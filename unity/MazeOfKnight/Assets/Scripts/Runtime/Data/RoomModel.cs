@@ -1,6 +1,6 @@
 using System;
 
-namespace MazeOfHollow.Data
+namespace MazeOfKnight.Data
 {
     // Formato del paquete que escribe tools/extract/unity_bundle.py (extracted/unity/<mapa>.json).
     // Las mismas clases se guardan dentro de los ScriptableObjects, así que no hay conversión intermedia.

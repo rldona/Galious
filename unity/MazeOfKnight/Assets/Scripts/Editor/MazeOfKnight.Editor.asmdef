@@ -1,0 +1,7 @@
+{
+    "name": "MazeOfKnight.Editor",
+    "rootNamespace": "MazeOfKnight.EditorTools",
+    "references": ["MazeOfKnight.Runtime"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true
+}

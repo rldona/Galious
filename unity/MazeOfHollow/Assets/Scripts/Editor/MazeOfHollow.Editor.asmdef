@@ -1,7 +1,0 @@
-{
-    "name": "MazeOfHollow.Editor",
-    "rootNamespace": "MazeOfHollow.EditorTools",
-    "references": ["MazeOfHollow.Runtime"],
-    "includePlatforms": ["Editor"],
-    "autoReferenced": true
-}

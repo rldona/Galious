@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MazeOfHollow.Data;
+using MazeOfKnight.Data;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 
-namespace MazeOfHollow.EditorTools
+namespace MazeOfKnight.EditorTools
 {
     // Importa el paquete de salas (extracted/unity/<mapa>.json, de tools/extract/unity_bundle.py):
     //   - Assets/Generated/Maps/<mapa>.asset (MapData) y Assets/Generated/Rooms/<mapa>/room_NNN.asset (RoomData);
@@ -33,7 +33,7 @@ namespace MazeOfHollow.EditorTools
             (TileClass.BossPassable, "boss_passable", new Color(0.35f, 0.35f, 0.40f)),
         };
 
-        [MenuItem("Maze of Hollow/Importar salas")]
+        [MenuItem("Maze of Knight/Importar salas", false, 0)]
         public static void ImportAll()
         {
             if (!Directory.Exists(BundleDir))
@@ -64,6 +64,44 @@ namespace MazeOfHollow.EditorTools
             foreach (var file in files)
                 BuildOverviewScene(Path.GetFileNameWithoutExtension(file));
             Debug.Log($"[GaliousImporter] {files.Length} mapas, {rooms} salas importadas");
+            if (!Application.isBatchMode)
+                OpenMap("castle");
+        }
+
+        // ---------- abrir las vistas generales ----------
+
+        [MenuItem("Maze of Knight/Abrir mapa/Castillo", false, 100)] static void OpenCastle() => OpenMap("castle");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 1", false, 101)] static void OpenWorld01() => OpenMap("world01");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 2", false, 102)] static void OpenWorld02() => OpenMap("world02");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 3", false, 103)] static void OpenWorld03() => OpenMap("world03");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 4", false, 104)] static void OpenWorld04() => OpenMap("world04");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 5", false, 105)] static void OpenWorld05() => OpenMap("world05");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 6", false, 106)] static void OpenWorld06() => OpenMap("world06");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 7", false, 107)] static void OpenWorld07() => OpenMap("world07");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 8", false, 108)] static void OpenWorld08() => OpenMap("world08");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 9", false, 109)] static void OpenWorld09() => OpenMap("world09");
+        [MenuItem("Maze of Knight/Abrir mapa/Mundo 10", false, 110)] static void OpenWorld10() => OpenMap("world10");
+
+        // Abre la vista general de un mapa y encuadra la vista de escena sobre él.
+        public static void OpenMap(string mapName)
+        {
+            string path = $"{GeneratedRoot}/Scenes/{mapName}_overview.unity";
+            if (!File.Exists(path))
+            {
+                EditorUtility.DisplayDialog("Maze of Knight",
+                    "Todavía no hay salas importadas. Usa Maze of Knight > Importar salas.", "Vale");
+                return;
+            }
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                return;
+            EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
+            var background = GameObject.Find("Fondo");
+            var view = SceneView.lastActiveSceneView;
+            if (background != null && view != null)
+            {
+                view.in2DMode = true;
+                view.Frame(background.GetComponent<Tilemap>().localBounds, false);
+            }
         }
 
         // ---------- datos ----------
@@ -213,7 +251,7 @@ namespace MazeOfHollow.EditorTools
 
         // ---------- batch ----------
 
-        // Unity -batchmode -projectPath unity/MazeOfHollow -executeMethod MazeOfHollow.EditorTools.GaliousImporter.ImportAndRenderBatch -quit
+        // Unity -batchmode -projectPath unity/MazeOfKnight -executeMethod MazeOfKnight.EditorTools.GaliousImporter.ImportAndRenderBatch -quit
         public static void ImportAndRenderBatch()
         {
             try

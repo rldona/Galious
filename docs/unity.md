@@ -1,12 +1,22 @@
 # Fase 5: proyecto Unity e importador
 
-Proyecto: `unity/MazeOfHollow`, con Unity **6000.6.5f1**. Paquetes:
+Proyecto: `unity/MazeOfKnight`, con Unity **6000.6.5f1**. Paquetes:
 - URP 17.6 (luces 2D más adelante);
 - 2D Tilemap y Tilemap Extras;
 - Pixel Perfect;
 - Input System;
 - Newtonsoft JSON;
 - Test Framework.
+
+## Abrir el proyecto en el editor
+
+1. **Unity Hub → Add → Add project from disk** y elegir la carpeta `unity/MazeOfKnight`. También se puede abrir directamente:
+   ```bash
+   /Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity -projectPath unity/MazeOfKnight
+   ```
+2. Si ya están importadas las salas, al abrir el proyecto se muestra la vista general del castillo. Si no, usar **Maze of Knight → Importar salas**, que la abre al terminar.
+3. Para ver otro mapa: **Maze of Knight → Abrir mapa → Castillo / Mundo 1…10**. Las escenas están en `Assets/Generated/Scenes`.
+4. La vista general es una escena de consulta, no se juega: se recorre en la ventana *Scene* (rueda para el zoom, botón central para moverse).
 
 ## Qué se versiona y qué no
 
@@ -22,9 +32,9 @@ Proyecto: `unity/MazeOfHollow`, con Unity **6000.6.5f1**. Paquetes:
    python3 tools/extract/unity_bundle.py
    ```
    Genera `extracted/unity/<mapa>.json`: 11 mapas, 320 salas.
-2. En Unity, menú **Maze of Hollow → Importar salas**. O en batch:
+2. En Unity, menú **Maze of Knight → Importar salas**. O en batch:
    ```bash
-   /Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity -batchmode -projectPath unity/MazeOfHollow -executeMethod MazeOfHollow.EditorTools.GaliousImporter.ImportAndRenderBatch -quit -logFile logs/unity/import.log
+   /Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity -batchmode -projectPath unity/MazeOfKnight -executeMethod MazeOfKnight.EditorTools.GaliousImporter.ImportAndRenderBatch -quit -logFile logs/unity/import.log
    ```
    El modo batch también renderiza cada vista general a `logs/unity/<mapa>_overview.png`. No usar `-nographics`: hace falta GPU para renderizar.
 

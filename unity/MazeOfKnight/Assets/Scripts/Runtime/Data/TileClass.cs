@@ -1,4 +1,4 @@
-namespace MazeOfHollow.Data
+namespace MazeOfKnight.Data
 {
     // Clases de colisión del original (docs/world_maps.md, "Colisión de los tiles"):
     // sólido = tile >= 0xBA (>= 0xF0 durante el combate con un jefe), escalera 9A/9B, agua B6/B7, lava B8/B9.

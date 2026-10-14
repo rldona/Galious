@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MazeOfHollow.Data
+namespace MazeOfKnight.Data
 {
     // El castillo o un mundo: sus salas y los datos del jefe.
     public class MapData : ScriptableObject

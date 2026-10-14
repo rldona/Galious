@@ -1,6 +1,6 @@
 # Galious Design Bible
 
-Documento de diseño de **Maze of Hollow**, remake de *Knightmare II: The Maze of Galious* (Konami, MSX, 1987) para Unity con estética al estilo de Hollow Knight. Recoge **qué hace el juego original**, con sus reglas y números, para reimplementarlo desde aquí y no traduciendo el código ensamblador.
+Documento de diseño de **Maze of Knight**, remake de *Knightmare II: The Maze of Galious* (Konami, MSX, 1987) para Unity con estética al estilo de Hollow Knight. Recoge **qué hace el juego original**, con sus reglas y números, para reimplementarlo desde aquí y no traduciendo el código ensamblador.
 
 Es la síntesis de la ingeniería inversa de las fases 0–3. Cada capítulo enlaza al documento técnico de `docs/` donde está la prueba: direcciones de la ROM, capturas y grabaciones.
 

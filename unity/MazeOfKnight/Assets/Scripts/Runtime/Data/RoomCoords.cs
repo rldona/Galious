@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MazeOfHollow.Data
+namespace MazeOfKnight.Data
 {
     // Conversión entre el original y Unity (Design Bible, cap. 11): 1 unidad = 16 px, tile de 8 px = 0,5 u.
     // Una sala mide 32 x 20 tiles (256 x 160 px) = 16 x 10 unidades. Origen de una sala: su esquina inferior

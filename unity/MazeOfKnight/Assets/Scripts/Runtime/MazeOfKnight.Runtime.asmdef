@@ -1,0 +1,6 @@
+{
+    "name": "MazeOfKnight.Runtime",
+    "rootNamespace": "MazeOfKnight",
+    "references": [],
+    "autoReferenced": true
+}

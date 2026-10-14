@@ -1,4 +1,4 @@
-# 11. Notas para el remake (Maze of Hollow)
+# 11. Notas para el remake (Maze of Knight)
 
 Las decisiones de este capítulo son **propuestas [I]**, no hechos del original. Sirven de punto de partida para la fase 5 (Unity) y hay que validarlas jugando.
 

@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace MazeOfHollow.Data
+namespace MazeOfKnight.Data
 {
-    // Una sala importada. La crea el importador (Maze of Hollow > Importar salas) en Assets/Generated.
+    // Una sala importada. La crea el importador (Maze of Knight > Importar salas) en Assets/Generated.
     public class RoomData : ScriptableObject
     {
         public string mapName;
