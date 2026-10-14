@@ -95,6 +95,16 @@ Después, una tabla de saltos por tipo (b04:66B4) lleva a la rutina de inicializ
 - Los más duros: 0x23 (vida 64), 0x15 (40), 0x40 (35), 0x16 y 0x22 (24), 0x4C (20).
 - No se pueden dañar: 0x20, 0x29, 0x31, 0x32, 0x36, 0x3A, 0x50, 0x51 y 0x69.
 
+## Dónde está la IA [C]
+
+- **Creación** (b04:65DA): copia el descriptor y llama a la rutina de **inicio** del tipo, en la tabla b04:66B4 (índice = tipo − 1, 107 entradas).
+- **Cada frame**, el bucle principal (b00:53C9) llama a b06:B3C5, que recorre los huecos E800 y para cada enemigo hace:
+  - B3F7 y B3E7: parpadeo y temporizadores en IX+3;
+  - **B45E**: la rutina de **actualización** del tipo, en la tabla b06:B472. No se llama si el libro está congelando (E0D5), salvo para el tipo 0x5B;
+  - B407: aplica la velocidad (IX+0E/0F en x, IX+16/17 en y, en 8.8; se aplica a través de b06:B0ED/B11B) y borra al enemigo si sale de la pantalla (y ≥ 0xB8 o x ≥ 0xF9).
+- Diez rutinas de actualización se comparten entre tipos, por ejemplo 0x32/0x51, 0x3A/0x50 y 0x1D/0x1E/0x33/0x3F.
+- `tools/extract/enemy_ai.py` desensambla el inicio y la actualización de cada tipo en `extracted/ai/<tipo>.asm`, siguiendo el flujo. Necesita `z80dis`.
+
 ## Comportamiento observado [O]
 
 ```
