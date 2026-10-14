@@ -96,6 +96,9 @@ namespace MazeOfKnight.Game
         public void SetSolid(RoomModel room, int col, int row, int width, int height) =>
             Fill(room, col, row, width, height, '#');
 
+        public void SetLadder(RoomModel room, int col, int row, int width, int height) =>
+            Fill(room, col, row, width, height, 'H');
+
         void Fill(RoomModel room, int col, int row, int width, int height, char value)
         {
             var grid = grids[room.id];

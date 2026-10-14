@@ -88,7 +88,15 @@ namespace MazeOfKnight.Game.Enemies
             { 0x53, () => new SplitFly() },
         };
 
-        public const int MaxEnemies = 16;   // [I] huecos E800 + 0x20·n; el original limita con E620/E635
+        public const int MaxEnemies = 16;
+
+        // Enemigos marcados (b04:60AE, b04:6584, b03:B6AE): en una sala con evento, los de estos tipos cuentan; al
+        // morir el último se dispara el evento de la sala.
+        public static readonly HashSet<int> MarkedTypes = new HashSet<int>
+            { 0x2F, 0x2D, 0x24, 0x0F, 0x2E, 0x22, 0x0C, 0x0E, 0x43, 0x10, 0x2A, 0x4C, 0x16, 0x1F, 0x13, 0x40, 0x15, 0x0A, 0x34, 0x14, 0x12, 0x07, 0x17 };
+        public bool EventPending;           // la sala tiene evento y aún no se ha disparado
+        int markedAlive;
+        public event Action<RoomModel> RoomCleared;   // [I] huecos E800 + 0x20·n; el original limita con E620/E635
 
         public static bool Implemented(int type) => Factories.ContainsKey(type) || Projectiles.ContainsKey(type);
 
@@ -117,8 +125,10 @@ namespace MazeOfKnight.Game.Enemies
             Context.Random = new Random(seed);
         }
 
-        public void EnterRoom(RoomWorld world, RoomModel room, PlayerMotor player)
+        // eventPending: la sala tiene un evento de enemigos marcados aún sin disparar.
+        public void EnterRoom(RoomWorld world, RoomModel room, PlayerMotor player, bool eventPending = false)
         {
+            EventPending = eventPending;
             Context.World = world;
             Context.Player = player;
             Context.Enemies = enemies;
@@ -131,6 +141,7 @@ namespace MazeOfKnight.Game.Enemies
             enemies.Clear();
             Room = room;
             Missing = 0;
+            markedAlive = 0;
             foreach (var s in room.spawns)
             {
                 if (Create(s.type, s.x, s.y, 0) == null && !Factories.ContainsKey(s.type))
@@ -161,6 +172,11 @@ namespace MazeOfKnight.Game.Enemies
                     e.HitBox = Boxes[info.box];
                     if (info.box == 0x4E && Boxes.Count > 0x4F) e.LeftBox = Boxes[0x4F];
                 }
+            }
+            if (EventPending && MarkedTypes.Contains(type))
+            {
+                e.Marked = true;
+                markedAlive++;
             }
             e.Init(Context);
             if (e is DeathExplosion boom)
@@ -236,6 +252,11 @@ namespace MazeOfKnight.Game.Enemies
                 e.Die(Context);
                 Killed?.Invoke(e);
                 StartDeath(e);
+                if (e.Marked && EventPending && --markedAlive <= 0)
+                {
+                    EventPending = false;
+                    RoomCleared?.Invoke(Room);
+                }
             }
             else
                 e.Hurt(Context);

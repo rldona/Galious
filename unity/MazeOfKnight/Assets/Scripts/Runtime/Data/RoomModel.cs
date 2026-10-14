@@ -56,6 +56,28 @@ namespace MazeOfKnight.Data
         public int disabledByItem;     // no se arma si al entrar se tiene este objeto (0x18, Carpet)
     }
 
+    // Eventos de sala (docs/entities.md, "Eventos de sala"; tools/extract/unity_bundle.py, room_events).
+    [Serializable]
+    public class RoomEventJson
+    {
+        public string kind;      // ladder, wall o castleItem
+        public int room;
+    }
+
+    [Serializable]
+    public class EventLadderJson
+    {
+        public int row, col, height;   // 2 tiles de ancho, de la fila hacia abajo; height 0 = no hay
+        public int openedBy;           // sala cuyo evento la hace aparecer
+    }
+
+    [Serializable]
+    public class WallBlockJson
+    {
+        public int row, col;           // bloque de 4 × 3 tiles
+        public int openedBy;           // sala cuyo evento lo abre; -1 = subir 5 veces por el pozo; 0 = no hay
+    }
+
     [Serializable]
     public class RoomModel
     {
@@ -78,6 +100,10 @@ namespace MazeOfKnight.Data
         public PointJson[] rocks = Array.Empty<PointJson>();
         public LadderJson[] ladders = Array.Empty<LadderJson>();
         public PeriodicJson[] periodic = Array.Empty<PeriodicJson>();
+        public bool markedRoom;        // matar a todos sus enemigos marcados dispara un evento
+        public RoomEventJson onClear = new RoomEventJson();
+        public EventLadderJson eventLadder = new EventLadderJson();
+        public WallBlockJson wallBlock = new WallBlockJson();
         public int doorWorld;   // castillo: puerta al mundo n (0 = ninguna)
         public PointJson door;
         public int godType;     // castillo: sala de dios (E690), 0 = ninguna

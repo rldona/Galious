@@ -59,9 +59,9 @@ Cada estado recibe `B = game_substate` (E001) y suele despachar con `DJNZ` por s
 | 11 | 47CF | → 5 al volver a pulsar F1 [O] | **menú de objetos (ITEM)**: F1 (`9E21` = SNSMAT fila 6, bit 5, por flanco); sonido 0x2B [C][O] |
 | 12 | 484F | → 5 al pulsar una tecla (E008 bit 5 = M) [C] | disparado por E01B; forzado: pantalla con una bola de cristal [F] |
 | 13 | 46AD | → 5 a ~1,5 s [O] | **volver al castillo**: al salir de una sala por un lado cuyo vecino es ≥ F6 (p. ej. subiendo por la escalera de la entrada del mundo 1); cartel «CASTLE !!» y reaparece en la puerta del castillo [C][O*] |
-| 14 | 488E | → 10 al pulsar abajo, saliendo por abajo (E01A = 2) [C] | **sala especial de un mundo** (su última sala, una sala de dios): al cargarla, el estado 10 salta al 14 en vez de al 5 [C][O]. Ver `world_maps.md` |
+| 14 | 488E | → 10 al pulsar abajo (E008 bit 1), saliendo por abajo (E01A = 2, música 0x8A); apareces en la sala de abajo en x = 128, y = 40 [C][O] | **sala especial de un mundo** (su última sala, una sala de dios): al cargarla, el estado 10 salta al 14 en vez de al 5. Se llega subiendo por la escalera de la fila 0 de la sala de abajo [C][O]. Ver `design_bible/08_santuarios.md` |
 | 15 | 4959 | → 5 a ~1 s; el jefe sigue apareciendo ya en el 5 (E0D2: 2 → 4) [O] | **invocar al jefe**: escribir su nombre en el teclado en la sala del jefe (ver «Jefes») [C][O*]. Mundo 1: YOMAR en la sala 13 → esqueleto de dragón |
-| 16 | 48C5 | 5 subestados (tabla 0x48C9); abajo → 16.3 → 16.4 → 5 en la misma sala [O*] | **entrar en la sala de un dios**: abajo sobre un objeto E680 (Y = Y_obj + 0x10, X = X_obj + 6…10; el tipo 3 exige además E099 ≠ 0). E690 = tipo. Hay tiendas (Hefesto, Ares, Demeter), Asclepio (pistas) y Demeter tipo 1 (contraseña) [C][O*] |
+| 16 | 48C5 | 5 subestados (tabla 0x48C9): 0–1 el jugador se hunde 16 px (sonido 0x82) y se dibuja el santuario (música 0x8D); 2 santuario (b02:8F43); abajo (o E693 = 2, salida automática de la Muerte) → 3–4: se redibuja la sala, el jugador sube 16 px y → 5 en la misma sala (música 0x88) [C][O] | **entrar en la sala de un dios**: abajo mantenido sobre un objeto E680 (Y = Y_obj + 0x10…0x11, X = X_obj + 6…10, E500 ∉ 4…7; el tipo 3 exige además E099 = Salt). E690 = tipo. Ver `design_bible/08_santuarios.md` [C][O] |
 | 17 | 49BA | 9 subestados (tabla 0x49BE) | disparado por E024; forzado: la sala se encoge y aparece una escena del castillo por fuera con personajes; ¿cinemática? [F] |
 | 18 | 4A69 | → 4 tras validar el código (reinicia RAM E016-E0FF, E200-EAFE, EC00-F03F y restaura desde la contraseña) [C] | **introducir contraseña**: desde el título con L pulsada; pide el código secreto y Return [O] |
 | 19 | 4B5B | → 5 a ~2 s [O] | **jefe derrotado**: E02C = 1 cuando su vida (E710) llega a 0. Activa el bit 2 de E061 + E041 (ya no se puede invocar) y suelta la llave (objeto 0x0C en E740) [C][O*] |
@@ -100,14 +100,15 @@ E680–E685: tipo, ?, Y, X, puntero (2 bytes). Recorridas las salas 0–130 del 
 |---|---|---|
 | 72 | 1 | Demeter: contraseña |
 | 115 | 2 | Hefesto: tienda |
-| 87 | 3 | no se entra sin E099 ≠ 0 (¿hace falta un objeto?) |
+| 87 | 3 | la Muerte: resurrección; no se entra sin la Salt (E099) |
 | 65 | 5 | Ares: tienda |
 | 5 | 6 | Hefesto: tienda |
 | 55 | 7 | Hefesto: tienda |
-| 54 | 8 | Asclepio: pista (un hada recupera vitalidad) |
+| 54 | 8 | Asclepio: pista («SEE A FAIRY TO RESTORE YOUR VITALITY.»; no cura) |
 | 4 | 9 | Ares: tienda |
 | 10 | 10 | Ares: tienda |
 | 32 | 11 | Demeter: tienda |
+| 143 | 4 | Ares: tienda (fuera del recorrido 0–130) |
 
 Puertas de mundo (E688) en el castillo: sala 104 → 1, 98 → 2, 63 → 3, 57 → 4, 62 → 5, 114 → 6, 6 → 7, 23 → 8, 108 → 9. Ninguna en las salas 0–130 lleva al mundo 10.
 

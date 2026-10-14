@@ -45,7 +45,7 @@ En total son 320 salas. Todos los mundos se recorren enteros desde la sala 1 y l
 - Excepción: la sala 6 del mundo E041 = 6 usa un mapa fijo en 8DAE.
 - La tabla de disposiciones de cada mundo tiene una sala menos que la de vecinos: la última sala (la "sala especial") no se dibuja con ella.
 
-**Sala especial de cada mundo.** Es la última sala. Al cargarla el juego pasa al estado 14 en vez del 5 [O]: es una sala de dios dentro del mundo (Demeter en los mundos 1, 4 y 9), con mensajes como guardar la partida, pistas sobre el agua o una puerta que lleva al castillo. b02:8EFC la detecta con las tablas 8F0A (sala) y 8F14 (tipo en E690) [C].
+**Sala especial de cada mundo.** Es la última sala. Al cargarla el juego pasa al estado 14 en vez del 5 [O]: es una sala de dios dentro del mundo: una pista (mundos 1–4, 6, 7, 9) o una tienda (mundo 5: Oar; mundo 8: Carpet). b02:8EEF la detecta con las tablas 8F0A (sala) y 8F14 (tipo en E690) [C]. Se entra subiendo por la escalera de la fila 0 de la sala de abajo, que es oculta salvo en los mundos 1 y 7, y se sale con abajo [O]. Ver `design_bible/08_santuarios.md`.
 
 **Puertas de mundo (castillo).**
 - Salas en 9990 y posición (Y, X) en 9997, ambas en el banco 2. La puerta 10 es dinámica: sala en E06D, posición según E06E (tabla 99AB) y solo aparece si E06C & 3 [C].

@@ -195,35 +195,49 @@ En las salas 25, 91 y 110 del castillo hay 12 enemigos **0x4E**: "polvo mágico"
 - **Qué pasa:** el polvo vuela al centro (0x70, 0x80). Cuando llega la última partícula aparece el **hada (0x4F)**, que revolotea por la sala. La primera vez suena 0x83 y se pone E63D = 1.
 - **Comprobado en la sala 25** con Popolon a 6 de vitalidad: tras 4 s aparece el hada; al tocarla la vitalidad sube al máximo (8 en esa partida) y el hada desaparece.
 
-## Santuarios y tiendas [C][G]
+## Santuarios y tiendas [C][O]
 
-El tipo de sala de dios (E690, tabla del castillo en `castle.json` → `gods`) elige qué se puede hacer en ella. Las tiendas venden tres artículos: lista en b02:9253 + 2·tipo, pares (precio en BCD, objeto). b02:918C hace la compra:
-- comprueba que tienes monedas suficientes (E048);
-- las resta (b02:922B);
-- activa la flag del objeto y suena 0x2D.
+Resumen; el detalle está en `design_bible/08_santuarios.md` y los datos en `extracted/unity/shrines.json` (`tools/extract/shrines.py`). El tipo de sala de dios (E690) elige qué pasa en ella; la lógica por tipo está en b02:8F43:
+- 8F72: la Muerte;
+- 90C0: contraseña;
+- 9126: tienda;
+- 92E8: pista.
 
-Casos especiales:
-- el carcaj da **+100 flechas** (dos sumas de 50);
-- la llave da **+1 llave**;
-- los escudos van **en orden**: no se puede comprar uno sin tener el anterior (E097 + 0x2A ≥ objeto).
+**Entrada:**
+- **Castillo** (objeto E680, estado 16): ↓ mantenido con y = godY + 16…17 y x = godX + 6…10 (b02:9A5F). No vale con E500 = 4…7. El tipo 3 exige E099 (Salt). Casi siempre la casilla está tapada por una piedra.
+- **Mundos:** la última sala (tablas b02:8F0A/8F14, mundos 1–9) pone E690 al cargarse y el estado 10 pasa al 14. Se llega subiendo por una escalera de la fila 0 de la sala de abajo, oculta salvo en los mundos 1 y 7.
+- **Salida:** ↓.
 
-| Tipo | Sala | Dios (según la guía) | Se vende |
+**Tiendas** (b02:9253 + 2·tipo, tres pares precio BCD/objeto; compra en b02:918C):
+- Escudo de plata o de oro fuera de orden (E097 + 0x2A < objeto): sonido 0x2F.
+- Sin monedas (E048 < precio): mensaje 0x12 y sonido 0x2F.
+- Si se compra: cobra (b02:922B) y aplica según el objeto:
+  - carcaj: +100 flechas (2 × 0x50);
+  - llave: +1;
+  - escudos: E097 = 1/2/3;
+  - el resto: E06F + objeto = 1.
+- Después suena 0x2D y el hueco queda vendido (E6CC + hueco) hasta salir. No mira si ya tienes el objeto.
+
+| Tipo | Sala | Dios (b02:954C) | Qué hay |
 |---|---|---|---|
-| 1 | castillo 72 | Demeter | contraseña (sin tienda) |
+| 1 | castillo 72 | Demeter | contraseña |
 | 2 | castillo 115 | Hefesto | Mine 30, llave 5, carcaj 20 |
-| 3 | castillo 87 | la Muerte | resurrección: comprueba 100 flechas y 100 monedas (b02:8FD8); para entrar hace falta la Salt |
+| 3 | castillo 87 | la Muerte | resurrección: 100 flechas, 100 monedas y 20 llaves (b02:8FCE); un crédito por personaje (E05A/E05B) |
 | 4 | castillo 143 | Ares | carcaj 20, Copper Shield 30, Magnifying Glass 20 |
 | 5 | castillo 65 | Ares | carcaj 20, Silver Shield 40, llave 5 |
 | 6 | castillo 5 | Hefesto | Harp 30, carcaj 20, llave 5 |
 | 7 | castillo 55 | Hefesto | carcaj 20, Conch Shell 25, llave 5 |
-| 8 | castillo 54 | sin tienda: Asclepio o Atenea, consejo o curación [G] | — |
+| 8 | castillo 54 | Asclepio | solo pista: "SEE A FAIRY TO RESTORE YOUR VITALITY." (no cura) |
 | 9 | castillo 4 | Ares | carcaj 20, Gold Shield 50, llave 5 |
 | 10 | castillo 10 | Ares | carcaj 20, Hat Helmet 50, llave 5 |
 | 11 | castillo 32 | Demeter | carcaj 20, Necklace 25, llave 5 |
-| 12 | mundo 5 | Demeter | Oar 30 |
-| 13 | mundo 8 | Demeter | Carpet 30 |
+| 12 | mundo 5, sala 18 | Demeter | Oar 30 |
+| 13 | mundo 8, sala 21 | Demeter | Carpet 30 |
+| 14–20 | salas especiales de los mundos 1, 2, 3, 4, 6, 7 y 9 | Demeter / Atenea | una pista (b02:9308) |
 
-Los precios coinciden con los de la guía de GameFAQs.
+**Mensajes:** tabla b15:B09E. Cada uno es dirección destino en ED80 + tiles + FF; FE = línea nueva. El inglés es id + 0x20 cuando la BIOS no es japonesa (0x002B & 0x0F ≠ 0).
+- Tiles: 1–10 = 0–9; 0x0B–0x24 = A–Z; 0x26 ×, 0x27 !, 0x29 ?, 0x2A ., 0x2B ,; 0x54/0x56/0x58 = iconos de flechas, monedas y llaves (2 tiles).
+- Los nombres de los dioses son los mensajes 0x18 + dios.
 
 ## Escaleras que se retiran [C][O]
 

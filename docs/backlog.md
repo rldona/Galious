@@ -13,3 +13,11 @@ Lo que falta por hacer en Unity. El estado de lo ya hecho está en [unity.md](un
 
 - **Vaciado gradual de la barra:** el daño, la curación y la experiencia van a un valor pendiente que se aplica 1 unidad cada 4 ticks; ahora se aplican de golpe.
 - **Vidas de repuesto:** Popolon empieza sin ninguna y Aphrodite con 1; abrir el menú F1 suma una al activo y cerrarlo la gasta; el retrato solo sale si ese personaje tiene vidas (docs/items_enemies.md, "Vitalidad, experiencia y vidas").
+
+## Santuarios y eventos
+
+- **Guardar la partida en Demeter** (castillo, sala 72): sustituye a la contraseña de 45 letras (design bible, cap. 8 y 11).
+- **Resurrección de la Muerte** (sala 87): depende de las vidas de repuesto (100 flechas, 100 monedas y 20 llaves; una vez por personaje).
+- **Animación de entrar y salir de un santuario del castillo** (el jugador se hunde 16 px en ~1 s; música 0x8D / 0x88).
+- **Objetos con condición del castillo:** al matar a los marcados de ciertas salas (E61C = 1) aparecen objetos en las salas 48, 75 y 24 (entre ellos el Hoi).
+- **Muro del mundo 3, sala 4:** se abre al subir 5 veces seguidas por el pozo de la sala.

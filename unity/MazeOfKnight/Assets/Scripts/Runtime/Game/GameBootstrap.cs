@@ -54,6 +54,11 @@ namespace MazeOfKnight.Game
         InventoryMenu menu;
         bool harpUsed;               // el arpa rompe las piedras con el primer espadazo de cada visita a la sala
         string typed = "";           // letras tecleadas (la daga: UMBRELLA)
+        ShrinesData shrines = new ShrinesData();
+        ShrineScreen shrineScreen;
+        bool downWasHeld;
+        // Eventos de sala ya disparados (mapa, sala): escaleras que aparecen y muros que se abren se quedan así.
+        readonly HashSet<(string, int)> firedEvents = new HashSet<(string, int)>();
         readonly Dictionary<Projectile, SpriteRenderer> projectileViews = new Dictionary<Projectile, SpriteRenderer>();
         readonly Dictionary<Enemy, SpriteRenderer> enemyViews = new Dictionary<Enemy, SpriteRenderer>();
         public int HurtTicks { get; private set; }   // invulnerable tras un golpe (parpadea)
@@ -84,6 +89,11 @@ namespace MazeOfKnight.Game
             Enemies.Killed += GainExperience;
             menu = gameObject.AddComponent<InventoryMenu>();
             menu.game = this;
+            var shrinesJson = Resources.Load<TextAsset>("Shrines");
+            if (shrinesJson != null) shrines = JsonUtility.FromJson<ShrinesData>(shrinesJson.text);
+            shrineScreen = gameObject.AddComponent<ShrineScreen>();
+            shrineScreen.game = this;
+            Enemies.RoomCleared += OnRoomCleared;
             if (UnityEngine.InputSystem.Keyboard.current != null)
                 UnityEngine.InputSystem.Keyboard.current.onTextInput += OnTextInput;
             LoadMap(mapName);
@@ -125,6 +135,8 @@ namespace MazeOfKnight.Game
                     !rocks.All.Any(r => !r.broken && r.room == room && r.x == room.item.x && r.y == room.item.y))
                     ShowItem(room);
             ApplyCarpet();
+            foreach (var (m, id) in firedEvents)
+                if (m == name) ApplyEvent(id);
         }
 
         void EnterWorld(int world)
@@ -170,6 +182,10 @@ namespace MazeOfKnight.Game
                 harpUsed = false;
             }
             motor.Shoes = Inventory.Has(Inventory.Shoes);
+            bool downPressed = motor.LastInput.Down && !downWasHeld;
+            downWasHeld = motor.LastInput.Down;
+            if (TryEnterShrine(downPressed))
+                return;
             player.ReverseControls = Inventory.ReversedControls;
             if (motor.AttackStartedThisTick && !harpUsed && Inventory.Has(Inventory.Harp))
             {
@@ -299,9 +315,83 @@ namespace MazeOfKnight.Game
                 Arrows -= w.cost;
         }
 
+        // ---------- eventos de sala ----------
+
+        // Muere el último enemigo marcado de la sala: aparecen sus escaleras y se abren sus muros (en esta sala o en
+        // otra del mismo mundo) y se queda así. En el castillo pone E61C = 1 (objetos con condición, en el backlog).
+        void OnRoomCleared(RoomModel room)
+        {
+            firedEvents.Add((mapName, room.id));
+            if (ApplyEvent(room.id) > 0) Say("Se oye algo abrirse…");
+        }
+
+        int ApplyEvent(int openerRoom)
+        {
+            int n = 0;
+            foreach (var r in World.Rooms)
+            {
+                var l = r.eventLadder;
+                if (l != null && l.height > 0 && l.openedBy == openerRoom)
+                {
+                    World.SetLadder(r, l.col, l.row, 2, l.height);
+                    mapView.RedrawCells(World, r, l.col, l.row, 2, l.height);
+                    n++;
+                }
+                var w = r.wallBlock;
+                if (w != null && w.openedBy == openerRoom)
+                {
+                    World.Clear(r, w.col, w.row, 4, 3);
+                    mapView.RedrawCells(World, r, w.col, w.row, 4, 3);
+                    n++;
+                }
+            }
+            return n;
+        }
+
+        // ---------- santuarios ----------
+
+        // Castillo (estado 16): ↓ de pie delante del dios (x = dios + 6…10, y = dios + 16…17), con la piedra que lo
+        // tapa ya rota; a la Muerte solo con la Salt. Mundos (estado 14): subir por la escalera de la fila 0 de la sala
+        // de debajo del santuario hasta y < 40.
+        bool TryEnterShrine(bool downPressed)
+        {
+            foreach (var s in shrines.shrines)
+            {
+                if (s.map != mapName) continue;
+                var e = s.entry;
+                bool enter;
+                if (s.state == 16)
+                    enter = downPressed && motor.State == MotorState.Ground && motor.Room.id == s.room
+                            && motor.X >= e.xMin && motor.X <= e.xMax && motor.Y >= e.yMin && motor.Y <= e.yMax
+                            && (e.needsItem == 0 || Inventory.Has(e.needsItem))
+                            && !rocks.All.Any(r => !r.broken && r.room == motor.Room && r.x == e.godX && r.y == e.godY);
+                else
+                    enter = motor.Room.id == e.fromRoom && motor.Y < e.exitBelowY && System.Math.Abs(motor.X - e.x) <= 8
+                            && World.Ladder(motor.Room, e.x, OriginalPhysics.RoomTopPx + 2);
+                if (!enter) continue;
+                if (s.state == 16 && s.entry.needsItem != 0 && !Inventory.Has(s.entry.needsItem)) return false;
+                shrineScreen.Show(new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys));
+                SetPaused(true);
+                return true;
+            }
+            return false;
+        }
+
+        public void LeaveShrine(ShrineVisit v)
+        {
+            Arrows = v.Arrows; Coins = v.Coins; Keys = v.Keys;
+            var s = v.Shrine;
+            var room = World.Room(s.exit.toRoom);
+            if (s.state == 16)
+                motor.Place(World, room, s.exit.x, s.exit.y);
+            else
+                motor.PlaceOnLadder(room, s.exit.x, s.exit.y);
+            SetPaused(false);
+        }
+
         // ---------- inventario ----------
 
-        public bool CanOpenMenu => motor != null && motor.State != MotorState.Knockback && motor.State != MotorState.Carried && motor.Stunned == 0;
+        public bool CanOpenMenu => motor != null && !shrineScreen.Open && motor.State != MotorState.Knockback && motor.State != MotorState.Carried && motor.Stunned == 0;
 
         public void SetPaused(bool paused) => player.Paused = paused;
 
@@ -412,7 +502,7 @@ namespace MazeOfKnight.Game
             foreach (var v in enemyViews.Values)
                 if (v != null) Destroy(v.gameObject);
             enemyViews.Clear();
-            Enemies.EnterRoom(World, motor.Room, motor);
+            Enemies.EnterRoom(World, motor.Room, motor, motor.Room.markedRoom && !firedEvents.Contains((mapName, motor.Room.id)));
         }
 
         // Colores provisionales: los de las primeras fichas y, para el resto, un tono fijo por tipo. Los proyectiles

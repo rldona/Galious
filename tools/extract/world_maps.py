@@ -22,8 +22,8 @@ DOOR_ROOMS, DOOR_POS = 0x9990, 0x9997   # banco 2 (grupo 0)
 GOD_TABLE = 0x9DDA                       # banco 2
 BOSS_ROOM = 0x5DFB
 BOSS_WORDS = 0x9B4F      # 3 bytes por mundo: puntero, longitud (indexado por E041)
-GODS = {1: 'Demeter (contraseña)', 2: 'Hefesto (tienda)', 3: '? (necesita E099)',
-        5: 'Ares (tienda)', 6: 'Hefesto (tienda)', 7: 'Hefesto (tienda)',
+GODS = {1: 'Demeter (contraseña)', 2: 'Hefesto (tienda)', 3: 'Muerte (resurrección, necesita la Salt)',
+        4: 'Ares (tienda)', 5: 'Ares (tienda)', 6: 'Hefesto (tienda)', 7: 'Hefesto (tienda)',
         8: 'Asclepio (pista)', 9: 'Ares (tienda)', 10: 'Ares (tienda)', 11: 'Demeter (tienda)'}
 DIRS = (('up', 0, -1), ('down', 0, 1), ('left', -1, 0), ('right', 1, 0))
 OUT = ROOT / 'extracted' / 'maps'

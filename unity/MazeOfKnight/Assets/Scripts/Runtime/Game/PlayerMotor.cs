@@ -86,6 +86,13 @@ namespace MazeOfKnight.Game
         }
 
         // La puerta arrastra al jugador: wait ticks quieto y luego ticks a speed px/tick en dir.
+        // Colocarlo agarrado a una escalera (al salir del santuario de un mundo, encima de la escalera de la sala de abajo).
+        public void PlaceOnLadder(RoomModel room, int x, int y)
+        {
+            Place(room, x, y);
+            State = MotorState.Ladder;
+        }
+
         public void Carry(int dir, int wait, int ticks, int speed)
         {
             State = MotorState.Carried;

@@ -120,8 +120,8 @@ NAMES = {
 # docs/design_bible/08_santuarios.md (tiendas de b02:9253)
 SHOPS = {
     0x05: [('castle', 115, 'Hephaestus', 30)], 0x06: [('castle', 143, 'Ares', 20)],
-    0x0D: [('castle', 32, 'Demeter', 25)], 0x10: [('world05', 0, 'Demeter', 30)],
-    0x18: [('world08', 0, 'Demeter', 30)], 0x19: [('castle', 10, 'Ares', 50)],
+    0x0D: [('castle', 32, 'Demeter', 25)], 0x10: [('world05', 18, 'Demeter', 30)],
+    0x18: [('world08', 21, 'Demeter', 30)], 0x19: [('castle', 10, 'Ares', 50)],
     0x21: [('castle', 5, 'Hephaestus', 30)], 0x23: [('castle', 55, 'Hephaestus', 25)],
     0x28: [('castle', 143, 'Ares', 30)], 0x2B: [('castle', 65, 'Ares', 40)], 0x2C: [('castle', 4, 'Ares', 50)],
 }

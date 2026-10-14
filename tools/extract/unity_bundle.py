@@ -14,6 +14,7 @@ JsonUtility, sin diccionarios):
   unity_bundle.py   -> extracted/unity/<mapa>.json, extracted/unity/enemies.json (catalogo de enemigos),
                        extracted/unity/weapons.json (armas secundarias, weapons.py)
                        y extracted/unity/items.json (objetos, menu F1, vitalidad y mapas del menu, items_export.py)
+                       y extracted/unity/shrines.json (santuarios: tiendas, contraseña, resurreccion, pistas; shrines.py)
 
 Todo sale de la ROM del usuario y se queda en local: extracted/ no se versiona.
 
@@ -25,6 +26,7 @@ from galious_rom import Rom, ROOT
 from periodic import periodic_for
 import weapons
 import items_export
+import shrines
 from enemy_boxes import boxes, player_boxes, enemy_box_info
 
 DAMAGE_TABLE = 0x64E5   # b04: dano por contacto segun el tipo (b03:B39A; el Hat Helmet lo reduce a la mitad)
@@ -34,6 +36,45 @@ LOOT_KILLS = {0: [1, 3], 1: [2, 5], 2: [4, 6]}   # regla -> muertes del tipo en 
 BIG_DEATH = {0x15, 0x16, 0x40, 0x42, 0x4C}       # b03:B645: 4 explosiones (b04:69D2), cada una con su tirada
 
 MAPS = ['castle'] + [f'world{k:02d}' for k in range(1, 11)]
+
+
+def room_events(name, rid):
+    """Eventos de sala (room_events.py; docs/entities.md, "Eventos de sala"). Campos:
+      markedRoom    al matar a todos los enemigos marcados de esta sala se dispara su evento (b04:60AE, b03:B6AE)
+      onClear       qué hace ese evento: {kind: ladder | wall | castleItem, room: sala afectada}
+      eventLadder   escalera que aparece cuando se dispara el evento de 'openedBy' {row, col, height, openedBy}
+                    (filas y columnas de la sala; 2 tiles de ancho, de la fila hacia abajo); height 0 = no hay
+      wallBlock     bloque de muro 4x3 que se abre {row, col, openedBy}; openedBy -1 = subir 5 veces por el pozo
+                    (mundo 3, sala 4), 0 = no hay"""
+    ev = ROOM_EVENTS
+    out = {'markedRoom': False, 'onClear': {'kind': '', 'room': 0},
+           'eventLadder': {'row': 0, 'col': 0, 'height': 0, 'openedBy': 0},
+           'wallBlock': {'row': 0, 'col': 0, 'openedBy': 0}}
+    for e in ev['on_clear'].get(name, []):
+        if e['room'] != rid:
+            continue
+        out['markedRoom'] = True
+        eff = e['effect']
+        if name == 'castle':
+            out['onClear'] = {'kind': 'castleItem', 'room': rid}
+        elif 'escalera' in eff:
+            target = rid if 'esta sala' in eff else int(eff.split()[-1])
+            out['onClear'] = {'kind': 'ladder', 'room': target}
+        elif 'muro' in eff:
+            out['onClear'] = {'kind': 'wall', 'room': 0}
+    for e in ev['on_load']:
+        if e['world'] != name or e['room'] != rid:
+            continue
+        opener = e.get('opened_by', '')
+        by = -1 if 'subir' in opener else int(opener.split(':')[-1]) if ':' in opener else 0
+        if e['kind'] == 'escalera':
+            out['eventLadder'] = {'row': e['pos']['row'], 'col': e['pos']['col'], 'height': e['height'], 'openedBy': by}
+        elif e['kind'].startswith('muro'):
+            out['wallBlock'] = {'row': e['pos']['row'], 'col': e['pos']['col'], 'openedBy': by}
+    return out
+
+
+ROOM_EVENTS = json.loads((ROOT / 'extracted' / 'entities' / 'room_events.json').read_text())
 DIRS = ('up', 'down', 'left', 'right')
 
 
@@ -87,6 +128,8 @@ def main():
                 'god': xy(gods[rid]) if rid in gods else {'x': 0, 'y': 0},
                 # generadores periodicos (b04:61A8-647B): campos documentados en periodic.py; [] si no hay
                 'periodic': periodic_for(m['e041'], int(rid)),
+                # eventos de sala: enemigos marcados, escaleras que aparecen y muros que se abren
+                **room_events(name, int(rid)),
             }
             for d in DIRS:
                 link = r['links'][d]
@@ -153,6 +196,7 @@ def main():
     print(f'catalogo: {len(enemies)} tipos de enemigo')
     weapons.main()     # armas secundarias -> extracted/unity/weapons.json (campos en weapons.py)
     items_export.main()   # objetos e inventario -> extracted/unity/items.json (campos en items_export.py)
+    shrines.main()        # santuarios -> extracted/unity/shrines.json (campos en shrines.py; despues de los mapas)
 
 
 if __name__ == '__main__':

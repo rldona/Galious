@@ -143,7 +143,7 @@ Por personaje: Aphrodite E050 experiencia, E051 su máximo, E052 vitalidad, E053
 | Continuar (ZEUS + F5, b01:7E9A) | experiencia 0, vitalidad al máximo, vidas 1 y 0 |
 
 **Mecánicas que describe la guía y aún no están localizadas en la ROM:**
-- **Asclepio:** cura. La Muerte (resurrección) solo está localizada en parte. Tiendas y hadas: ver `entities.md`.
+- *(Resuelto: Asclepio no cura, solo remite a las hadas; la Muerte resucita una vez por personaje. Ver `design_bible/08_santuarios.md`.)*
 - **Callejones que se cierran a tu espalda.**
 - **Piedras que aparecen** si esperas 15 s en el borde, en el mundo 5.
 - **Contraseñas especiales** y extras con otro cartucho de Konami en el segundo slot.
