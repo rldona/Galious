@@ -167,7 +167,7 @@ def main():
         for room in rooms:
             ev = {'world': WORLDS[e041 - 1], 'room': room, 'trigger': 'matar a los enemigos marcados de la sala'}
             if e041 == 1:
-                ev['effect'] = 'E61C = 1 (castillo; lo usa b03:A003, sin descifrar)'
+                ev['effect'] = 'E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)'
             else:
                 t = trace(rom, ON_CLEAR, e041, room, {0xE60E: room_bits & 0xFF, 0xE60F: room_bits >> 8})
                 ev['writes'] = {f'{a:04X}': v for a, v in t.writes}

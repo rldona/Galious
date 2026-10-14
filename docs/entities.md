@@ -66,7 +66,7 @@ Con las superposiciones, el render se parece a las capturas en un 99,1 % en el c
 - Cada enemigo que nace en ella, si su tipo está en b04:6584 (23 tipos: 2F 2D 24 0F 2E 22 0C 0E 43 10 2A 4C 16 1F 13 40 15 0A 34 14 12 07 17), suma 1 a E622 y queda marcado con el bit 3 de IX+2.
 - Al morir uno marcado, b03:B6AE resta 1. Cuando llega a 0:
   - En un mundo se ejecuta el evento de la sala (b08:9D5F).
-  - En el castillo solo se pone E61C = 1. Lo lee b03:A003 junto con el bit 2 de E068 y una secuencia de 4 direcciones (tabla A056); está sin descifrar.
+  - En el castillo solo se pone E61C = 1, que usa la rutina de objetos con condición (ver abajo).
 - Suena 0x2E una sola vez, guardado con el bit 4 del byte persistente de la sala.
 
 **Bloques de muro** [C][O]: un bloque 4×3 de ladrillo (tiles F0) tapa un paso. Está cerrado mientras su flag (E0A1–E0AC) vale 0, y desaparece cuando se cumple su condición:
@@ -113,6 +113,20 @@ Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibbl
 | 7 (0x07–0x37) | EA20 (se dibuja como bloque 4×3 de F0) | **pared que se rompe a espadazos**, ver abajo [C][O] | castillo 97 (camino de la cruz), mundo 2 sala 4, mundo 4 sala 16, mundo 5 sala 7, mundo 6 sala 6, mundo 9 sala 26 |
 
 **Contraste con el mapa de mars2000you** (marcas N, "muro temporal que aparece después de pasar"): 14 de sus 16 marcas N caen en salas con objeto de clase 5. Sus marcas T, "escalera que puede desaparecer", caen en 12 de las 13 salas de la tabla de escaleras extra. Sus marcas FY, puntos donde aparece un hada, están en las salas 25, 91 y 110 del castillo (ver "Hadas").
+
+## Objetos que aparecen con una condición [C][O]
+
+b02:9F82 (sigue en b03 a partir de A000) se ejecuta en el castillo, como mucho una vez por sala (E539). Si se cumple la condición, crea el objeto en la posición indicada (b00:5D88, en E740) y suena 0x2E:
+
+| Sala | Objeto | Posición (x, y) | Condición |
+|---|---|---|---|
+| 48 | Hoi (0x13) | 0x50, 0x28 | matar a todos los enemigos marcados de la sala (E61C) [O: 7 enemigos 0x34] |
+| 75 | Candle (0x16) | 0x20, 0xA8 | igual |
+| 24 | Saber (0x25) | 0xD0, 0x68 | igual, y además el bit 2 de E068 (un jefe derrotado; según la guía, el del mundo 6) |
+| 40 | Vase (0x1B) | 0x80, 0x88 | bit 2 de E066 (según la guía, tras recuperar el mundo 4) y una **secuencia de 9 pasos** contados en E536: 3 espadazos mirando a un lado (E503 = 0), 3 mirando al otro y 3 saltos sin espada. Un paso fuera de orden pone la cuenta a 0 |
+| 43 | Dagger (0x26) | 0x60, 0x28 | estar **sobre un ascensor** (b09:A8CE, bit 0 de EC12/EC22) y pulsar **derecha, abajo, izquierda y arriba** (tabla A056). Cualquier otra tecla reinicia |
+
+Las otras salas de evento del castillo (35, 53, 69, 77, 101 y 105) también activan E61C al limpiarlas, pero no se ha encontrado nada más que lo lea.
 
 ## Paredes que suenan y se rompen [C][O]
 
