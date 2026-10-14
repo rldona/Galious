@@ -45,6 +45,8 @@ namespace MazeOfKnight.Game
         readonly List<(RoomModel room, GameObject go)> visibleItems = new List<(RoomModel, GameObject)>();
         Rocks rocks;
         PlayerMotor motor;
+        public LiftSystem Lifts { get; private set; }
+        readonly List<SpriteRenderer> liftViews = new List<SpriteRenderer>();
         public EnemySystem Enemies { get; private set; }
         public WeaponSystem Weapons { get; private set; }
         public int SelectedWeapon;   // E510: 1 flecha … 6 lupa (0 = ninguna)
@@ -112,6 +114,9 @@ namespace MazeOfKnight.Game
                 UnityEngine.InputSystem.Keyboard.current.onTextInput += OnTextInput;
             LoadMap(mapName);
             motor = new PlayerMotor(World, World.Room(startRoom), startX, startY) { Character = startCharacter };
+            var liftsJson = Resources.Load<TextAsset>("Lifts");
+            Lifts = new LiftSystem(liftsJson != null ? JsonUtility.FromJson<LiftsData>(liftsJson.text) : null) { InCastle = mapName == "castle" };
+            motor.Lifts = Lifts;
             motor.DoorEntered += EnterWorld;
             motor.CastleExitReached += ExitToCastle;
             player.Init(motor);
@@ -146,6 +151,7 @@ namespace MazeOfKnight.Game
                     var demo = data.demos[AttractMode.Demo % data.demos.Length];
                     if (demo.map != mapName) LoadMap(demo.map);
                     motor.Place(World, World.Room(demo.room), demo.x, demo.y);
+                    Lifts.PresetForStart(demo.room);   // la demo 0 empieza sobre el ascensor de la sala 146
                     Inventory.Add(1);
                     SelectedWeapon = 1;
                     Arrows = 100;
@@ -165,6 +171,7 @@ namespace MazeOfKnight.Game
             mapName = name;
             var map = maps[name];
             if (Enemies != null) Enemies.Context.E041 = map.e041;
+            if (Lifts != null) Lifts.InCastle = name == "castle";
             World = new RoomWorld(map.rooms.Select(r => r.room));
             rocks = new Rocks(name, World, brokenRocks);
             rocks.Broken += OnRockBroken;
@@ -691,6 +698,28 @@ namespace MazeOfKnight.Game
                 sr.transform.localScale = new Vector3((x1 - x0) / 16f, Mathf.Max(0.05f, (y1 - y0) / 16f), 1);
                 sr.flipX = e.FacingLeft;
             }
+            // Ascensores de la sala: dos bloques de 16 × 16 (x … x + 31, y … y + 15).
+            int n = 0;
+            if (Lifts != null)
+                foreach (var l in Lifts.InRoom(motor.Room.id))
+                {
+                    if (n == liftViews.Count)
+                    {
+                        var go = new GameObject("Ascensor");
+                        var lsr = go.AddComponent<SpriteRenderer>();
+                        lsr.sprite = enemySprite;
+                        lsr.color = new Color(0.85f, 0.85f, 0.9f);
+                        lsr.sortingOrder = 6;
+                        liftViews.Add(lsr);
+                    }
+                    var v = liftViews[n++];
+                    v.enabled = true;
+                    var bl = RoomCoords.PixelToWorld(motor.Room, l.X, l.Y + Lifts.Box.height);
+                    v.transform.position = new Vector3(bl.x, bl.y, 0);
+                    v.transform.localScale = new Vector3(Lifts.Box.width / 16f, Lifts.Box.height / 16f, 1);
+                }
+            for (; n < liftViews.Count; n++)
+                liftViews[n].enabled = false;
             // Parpadeo del jugador mientras es invulnerable.
             if (player.body != null)
                 player.body.enabled = HurtTicks <= 0 || (HurtTicks / 2) % 2 == 0;

@@ -58,6 +58,13 @@ namespace MazeOfKnight.Game
         bool upHeld, downHeld;   // saltar, engancharse a una escalera y entrar por una puerta piden pulsar de nuevo
 
         public event System.Action<RoomModel, RoomModel> RoomChanged;
+
+        // Ascensores del castillo (Lifts.cs): después del jugador se mira la colisión y luego se mueven y lo llevan. Encima
+        // de uno cuenta como suelo (b03:A8CE).
+        public LiftSystem Lifts;
+        public bool OnLift => Lifts != null && Lifts.Riding(Room.id);
+        // E52B/E52D: el salto empezó sobre ese ascensor vertical; con él se puede salir por arriba de la sala saltando.
+        public int JumpedFromShaft;
         public event System.Action<int> DoorEntered;        // mundo
         public event System.Action<int> CastleExitReached;  // código de salida 0xF5-0xFE
 
@@ -86,7 +93,37 @@ namespace MazeOfKnight.Game
             landY = -1;
             jumpDir = 0;
             hoverTicks = 0;
+            JumpedFromShaft = 0;
+            hitWall = false;
         }
+
+        // El vertical cambia de sala con el jugador encima (b03:A7F8): entra con él, a su altura.
+        public void RideToRoom(int roomId, int y)
+        {
+            var next = world.Room(roomId);
+            if (next == null) return;
+            var previous = Room;
+            Room = next;
+            Y = y;
+            RoomChanged?.Invoke(previous, next);
+        }
+
+        // b03:A916: encima de un ascensor, los pies a su altura y, en el horizontal, lo que se ha movido.
+        public void CarryOnLift(int dx, int y)
+        {
+            X += dx;
+            Y = y;
+        }
+
+        // b03:B0C2: el ascensor lo aparta por un lado o lo empuja por debajo.
+        public void PushByLift(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        // E519 bit 3: suelo de tiles bajo los pies.
+        public bool OnTileFloor => ((Y - P.RoomTopPx) & 7) == 0 && SolidUnderFeet();
 
         // La puerta arrastra al jugador: wait ticks quieto y luego ticks a speed px/tick en dir.
         // Colocarlo agarrado a una escalera (al salir del santuario de un mundo, encima de la escalera de la sala de abajo).
@@ -125,6 +162,15 @@ namespace MazeOfKnight.Game
         int shoeLadder;
 
         public void Tick(MotorInput input)
+        {
+            TickPlayer(input);
+            Lifts?.Collide(this);
+            Lifts?.Move(this);
+            if (State == MotorState.Ground || State == MotorState.Ladder)
+                JumpedFromShaft = 0;     // b03:A3D8: al aterrizar
+        }
+
+        void TickPlayer(MotorInput input)
         {
             if (Stunned > 0)
             {
@@ -213,6 +259,7 @@ namespace MazeOfKnight.Game
             // retraso, y lo que parecía "aún anda 2 px" era ese retraso; el retraso lo pone PlayerController).
             if (upPressed)
             {
+                JumpedFromShaft = Lifts?.RidingShaft(Room.id) ?? 0;   // b03:A308
                 State = MotorState.JumpPrep;
                 prepTicks = 1;               // este tick ya cuenta como preparación
                 return;
@@ -235,6 +282,7 @@ namespace MazeOfKnight.Game
                 return;                      // tick quieto antes de despegar
             State = MotorState.Jump;
             jumpDir = InputDir(input);
+            hitWall = false;
             riseIndex = Character == Character.Popolon ? P.RiseStartPopolon : P.RiseStartAphrodite;
             apexTicks = 0;
             cutDone = false;
@@ -265,6 +313,11 @@ namespace MazeOfKnight.Game
             }
 
             // Punto más alto
+            if (OnLift)
+            {
+                State = MotorState.Ground;   // b03:A3AC: sobre un ascensor aterriza
+                return;
+            }
             AirMove(input, apexTicks < P.ApexTicksAtRiseSpeed);
             if (LiquidStep() && ++apexTicks >= P.ApexTicks)
                 StartFall(0, true);
@@ -274,6 +327,7 @@ namespace MazeOfKnight.Game
         // despegó (o la última pulsada) aunque se suelte: 2 px/tick. Subiendo y en el primer tick arriba, 2; después, 3
         // solo con ↑ y la dirección pulsadas, y 2 con la dirección sola o sin nada.
         int jumpDir;
+        bool hitWall;
         int landY = -1;            // aterrizaje pendiente (se ha hundido en el suelo este tick)
 
         // Con ← y → a la vez, gana ← (trazas de la demo 1: el jugador va a la izquierda).
@@ -284,13 +338,18 @@ namespace MazeOfKnight.Game
             int dir = InputDir(input);
             if (dir != 0) jumpDir = dir;
             if (jumpDir == 0) return;
-            int speed = !rising && dir != 0 && input.Up ? P.AirSpeedFalling : P.AirSpeedRising;
+            // Tras chocar con una pared ya no pasa de 2 px/tick hasta aterrizar (demo 0, castillo 101: 91 → 88, parado
+            // contra la pared, y luego 86 84 82 con ← y ↑ pulsados) [O].
+            int speed = !rising && dir != 0 && input.Up && !hitWall ? P.AirSpeedFalling : P.AirSpeedRising;
             var held = input;
             held.Left = jumpDir < 0;
             held.Right = jumpDir > 0;
             // Al chocar con una pared se pierde la inercia del salto (demo 1, castillo 121 → 132) [O].
-            if (!MoveHorizontal(held, speed) && dir == 0)
-                jumpDir = 0;
+            if (!MoveHorizontal(held, speed))
+            {
+                hitWall = true;
+                if (dir == 0) jumpDir = 0;
+            }
         }
 
         // Al salir andando de una plataforma (o quedarse sin suelo): 4 ticks quieto en el aire y luego la tabla de caída
@@ -311,6 +370,13 @@ namespace MazeOfKnight.Game
 
         void TickFall(MotorInput input)
         {
+            if (OnLift)
+            {
+                // b03:A4BE: sobre un ascensor aterriza, también en los ticks quieto antes de caer.
+                State = MotorState.Ground;
+                hoverTicks = 0;
+                return;
+            }
             if (hoverTicks > 0)
             {
                 hoverTicks--;
@@ -355,6 +421,7 @@ namespace MazeOfKnight.Game
             if (RemakeRules.LeaveLadderSideways && side != 0 && !input.Up && !input.Down && !BodyBlockedAt(X + side, side))
             {
                 StartFall(0, true);
+                hitWall = false;
                 MoveHorizontal(input, P.AirSpeedFalling);
                 return;
             }
@@ -527,6 +594,8 @@ namespace MazeOfKnight.Game
         // De pie si hay sólido bajo los pies o la parte de arriba de una escalera que baja.
         bool Supported()
         {
+            if (OnLift)
+                return true;
             if (InLiquid && Y >= P.LiquidFloorY)
                 return true;                 // en el líquido no se baja de y = 184
             if (((Y - P.RoomTopPx) & 7) != 0)
@@ -552,7 +621,7 @@ namespace MazeOfKnight.Game
         bool BodyBlockedAt(int x, int dir)
         {
             int edge = dir < 0 ? x + P.FootLeft : x + P.FootRight;
-            foreach (int py in new[] { Y - P.HeadHeight, Y - 8, Y - 1 })
+            foreach (int py in new[] { Y - P.WallTop, Y - 8, Y - 1 })
             {
                 // Por encima de la sala está el marcador: no es pared (la cabeza llega a y = 24 al saltar pegado al
                 // borde de arriba y se sigue avanzando; castillo, sala 73).
@@ -578,13 +647,14 @@ namespace MazeOfKnight.Game
                 X = dir < 0 ? ((X + P.FootLeft) & ~7) + 8 - P.FootLeft : ((X + P.FootRight) & ~7) - 1 - P.FootRight;
                 return false;
             }
+            // Todo el paso o nada: si el destino choca, no se mueve (demo 0, castillo 100: en x = 81 junto a una piedra
+            // que empieza en x = 71, pulsando ← se queda en 81 en vez de avanzar 1 px) [O].
             speed = ScaleHorizontal(speed);
-            for (int i = 0; i < speed; i++)
-            {
-                if (BodyBlockedAt(X + dir, dir))
-                    return false;
-                X += dir;
-            }
+            if (speed == 0)
+                return true;
+            if (BodyBlockedAt(X + dir * speed, dir))
+                return false;
+            X += dir * speed;
             return true;
         }
 
@@ -597,8 +667,11 @@ namespace MazeOfKnight.Game
         void CrossRoomEdges()
         {
             int dx = X < P.ExitLeftX ? -1 : X >= P.ExitRightX ? 1 : 0;
-            bool climbing = State == MotorState.Ladder;   // [I] también en las plataformas que suben (aún no están)
-            int dy = climbing && Y < P.ExitUpY ? -1 : Y > P.RoomBottomPx ? 1 : 0;
+            bool climbing = State == MotorState.Ladder;
+            // b03:A7F8: saltando desde un ascensor vertical también se sale por arriba, y ese ascensor sube detrás (si
+            // sube). En un ascensor que cambia de sala, el jugador va con él (LiftSystem).
+            bool liftJump = JumpedFromShaft != 0 && (State == MotorState.Jump || State == MotorState.JumpPrep || State == MotorState.Fall);
+            int dy = (climbing || liftJump) && Y < P.ExitUpY ? -1 : Y > P.RoomBottomPx ? 1 : 0;
             if (dx == 0 && dy == 0)
                 return;
             var next = world.Neighbour(Room, dx, dy);
@@ -615,6 +688,8 @@ namespace MazeOfKnight.Game
                 if (dx > 0) X = System.Math.Min(X, P.RoomWidthPx - 1);
                 return;
             }
+            if (dy < 0 && liftJump)
+                Lifts?.PlayerJumpedOut(JumpedFromShaft);
             var previous = Room;
             Room = next;
             if (dx > 0) X = P.EnterFromLeftX;

@@ -41,13 +41,16 @@ namespace MazeOfKnight.Tests
         [Test]
         public void DemoReplaysOnTheEngine()
         {
-            // Solo informa: el remake no es idéntico (sin plataformas que suben, azar sin sembrar), así que la ruta puede
-            // torcerse. Se compara con la medida en openMSX.
+            // Las dos demos recorren las salas del original (sin enemigos: no hay ninguno en su camino que cambie la ruta).
+            // Las posiciones tick a tick se comparan con las trazas de openMSX (logs/unity/demoN_remake.tsv).
             var map = Resources.LoadAll<MapData>("Maps").First(m => m.mapName == "castle");
             foreach (var demo in Data().demos)
             {
                 var world = new RoomWorld(map.rooms.Select(r => r.room));
                 var motor = new PlayerMotor(world, world.Room(demo.room), demo.x, demo.y);
+                var ljson = Resources.Load<TextAsset>("Lifts");
+                motor.Lifts = new LiftSystem(ljson != null ? JsonUtility.FromJson<LiftsData>(ljson.text) : null);
+                motor.Lifts.PresetForStart(demo.room);
                 var rocks = new Rocks("castle", world, new HashSet<(string, int, int, int)>());
                 var wjson = Resources.Load<TextAsset>("Weapons");
                 var weapons = new MazeOfKnight.Game.WeaponSystem(wjson != null ? JsonUtility.FromJson<WeaponsData>(wjson.text) : null);
@@ -75,14 +78,15 @@ namespace MazeOfKnight.Tests
                     }
                     fireDelayed = p.FirePressed;
                     weapons.Tick(motor, world, enemies, rocks, items);
-                    trace.AppendLine($"{tick++}\t{motor.Room.id}\t{motor.X}\t{motor.Y}\t{motor.State}\t{(input.Up ? "U" : "")}{(input.Down ? "D" : "")}{(input.Left ? "L" : "")}{(input.Right ? "R" : "")}{(input.Attack ? "S" : "")}");
+                    trace.AppendLine($"{tick++}\t{motor.Room.id}\t{motor.X}\t{motor.Y}\t{motor.State}\t{(input.Up ? "U" : "")}{(input.Down ? "D" : "")}{(input.Left ? "L" : "")}{(input.Right ? "R" : "")}{(input.Attack ? "S" : "")}\t{motor.Lifts.ShaftInRoom(motor.Room.id)?.Y}\t{motor.Lifts.SlideInRoom?.X}");
                     if (motor.Room.id != rooms[rooms.Count - 1]) rooms.Add(motor.Room.id);
                 }
                 System.IO.File.WriteAllText(System.IO.Path.Combine(Application.dataPath, $"../../../logs/unity/demo{demo.index}_remake.tsv"), trace.ToString());
                 TestContext.WriteLine($"demo {demo.index}: {string.Join("→", rooms)}");
                 Assert.Greater(rooms.Count, 1, $"demo {demo.index} sale de su sala");
-                // La demo 1 (sin plataformas que suben) recorre exactamente las salas del original (y, comparada tick a
-                // tick con la traza de openMSX, las mismas posiciones).
+                // Salas del original (trazas de openMSX: logs/omsx/attract y logs/omsx/lift/demo0).
+                if (demo.index == 0)
+                    CollectionAssert.AreEqual(new[] { 146, 135, 126, 113, 101, 100, 99, 112, 111, 110, 109 }, rooms);
                 if (demo.index == 1)
                     CollectionAssert.AreEqual(new[] { 1, 107, 120, 121, 132, 133, 143, 133 }, rooms);
             }

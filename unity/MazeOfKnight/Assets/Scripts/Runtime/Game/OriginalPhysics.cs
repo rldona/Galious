@@ -30,6 +30,9 @@ namespace MazeOfKnight.Game
         public const int SupportLeft = -4;
         public const int SupportRight = 4;
         public const int HeadHeight = 11;         // entre 9 y 11 [O]: sala 97 (choca en y = 110 y aún sube 1 px) y demo 1, sala 107 (sube a 76, choca, sube 1 a 75)
+        // Las paredes se miran desde 9 px por encima de los pies (no 11): demo 0, castillo 101, cayendo pegado a una pared
+        // que acaba en la fila 7 se suelta al pasar de y = 105 a 110 [O]. Con 9 la demo 1 sigue igual.
+        public const int WallTop = 9;
 
         // Espada (docs/player.md, "Espada"): 4 ticks, alcance hasta x + 18 delante del centro. La franja vertical
         // no se ha medido: se supone a la altura del cuerpo [I].

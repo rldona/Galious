@@ -165,6 +165,46 @@ b02:9F82 (sigue en b03 a partir de A000) se ejecuta en el castillo, como mucho u
 
 Las otras salas de evento del castillo (35, 53, 69, 77, 101 y 105) también activan E61C al limpiarlas, pero no se ha encontrado nada más que lo lea.
 
+## Ascensores [C][O]
+
+Bloques de 32 × 16 px (dos bloques de 16 × 16): ocupan x … x + 31, y … y + 15, y el jugador va de pie sobre su cara de arriba (sus pies en y). Solo hay ascensores en el castillo (E041 = 1). Datos: `tools/extract/lifts.py` → `extracted/unity/lifts.json`. Medidas: `tools/openmsx/lift_measure.py` (la demo 0 entera, y 160 s en la sala 1 para seguir los seis verticales).
+
+**Verticales** (E4A0, 6 de 16 bytes; el de la sala actual se copia en EC10):
+- Cada uno recorre una columna de salas a **2 px/tick** y **sigue moviéndose aunque el jugador esté en otra sala o en un mundo**. Solo se paran durante la carga de una sala.
+- Subiendo, al bajar de y = 0x28 pasa a la sala de arriba y aparece en y = 0xB9. Bajando, al llegar a y = 0xC0 pasa a la de abajo y aparece en y = 0x28.
+- Dan la vuelta en sus salas de los extremos: abajo, al llegar a su y (… 142, 144, 142); arriba, cuando y + 1 < su y (con la y de arriba 120: … 121, 119, 117, 119).
+- Al empezar la partida, cada uno está en su sala de arriba, bajando (b01:63C2, tablas b09:BB24/BB54). La demo 0 pone el 6 en la sala 146, en y = 64, subiendo (b00:5FA8).
+
+| Id | Salas (de arriba abajo) | x | Vuelta arriba | Vuelta abajo |
+|---|---|---|---|---|
+| 6 | 80 88 101 113 126 135 146 | 112 | sala 80, y 120 | sala 146, y 144 |
+| 5 | 68 82 89 103 116 129 138 | 112 | 68, 88 | 138, 120 |
+| 4 | 17 28 36 49 56 | 112 | 17, 56 | 56, 120 |
+| 3 | 8 16 26 35 46 | 112 | 8, 88 | 46, 144 |
+| 2 | 14 24 34 | 112 | 14, 88 | 34, 152 |
+| 1 | 13 22 33 41 52 | 112 | 13, 152 | 52, 120 |
+
+**Horizontales** (EC20; tabla b09:BA53): uno por sala, en las salas 5, 7, 8, 10, 22, 24, 28, 36, 37, 43, 46, 102, 126, 129 y 140.
+- Vuelven a su sitio cada vez que se entra en la sala y van a 2 px/tick, primero hacia la derecha.
+- Dan la vuelta mirando la x de **antes** de moverse, así que se pasan 2 px. En la sala 43, con los límites 48 y 176, el recorrido es 174, 176, 178, 176… y 50, 48, 46, 48. El jugador que va encima se desplaza lo mismo que el ascensor.
+
+**Orden dentro del tick** (punto de ruptura en b03:B0C2 durante la demo 0):
+1. Se mueve el jugador.
+2. Se mira la colisión, con el ascensor aún donde estaba.
+3. En el frame siguiente se mueven los ascensores y llevan al jugador (b03:A916): los pies a la altura del ascensor y, en el horizontal, lo que este se ha movido.
+
+**Colisión** (b03:B0C2, cada ascensor de la sala; lx, ly = esquina del ascensor; x, y = centro de los pies):
+- **Al bajarse:** 7 ticks sin colisión con ese ascensor (bits 3–6 de EC12/EC22).
+- **Por los lados:** con los pies entre ly + 1 y ly + 31, si x − lx está entre −8 y −5, lo aparta a x = lx − 8; si está entre 37 y 40, a x = lx + 40. Un horizontal empuja así al jugador que está a su lado.
+- **Encima:** con x − lx entre −2 y 34 y los pies entre ly y ly + 7, va encima. Basta con que ya fuera encima o con que no haya suelo de tiles bajo los pies (E519 bit 3).
+- **Por debajo:** con los pies entre ly + 24 y ly + 31 y sin suelo de tiles, lo empuja a y = ly + 32. No se puede atravesar saltando desde abajo.
+- **Como suelo:** ir encima (b03:A8CE) cuenta como suelo: de pie, saltando y cayendo (también en los 4 ticks quieto antes de caer). Encima no se pueden usar el fuego rodante, el fuego ni la mina.
+
+**Cambio de sala** (b03:A7F8):
+- Si un vertical cambia de sala con el jugador encima, el jugador va con él y aparece a su altura.
+- Si se salta desde un vertical (E52B/E52D) y la y baja de 0x28, se sale por arriba aunque no haya escalera. Si ese ascensor sube, pasa también a la sala de arriba en el tick siguiente.
+- La Dagger de la sala 43 se consigue sobre su ascensor horizontal (ver "Objetos que aparecen con una condición").
+
 ## Paredes que suenan y se rompen [C][O]
 
 Son los objetos de clase 7 (b09:A634).

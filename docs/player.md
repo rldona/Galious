@@ -221,3 +221,13 @@ La demo 1 del ciclo de presentación (`docs/attract.md`) son pulsaciones grabada
 - **Cabeza:** entre 9 y 11 px por encima de los pies (antes 13).
 - **Cambio de sala:** a la derecha al llegar a x = 248 (aparece en x = 16); a la izquierda al bajar de x = 16 (aparece en 247); abajo al pasar de y = 192 (aparece en y = 40); arriba, por una escalera, al bajar de y = 40 (aparece en y = 185). Hay unos 20 frames de pausa en los que el juego no avanza.
 - **Piedras y armas:** una flecha que choca con una piedra la daña antes de desaparecer (3 flechas de Popolon rompen una piedra de 15).
+
+### Comprobado con la demo 0 (ascensores) [O]
+
+La demo 0 empieza sobre el ascensor vertical de la sala 146 del castillo (ver [entities.md](entities.md), "Ascensores"). Con los ascensores implementados, el remake recorre las mismas salas que el original (146 → 135 → 126 → 113 → 101 → 100 → 99 → 112 → 111 → 110 → 109). Las posiciones coinciden tick a tick hasta la sala 101; en la 111 un enemigo golpea al jugador del original y la prueba del remake no lleva enemigos. Traza: `logs/omsx/lift/demo0.tsv.gz` (`tools/openmsx/lift_measure.py demo0`). Correcciones que salieron de ella:
+
+- **Andar contra una pared:** el paso es entero o nada. En x = 81, junto a una piedra que empieza en x = 71, el jugador no avanza al pulsar ← (antes avanzaba 1 px hasta tocarla).
+- **En el aire, tras chocar con una pared:** ya no pasa de 2 px/tick hasta aterrizar, aunque se mantengan ↑ y la dirección (castillo 101: 91 → 88, parado contra la pared, y luego 86, 84, 82).
+- **Paredes:** se miran desde 9 px por encima de los pies, no desde 11 como el techo. Cayendo pegado a una pared que acaba en la fila 7, el jugador se suelta al pasar de y = 105 a y = 110.
+- **Pendiente:** en la sala 101, tras aterrizar con ↑ todavía pulsado desde el aire, el original se queda quieto un tick más que el remake antes de andar. Puede que guarde la pulsación de ↑ hecha en el aire.
+

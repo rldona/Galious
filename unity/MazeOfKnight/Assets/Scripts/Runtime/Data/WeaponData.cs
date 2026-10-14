@@ -24,6 +24,7 @@ namespace MazeOfKnight.Data
         public string pool;          // projectile (huecos E540…) o mine (E5A0…)
         public int maxPopolon, maxAphrodite, maxItem, maxPopolonWithItem;
         public bool air, ladder, ground;
+        public bool blockedOnLift;   // no se puede sobre un ascensor (bit 0 de EC12/EC22)
         public int spawnDxRight, spawnDxLeft, spawnDy;
         public bool spawnAlignY8;
         public int spawnMinY;

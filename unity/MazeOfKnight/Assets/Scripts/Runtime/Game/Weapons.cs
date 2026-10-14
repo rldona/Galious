@@ -61,6 +61,7 @@ namespace MazeOfKnight.Game
             bool ground = m.State == MotorState.Ground || m.State == MotorState.JumpPrep;
             bool air = m.State == MotorState.Jump || m.State == MotorState.Fall;
             if (!(ground && w.ground || air && w.air)) return "aquí no";
+            if (w.blockedOnLift && m.OnLift) return "aquí no";
             int max = m.Character == Character.Popolon
                 ? (w.maxItem != 0 && items.Contains(w.maxItem) ? w.maxPopolonWithItem : w.maxPopolon)
                 : w.maxAphrodite;

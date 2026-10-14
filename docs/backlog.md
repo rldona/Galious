@@ -35,6 +35,7 @@ El barrido de tiles (docs/entities.md, "Barrido de tiles en openMSX") no llegó 
 - **Escaleras que se retiran** de las salas 21, 60, 73, 102, 124 y 136 del castillo.
 - **Eventos de sala** (enemigos marcados): escaleras y bloques de muro de los mundos, y los objetos con condición del castillo.
 - **Umbral del toque de salto** entre 5 y 9 frames (medido: 4 frames no salta, 10 sí).
+- **Salto pulsado en el aire:** en la demo 0 (castillo 101), al aterrizar con ↑ pulsado desde el aire, el original se queda un tick más quieto que el remake antes de andar (player.md, "Comprobado con la demo 0").
 
 ## Jefes
 
@@ -46,5 +47,6 @@ El barrido de tiles (docs/entities.md, "Barrido de tiles en openMSX") no llegó 
 
 ## Mundo
 
-- **Plataformas que suben (ascensores):** la demo 0 empieza en una, del castillo 146 hasta la 113 (EC12/EC22); las armas de fuego y la mina no se usan sobre ellas. Sin ellas la demo 0 se tuerce desde el principio.
+- **Dagger de la sala 43:** aparece al pulsar →, ↓, ←, ↑ sobre el ascensor horizontal (entities.md, "Objetos que aparecen con una condición"). Los ascensores ya están; falta el objeto.
+- **Gráfico de los ascensores:** ahora es un rectángulo de 32 × 16.
 - **Pausa al cambiar de sala** (~20 frames en los que el juego no avanza mientras se dibuja la sala nueva).
