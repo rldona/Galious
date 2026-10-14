@@ -19,24 +19,48 @@ Iconos de los objetos: `extracted/entities/item_icons.png` (tipos 0x07–0x2C en
 - E06F + tipo = 1 (lo tienes) y se activa el bit persistente "recogido en esta sala". Suena 0x2D, salvo la llave.
 - 0x07, 0x08, 0x09 y 0x0A son **objetos de mundo**: activan los bits 5, 6, 7 y 4 de E061 + mundo, y al entrar en cada mundo se copian a sus flags (b00:462E–4642). Hay uno de cada en cada mundo.
 - 0x0C, **llave**: desbloquea la puerta del mundo siguiente (bit 1 de E062 + mundo) y dentro de un mundo dispara la fanfarria (estado 20) [C][O].
-- 0x2B y 0x2C guardan 2 o 3 en E097: la pieza de **equipo** activa [I].
-- 0x2D, 0x2E y 0x2F son **recursos**: suman +50, +10 y +2 a los contadores E046, E048 y E04A (BCD, tope 999), que son las tres filas del marcador (b00:4D5A, 4D7B, 4D82). Por los iconos serían flechas, monedas y llaves [I].
+- 0x2B y 0x2C guardan 2 o 3 en E097, el **nivel de escudo**. E097 es a la vez la flag del objeto 0x28, que es el nivel 1 [C].
+- 0x2D, 0x2E y 0x2F son **recursos**: suman +50, +10 y +2 a los contadores E046, E048 y E04A (BCD, tope 999), que son las tres filas del marcador (b00:4D5A, 4D7B, 4D82). Por los iconos serían flechas, monedas y llaves. Que E046 son flechas está comprobado: cada disparo de flecha resta 1 [O*].
 
-**Efectos encontrados en el código** [C]:
+**Qué hace cada objeto.** El icono está descrito a ojo desde `item_icons.png`. El efecto sale de buscar en todo el código quién lee su flag (E06F + tipo) y, donde se indica, de probarlo en openMSX forzando la flag.
+- **[O*]** probado en el emulador.
+- **[C]** leído en el código, sin probar.
+- **?** sin descifrar.
 
-| Objeto | Efecto |
-|---|---|
-| 0x0D | necesario para cruzar la puerta 7 con el personaje E501 = 1 (b02:9A41) |
-| 0x23 | necesario para cruzar la puerta 5 con el personaje E501 = 1 (b02:9A33) |
-| 0x2A | necesario para entrar en la sala de dios de tipo 3 (castillo, sala 87) |
-| 0x25 | **mejora de arma**: cada golpe resta 1 de vida extra (b03:B580–B5DB) |
-| 0x24 | inmunidad al contacto con el enemigo 0x08 |
-| 0x0E | inmunidad al contacto con el enemigo 0x2A |
-| 0x0F | inmunidad al contacto con el enemigo 0x28 |
-| 0x17 | inmunidad al contacto con el enemigo 0x2E |
-| 0x22 | inmunidad al contacto con el enemigo 0x31 (llamas, invulnerables) |
-| 0x15 | lo comprueba el menú de objetos (b02:9AC9) |
-| 0x12 | hace aparecer el **puente** de la sala 11 del mundo 2: una fila de 16 tiles C4 sobre el agua (b08:9F87, EAC8) [C][O*] |
+| Tipo | Icono | Efecto | Código |
+|---|---|---|---|
+| 0x01–0x04 | (sin icono) | armas secundarias: flecha, flecha doble, fuego rodante, fuego (M) [O*] | E510 |
+| 0x05, 0x06 | (sin icono) | armas secundarias 5 y 6: casos propios al disparar; la 6 activa E517. No aparecen en ninguna sala [C] | b03:A72B, AD46 |
+| 0x07–0x0A | frasco, capa, vara, pergamino | objetos de mundo: bits 5, 6, 7 y 4 de E061 + mundo [C] | b00:462E |
+| 0x0B | cruz | interviene en el combate con el jefe (estado del jefe E70A ≥ 0x12/0x19): con la cruz se ejecuta b03:B96D en su posición [C] ? | b03:BBA8 |
+| 0x0C | llave | abre la puerta del mundo siguiente; fanfarria [C][O] | b03:B701 |
+| 0x0D | collar azul | Popolon lo necesita para la puerta 7 [C] | b02:9A41 |
+| 0x0E, 0x0F, 0x17, 0x22, 0x24 | corona, guante, figura verde, triángulo, frasco verde | inmunidad al contacto con los enemigos 0x2A, 0x28, 0x2E, 0x31 y 0x08 [C] | b03:B1F7 |
+| 0x10 | pluma roja | en el mundo 5, salas 12 y 13, el agua (tile B6) no te hunde: activa E52A en vez de "en el agua" [C] | b03:B037 |
+| 0x11 | bota | **sube y baja escaleras un 25 % más rápido** (0,62 px/frame frente a 0,5); el salto y el paso no cambian [O*] | b03:A5FE, A6B6 |
+| 0x12 | figura verde | hace aparecer el **puente** del mundo 2, sala 11 [O*] | b08:9F87 |
+| 0x13 | capa gris | sin ella, **en el mundo 8 izquierda y derecha van al revés** (b03:A8BE intercambia los bits) [O*]. Te lo da un dios (b02:9FA7) | b03:A8A6 |
+| 0x14 | campana | en el castillo, **suena (0x28) al entrar en ciertas salas**, según tus flags de progreso (tablas b00:BE4F/BE63) [C]. Pista | b00:5D24 |
+| 0x15 | aro dorado | en el menú de objetos, **Return te devuelve al castillo** (sala 72), también desde un mundo [O*] | b02:9AC9 |
+| 0x16 | vela | sin ella, la sala 6 del mundo 5 está **a oscuras** (solo se ve el fondo) [O*]. Te la da un dios | b00:55F7 |
+| 0x18 | pañuelo rojo | **apaga los generadores periódicos** de enemigos de varias salas de los mundos 7–10 (b04:6200); en el mundo 8 también cambia tiles (b00:5575) [C] | b04:6200 |
+| 0x19 | casco | **recibes la mitad de daño** [C] | b03:B3BF |
+| 0x1A | lámpara | en los mundos coloca un sprite indicador desde una tabla por mundo; quizá en el recuadro del marcador [C][I] | b01:668F |
+| 0x1B | jarrón | **duplica la experiencia** que ganas [C]. Te lo da un dios | b03:B62E |
+| 0x1C | collar amarillo | con él, la espada interactúa con una lista de objetos de la sala (EA20) y suena 0x1E [C] ? | b09:A668 |
+| 0x1D, 0x1E | pendientes, piedra roja | nadie lee su flag directamente ? | — |
+| 0x1F | anillo | **Aphrodite rompe piedras igual que Popolon**: 5 por golpe en vez de 1 (de 15) [O*] | b03:B841 |
+| 0x20 | libro | **CTRL congela a los enemigos ~5 s** (E0D5/E0D6), hasta 16 veces (E531) [O*] | b02:9BB6 |
+| 0x21 | arpa | **un golpe de espada rompe todas las piedras de la sala** [O*] | b01:6398 |
+| 0x23 | cuerno | Popolon lo necesita para la puerta 5 [C] | b02:9A33 |
+| 0x25 | daga | la espada quita 1 de vida extra por golpe [C] | b03:B580 |
+| 0x26 | espada | te la dan al limpiar ciertas salas del castillo e introducir una secuencia de 4 direcciones (b03:A003, tabla A056). Con ella, escribir **UMBRELLA** activa algo (b02:9C0B → b03:B5EA) [C] ? | b02:9BEE |
+| 0x27 | pluma blanca | en el menú de objetos, **pulsar el número de un mundo abierto te lleva a la sala de su puerta** [O*] | b02:9A99 |
+| 0x28 | objeto rojo | primer nivel de escudo: E097 es su flag. 0x2B y 0x2C la suben a 2 y 3 [C] | b03:B74B |
+| 0x29 | copa | con ella, los proyectiles que llegan a la altura del jugador por delante se bloquean (b09:A345) [C] ? | b09:A345 |
+| 0x2A | montón gris | necesario para entrar en la sala de dios de tipo 3 (castillo, sala 87) [C] | b02:9A84 |
+| 0x2B, 0x2C | escudo gris, escudo dorado | escudo de nivel 2 y 3 (E097) [C] | b03:B74B |
+| 0x2D–0x2F | (tiles propios) | +50 flechas, +10 monedas, +2 llaves (E046/E048/E04A) [C][O] | b03:B701 |
 
 Las inmunidades salen de b03:B1F7–B22D, la colisión entre jugador y enemigo: si tienes el objeto, se sale sin hacer daño.
 
@@ -157,4 +181,4 @@ python3 tools/extract/catalog.py                          # lo incorpora a enemi
 ## Pendiente
 - Confirmar cada comportamiento en el código (rutinas de inicialización en b04:66B4 y de actualización por tipo) y medir con grabaciones más largas y con el jugador moviéndose.
 - Nombres de objetos más allá de la descripción visual. Cómo se disparan las armas secundarias y qué daño hacen.
-- Qué son exactamente E097 y E098 (el equipo) y cómo afecta a la defensa.
+- Objetos con **?** en la tabla: 0x0B, 0x1C, 0x1D, 0x1E, 0x26 (UMBRELLA), 0x29, y las armas 5 y 6.

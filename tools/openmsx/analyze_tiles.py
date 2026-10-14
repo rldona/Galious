@@ -14,7 +14,8 @@ ITEM_TILES = set(range(0x60, 0x7A))
 
 
 def main():
-    rows = [l.rstrip('\n').split('\t') for l in open(ROOT / 'logs' / 'omsx' / 'tile_changes.tsv')]
+    rows = [l.rstrip('\n').split('\t') for f in sorted((ROOT / 'logs' / 'omsx').glob('tile_changes*.tsv'))
+            if 'walk_only' not in f.name for l in open(f)]
     groups = collections.defaultdict(list)
     for name, loaded, pas, pc, ret, e041, room, addr, old, new, py, px in rows:
         old_t, new_t = int(old, 16), int(new, 16)

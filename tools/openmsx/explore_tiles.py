@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Barrido de salas buscando tiles que cambian en plena partida (escaleras que se van, muros que salen...).
 
-  explore_tiles.py [mapa ...]        (castle, world01..world10; sin argumentos, todos)
+  explore_tiles.py [mapa[:desde-hasta] ...]   (castle, world01..world10; sin argumentos, todos)
 
 En cada sala, con el jugador invencible, para cada altura de suelo (y = 56, 88, 120, 152, 184)
 lo coloca en un borde y lo hace andar hacia el otro durante WALK segundos (proc Tcl drive, frame a
 frame): de izquierda a derecha y de derecha a izquierda pulsando arriba a ratos (salta, o sube si
 hay escalera) y una tercera pasada pulsando abajo a ratos (baja escaleras). Teclas: arriba = saltar
 y subir, abajo = bajar, espacio = espada, M = arma secundaria (b00:4C75, b03:A71E). tile_watch.tcl anota cada escritura en el mapa de nombres de la sala que
-cambia un tile (E000 = 5). Salida: logs/omsx/tile_changes.tsv
+cambia un tile (E000 = 5). Salida: logs/omsx/tile_changes.tsv (o $TILE_OUT, para repartir el
+barrido entre dos instancias de openMSX con OMSX_SOCK)
   mapa  sala_cargada  pasada  mundo  sala  pc  retorno  dir_vram  antes  despues  jugador_y  jugador_x
 """
 import json, os, sys
@@ -58,14 +59,16 @@ def main(maps):
     send('source ' + os.path.abspath(os.path.join(os.path.dirname(__file__), 'tile_watch.tcl')))
     send(DRIVE)
     send('set throttle off')
-    out = open(os.path.join(RUN, 'tile_changes.tsv'), 'a')
+    out = open(os.path.join(RUN, os.environ.get('TILE_OUT', 'tile_changes.tsv')), 'a')
     rom = Rom()
     ent = json.loads((ROOT / 'extracted' / 'entities' / 'entities.json').read_text())
     castle = json.loads((ROOT / 'extracted' / 'maps' / 'castle.json').read_text())
-    for name in maps:
+    for arg in maps:
+        name, _, span = arg.partition(':')
         info = idx[name]
         n = info['table_rooms'] - (0 if info['e041'] in (1, 11) else 1)
-        for room in range(1, n + 1):
+        first, last = map(int, span.split('-')) if span else (1, n)
+        for room in range(first, min(last, n) + 1):
             changes = 0
             tries = [(y, x, dkey, extra, f'{y}{tag}') for y in FLOORS for x, dkey, extra, tag in PASSES]
             for lx, top, bottom in ladder_spans(rom, info['e041'], room, ent[name][str(room)], castle):
