@@ -238,6 +238,14 @@ namespace MazeOfKnight.Game
                 TickGround(input);
                 return;
             }
+            // Remake: soltarse de la escalera hacia un lado con sitio libre (RemakeRules).
+            int side = input.Left == input.Right ? 0 : input.Left ? -1 : 1;
+            if (RemakeRules.LeaveLadderSideways && side != 0 && !input.Up && !input.Down && !BodyBlockedAt(X + side))
+            {
+                StartFall(0, true);
+                MoveHorizontal(input, P.AirSpeedFalling);
+                return;
+            }
             if (input.Up)
             {
                 Y -= P.LadderSpeed;

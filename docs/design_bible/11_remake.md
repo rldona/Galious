@@ -33,6 +33,7 @@ Las decisiones de este capítulo son **propuestas [I]**, no hechos del original.
 | Espada corta horizontal | ataque con dirección (arriba y abajo) y **pogo** hacia abajo; conservar que solo cuente en la zona vulnerable de los jefes |
 | Daño por contacto continuo | invulnerabilidad tras el golpe y retroceso legible |
 | Armas secundarias con flechas | mantener el recurso flechas como "alma" o munición; la mina daña también al jugador |
+| Escaleras | en el original, a media escalera solo se sube o se baja. **Ya en el prototipo:** con ← o → te sueltas hacia un lado con sitio libre y caes con control (`RemakeRules.LeaveLadderSideways`, a petición del usuario) |
 | Dash | no existe en el original. Si se añade, que no rompa los muros que se cierran ni las escaleras que se retiran (dar tiempo a reaccionar) |
 | Contraseña | guardado en santuarios de Demeter |
 | Teclear la palabra | selector o recitado con mando |

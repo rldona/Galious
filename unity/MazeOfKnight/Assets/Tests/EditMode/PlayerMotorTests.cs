@@ -197,9 +197,12 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
-        public void NoSteppingOffMidLadder()
+        public void NoSteppingOffMidLadderBetweenWalls()
         {
+            // Escalera de abajo de la sala 1: paredes a los dos lados.
             var room = LadderThroughFloor();
+            for (int r = 12; r < 20; r++)
+                room.collision[r] = new string('#', 14) + "HH" + new string('#', 16);
             var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 150);
             motor.Tick(new MotorInput { Up = true });
             motor.Tick(new MotorInput { Up = true });
@@ -207,6 +210,34 @@ namespace MazeOfKnight.Tests
                 motor.Tick(new MotorInput { Right = true });
             Assert.AreEqual(MotorState.Ladder, motor.State);
             Assert.AreEqual(120, motor.X);
+        }
+
+        [Test]
+        public void RemakeLetsYouLeaveTheLadderSidewaysIntoFreeSpace()
+        {
+            var room = LadderThroughFloor();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 120);
+            motor.Tick(new MotorInput { Up = true });      // se engancha a la escalera de arriba
+            for (int t = 0; t < 20; t++)
+                motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            motor.Tick(new MotorInput { Right = true });
+            Assert.AreEqual(MotorState.Fall, motor.State);
+            Assert.AreEqual(123, motor.X);
+            try
+            {
+                RemakeRules.LeaveLadderSideways = false;     // comportamiento original
+                var m2 = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 120);
+                m2.Tick(new MotorInput { Up = true });
+                for (int t = 0; t < 20; t++)
+                    m2.Tick(new MotorInput { Up = true });
+                m2.Tick(new MotorInput { Right = true });
+                Assert.AreEqual(MotorState.Ladder, m2.State);
+            }
+            finally
+            {
+                RemakeRules.LeaveLadderSideways = true;
+            }
         }
 
         [Test]
