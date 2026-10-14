@@ -46,6 +46,9 @@ namespace MazeOfKnight.Game
         Rocks rocks;
         PlayerMotor motor;
         public EnemySystem Enemies { get; private set; }
+        public WeaponSystem Weapons { get; private set; }
+        public int SelectedWeapon;   // E510: 1 flecha … 6 lupa (0 = ninguna)
+        readonly Dictionary<Projectile, SpriteRenderer> projectileViews = new Dictionary<Projectile, SpriteRenderer>();
         readonly Dictionary<Enemy, SpriteRenderer> enemyViews = new Dictionary<Enemy, SpriteRenderer>();
         public int HurtTicks { get; private set; }   // invulnerable tras un golpe (parpadea)
         float messageUntil;
@@ -65,6 +68,11 @@ namespace MazeOfKnight.Game
             Enemies.Spawned += ShowEnemy;
             Enemies.HasItem = t => Collected.Contains(t);
             Enemies.Killed += e => { if (enemyViews.TryGetValue(e, out var v)) v.enabled = false; Say("Enemigo derrotado"); };
+            var weaponsJson = Resources.Load<TextAsset>("Weapons");
+            Weapons = new WeaponSystem(weaponsJson != null ? JsonUtility.FromJson<WeaponsData>(weaponsJson.text) : null);
+            Weapons.Spawned += ShowProjectile;
+            Weapons.PlayerHit += (damage, dir) => Hurt(damage, dir, $"-{damage} (mina)");
+            player.WeaponKey += SelectWeapon;
             LoadMap(mapName);
             motor = new PlayerMotor(World, World.Room(startRoom), startX, startY) { Character = startCharacter };
             motor.DoorEntered += EnterWorld;
@@ -142,6 +150,9 @@ namespace MazeOfKnight.Game
                 Say(TakeLoot(drop));
             if (motor.AttackStartedThisTick)
                 Enemies.Strike(motor, Collected);
+            if (player.ConsumeFire())
+                FireWeapon();
+            Weapons.Tick(motor, World, Enemies, rocks, Collected);
             if (HurtTicks > 0)
                 HurtTicks--;
             else if (motor.State != MotorState.Knockback && motor.State != MotorState.Carried)
@@ -173,6 +184,8 @@ namespace MazeOfKnight.Game
                     continue;
                 takenItems.Add((mapName, room.id));
                 Collected.Add(room.item.type);
+                if (SelectedWeapon == 0 && room.item.type >= 1 && room.item.type <= 6)
+                    SelectedWeapon = room.item.type;
                 Destroy(go);
                 visibleItems.RemoveAt(i);
                 Say(PickUp(room.item.type));
@@ -199,15 +212,61 @@ namespace MazeOfKnight.Game
                 Say("Paralizado");
                 return;
             }
-            Vitality[c] -= enemy.Damage;
             if (enemy.DiesOnTouch)
                 enemy.Alive = false;
-            int dir = enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1;
+            Hurt(enemy.Damage, enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1, $"-{enemy.Damage} (0x{enemy.Type:X2})");
+        }
+
+        // Daño al jugador: vitalidad, retroceso y 42 ticks de invulnerabilidad.
+        void Hurt(int damage, int dir, string message)
+        {
+            if (HurtTicks > 0)
+                return;
+            int c = (int)motor.Character;
+            Vitality[c] -= damage;
             motor.Knockback(dir);
             HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
-            Say($"-{enemy.Damage} (0x{enemy.Type:X2})");
+            Say(message);
             if (Vitality[c] <= 0)
                 LoseLife();
+        }
+
+        // ---------- armas secundarias ----------
+
+        void SelectWeapon(int id)
+        {
+            if (!Collected.Contains(id)) { Say($"No tienes {WeaponName(id)}"); return; }
+            SelectedWeapon = id;
+            Say($"Arma: {WeaponName(id)}");
+        }
+
+        public string WeaponName(int id) => Weapons?.Data.Get(id)?.name ?? (id == 0 ? "ninguna" : $"arma {id}");
+
+        void FireWeapon()
+        {
+            if (SelectedWeapon == 0) return;
+            var w = Weapons.Data.Get(SelectedWeapon);
+            if (w == null) return;
+            if (w.motion == "none")
+            {
+                // Lupa: lee la lápida del mundo y muestra la palabra del jefe.
+                var t = Weapons.ReadTombstone(motor, maps[mapName].e041);
+                Say(t != null ? $"La lápida dice: {maps[mapName].bossWord}" : "Aquí no hay nada que leer");
+                return;
+            }
+            if (Weapons.CanFire(w, motor, Collected, Arrows) != null) return;
+            if (Weapons.Fire(w, motor, World, Enemies, rocks, Collected) != null)
+                Arrows -= w.cost;
+        }
+
+        void ShowProjectile(Projectile p)
+        {
+            var go = new GameObject($"Proyectil {p.Weapon.name}");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = enemySprite;
+            sr.color = p.Id switch { 1 => Color.white, 2 => new Color(0.9f, 0.8f, 0.6f), 3 => new Color(1f, 0.5f, 0.1f), 4 => new Color(1f, 0.2f, 0.1f), _ => Color.gray };
+            sr.sortingOrder = 9;
+            projectileViews[p] = sr;
         }
 
         void EnterEnemyRoom()
@@ -253,6 +312,20 @@ namespace MazeOfKnight.Game
         {
             if (motor == null)
                 return;
+            foreach (var p in projectileViews.Keys.Where(p => !p.Alive).ToList())
+            {
+                if (projectileViews[p] != null) Destroy(projectileViews[p].gameObject);
+                projectileViews.Remove(p);
+            }
+            foreach (var (p, sr) in projectileViews.Select(kv => (kv.Key, kv.Value)))
+            {
+                var (x0, y0, x1, y1) = Weapons.Box(p);
+                var bl = RoomCoords.PixelToWorld(Weapons.Room ?? motor.Room, (int)x0, (int)y1);
+                sr.transform.position = new Vector3(bl.x, bl.y, 0);
+                sr.transform.localScale = new Vector3((x1 - x0) / 16f, (y1 - y0) / 16f, 1);
+                if (p.Exploding) sr.color = new Color(1f, 0.9f, 0.3f, 0.7f);
+                else if (p.Id == 5) sr.color = p.Armed && (p.Age / 4) % 2 == 0 ? Color.white : Color.gray;
+            }
             foreach (var e in enemyViews.Keys.Where(e => !e.Alive).ToList())
             {
                 if (enemyViews[e] != null) Destroy(enemyViews[e].gameObject);
@@ -368,6 +441,15 @@ namespace MazeOfKnight.Game
             {
                 Keys = Mathf.Min(999, Keys + 1);
                 Say($"[depuración] +1 llave ({Keys})");
+            }
+            // Depuración: G da las seis armas y 50 flechas para probarlas.
+            if (UnityEngine.InputSystem.Keyboard.current?.gKey.wasPressedThisFrame == true)
+            {
+                for (int id = 1; id <= 6; id++)
+                    if (!Collected.Contains(id)) Collected.Add(id);
+                Arrows = Mathf.Min(999, Arrows + 50);
+                if (SelectedWeapon == 0) SelectedWeapon = 1;
+                Say($"[depuración] las 6 armas y +50 flechas ({Arrows})");
             }
         }
     }

@@ -63,5 +63,30 @@ namespace MazeOfKnight.Game
                 Broken?.Invoke(rock);
             }
         }
+
+        // Un proyectil toca una piedra (caja de la piedra [y, y + 16] × [x, x + 20], docs/player.md): la daña y true.
+        public bool StrikeRect(RoomModel room, RoomWorld world, int x0, int x1, int y0, int y1, int damage)
+        {
+            foreach (var rock in rocks)
+            {
+                if (rock.broken || rock.room != room)
+                    continue;
+                if (x1 < rock.x || x0 > rock.x + 20 || y1 < rock.y || y0 > rock.y + 16)
+                    continue;
+                if (damage <= 0)
+                    return true;
+                rock.hp -= damage;
+                Hit?.Invoke(rock);
+                if (rock.hp <= 0)
+                {
+                    rock.broken = true;
+                    brokenForever.Add((mapName, rock.room.id, rock.x, rock.y));
+                    world.Clear(rock.room, rock.x >> 3, (rock.y - P.RoomTopPx) >> 3, 2, 2);
+                    Broken?.Invoke(rock);
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }

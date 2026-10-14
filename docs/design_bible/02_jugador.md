@@ -50,9 +50,9 @@ Diseño: el juego obliga a alternar. Aphrodite es para el agua y los disparos m�
 
 ## Vitalidad, experiencia y vidas
 
-- **Vitalidad:** empieza en 32 y sube 32 con cada Great Key, hasta 192 [G]. El juego la cambia poco a poco: cada 4 frames aplica un paso de un incremento pendiente por personaje (b01:618D) [C].
+- **Vitalidad:** en unidades de 1 px de barra (la barra mide 48). Empieza en 8 de 8. Cada Great Key da +8 de máximo al personaje activo mientras tenga < 72, y lo cura entero [C]. La guía cuenta ×4: 32, +32, hasta 192 [G]. Daño, cura y experiencia pasan por un pendiente por personaje que se aplica de 1 en 1 cada 4 ticks (b01:6171) [C][O].
 - **Daño recibido:** los enemigos tienen una clase de daño; el Hat Helmet lo reduce a la mitad [C]. Por debajo de 6 suena el aviso de vitalidad baja [C].
-- **Experiencia:** sube al matar enemigos. Al llenarse, repone la vitalidad [G]. El Vase duplica la experiencia ganada [C].
+- **Experiencia:** sube al matar enemigos (b03:BF27 por tipo, ×2 con el Vase). La barra se llena a 48: vuelve a 0 (se conserva lo que sobra) y la vitalidad se rellena. No hay niveles [C][O]. Detalle en [items_enemies.md](../items_enemies.md), «Vitalidad, experiencia y vidas».
 - **Otras curaciones:** hadas (ver [Mecánicas de sala](07_salas.md)) y Asclepio [G].
 - **Vidas:** contador por personaje (E058/E059). Al perder una vida, si al personaje no le quedan, se pasa al otro; si a ninguno, fin de partida [C].
 - **Resurrección:** la Muerte resucita una sola vez (ver [Santuarios](08_santuarios.md)) [G][C].

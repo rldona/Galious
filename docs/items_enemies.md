@@ -27,60 +27,127 @@ Iconos de los objetos: `extracted/entities/item_icons.png` (tipos 0x07–0x2C en
 - **[C]** leído en el código;
 - **[G]** solo lo dice la guía, sin contrastar todavía.
 
-El efecto en código sale de buscar quién lee la flag del objeto (E06F + tipo).
+El efecto en código sale de buscar quién lee la flag del objeto (E06F + tipo, búsqueda de la dirección en toda la ROM). Todo está en `extracted/unity/items.json` (`tools/extract/items_export.py`, campos explicados en su cabecera). Unidades: px y ticks (30 ticks/s); "personaje activo" = E501 (1 Popolon, 0 Aphrodite).
 
-| Tipo | Nombre | Efecto | Código |
+| Tipo | Nombre | Efecto exacto | Código |
 |---|---|---|---|
-| 0x01 | Arrow | flecha (M; gasta flechas, E046) [O*] | E510 |
-| 0x02 | Ceramic Arrow | atraviesa enemigos y es más lenta [G] | |
-| 0x03 | Rolling Fire | recorre la plataforma del jugador [G] | |
-| 0x04 | Fire | corre por el suelo y cae al de abajo [G] | |
-| 0x05 | Mine | mina: daño alto, también a ti. Popolon pone 2, Aphrodite 3. Se compra a Hefesto [G]. Tiene caso propio al dispararla [C] | b03:A72B |
-| 0x06 | Magnifying Glass | con M delante de una lápida, revela la palabra del jefe [G]. Activa E517 [C] | b03:AD46 |
-| 0x07–0x0A | Holy Water, Cloak, Magic Rod, Map | uno de cada en cada mundo [C]. Según la guía: daño doble al jefe, daño del jefe a la mitad, munición infinita contra el jefe y mapa del mundo en el menú [G]. Magic Rod comprobado: con E078 y E0D2 ≠ 0 los disparos no gastan flechas (b03:AA8E) [C] | b00:462E |
-| 0x0B | Cross | necesaria para vencer a Galious [G]. Interviene en el combate con el jefe (b03:BBA8) [C] | b03:BBA8 |
-| 0x0C | Great Key | abre la puerta del mundo siguiente [C][O]. Sube 32 la vitalidad máxima, hasta 192 [G] | b03:B701 |
-| 0x0D | Necklace | **Popolon** lo necesita para entrar en el mundo 7 [C] | b02:9A41 |
-| 0x0E | Crown | inmune al contacto con 0x2A, los Uh del mundo 2 [C][G] | b03:B1F7 |
-| 0x0F | Helmet | inmune al contacto con 0x28, el ectoplasma [C][G] | b03:B1F7 |
-| 0x10 | Oar | andar sobre el agua en el mundo 5, salas 12 y 13 [C][G] | b03:B037 |
-| 0x11 | Shoes | escaleras un 25 % más rápido [O*]. La guía dice "andan más rápido", pero en mi medida el paso no cambia | b03:A6B6 |
-| 0x12 | Decorative Doll | hace aparecer el puente del mundo 2 [O*] | b08:9F87 |
-| 0x13 | Hoi | sin él, izquierda y derecha van al revés en el mundo 8 [O*]. Aparece al matar a todos en una sala del castillo [G] | b03:A8A6 |
-| 0x14 | Bell | suena al acercarte a la puerta del mundo de la llave que llevas [G]; código por progreso [C] | b00:5D24 |
-| 0x15 | Angel Ring | F1 + Return: vuelves al santuario de Demeter, que es la sala 72 [O*] | b02:9AC9 |
-| 0x16 | Candle | ilumina salas oscuras del mundo 5 [O*] | b00:55F7 |
-| 0x17 | Armor | inmune a 0x2E, los disparos de bambú [C][G] | b03:B1F7 |
-| 0x18 | Carpet | convierte en piedra la lava del mundo 8 [G]. Rellena tiles con F0 (b00:5575) y apaga generadores de enemigos (b04:6200) [C] | b04:6200 |
-| 0x19 | Hat Helmet | recibes la mitad de daño [C] | b03:B3BF |
-| 0x1A | Lamp | marca en el mapa la sala del jefe [G]. Sprite indicador por mundo [C] | b01:668F |
-| 0x1B | Vase | duplica la experiencia que ganas [C]. Aparece tras recuperar el mundo 4 con una secuencia de 9 acciones de espada y salto (E536 = 9) [G][C] | b03:B62E, b02:9FC1 |
-| 0x1C | Pendant | **Aphrodite puede romper las paredes que suenan**; sin él, solo Popolon [O*]. Así se consigue el muñeco del mundo 2 | b09:A668 |
-| 0x1D | Earrings | Popolon dispara 3 flechas a la vez (no los fuegos) [C][O] | b03:A99E (E08C) |
-| 0x1E | Bracelet | Popolon pone 3 minas [C][O] | b03:A9B7 (E08D) |
-| 0x1F | Ring | Aphrodite rompe piedras con 3 golpes en vez de 15 [O*] | b03:B841 |
-| 0x20 | Bible | CTRL congela a los enemigos, como mucho 16 veces [O*]. Yo medí unos 5 s; la guía dice 15 | b02:9BB6 |
-| 0x21 | Harp | un golpe de espada rompe todas las piedras [O*] | b01:6398 |
-| 0x22 | Triangle | inmune a 0x31, las nubes blancas o vapores [C][G] | b03:B1F7 |
-| 0x23 | Conch Shell | **Aphrodite** la necesita para entrar en el mundo 5 [C] | b02:9A33 |
-| 0x24 | Pitcher | inmune a 0x08, las bolas de fuego [C][G] | b03:B1F7 |
-| 0x25 | Saber | la espada quita más vida [C]. Aparece al matar a los murciélagos de una sala del castillo después de recuperar el mundo 6 (E068 bit 2 + E61C) [C][G] | b03:A003 |
-| 0x26 | Dagger | escribir UMBRELLA mata a los murciélagos de la pantalla [G]. Aparece al introducir derecha, abajo, izquierda y arriba sobre el ascensor horizontal (tabla A056) [C][G] | b03:A01A |
-| 0x27 | Wing | en el menú (F1), el número de un mundo te lleva a su puerta [O*] | b02:9A99 |
-| 0x28, 0x2B, 0x2C | Copper, Silver y Gold Shield | detienen disparos de demonios menores, medios y todos. Nivel en E097: 1, 2 y 3 [C][G] | b03:B74B |
-| 0x29 | Bread & Water | Aphrodite cruza las puertas giratorias [G] (b09:A345 compara E098 con un objeto a la altura del jugador [C]) | b09:A345 |
-| 0x2A | Salt | necesaria para entrar en el santuario de la Muerte (sala de dios de tipo 3) [C][G] | b02:9A84 |
-| 0x2D–0x2F | carcaj, moneda, llave | +50 flechas, +10 monedas, +2 llaves [C][O] | b03:B701 |
+| 0x01–0x04 | Arrow, Ceramic Arrow, Rolling Fire, Fire | armas secundarias (M). Cada disparo gasta 1 flecha (E046) y hace falta tener ≥ 1. Física, límites y daño en `player.md` y `weapons.json` [C][O*] | b03:A72B, AA0A |
+| 0x05 | Mine | arma 5: 2 de daño (4 con el Saber); solo de pie en el suelo. Popolon pone 2 a la vez (3 con el Bracelet), Aphrodite 3 [C] | b03:A96D, B5B1 |
+| 0x06 | Magnifying Glass | arma 6: M no dispara, pone E517 = 1 (leer la lápida); no gasta flechas [C] | b03:AD3A |
+| 0x07 | Holy Water | objeto de mundo. Al crearse el jefe, su vida = floor(vida / 2) (24 → 12, Galious 248 → 124) [C] | b01:7F63 |
+| 0x08 | Cloak | objeto de mundo. El daño por **contacto con el cuerpo del jefe** (b03:BAD2[jefe]: 8, 12, 20, 12, –, 36, 24, 32, 40, 16, 16 para los jefes 1–11) se divide entre 2, redondeando hacia abajo. No toca sus proyectiles, que son enemigos normales [C] | b03:BABA |
+| 0x09 | Magic Rod | objeto de mundo. Con el jefe en juego (E0D2 ≠ 0) los disparos de cualquier arma secundaria no gastan flechas, pero hace falta tener al menos 1 [C] | b03:AA8E, A995 |
+| 0x0A | Map | objeto de mundo. El menú dibuja el mapa del mundo y tu sala (sprite rojo). No hay en el mundo 10 ni en el castillo [C][O*] | b01:661B |
+| 0x0B | Cross | sin ella, los golpes a Galious (jefe 9) no cuentan ni suenan (`boss_ai.md`) [C] | b03:BBA8 |
+| 0x0C | Great Key | desbloquea la puerta del mundo siguiente (E062 + E041 + 1, bit 1). Si la vitalidad máxima del **personaje activo** es < 72, sube **+8** (cada unidad es 1 px de barra) y se cura entera: en el castillo al cogerla, en un mundo al acabar la fanfarria (estado 20). La flag se borra al abrirse una puerta [C][O] | b03:B78C, AE9A; b02:99FB |
+| 0x0D | Necklace | **Popolon** no cruza la puerta del mundo 7 sin él. En el mundo 7, el menú no deja cambiar de personaje sin él [C][O*] | b02:9A3A; b01:684B |
+| 0x0E | Crown | el contacto con 0x2A (los Uh del mundo 2) no hace nada: ni daño ni retroceso [C] | b03:B206 |
+| 0x0F | Helmet | igual con 0x28 (ectoplasma) [C] | b03:B210 |
+| 0x10 | Oar | en el mundo 5, salas 12 y 13, el tile B6 (superficie del agua) es suelo: E52A = 1 y se anda por encima. Fuera de esas dos salas no hace nada [C] | b03:B037 |
+| 0x11 | Shoes | andar a **2,5 px/tick** en vez de 2 (no durante el salto, E500 = 1) y escaleras a **1,25 px/tick** en vez de 1: los dos, ×1,25 [C][O: 30 → 37,5 px en 0,5 s] | b03:A1EA, A235, A6B6 |
+| 0x12 | Decorative Doll | mundo 2, sala 11: aparece el puente, 16 tiles C4 sobre el agua (`entities.md`) [C][O*] | b08:9F87 |
+| 0x13 | Hoi | sin él, en todas las salas del mundo 8 se intercambian los bits 2 y 3 de la entrada (izquierda ↔ derecha) [C][O*] | b03:A8A0 |
+| 0x14 | Bell | solo en el castillo. Busca el mundo de número más alto con la puerta desbloqueada y sin abrir (E062 + n bit 1; el 10 con E06C). Al entrar en una sala de su lista suena 0x28. Listas (b09:BE4F): mundo 1: 104 90 91 92 105 117 118 · 2: 98 86 87 97 99 110 111 112 · 3: 63 55 56 64 76 77 78 · 4: 57 67 68 · 5: 62 54 55 74 75 76 · 6: 114 101 113 126 127 · 7: 6 2 7 14 · 8: 23 13 22 33 · 9: 108 2 3 4 · 10: según E06E [C] | b00:5D24 |
+| 0x15 | Angel Ring | en el menú, Return: vas al castillo, sala 72 (Demeter). No vale con el jefe en juego (E0D2) ni con E0D4. Desde un mundo: 120 ticks de espera con sonido 0xFA y pierdes los objetos de mundo de la flag (siguen guardados en E061 + mundo) [C][O*] | b02:9AC9; b00:47DE |
+| 0x16 | Candle | sin ella, la sala 6 del mundo 5 (la única oscura) se dibuja con el mapa fijo b08:8DAE: misma geometría, pero los muros son los tiles F1–F4, que se ven como el fondo, y faltan las columnas. Es decir, **muros invisibles con la colisión intacta** [C][O*] | b00:55F7 |
+| 0x17 | Armor | contacto con 0x2E (bambú) anulado [C] | b03:B21A |
+| 0x18 | Carpet | en el mundo 8, las salas con lava (E619) tienen las filas 12–19 de muro F0. Además, en ninguna sala se arma el generador de bolas de fuego E653 (castillo 144–147, mundos 8–10) (`world_maps.md`, `entities.md`) [C][O] | b00:5575; b04:6200 |
+| 0x19 | Hat Helmet | daño de enemigos y proyectiles: si es 1, queda 1; si no, floor(daño / 2) (2 → 1, 3 → 1, 5 → 2, 8 → 4). No afecta al cuerpo del jefe, al agua ni a la lava [C] | b03:B3BF |
+| 0x1A | Lamp | con el Map, marca además la sala del jefe (sprite azul, b09:B0FC). Sin el Map no se ve nada [C][O*] | b01:668F |
+| 0x1B | Vase | la experiencia de cada enemigo (b03:BF27) se duplica [C] | b03:B62E |
+| 0x1C | Pendant | Aphrodite rompe las paredes que suenan (clase 7); Popolon siempre puede [C][O*] | b09:A668 |
+| 0x1D | Earrings | Popolon: hasta 3 flechas (tipos 1 y 2) a la vez en vez de 2. Aphrodite siempre 3 [C][O] | b03:A99E |
+| 0x1E | Bracelet | Popolon: hasta 3 minas a la vez en vez de 2 [C][O] | b03:A9B7 |
+| 0x1F | Ring | Aphrodite quita 5 a las piedras (15 de vida → 3 golpes) en vez de 1; Popolon siempre 5 [C][O*] | b03:B841 |
+| 0x20 | Bible | CTRL (fila 6, bit 1): congela enemigos, generadores y jefe durante **150 ticks (5 s)**, **16 usos** en toda la partida (E531). No vale si ya está congelado, si mueres ni en la sala del jefe mientras escucha la palabra (E615). Se acaba al cambiar de sala. El contacto sigue haciendo daño [C][O: 30 ticks/s] | b02:9BB6; b06:B3B4 |
+| 0x21 | Harp | el primer espadazo de cada visita a una sala rompe todas sus piedras (hasta 3, EC30), estén donde estén (E632) [C][O*] | b01:6398 |
+| 0x22 | Triangle | contacto con 0x31 (llamas o vapores) anulado [C] | b03:B224 |
+| 0x23 | Conch Shell | **Aphrodite** no cruza la puerta del mundo 5 sin ella. En el mundo 5, el menú no deja cambiar de personaje sin ella [C][O*] | b02:9A2C; b01:683D |
+| 0x24 | Pitcher | contacto con 0x08 (bolas de fuego) anulado [C] | b03:B1FC |
+| 0x25 | Saber | +1 de daño por golpe con espada, flechas y fuegos (1 → 2), +2 con la mina (2 → 4). No cuenta contra los jefes [C] | b03:B586, B5D1 |
+| 0x26 | Dagger | escribir UMBRELLA (en cualquier momento, con murciélagos en la sala: E63E) mata a todos los 0x0E de la sala, con su experiencia y su botín [C] | b02:9BEE; b03:B5EA |
+| 0x27 | Wing | en el menú y **solo en el castillo**, la tecla 1–9 te lleva a la sala de la puerta de ese mundo (104 98 63 57 62 114 6 23 108) si la puerta ya se abrió alguna vez (E062 + n bit 0). El mundo 10 no tiene tecla [C][O*] | b02:9A99 |
+| 0x28, 0x2B, 0x2C | Copper, Silver, Gold Shield | nivel en E097 (1, 2, 3). Al nacer un proyectil de la lista del nivel se marca (IX+3 bit 7). Si te toca mientras **no estás dando un espadazo** (E530 ≠ 0) y **lo miras de frente** (E503 frente a x − 8), desaparece con el sonido 0x1D y no hace daño. Nivel 1: 1A 1D 1E 3F 44 47 56 · nivel 2 añade 3D 41 45 46 48 4A 4B 4D 61 · nivel 3 añade 54 55 58 59 65 68 (proyectiles de los jefes) [C] | b04:659F; b03:B3E7 |
+| 0x29 | Bread & Water | Aphrodite cruza las puertas giratorias (clase 3); Popolon siempre [C] | b09:A345 |
+| 0x2A | Salt | entrar en la sala de dios de tipo 3 (la Muerte, castillo 87) [C][O*] | b02:9A84 |
+| 0x2D–0x2F | carcaj, moneda, llave | +50 flechas, +10 monedas, +2 llaves (BCD, tope 999) [C][O] | b03:B7BE |
+
+### Flags: personajes y mundos [C]
+
+- **Una sola flag por objeto (E06F + tipo), compartida por los dos personajes.** No hay inventario por personaje: lo que cambia es a quién le sirve. Solo afectan a uno: Necklace y Earrings/Bracelet (Popolon); Conch Shell, Pendant, Ring y Bread & Water (Aphrodite; Popolon ya lo puede hacer sin ellos). La Great Key sube la vitalidad máxima **solo del personaje activo** al cogerla.
+- **Objetos de mundo (0x07–0x0A):** uno de cada en cada mundo (el 10 no tiene Map; la Great Key va aparte). Se guardan **por mundo** en E061 + E041 (castillo E041 = 1, mundo k = k + 1): bit 5 Holy Water, 6 Cloak, 7 Magic Rod y 4 Map; el bit 2 es "jefe vencido". La flag E076–E079 solo vale para el mundo en que estás: se copia de esos bits al entrar (b00:461F) y se borra al volver al castillo o con el Angel Ring (b00:4730). Un objeto de mundo no reaparece en su sala si ya lo tienes (b00:5D92 mira la flag).
+- **Escudos:** 0x28 pone E097 = 1. 0x2B y 0x2C ponen E097 = 2 o 3 y además su flag (E09A, E09B). En el menú solo hay la casilla de 0x28, con el icono del mejor escudo (b00:5747).
+- **Recursos (0x2D–0x2F):** no tienen flag; suman a los contadores.
+- **Cómo se consiguen:** en su sala (muchos bajo piedras o por condición, `entities.md`) o en las tiendas (`design_bible/08_santuarios.md`: Mine, Magnifying Glass, Necklace, Oar, Carpet, Hat Helmet, Harp, Conch Shell y los escudos, que se venden en orden).
+
+## Inventario (menú F1)
+
+Capturas locales (no versionadas) con las flags forzadas [O*]: `logs/omsx/inv_menu_all.png` (todo) e `inv_menu_w3.png` (mundo 3, con Map y Lamp).
+
+**Abrir** (estado 5 → 11, b00:44D5) [C][O]: F1 por flanco (SNSMAT fila 6, bit 5), con partida en curso (E002 bit 6) y si E500 no está entre 4 y 7 (retroceso, muerte, parálisis, puerta giratoria). Suena 0x2B. El juego queda **parado**: el estado 11 no ejecuta el bucle de juego (enemigos, temporizadores, jefe).
+
+**Al abrir** (b01:65A8) [C]:
+- vidas del personaje activo +1 (E058 + E501, BCD): el menú cuenta la vida en juego;
+- si el incremento pendiente de vitalidad del personaje activo (E05E / E061) es negativo, se pone a 0: **el daño que aún no se había descontado se pierde**;
+- cursor en la fila de personajes (E04C = 0), personaje elegido = el activo (E04D), arma elegida = E510 (si es 0, la primera que tengas, E04E).
+
+**Pantalla** (256 × 192; el marcador sigue arriba, en las filas 0–3; el menú ocupa las filas 4–23) [C][O]:
+
+| Elemento | Posición (x, y) en px | Detalle |
+|---|---|---|
+| Retratos | Popolon (96, 40), Aphrodite (144, 40), 16 × 16 | solo si a ese personaje le quedan vidas |
+| Cursor de personaje | sprite en x = 0x61 (Popolon) o 0x91 (Aphrodite), y = 0x27 | patrón A0, color 3 |
+| «ITEM» | (112, 72) | |
+| Rejilla de objetos | (48, 80), 10 × 3 casillas de 16 × 16 | tipos 0x0D–0x2A en orden: casilla k = tipo 0x0D + k, en (48 + 16·(k mod 10), 80 + 16·(k div 10)). Solo se dibujan los que tienes |
+| «MAP» | (48, 136) | si tienes el Map (E079) |
+| Mapa del mundo | rectángulo por mundo (`items.json` worldMaps) | ver abajo |
+| Objetos de mundo | (120, 144), 6 casillas de 16 × 16 | Holy Water, Cloak, Magic Rod, Map, Cross y Great Key |
+| Recuadro de armas | (104, 160)–(239, 183) | armas 1–6 en x = 112, 136, 160, 176, 192, 216 (y = 168, 16 × 8) |
+| Cursor de arma | sprite en x = 0x70, 0x88, 0x9C, 0xAC, 0xC0, 0xD8 (b01:68E4), y = 0xA3 | patrón A0, color 15 |
+
+El cursor de la fila activa parpadea: 8 frames sí, 8 no (bit 3 de E003). Las marcas del mapa también.
+
+**Controles dentro del menú** (b01:67F4, por flanco: b00:4C68 deja en E008 las teclas recién pulsadas) [C][O]:
+- **↑ / ↓**: cambian de fila. A la de armas solo se pasa si tienes alguna (E04E ≠ 0).
+- **← / →** en la fila de personajes: eligen al otro personaje si le quedan vidas (E058 + otro ≠ 0). En el mundo 5 hace falta la Conch Shell y en el mundo 7 el Necklace para cambiar. No hace falta espacio.
+- **← / →** en la fila de armas: arma anterior o siguiente que tengas, dando la vuelta (1…6). Se aplica en el acto (E510 y el recuadro del marcador).
+- Cada cambio suena 0x2C.
+- **Return** con el Angel Ring y **1–9** con el Wing (ver la tabla).
+
+**Cerrar** con F1 (b00:481E → b01:6903) [C][O]: personaje activo = el elegido (E501 = E04D), sus vidas −1, E510 = arma elegida. Se redibuja la sala, pero **la sala sigue igual**: los enemigos siguen donde estaban (comprobado con el esqueleto de la sala 104). Si cambias de personaje, el anterior recupera la vida que estaba en juego.
+
+**Viajes desde el menú** [C][O*]:
+- **Wing** (b02:9A99): sala de la puerta del mundo (b02:9990) y estado 5. La sala es nueva: b00:51E8 borra E600–F03F y los proyectiles.
+- **Angel Ring** (b02:9AC9): en el castillo, directo a la sala 72. En un mundo: borra las flags de los objetos de mundo, sonido 0xFA, 120 ticks de espera (subestado 2), música 0x88 y castillo, sala 72.
+
+**Mapa del mundo** (b01:661B, banco 9) [C][O*]:
+- Solo con el Map y fuera del castillo. El dibujo es un bloque de tiles fijo por mundo (b09:AF2A[mundo]: destino, ancho, alto y tiles). En el mundo 1 mide 3 × 5 tiles en (48, 144); en el 3, 5 × 5 en (40, 144).
+- **Tu sala**: celda = b09:B038[E041][E042], un byte fila·16 + columna. El sprite rojo (patrón A4, color 8) va en x = 8·columna + 1, y = 0x90 + 4·fila. Cada celda mide 8 × 4 px.
+- **La sala del jefe** (con la Lamp): celda b09:B0FC[E041], sprite azul (color 5).
+- El mapa es completo desde el principio: no se descubre sala a sala. Las celdas de todas las salas están en `items.json` (worldMaps[].roomCells).
+
+## Vitalidad, experiencia y vidas [C][O]
+
+Por personaje: Aphrodite E050 experiencia, E051 su máximo, E052 vitalidad, E053 su máximo; Popolon E054–E057 igual. Incrementos pendientes: E05D/E05E (Aphrodite), E060/E061 (Popolon). Vidas de reserva: E058 (Aphrodite), E059 (Popolon).
+
+| | Valor |
+|---|---|
+| Al empezar (b00:4CE6) | experiencia 0 de 48, vitalidad 8 de 8, los dos. Juega Popolon, con 0 vidas de reserva; Aphrodite tiene 1 |
+| Barra (b01:60C9) | 6 tiles de 8 px = 48 px, **1 px por unidad** (las de VIT y EXP). Más de 48 no se ve. *(Corrige el "4 px por unidad" de `player.md`: la guía cuenta en otra escala, su "32" son 8 unidades)* |
+| Cambios | daño, cura y experiencia van a un **pendiente** (b01:612C, 6158) que se aplica de 1 en 1 cada 4 ticks (b01:6171): 7,5 unidades/s [O] |
+| Experiencia | al morir un enemigo, + b03:BF27[tipo] (×2 con el Vase) al pendiente del personaje activo |
+| Barra de experiencia llena | al llegar a 48, experiencia −48 y, si la vitalidad no está al máximo, se rellena entera. No hay niveles ni otra recompensa; el máximo de experiencia no cambia nunca (solo se guarda en la contraseña) [C][O: 60 de experiencia con 3 de vida → 12 de experiencia y 8 de vida] |
+| Vitalidad máxima | +8 con cada Great Key mientras sea < 72 (8 → … → 72, tope con 8 llaves). Solo el personaje activo. La barra solo enseña 48. La guía dice «hasta 192», es decir 48 unidades en su escala: el código deja llegar a 72 [C] |
+| Vida perdida | al llegar a 0, experiencia y vitalidad a 0 (b03:B337) y estado 6; ver `state_machine.md` |
+| Aviso | al recibir daño con vitalidad < 6 suena 0x2A |
+| Continuar (ZEUS + F5, b01:7E9A) | experiencia 0, vitalidad al máximo, vidas 1 y 0 |
 
 **Mecánicas que describe la guía y aún no están localizadas en la ROM:**
 - **Asclepio:** cura. La Muerte (resurrección) solo está localizada en parte. Tiendas y hadas: ver `entities.md`.
-- **Experiencia:** llenar la barra repone la vitalidad.
 - **Callejones que se cierran a tu espalda.**
 - **Piedras que aparecen** si esperas 15 s en el borde, en el mundo 5.
-- **Puertas giratorias** que Popolon cruza siempre y Aphrodite solo con Bread & Water.
 - **Contraseñas especiales** y extras con otro cartucho de Konami en el segundo slot.
 
-Las inmunidades salen de b03:B1F7–B22D, la colisión entre jugador y enemigo: si tienes el objeto, se sale sin hacer daño.
 
 **Dónde están**: 0x2D, 0x2E y 0x2F aparecen en 13, 25 y 14 salas del castillo, casi siempre bajo piedras. 0x07–0x0A, una vez por mundo. 0x0C, en el castillo y en cada mundo (el jefe la suelta, véase `state_machine.md`). El resto son únicos y están en el castillo. La lista completa está en `items.json`.
 
@@ -124,7 +191,7 @@ Todo se decide por el **tipo** del enemigo (IX+0), no por IX+11: b03:B63C guarda
 
 **Explosión 0x5B**: 8 fotogramas de 3 ticks (24 ticks de IA, ≈ 0,8 s). No se mueve y se anima también con el libro (E0D5). Al acabar se borra y decide el botín (6A3B):
 
-1. **Regla** = 647B[tipo]. b06:B57A anota hasta **2 tipos distintos por sala** en E6C2/E6C3, con un contador de muertes en E6C4/E6C5. Si el tipo no está anotado y ya hay dos, no hay botín. La regla 4 no anota nada. La zona E600–F03F se pone a 0 al entrar en cada sala (b00:525E, desde los estados 4, 8, 10 y 13, y al salir del menú de objetos), así que todo cuenta **por visita a la sala**.
+1. **Regla** = 647B[tipo]. b06:B57A anota hasta **2 tipos distintos por sala** en E6C2/E6C3, con un contador de muertes en E6C4/E6C5. Si el tipo no está anotado y ya hay dos, no hay botín. La regla 4 no anota nada. La zona E600–F03F se pone a 0 al entrar en cada sala (b00:525E, desde los estados 4, 8, 10 y 13, y al viajar con el Wing o el Angel Ring desde el menú; cerrar el menú con F1 no la borra [C][O]), así que todo cuenta **por visita a la sala**.
 
    | Regla | Hay tirada cuando… |
    |---|---|

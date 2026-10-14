@@ -11,7 +11,7 @@ JsonUtility, sin diccionarios):
   - puertas de mundo y salas de dioses del castillo;
   - generadores periodicos de enemigos (periodic.py), en rooms[].periodic.
 
-  unity_bundle.py   -> extracted/unity/<mapa>.json, extracted/unity/enemies.json (catalogo de enemigos) y
+  unity_bundle.py   -> extracted/unity/<mapa>.json, extracted/unity/enemies.json (catalogo de enemigos),
                        extracted/unity/weapons.json (armas secundarias, weapons.py)
                        y extracted/unity/items.json (objetos, menu F1, vitalidad y mapas del menu, items_export.py)
 

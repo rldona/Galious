@@ -90,9 +90,10 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
 
 ## Pendiente
 - Cajas de colisión (docs/items_enemies.md, "Cajas de colisión"): el jugador toca con x − 6 … x + 6, y − 14 … y − 2; la espada golpea en y − 7 … y − 4, x + 8 … x + 18 (o x − 18 … x − 8); cada enemigo usa su caja de la tabla b14:9006 (bordes incluidos), con la 4E/4F de 24 px del esqueleto según hacia dónde mire. [I] Las cajas que cambian con cada fotograma se aproximan con la inicial; en los que crecen (pinchos, brotes, los que emergen) se recorta su alto según la etapa.
+- Armas secundarias (`Weapons.cs`, datos en `weapons.json` → `Resources/Weapons.json`): M dispara el arma elegida (1–6 la eligen hasta que esté el menú; G de depuración da las seis y 50 flechas). 1 flecha por disparo; límites por personaje (Earrings, Bracelet); flecha 8 px/tick, cerámica 4 que atraviesa (vuelve a dañar cada 16 ticks), fuego rodante que rodea la plataforma una vez, fuego que corre por el suelo y cae, mina que se arma al apartarse y estalla al tocarla (70 ticks, 2 por golpe cada 32, también al jugador), lupa que lee la lápida del mundo. Dañan piedras (la mina no). [I] Los escudos de algunos enemigos (rebote) aún no se usan.
 - Muerte y botín (`Loot.cs`): explosión de 24 ticks (4 en los grandes, una cada 16 [I]) y sorteo según el tipo: regla (qué muertes de ese tipo sortean en la visita a la sala, con 2 tipos seguidos como mucho, o "el último vivo") y nivel (por el daño). El objeto (flechas, monedas o llaves) se queda quieto en la rejilla de 8 px hasta recogerlo o salir de la sala; tope 999. La experiencia (BF27) está en el catálogo pero aún no se usa.
 - Generadores periódicos (`Periodic.cs`, `EnemyGenerated.cs`): los 8 generadores de 51 salas con sus tiempos en ticks (tandas de 3 del E650/E662, espera aleatoria del E653, que el Carpet apaga, pausa del E659 con el jugador en el agua, fin del E668 a los 5 o 10) y sus tipos 0x08, 0x09, 0x0D, 0x1B, 0x21, 0x30, 0x35, 0x38, 0x3E y 0x6A.
-- Armas secundarias, objetos de mundo e inventario.
+- Objetos de mundo e inventario (menú F1).
 - Salas de dios de los mundos y puerta del mundo 10.
 - Piedras que aparecen (clase 6, mundo 5) y muros que abren los eventos de sala (dependen de los enemigos).
 - Pipeline URP con renderer 2D (luces) y el estilo visual del remake.

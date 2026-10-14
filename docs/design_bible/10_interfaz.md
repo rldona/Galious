@@ -6,21 +6,24 @@ Fuentes: [state_machine.md](../state_machine.md) (estados 9, 11, 12 y 18), [play
 
 | Elemento | Contenido |
 |---|---|
-| Centro | **VIT** y **EXP** de Popolon y de Aphrodite, en barras [O] |
+| Centro | **VIT** y **EXP** de Popolon y de Aphrodite, en barras de 48 px, 1 px por unidad [C][O] |
 | Abajo a la izquierda | dónde estás: CASTLE o WORLD n [O] |
 | Derecha | contadores de **flechas, monedas y llaves** (3 cifras) [O] |
 | Recuadro rojo de la derecha | **arma secundaria** elegida [O] |
 
 ## Menú de objetos (F1, estado 11)
 
-Según la guía y lo visto en el emulador:
-- **Arriba:** los dos personajes. Se elige uno con el cursor y espacio para **cambiar de personaje** [O].
-- **Centro:** los objetos conseguidos (30 casillas) [G].
-- **Abajo a la derecha:** las armas secundarias. La elegida pasa al recuadro del marcador [O*]. Encima, los objetos especiales del mundo [G].
-- **Abajo a la izquierda:** el **mapa del mundo** si tienes su Map. El punto rojo eres tú; el azul, el jefe si tienes la Lamp [G][C].
-- **Acciones dentro del menú:**
-  - **número** con el Wing: viajar a un mundo [O*];
-  - **Return** con el Angel Ring: volver a Demeter [O*].
+Detalle y coordenadas en [items_enemies.md](../items_enemies.md), «Inventario (menú F1)»; datos en `extracted/unity/items.json` [C][O].
+- **Abrir y cerrar:** F1. El juego se para del todo. Al cerrar, la sala sigue igual. No se abre durante el retroceso, la muerte o una parálisis.
+- **Arriba:** los dos personajes (solo los que tienen vidas). El cursor empieza aquí: **←/→ elige personaje** y el cambio se aplica al cerrar. En el mundo 5 hace falta la Conch Shell y en el 7 el Necklace.
+- **Centro («ITEM»):** rejilla de 10 × 3 con los objetos 0x0D–0x2A, cada uno en su casilla fija. Solo se dibujan los que tienes. La casilla del escudo enseña el mejor.
+- **Abajo, a la derecha del mapa:** fila de objetos de mundo (Holy Water, Cloak, Magic Rod, Map) más Cross y Great Key.
+- **Abajo del todo:** recuadro de las armas secundarias. **↑/↓ cambia de fila y ←/→ elige arma**, que pasa al acto al recuadro del marcador.
+- **Abajo a la izquierda («MAP»):** mapa del mundo si tienes su Map (no en el castillo). Punto rojo: tu sala; punto azul: la sala del jefe, si tienes además la Lamp. El mapa sale entero, no se descubre.
+- **Acciones:**
+  - **1–9** con el Wing, solo en el castillo: viajar a la puerta de ese mundo, si ya se abrió;
+  - **Return** con el Angel Ring: volver a Demeter (castillo, sala 72).
+- **Rarezas del original:** abrir el menú anula el daño que aún no se había descontado de la barra; el cambio de personaje traspasa la vida en juego.
 
 ## Otras pantallas
 

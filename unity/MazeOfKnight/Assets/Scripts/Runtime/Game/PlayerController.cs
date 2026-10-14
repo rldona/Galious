@@ -17,7 +17,12 @@ namespace MazeOfKnight.Game
         public PlayerMotor Motor { get; private set; }
         public event System.Action Ticked;
 
-        InputAction move, jump, attack, switchCharacter;
+        InputAction move, jump, attack, switchCharacter, fire;
+        bool fireLatch;
+        // Arma secundaria (M): una pulsación nueva por disparo; el arranque la consume en su tick.
+        public bool ConsumeFire() { bool f = fireLatch; fireLatch = false; return f; }
+        // Elegir arma con 1…6 (provisional, hasta el menú de objetos).
+        public event System.Action<int> WeaponKey;
         float accumulator;
         bool attackLatch;   // un toque más corto que un tick no se pierde
         // ↑ y ↓ igual: una pulsación entre dos ticks llega al siguiente tick como "pulsada" (al menos ese tick) y como
@@ -46,6 +51,10 @@ namespace MazeOfKnight.Game
             attack = new InputAction("Espada", InputActionType.Button);
             attack.AddBinding("<Keyboard>/space");
             attack.AddBinding("<Gamepad>/buttonWest");
+            fire = new InputAction("Arma", InputActionType.Button);
+            fire.AddBinding("<Keyboard>/m");
+            fire.AddBinding("<Gamepad>/buttonNorth");
+            fire.Enable();
             switchCharacter = new InputAction("Cambiar personaje", InputActionType.Button);
             switchCharacter.AddBinding("<Keyboard>/tab");
             switchCharacter.AddBinding("<Gamepad>/select");
@@ -58,6 +67,7 @@ namespace MazeOfKnight.Game
         void OnDisable()
         {
             move.Disable();
+            fire.Disable();
             jump.Disable();
             attack.Disable();
             switchCharacter.Disable();
@@ -72,6 +82,13 @@ namespace MazeOfKnight.Game
 
             if (attack.WasPressedThisFrame())
                 attackLatch = true;
+            if (fire.WasPressedThisFrame())
+                fireLatch = true;
+            var kb = Keyboard.current;
+            if (kb != null)
+                for (int i = 1; i <= 6; i++)
+                    if (kb[(Key)((int)Key.Digit1 + i - 1)].wasPressedThisFrame)
+                        WeaponKey?.Invoke(i);
             var v = move.ReadValue<Vector2>();
             bool up = v.y > 0.5f || jump.IsPressed(), down = v.y < -0.5f;
             if (up && !upWasDown) upLatch = true;

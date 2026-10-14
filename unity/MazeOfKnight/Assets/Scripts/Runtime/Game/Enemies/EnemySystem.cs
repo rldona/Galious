@@ -216,6 +216,37 @@ namespace MazeOfKnight.Game.Enemies
             return null;
         }
 
+        // Quita vida a un enemigo (espada o arma): al llegar a 0 muere, explota y sortea el botín; si no, avisa del golpe.
+        public void Damage(Enemy e, int damage)
+        {
+            e.Hp -= damage;
+            Hit?.Invoke(e);
+            if (e.Hp <= 0)
+            {
+                e.Alive = false;
+                e.Die(Context);
+                Killed?.Invoke(e);
+                StartDeath(e);
+            }
+            else
+                e.Hurt(Context);
+        }
+
+        // Enemigos vivos y visibles cuya caja se solapa con [x0, x1) × [y0, y1).
+        public List<Enemy> Overlapping(float x0, float y0, float x1, float y1)
+        {
+            var list = new List<Enemy>();
+            foreach (var e in enemies)
+            {
+                if (!e.Alive || !e.Visible || e is LootDrop || e is DeathExplosion)
+                    continue;
+                var (ex0, ey0, ex1, ey1) = e.Box();
+                if (x0 < ex1 && x1 > ex0 && y0 < ey1 && y1 > ey0)
+                    list.Add(e);
+            }
+            return list;
+        }
+
         // Un espadazo recién empezado: 1 de daño (2 con el Saber) a cada enemigo que alcance.
         public void Strike(PlayerMotor m, ICollection<int> collected)
         {
@@ -230,17 +261,7 @@ namespace MazeOfKnight.Game.Enemies
                     continue;
                 if (!e.OnHit(Context))
                     continue;
-                e.Hp -= damage;
-                Hit?.Invoke(e);
-                if (e.Hp <= 0)
-                {
-                    e.Alive = false;
-                    e.Die(Context);
-                    Killed?.Invoke(e);
-                    StartDeath(e);
-                }
-                else
-                    e.Hurt(Context);
+                Damage(e, damage);
             }
         }
     }

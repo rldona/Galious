@@ -4,7 +4,7 @@ Leyenda como en `state_machine.md`: **[C]** código · **[O]** observado en open
 
 ## Controles
 
-La lectura de entrada (b00:4C75) junta joystick y teclado en un byte, E008 (E009 = recién pulsadas) [C]:
+La lectura de entrada (b00:4C75) junta joystick y teclado en un byte. b00:4C68 guarda en **E009 las teclas mantenidas** y en **E008 las recién pulsadas** (flanco: nuevo AND NOT anterior) [C]. Andar lee E009; saltar, la espada, M y el menú leen E008, por eso piden una pulsación nueva. *(Antes estaba al revés aquí y en los nombres `input_held`/`input_new` de `rom_views.py`.)*
 
 | Bit | Teclado | Joystick | Acción |
 |---|---|---|---|
@@ -99,7 +99,7 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 
 | | Valor |
 |---|---|
-| Vitalidad | se cuenta en **unidades**: al empezar, 8 de 8 (E052/E053 Aphrodite, E056/E057 Popolon). La barra mide 4 px por unidad (de ahí el "32" de la guía) |
+| Vitalidad | se cuenta en **unidades**: al empezar, 8 de 8 (E052/E053 Aphrodite, E056/E057 Popolon). La barra mide **1 px por unidad**: 6 tiles de 8 px, 48 como mucho (b01:60C9) [C][O]. La guía cuenta en otra escala (su "32" son 8 unidades). Experiencia, máximos y Great Key en `items_enemies.md`, «Vitalidad, experiencia y vidas» |
 | Movimiento vertical | a **1/4**: las tablas de salto y caída avanzan una entrada cada 4 ticks y cada paso se reparte en 4. Hundirse a velocidad máxima: 6/4 = 1,5 px/tick (1 y 2 alternos). Aphrodite salta los mismos 42 px desde el fondo, pero en unos 40 ticks |
 | Movimiento horizontal | a la mitad: andar, 1 px/tick |
 | Fondo | no se baja de y = 184 (en la lava del mundo 8, aunque la fila 19 también sea lava) |
