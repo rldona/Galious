@@ -1,6 +1,8 @@
 {
     "name": "MazeOfKnight.Runtime",
     "rootNamespace": "MazeOfKnight",
-    "references": [],
+    "references": [
+        "Unity.InputSystem"
+    ],
     "autoReferenced": true
 }

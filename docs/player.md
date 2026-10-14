@@ -23,7 +23,7 @@ Fuera de esa rutina se leen otras teclas:
 
 ## Acciones (las mismas para los dos personajes)
 
-- **Andar** a izquierda y derecha: 52 px/s [O].
+- **Andar** a izquierda y derecha: 2 px/tick, 60 px/s [O] (ver «Física del movimiento»).
 - **Saltar** con ↑. Se puede dirigir a izquierda y derecha en el aire. La altura depende del personaje (ver abajo).
 - **Subir y bajar escaleras.** Para bajar hay que estar alineado con la escalera: x del jugador = x de la escalera + 8.
 - **Espada.** Rompe piedras (15 de vida) y daña enemigos. El objeto 0x25 suma 1 de daño por golpe.
@@ -60,6 +60,28 @@ Datos de la tabla:
   - Medido en el mundo 2, sala 11, sin enemigos.
   - En el agua, b03:A103 no deja que Aphrodite baje de y = 0xB9, salvo en la sala 11 del mundo 7.
 - **Lava** [C][O]: tiles B8/B9, E511 = 2. El umbral es 3 para los dos personajes (b03:B07D). Medido en el mundo 8, sala 16: los dos se hunden y mueren en ~1,2 s. Detalles y Carpet en [world_maps.md](world_maps.md#agua-y-lava-co).
+
+## Física del movimiento, medida frame a frame [O]
+
+`tools/openmsx/jump_measure.py` coloca al jugador en la sala 1 del castillo (suelo en y = 120) y registra y, x y E500 en cada frame (`player_trace.tcl`). Datos crudos: `logs/omsx/jump_measure*.json`.
+
+La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valores van en px por tick.
+
+| Movimiento | Valor |
+|---|---|
+| Andar | **2 px/tick** (60 px/s), sin aceleración ni frenada. El "52 px/s" de antes salía de una medida más basta |
+| Despegue | ↑ se lee en el tick siguiente (E500 = 1). **2 ticks de preparación**: el de la pulsación (aún anda 2 px) y uno quieto; sube en el tercero. Si se suelta ↑ en ellos, Popolon no salta |
+| Subida | tabla **6 6 6 6 6 5 5 4 4 3 2 1**. Popolon la empieza en la entrada 0 (**54 px**). Aphrodite en la entrada 2 (**42 px**): las dos tablas de b03:A951/A953 son la misma, desplazada |
+| Punto más alto | 4 ticks quieto |
+| Bajada | tabla **1 2 3 4 4 5 5 6**, y luego 6 hasta tocar suelo (velocidad máxima de caída: 6 px/tick) |
+| Soltar ↑ (solo Popolon) | tras 1 tick sin moverse, salta a la última entrada de la subida (1), hace los 4 ticks arriba y baja. Aphrodite hace siempre el salto entero |
+| Chocar con el techo | igual que soltar ↑. El tope de la cabeza está entre 9 y 13 px por encima de los pies (medido en la sala 97: choca en y = 110 y el paso de 1 px aún entra) |
+| Control en el aire durante el salto | 2 px/tick subiendo y en el primer tick arriba; **3 px/tick** desde el segundo tick arriba hasta el tick en que aterriza |
+| Caer por un borde (E500 = 2) | la caída empieza en la entrada "3" de la tabla de bajada (3 4 4 5 5 6…) y **no hay control horizontal** |
+| Aterrizar | el último paso puede meter los pies en el suelo; se corrige al borde superior de la fila |
+| Escalera (E500 = 3) | 1 px/tick |
+
+Estados de E500 vistos: 0 de pie o andando, 1 salto, 2 caída, 3 escalera, 4 retroceso, 7 arrastrado por una puerta giratoria.
 
 ## Pendiente
 

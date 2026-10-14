@@ -12,7 +12,7 @@ using UnityEngine.Tilemaps;
 namespace MazeOfKnight.EditorTools
 {
     // Importa el paquete de salas (extracted/unity/<mapa>.json, de tools/extract/unity_bundle.py):
-    //   - Assets/Generated/Maps/<mapa>.asset (MapData) y Assets/Generated/Rooms/<mapa>/room_NNN.asset (RoomData);
+    //   - Assets/Generated/Resources/Maps/<mapa>.asset (MapData) y Assets/Generated/Rooms/<mapa>/room_NNN.asset (RoomData);
     //   - Assets/Generated/Scenes/<mapa>_overview.unity: todas las salas en su rejilla, una capa de Tilemap por
     //     clase de colisión, con los tiles provisionales de Assets/Art/Placeholder.
     // Lo generado sale de la ROM del usuario y no se versiona (ver .gitignore).
@@ -20,6 +20,8 @@ namespace MazeOfKnight.EditorTools
     {
         const string GeneratedRoot = "Assets/Generated";
         const string PlaceholderRoot = "Assets/Art/Placeholder";
+        // Los mapas van en Resources para que el juego los cargue (Resources.Load<MapData>("Maps/<mapa>")).
+        public const string MapsRoot = GeneratedRoot + "/Resources/Maps";
 
         static string BundleDir => Path.GetFullPath(Path.Combine(Application.dataPath, "../../../extracted/unity"));
         static string RepoLogs => Path.GetFullPath(Path.Combine(Application.dataPath, "../../../logs/unity"));
@@ -45,7 +47,7 @@ namespace MazeOfKnight.EditorTools
             var files = Directory.GetFiles(BundleDir, "*.json").OrderBy(f => f).ToArray();
             // Las carpetas, antes de StartAssetEditing: dentro, IsValidFolder no ve las recién creadas y
             // CreateFolder acabaría haciendo duplicados ("Generated 1"...).
-            EnsureFolder($"{GeneratedRoot}/Maps");
+            EnsureFolder($"{MapsRoot}");
             EnsureFolder($"{GeneratedRoot}/Scenes");
             foreach (var file in files)
                 EnsureFolder($"{GeneratedRoot}/Rooms/{Path.GetFileNameWithoutExtension(file)}");
@@ -110,7 +112,7 @@ namespace MazeOfKnight.EditorTools
         {
             string roomDir = $"{GeneratedRoot}/Rooms/{bundle.map}";
 
-            var map = LoadOrCreate<MapData>($"{GeneratedRoot}/Maps/{bundle.map}.asset");
+            var map = LoadOrCreate<MapData>($"{MapsRoot}/{bundle.map}.asset");
             map.mapName = bundle.map;
             map.e041 = bundle.e041;
             map.bossRoom = bundle.bossRoom;
@@ -200,7 +202,7 @@ namespace MazeOfKnight.EditorTools
         {
             // NewScene descarga los assets sin referencias: cargar mapa y tiles después, no antes.
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            var map = AssetDatabase.LoadAssetAtPath<MapData>($"{GeneratedRoot}/Maps/{mapName}.asset");
+            var map = AssetDatabase.LoadAssetAtPath<MapData>($"{MapsRoot}/{mapName}.asset");
             var tiles = EnsurePlaceholderTiles();
 
             var grid = new GameObject($"{mapName} (rejilla)").AddComponent<Grid>();

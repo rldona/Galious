@@ -39,10 +39,11 @@ Diseño: el juego obliga a alternar. Aphrodite es para el agua y los disparos m�
 
 | Parámetro | Valor |
 |---|---|
-| Andar | 52 px/s, unos 1,7 px por tick [O]. Igual para los dos; la guía dice que los Shoes lo aceleran, pero no lo hemos visto en el paso [G] |
+| Andar | 2 px/tick = 60 px/s [O]. Igual para los dos; la guía dice que los Shoes lo aceleran, pero no lo hemos visto en el paso [G] |
+| Salto | 2 ticks de preparación; subida 6 6 6 6 6 5 5 4 4 3 2 1 px/tick (Aphrodite empieza en la 3.ª entrada); 4 ticks arriba; bajada 1 2 3 4 4 5 5 6, con tope de 6. Soltar ↑ corta la subida (solo Popolon); chocar con el techo también (medido con Popolon) [O] |
+| Aire | 2 px/tick subiendo, 3 px/tick bajando. Caer por un borde no deja mover en horizontal [O] |
 | Escaleras | 0,5 px/frame (1 px/tick). Con Shoes, 0,62 px/frame [O*] |
 | Alinearse con una escalera | x del jugador = x de la escalera + 8 [O] |
-| Salto | ver la tabla de personajes. Dos tablas de salto en b03:A951/A953 [C] |
 | Caída | se cae por los huecos de las plataformas. Caer a la sala de abajo es normal |
 | Colisión | caja de pies de 16 px (x − 8 … x + 7); sólido si tile ≥ 0xBA. Durante el combate con un jefe solo son sólidos F0–FF, porque los números 5A–EF pasan a dibujar al jefe [C][O] |
 | Daño al tocar enemigos | retroceso (estado E500 = 4: sale despedido 4 px por tick, alejándose) y daño. Con las protecciones (Crown, Helmet, Armor, Triangle y Pitcher), los enemigos correspondientes no hacen daño por contacto [C] |
