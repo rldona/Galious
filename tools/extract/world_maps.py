@@ -5,6 +5,9 @@ Fuentes (ver docs/world_maps.md):
   - vecinos: tabla de punteros por mundo en A9EF (bancos 7-9), 4 bytes por sala
     (arriba, abajo, izquierda, derecha; FF = pared; >= F6 = salida al castillo; F5 = salida
     especial del mundo 10, sin identificar)
+  - mundo 10: la sala 6 es la sala de las 10 piedras del final (docs/ending.md). Sus enlaces son FF FF FF FF y
+    solo se llega a ella cuando Galious cae: el estado 19 pone E64B = 6 (b00:4BA2), es decir, la salida derecha
+    de la sala 5 lleva a la 6. Se coloca a la derecha de la 5 y se anota en after_boss_links
   - puertas de mundo (solo castillo): salas en 9990, posicion (Y, X) en 9997
   - salas de dioses (solo castillo): tabla en 9DDA (sala, tipo, Y, X), terminada en 0
   - sala del jefe: tabla en 5DFB indexada por mundo
@@ -22,6 +25,7 @@ DOOR_ROOMS, DOOR_POS = 0x9990, 0x9997   # banco 2 (grupo 0)
 GOD_TABLE = 0x9DDA                       # banco 2
 BOSS_ROOM = 0x5DFB
 BOSS_WORDS = 0x9B4F      # 3 bytes por mundo: puntero, longitud (indexado por E041)
+FINAL_ROOM = 6           # mundo 10 (E041 = 11): sala de las piedras; b00:4BA2 la enlaza al caer Galious
 GODS = {1: 'Demeter (contraseña)', 2: 'Hefesto (tienda)', 3: 'Muerte (resurrección, necesita la Salt)',
         4: 'Ares (tienda)', 5: 'Ares (tienda)', 6: 'Hefesto (tienda)', 7: 'Hefesto (tienda)',
         8: 'Asclepio (pista)', 9: 'Ares (tienda)', 10: 'Ares (tienda)', 11: 'Demeter (tienda)'}
@@ -44,9 +48,9 @@ def extract(rom):
         if e041 < 11:
             count = (ptrs[e041 + 1] - start) // 4
         else:
-            count = 1
-            while rom.block(start + 4 * (count + 1), 4, LINKS_GROUP) != b'\xff' * 4:
-                count += 1
+            # El ultimo mundo no tiene tabla siguiente. Su sala 6 (la del final) tiene los cuatro enlaces a FF y
+            # despues vienen otros datos: el tamano sale del codigo (b00:4BA2 pone E64B = 6), no de un terminador.
+            count = FINAL_ROOM
         links = {}
 
         def get(room):
@@ -81,6 +85,13 @@ def extract(rom):
                     continue
                 pos[n], grid[p] = p, n
                 q.append(n)
+        after_boss = []
+        if e041 == 11:
+            # enlace dinamico: tras el estado 19, E64B = 6 en la sala del jefe (sala 5): su salida derecha va a la 6
+            boss5 = rom.byte(BOSS_ROOM + e041)
+            x, y = pos[boss5]
+            pos[FINAL_ROOM], grid[(x + 1, y)] = (x + 1, y), FINAL_ROOM
+            after_boss.append({'room': boss5, 'dir': 'right', 'to': FINAL_ROOM})
         exits = [(r, d, hex(get(r)[d])) for r in pos for d, _, _ in DIRS if 0xF5 <= get(r)[d] < 0xFF]
         boss = rom.byte(BOSS_ROOM + e041) if e041 >= 2 else None
         word = None
@@ -91,7 +102,7 @@ def extract(rom):
             'e041': e041, 'table': hex(start), 'table_rooms': count,
             'reachable': len(pos), 'unreachable': sorted(set(rooms) - set(pos)),
             'rooms': {r: {'pos': pos[r], 'links': get(r)} for r in sorted(pos)},
-            'exits_to_castle': exits, 'boss_room': boss, 'boss_word': word,
+            'exits_to_castle': exits, 'boss_room': boss, 'boss_word': word, 'after_boss_links': after_boss,
             'conflicts': conflicts,
         }
     castle = worlds['castle']

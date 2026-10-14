@@ -62,9 +62,9 @@ Cada estado recibe `B = game_substate` (E001) y suele despachar con `DJNZ` por s
 | 14 | 488E | → 10 al pulsar abajo (E008 bit 1), saliendo por abajo (E01A = 2, música 0x8A); apareces en la sala de abajo en x = 128, y = 40 [C][O] | **sala especial de un mundo** (su última sala, una sala de dios): al cargarla, el estado 10 salta al 14 en vez de al 5. Se llega subiendo por la escalera de la fila 0 de la sala de abajo [C][O]. Ver `design_bible/08_santuarios.md` |
 | 15 | 4959 | → 5 a los 193 frames (1 + 60 de parpadeo + 128 de fundido + 5 de carga); el jefe sigue apareciendo ya en el 5 (E0D2: 1 → 4, unos 105 ticks más) [O]. Detalle en `boss_ai.md`, «Invocación» | **invocar al jefe**: escribir su nombre en el teclado en la sala del jefe (ver «Jefes») [C][O*]. Mundo 1: YOMAR en la sala 13 → esqueleto de dragón |
 | 16 | 48C5 | 5 subestados (tabla 0x48C9): 0–1 el jugador se hunde 16 px (sonido 0x82) y se dibuja el santuario (música 0x8D); 2 santuario (b02:8F43); abajo (o E693 = 2, salida automática de la Muerte) → 3–4: se redibuja la sala, el jugador sube 16 px y → 5 en la misma sala (música 0x88) [C][O] | **entrar en la sala de un dios**: abajo mantenido sobre un objeto E680 (Y = Y_obj + 0x10…0x11, X = X_obj + 6…10, E500 ∉ 4…7; el tipo 3 exige además E099 = Salt). E690 = tipo. Ver `design_bible/08_santuarios.md` [C][O] |
-| 17 | 49BA | 9 subestados (tabla 0x49BE) | disparado por E024; forzado: la sala se encoge y aparece una escena del castillo por fuera con personajes; ¿cinemática? [F] |
+| 17 | 49BA | 9 subestados (tabla 0x49BE), 1 vez por frame; ~6490 frames y → 0 (logo de Konami), borrando E002 bit 6 [C][O] | **final del juego**: E024 = 1 al tocar al bebé (0x6B) en la sala 6 del mundo 10. La sala se borra en anillos, escena del castillo (música 0x92), epílogo y créditos (0x93). Ver «Final del juego» y `ending.md` [C][O*] |
 | 18 | 4A69 | → 4 tras validar el código (reinicia RAM E016-E0FF, E200-EAFE, EC00-F03F y restaura desde la contraseña) [C] | **introducir contraseña**: desde el título con L pulsada; pide el código secreto y Return [O] |
-| 19 | 4B5B | → 5 a ~2 s [O] | **jefe derrotado**: E02C = 1 cuando su vida (E710) llega a 0. Activa el bit 2 de E061 + E041 (ya no se puede invocar) y suelta la llave (objeto 0x0C en E740) [C][O*] |
+| 19 | 4B5B | → 5 a ~2 s [O] | **jefe derrotado**: E02C = 1 cuando su vida (E710) llega a 0. Activa el bit 2 de E061 + E041 (ya no se puede invocar) y suelta la llave (objeto 0x0C en E740); en el mundo 10, sin llave: E64B = 6 [C][O*] |
 | 20 | 4BD8 | → 5 cuando E53F = 0, a los 480 frames (9 saltitos + 120 frames de texto; `boss_ai.md`, «Derrota») [O] | **fanfarria de la llave**: al coger la llave 0x0C dentro de un mundo; desbloquea la puerta del mundo siguiente (E064 = 2 tras el mundo 1) [C][O*] |
 
 Prioridad del despacho en el estado 5 [C]: E020 → 15, E01F=1 → 8, E01F=2 → 13, E01C → 16, E031 → 20, E01A → 10, E01B → 12, E024 → 17, E02C → 19. Después van las comprobaciones `9E07` → 9 y `9E21` → 11.
@@ -92,6 +92,24 @@ Prioridad del despacho en el estado 5 [C]: E020 → 15, E01F=1 → 8, E01F=2 →
 La tabla BD0A está indexada por número de jefe, no por mundo (corregido; antes se leía por mundo). Bits y fichas de cada jefe en `boss_ai.md`.
 
 Comprobado jugando en el mundo 1 [O*], con invencibilidad, viaje forzado a la sala 13 y la vida del jefe bajada a 1 antes del golpe final; todo lo demás lo hizo el juego: YOMAR → estado 15 → aparece el esqueleto de dragón → golpe con la espada → estado 19 → llave → estado 20 → E064 = 2. Bits: 0 espada, 1 mina, 2 fuego rodante, 3 fuego, 4 flecha de cerámica, 5 flecha (`boss_ai.md`).
+
+## Final del juego [C][O*]
+Detalle, textos y tiempos en `ending.md`; datos en `extracted/unity/ending.json`.
+- **Galious cae** (estado 19, mundo 10): no hay llave ni estado 20. E64B = 6: la salida derecha de la sala 5 (pasillo de abajo) lleva a la sala 6; las demás salidas siguen cerradas. Música 0x8B.
+- **Sala 6**: no tiene salidas. Hay 10 piedras (enemigo 0x5C, 5 de vida). Al cargar la sala se elige F033 = (rnd & 3) + (rnd & 7):
+  - la piedra F033 (de 0 a 9, en el orden de la lista) esconde al bebé 0x6B;
+  - las demás sueltan un fantasma 0x39 (vida 40, daño 14, espiral que se abre);
+  - con F033 = 10 no hay bebé y hay que perder una vida para que se repita la tirada [F][O].
+- **Tocar al bebé** (cualquier personaje, sin parpadear: E518 = 0) → E024 = 1 → estado 17:
+
+| Sub | Frames | Qué pasa |
+|---|---|---|
+| 0–1 | 40 | orden 0xFF (silencio); la sala se congela |
+| 2 | 101 | la sala se borra en 10 anillos de tiles, uno cada 10 frames; el bebé se queda |
+| 3 | 120 | negro con el jugador y el bebé |
+| 4–5 | ~19 + 766 | castillo: la bandera roja baja, sube la azul con la cruz, aparece el bebé, bocadillos «NICE!» / «GREAT!»; música 0x92 |
+| 6–7 | ~28 + 5417 | epílogo y créditos que suben (1 px cada 3 frames medido; 3 pausas de 510); música 0x93, que se corta al final |
+| 8 | <1 | cuando calla la música → estado 0 (logo de Konami) y título. Sin segunda vuelta |
 
 ## Salas de dioses (objetos E680) en el castillo [O*]
 E680–E685: tipo, ?, Y, X, puntero (2 bytes). Recorridas las salas 0–130 del castillo con `tools/openmsx/scan_rooms.py` y probado cada objeto con `try_object.py`:

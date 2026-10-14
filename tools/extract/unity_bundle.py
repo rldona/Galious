@@ -16,11 +16,14 @@ JsonUtility, sin diccionarios):
                        y extracted/unity/items.json (objetos, menu F1, vitalidad y mapas del menu, items_export.py)
                        y extracted/unity/shrines.json (santuarios: tiendas, contraseña, resurreccion, pistas; shrines.py)
                        y extracted/unity/bosses.json (jefes: invocacion, cajas, derrota, hijos; bosses.py)
+                       y extracted/unity/ending.json (final: sala de las piedras, estado 17, epilogo; ending.py)
 
 Todo sale de la ROM del usuario y se queda en local: extracted/ no se versiona.
 
 Enlaces: -1 = sin salida (255 en la ROM); 0xF5-0xFE = salida al castillo desde la sala 1 de un mundo
 (ver world_maps.md). En la rejilla, y crece hacia arriba (la ROM la guarda hacia abajo).
+afterBossRight: sala a la que lleva la salida derecha cuando el jefe de la sala ya ha caido (-1 = nada). Solo el
+mundo 10: sala 5 -> 6, la sala de las piedras del final (estado 19, b00:4BA2; docs/ending.md).
 """
 import json
 from galious_rom import Rom, ROOT
@@ -29,6 +32,7 @@ import weapons
 import items_export
 import shrines
 import bosses
+import ending
 from enemy_boxes import boxes, player_boxes, enemy_box_info
 
 DAMAGE_TABLE = 0x64E5   # b04: dano por contacto segun el tipo (b03:B39A; el Hat Helmet lo reduce a la mitad)
@@ -96,6 +100,7 @@ def main():
         col = json.loads((ROOT / 'extracted' / 'maps' / 'collision' / f'{name}.json').read_text())
         doors = m.get('doors', {})
         gods = m.get('gods', {})
+        after_boss = {str(l['room']): l['to'] for l in m.get('after_boss_links', []) if l['dir'] == 'right'}
         rooms = []
         placed = [m['rooms'][k]['pos'] for k in m['rooms']]
         spare_x = max(p[0] for p in placed) + 2            # columna aparte para las salas sin enlaces
@@ -136,6 +141,7 @@ def main():
             for d in DIRS:
                 link = r['links'][d]
                 room[d] = -1 if link == 255 else link
+            room['afterBossRight'] = after_boss.get(rid, -1)
             rooms.append(room)
         bundle = {
             'map': name,
@@ -200,6 +206,7 @@ def main():
     items_export.main()   # objetos e inventario -> extracted/unity/items.json (campos en items_export.py)
     shrines.main()        # santuarios -> extracted/unity/shrines.json (campos en shrines.py; despues de los mapas)
     bosses.main()         # jefes, invocacion, derrota e hijos -> extracted/unity/bosses.json (campos en bosses.py)
+    ending.main()         # final: piedras, estado 17, epilogo -> extracted/unity/ending.json (campos en ending.py)
 
 
 if __name__ == '__main__':

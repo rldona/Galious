@@ -187,3 +187,48 @@ namespace MazeOfKnight.Game.Enemies
         }
     }
 }
+
+namespace MazeOfKnight.Game.Enemies
+{
+    // Final del juego (docs/ending.md): mundo 10, sala 6.
+
+    // 0x5C: piedra de la sala del bebé. Quieta y sin daño, 5 de vida. Al romperla deja al bebé (si es la elegida) o
+    // un fantasma 0x39, sin explosión, experiencia ni botín.
+    public class BabyRock : Enemy
+    {
+        public bool HasBaby;
+
+        public override void Init(EnemyContext ctx) { Harmful = false; }
+
+        public override void Tick(EnemyContext ctx) { }
+
+        public override void Die(EnemyContext ctx) => ctx.SpawnChild(HasBaby ? 0x6B : 0x39, X, Y);
+    }
+
+    // 0x39: fantasma que sale de una piedra vacía. Espiral que se abre alrededor de (y, x ± 10): +8/256 de vuelta y
+    // +0,5 px de radio por tick; desaparece al salir de la zona visible. 40 de vida, 14 de daño.
+    public class SpiralGhost : Enemy
+    {
+        float cx, cy, radius;
+        int angle;
+
+        public override void Init(EnemyContext ctx) { cy = Y; cx = X + (ctx.Coin() ? 10 : -10); }
+
+        public override void Tick(EnemyContext ctx)
+        {
+            angle = (angle + 8) & 255;
+            radius += 0.5f;
+            double t = angle * System.Math.PI * 2 / 256;
+            X = cx + radius * (float)System.Math.Sin(t + System.Math.PI / 2);
+            Y = cy + radius * (float)System.Math.Sin(t);
+            if (X < 0 || X > 0xF0 || Y < OriginalPhysics.RoomTopPx || Y > OriginalPhysics.RoomBottomPx - 16) Alive = false;
+        }
+    }
+
+    // 0x6B: el bebé (Pampas). Quieto, no se puede golpear ni hace daño; al tocarlo empieza el final.
+    public class Baby : Enemy
+    {
+        public override void Init(EnemyContext ctx) { Harmful = Hittable = false; }
+        public override void Tick(EnemyContext ctx) { }
+    }
+}

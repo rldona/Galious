@@ -22,7 +22,7 @@ El juego es un laberinto de salas fijas con transición sala a sala (sin scroll)
 | 9 | 27 | 25 | XYWOLEH | King Dragon | 108 |
 | 10 | 5 | 5 | HAMALECH | Galious | aparece en uno de 4 sitios del castillo al azar [G] |
 
-En total son 320 salas [C]. Cada sala tiene cuatro enlaces (arriba, abajo, izquierda y derecha) a otra sala o a nada. Un enlace de un mundo a un valor F5–FE significa "volver al castillo" por ese lado (estado 13) [C].
+En total son 321 salas, contando la sala 6 del mundo 10 (la del final) [C]. Cada sala tiene cuatro enlaces (arriba, abajo, izquierda y derecha) a otra sala o a nada. Un enlace de un mundo a un valor F5–FE significa "volver al castillo" por ese lado (estado 13) [C].
 
 **Rareza del laberinto:** en el mundo 3, la sala 4 enlaza hacia arriba consigo misma: es un pozo sin fin. Subirlo 5 veces seguidas abre un muro (ver [Mecánicas de sala](07_salas.md)) [C][O].
 
@@ -37,7 +37,7 @@ En total son 320 salas [C]. Cada sala tiene cuatro enlaces (arriba, abajo, izqui
 5. **Puertas por personaje** [C]: Aphrodite necesita la **Conch Shell** para el mundo 5 y Popolon el **Necklace** para el mundo 7. Algunos mundos tienen pasos que solo uno de los dos puede hacer, como el agua profunda (ver [El jugador](02_jugador.md)).
 6. **Mundo 10:** su puerta aparece en uno de cuatro sitios del castillo, elegidos al azar en cada partida [G].
    - Galious solo puede ser dañado con la **Cross** [C].
-   - Tras vencerlo, Pampas está en una de 10 piedras de la sala siguiente, al azar [G].
+   - Tras vencerlo, Pampas está en una de 10 piedras de la sala siguiente (sala 6, sin salidas), al azar, y las demás sueltan fantasmas [G][C][O]. Ver `ending.md`.
 7. **Orden recomendado** por la guía [G]: recorrer el castillo en sentido antihorario recogiendo objetos antes del mundo 1. Los mundos se recuperan en orden 1 → 10, porque cada llave abre el siguiente.
 
 ## Viaje

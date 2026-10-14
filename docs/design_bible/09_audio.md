@@ -16,7 +16,7 @@ La música y los efectos del original son de Konami: el remake necesita **banda 
 | 0x8F | sala del jefe, esperando la palabra | tensión, "Devil's Room" | 16 s |
 | 0x90 | combate con el jefe | **se acelera** al cuarto y al octavo de la vida del jefe | 22,8 s |
 | 0x8C | bola de cristal | — | 8,3 s |
-| 0x92 / 0x93 | cinemática final | final | 12 s / 60 s |
+| 0x92 / 0x93 | cinemática final: escena del castillo (766 frames) / epílogo y créditos (se corta con la orden 0xFF 312 frames antes del final; `ending.md`) | final | 14,4 s / 60,3 s |
 
 **Jingles:**
 - invocar al jefe (0x81);

@@ -44,6 +44,10 @@ namespace MazeOfKnight.Game.Enemies
             { 0x65, () => new LipShot() },
             { 0x67, () => new GaliousOrb() },
             { 0x68, () => new MonsterBall() },
+            // final del juego (docs/ending.md)
+            { 0x5C, () => new BabyRock() },
+            { 0x39, () => new SpiralGhost() },
+            { 0x6B, () => new Baby() },
         };
     }
 

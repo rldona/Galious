@@ -72,3 +72,7 @@ Propuesta para la fase 5: un importador que lea esos JSON y cree los ScriptableO
 - la puesta en escena (decoración apagada y jefe hecho de tiles) se cumple en los 10 jefes.
 
 Para el remake, el jefe puede moverse suave (sprite o rig propio); el salto de 8 px es una limitación del MSX, no parte del diseño.
+
+## RemakeRules.BabyAlwaysPresent (desactivado)
+
+Original (docs/ending.md): la piedra del bebé sale de (0..3) + (0..7); con 10 (1 de cada 32 veces) ninguna de las 10 piedras lo tiene y la sala, sin salidas, solo se deja perdiendo una vida. Opción del remake: una piedra al azar de las 10, siempre. Desactivada: se juega como el original.

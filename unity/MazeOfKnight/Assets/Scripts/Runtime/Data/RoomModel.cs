@@ -100,6 +100,7 @@ namespace MazeOfKnight.Data
         public PointJson[] rocks = Array.Empty<PointJson>();
         public LadderJson[] ladders = Array.Empty<LadderJson>();
         public PeriodicJson[] periodic = Array.Empty<PeriodicJson>();
+        public int afterBossRight = -1;   // mundo 10, sala 5: tras vencer a Galious la salida derecha lleva aquí (sala 6)
         public bool markedRoom;        // matar a todos sus enemigos marcados dispara un evento
         public RoomEventJson onClear = new RoomEventJson();
         public EventLadderJson eventLadder = new EventLadderJson();

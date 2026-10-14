@@ -40,7 +40,19 @@ Consejos de la guía [G], coherentes con la tabla: flechas al Bony Dragon y a Do
 
 ## Final
 
-Tras vencer a Galious, Pampas está en una de 10 piedras de la sala siguiente, al azar; las demás sueltan ectoplasma. Luego viene la cinemática final, con las músicas 0x92 y 0x93 [G][C].
+Detalle en [ending.md](../ending.md); datos en `ending.json`.
+
+- **Galious no suelta llave** [C][O]. Al caer, la salida derecha de su sala (sala 5, pasillo de abajo) lleva a la sala 6.
+- **Sala 6** [C][O]: no tiene salidas. Hay 10 piedras de 5 golpes. Al entrar se tira F033 = (0–3) + (0–7):
+  - la piedra F033 de la lista esconde a Pampas, el bebé;
+  - las otras sueltan un **fantasma 0x39**: vida 40, daño 14, gira en espiral alrededor de la piedra y se va;
+  - [G] la guía lo llama «ectoplasma», pero no es el 0x28 y el Helmet no protege;
+  - con F033 = 10 (1/32) no hay bebé: hay que morir para que se repita la tirada [F][O].
+- **Tocar al bebé** (cualquier personaje, sin parpadear) → estado 17, unos 108 s [C][O]:
+  1. la sala se deshace en anillos;
+  2. el castillo de Galious con su bandera roja, que baja; sube la bandera azul con la cruz, aparece el bebé entre Popolon y Aphrodite y salen bocadillos «NICE!» / «GREAT!» (música 0x92);
+  3. epílogo y créditos que suben (música 0x93);
+  4. vuelta al logo de Konami y al título. No hay segunda vuelta ni nada que dependa del tiempo, la experiencia o el personaje.
 
 ## Notas para el remake
 

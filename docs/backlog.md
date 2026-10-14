@@ -38,7 +38,8 @@ El barrido de tiles (docs/entities.md, "Barrido de tiles en openMSX") no llegó 
 
 ## Jefes
 
-- **Final del juego:** tras vencer a Galious la salida derecha lleva a la sala 6 del mundo 10 (E64B = 6); falta lo que pasa después (rescate del bebé, final).
+- **Final del juego con gráficos y música:** el castillo (20 × 14 tiles, b15:B989), la fuente de 8 × 16 del epílogo y las músicas 0x8B, 0x92 y 0x93; ahora son cuadros y texto con los tiempos del original.
+- **Logo de Konami, título y demo** al acabar (estados 0 y 1): ahora se empieza directamente una partida nueva.
 - **Animaciones del combate:** la invocación (borde parpadeando 60 frames, la decoración que se deshace en puntos 128), la disolución del jefe vencido y los 9 saltos de la celebración; ahora son esperas con un mensaje.
 - **Repetir una letra pide soltarla** (el original lee la tecla una vez por tick y solo si cambia); el remake acepta cada pulsación del sistema.
 - **Fondo negro durante el combate** (la decoración se apaga) y el dibujo del jefe con tiles (necesita gráficos).

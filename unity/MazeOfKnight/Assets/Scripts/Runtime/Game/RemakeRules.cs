@@ -7,5 +7,10 @@ namespace MazeOfKnight.Game
         // Original: a media escalera, ← y → no hacen nada (medido en el castillo, sala 1). Remake: si hay sitio a
         // ese lado, el jugador se suelta y cae con control en el aire.
         public static bool LeaveLadderSideways = false;   // desactivado: se juega como el original
+
+        // Original: la piedra del bebé (mundo 10, sala 6) sale de (0..3) + (0..7), así que 1 de cada 32 veces vale 10 y
+        // ninguna de las 10 piedras lo tiene: solo se sale perdiendo una vida (docs/ending.md). Remake: una de las 10 al
+        // azar, siempre.
+        public static bool BabyAlwaysPresent = false;     // desactivado: se juega como el original
     }
 }

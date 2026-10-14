@@ -144,8 +144,16 @@ namespace MazeOfKnight.Game.Enemies
             markedAlive = 0;
             foreach (var s in room.spawns)
             {
-                if (Create(s.type, s.x, s.y, 0) == null && !Factories.ContainsKey(s.type))
+                if (Create(s.type, s.x, s.y, 0) == null && !Factories.ContainsKey(s.type) && !Projectiles.ContainsKey(s.type))
                     Missing++;
+            }
+            // Sala del bebé: al cargarla se elige su piedra, (0..3) + (0..7) en el orden de la lista; con 10, ninguna
+            // (b06:AABE, docs/ending.md).
+            var rocks = enemies.OfType<BabyRock>().ToList();
+            if (rocks.Count > 0)
+            {
+                int pick = RemakeRules.BabyAlwaysPresent ? Context.Rand(0, rocks.Count - 1) : Context.Rand(0, 3) + Context.Rand(0, 7);
+                if (pick < rocks.Count) rocks[pick].HasBaby = true;
             }
         }
 

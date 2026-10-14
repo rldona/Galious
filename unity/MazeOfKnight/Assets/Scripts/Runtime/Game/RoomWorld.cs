@@ -13,6 +13,7 @@ namespace MazeOfKnight.Game
         readonly Dictionary<int, char[][]> grids = new Dictionary<int, char[][]>();
         public bool BossFight;
         public RoomModel LockedRoom;
+        public bool LockAllowsRight;
 
         public RoomWorld(IEnumerable<RoomModel> models)
         {
@@ -50,7 +51,7 @@ namespace MazeOfKnight.Game
             int dx = px < 0 ? -1 : px >= OriginalPhysics.RoomWidthPx ? 1 : 0;
             int dyOut = py < OriginalPhysics.RoomTopPx ? -1 : py >= OriginalPhysics.RoomBottomPx ? 1 : 0;
             // Sala del jefe durante el combate: todas las salidas cerradas (state_machine.md, estado 15).
-            if (room == LockedRoom && (dx != 0 || dyOut != 0))
+            if (room == LockedRoom && (dx != 0 || dyOut != 0) && !(LockAllowsRight && dx > 0 && dyOut == 0))
                 return TileClass.Solid;
             if (dx != 0)
             {

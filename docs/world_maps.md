@@ -29,14 +29,14 @@ python3 tools/extract/stitch_maps.py 0.5    # mapa visual con capturas (necesita
 | 9 | 10 | 27 | 25 | XYWOLEH | sala 1 izquierda (F6) | 27 |
 | 10 | 11 | 5 | 5 | HAMALECH | sala 1 izquierda (F5, ver abajo) | — |
 
-En total son 320 salas. Todos los mundos se recorren enteros desde la sala 1 y la cuadrícula no tiene contradicciones, salvo la sala 4 del mundo 3, cuyo vecino de arriba es ella misma: un bucle del laberinto [C].
+En total son 321 salas (la 321 es la sala 6 del mundo 10, la de las piedras del final, a la que solo se llega al caer Galious: `ending.md`). Todos los mundos se recorren enteros desde la sala 1 y la cuadrícula no tiene contradicciones, salvo la sala 4 del mundo 3, cuyo vecino de arriba es ella misma: un bucle del laberinto [C].
 
 ## Formatos en la ROM [C]
 
 **Vecinos de cada sala.** b00:5218 mapea los bancos 7–9 y lee el puntero del mundo en `A9EF + 2·E041` (banco 9). Los 4 bytes de la sala están en `puntero + 4·sala` y se copian a E648–E64B: arriba, abajo, izquierda y derecha.
 - Valores: `FF` = pared; `F6–FE` = salida al castillo, con `FF − n` para el mundo n, que dice a qué puerta se vuelve.
 - El 0xF5 del mundo 10 queda por debajo del umbral `CP F6` de b03:A897, así que esa salida se gestiona en otro sitio (pendiente).
-- Las salas van de 1 a N: la entrada 0 no se usa y la N cae donde empieza la tabla del mundo siguiente. El último mundo termina en una entrada `FF FF FF FF`. Comprobado con las 139 salas leídas en el emulador [O].
+- Las salas van de 1 a N: la entrada 0 no se usa y la N cae donde empieza la tabla del mundo siguiente. El último mundo no tiene terminador: su sala 6 (la del final) tiene los cuatro enlaces a `FF` y detrás vienen otros datos. Su tamaño (6) sale de b00:4BA2, que pone E64B = 6 tras vencer a Galious. Comprobado con las 139 salas leídas en el emulador [O].
 
 **Disposición de cada sala.** b00:5561 mapea los bancos 7–9 y b00:55F7 lee el puntero del mundo en `6ABE + 2·E041` (banco 7).
 - Cada sala son 40 bytes en `puntero + 40·(sala − 1)`: 8×5 bloques de 32×32 px.

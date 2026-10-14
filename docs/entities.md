@@ -23,7 +23,7 @@ Todas las coordenadas son de pantalla en píxeles. La Y incluye las 32 líneas d
 | Escaleras extra | A6EB | 9 | pares (mundo, sala); datos de 5 bytes en A705 + 5k: Y, X, alto, ?, ? | b09:A761 |
 | Emblema del jefe | 9BE2[E041] | 8 | puntero a 8×8 tiles; en (12, 8), o (12, 10) en el mundo 6; solo con E615 = 1 | b00:55CE |
 
-Totales: 1124 generadores, 125 objetos de sala, 129 objetos recogibles y 245 piedras.
+Totales: 1134 generadores (10 son las piedras 0x5C de la sala 6 del mundo 10, `ending.md`), 125 objetos de sala, 129 objetos recogibles y 245 piedras.
 
 **Persistencia** [C]: cada piedra tiene un bit (contador global E6A0 y campo de bits en (E60E)) y cada objeto recogible su flag en E06F + tipo, así que lo roto o recogido no vuelve. El estado 18 (nueva partida o contraseña) reinicia E016–E0FF, E200–EAFE y EC00–F03F.
 

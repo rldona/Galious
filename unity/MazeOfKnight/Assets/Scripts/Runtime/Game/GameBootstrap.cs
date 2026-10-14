@@ -59,6 +59,9 @@ namespace MazeOfKnight.Game
         // En la sala del jefe las letras sirven para escribir la palabra: I, G y K no hacen nada más.
         public bool TypingWord => Bosses != null && Bosses.Listening;
         GameObject keyView;
+        EndingScreen ending;
+        public bool EndingRunning => ending != null && ending.Running;
+        EndingData endingData;
         ShrineScreen shrineScreen;
         bool downWasHeld;
         // Eventos de sala ya disparados (mapa, sala): escaleras que aparecen y muros que se abren se quedan así.
@@ -102,6 +105,9 @@ namespace MazeOfKnight.Game
             Bosses = new BossFight(bossesJson != null ? JsonUtility.FromJson<BossesData>(bossesJson.text) : null);
             Bosses.Message += Say;
             Enemies.BossDefeated += _ => Bosses.OnBossDefeated();
+            var endingJson = Resources.Load<TextAsset>("Ending");
+            endingData = endingJson != null ? JsonUtility.FromJson<EndingData>(endingJson.text) : new EndingData();
+            ending = gameObject.AddComponent<EndingScreen>();
             if (UnityEngine.InputSystem.Keyboard.current != null)
                 UnityEngine.InputSystem.Keyboard.current.onTextInput += OnTextInput;
             LoadMap(mapName);
@@ -191,6 +197,8 @@ namespace MazeOfKnight.Game
             }
             motor.Shoes = Inventory.Has(Inventory.Shoes);
             TickBossFight();
+            if (TouchBaby())
+                return;
             bool downPressed = motor.LastInput.Down && !downWasHeld;
             downWasHeld = motor.LastInput.Down;
             if (TryEnterShrine(downPressed))
@@ -363,6 +371,7 @@ namespace MazeOfKnight.Game
         {
             Bosses.Tick(Enemies, () => Enemies.SpawnBoss(Bosses.Info, Inventory.Has(0x07), Inventory.Has(0x08), Inventory.Has(0x0B)));
             World.LockedRoom = Bosses.LocksExits ? Bosses.Room : null;
+            World.LockAllowsRight = Bosses.RightExitOpen;
             World.BossFight = Bosses.InFight;
             if (Bosses.FreezesPlayer) motor.Stunned = 2;
             if (Bosses.Current == BossFight.Stage.KeyOnFloor)
@@ -392,6 +401,29 @@ namespace MazeOfKnight.Game
             var p = RoomCoords.PixelToWorld(room, x + 8, y + 16);
             go.transform.position = new Vector3(p.x, p.y, 0);
             return go;
+        }
+
+        // ---------- final ----------
+
+        // Tocar al bebé (sin estar parpadeando) empieza el final (b03:B2AD → estado 17).
+        bool TouchBaby()
+        {
+            if (HurtTicks > 0 || ending.Running) return false;
+            foreach (var e in Enemies.Enemies)
+            {
+                if (!(e is Baby) || !e.Alive) continue;
+                var (x0, y0, x1, y1) = e.Box();
+                if (motor.X + OriginalPhysics.ContactRight + 1 > x0 && motor.X + OriginalPhysics.ContactLeft < x1 &&
+                    motor.Y + OriginalPhysics.ContactBottom + 1 > y0 && motor.Y + OriginalPhysics.ContactTop < y1)
+                {
+                    SetPaused(true);
+                    foreach (var other in Enemies.Enemies)
+                        if (!(other is Baby)) other.Visible = false;
+                    ending.Begin(endingData, new Vector2(motor.X, motor.Y), new Vector2(e.X, e.Y));
+                    return true;
+                }
+            }
+            return false;
         }
 
         // ---------- santuarios ----------
@@ -739,6 +771,18 @@ namespace MazeOfKnight.Game
             {
                 Enemies.FreezeTicks = Inventory.BibleTicks;
                 Say($"Biblia: enemigos congelados ({16 - Inventory.BibleUses} usos)");
+            }
+            // Depuración: F4 lleva a la sala del bebé (mundo 10, sala 6).
+            if (UnityEngine.InputSystem.Keyboard.current?.f4Key.wasPressedThisFrame == true && !Bosses.Active && !ending.Running && maps.ContainsKey("world10"))
+            {
+                Inventory.EnterWorld(10);
+                LoadMap("world10");
+                var room = World.Room(6);
+                if (room != null)
+                {
+                    motor.Place(World, room, 24, 184);
+                    Say("[depuración] sala del bebé: rompe las piedras");
+                }
             }
             // Depuración: F2 lleva a la sala del jefe del mundo en el que estás.
             if (UnityEngine.InputSystem.Keyboard.current?.f2Key.wasPressedThisFrame == true && Inventory.CurrentWorld > 0 && !Bosses.Active)

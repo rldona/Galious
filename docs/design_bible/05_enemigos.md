@@ -5,7 +5,7 @@ Fuentes: [enemy_ai.md](../enemy_ai.md) (ficha por tipo, leída del código), [it
 ## Reglas generales [C]
 
 - **Huecos:** hasta 16 enemigos a la vez (E800 + 0x20·n), con un límite por sala (E635).
-- **Generadores:** los enemigos nacen de los generadores de la sala (1124 en total). Algunas salas tienen además **generadores periódicos** que crean un enemigo cada cierto tiempo (b04:61A8), y el Carpet apaga los del mundo 8.
+- **Generadores:** los enemigos nacen de los generadores de la sala (1134 en total). Algunas salas tienen además **generadores periódicos** que crean un enemigo cada cierto tiempo (b04:61A8), y el Carpet apaga los del mundo 8.
 - **Cada tick** (~30/s), cada enemigo ejecuta su rutina de IA y después se le aplica su velocidad. Si sale de la pantalla, desaparece.
 - **Descriptor:** vida (FE/FF = invulnerable) y caja de colisión inicial. El botín depende del tipo (ver [items_enemies.md](../items_enemies.md), «Muerte y botín»).
 - **Enemigos marcados:** 23 tipos cuentan para los **eventos de sala** (abrir muros, sacar escaleras u objetos al limpiar la sala).

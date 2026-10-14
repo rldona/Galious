@@ -13,7 +13,7 @@ namespace MazeOfKnight.Game
     // disolución y cae la Gran Llave; las salidas no se abren hasta cogerla. Después, la celebración (480 frames).
     public class BossFight
     {
-        public enum Stage { Idle, Invoking, Summoning, Fighting, Dissolving, KeyOnFloor, Fanfare }
+        public enum Stage { Idle, Invoking, Summoning, Fighting, Dissolving, KeyOnFloor, Fanfare, RightExitOnly }
 
         readonly BossesData data;
         public Stage Current { get; private set; } = Stage.Idle;
@@ -36,12 +36,15 @@ namespace MazeOfKnight.Game
         public bool Listening => Current == Stage.Idle && Info != null && Room != null && Info.room == Room.id && !Defeated.Contains(World);
         public bool Active => Current != Stage.Idle;
         public bool LocksExits => Current != Stage.Idle;
+        // Tras Galious (sin llave): solo se abre la salida derecha, que lleva a la sala 6 (E64B = 6, docs/ending.md).
+        public bool RightExitOpen => Current == Stage.RightExitOnly;
         public bool FreezesPlayer => Current == Stage.Invoking;
         public bool InFight => Current == Stage.Summoning || Current == Stage.Fighting;
 
         // Al entrar en una sala (world 0 = castillo).
         public void EnterRoom(int world, RoomModel room)
         {
+            if (Current == Stage.RightExitOnly && room != Room) Current = Stage.Idle;
             if (Active && room == Room) return;
             World = world;
             Room = room;
@@ -97,6 +100,11 @@ namespace MazeOfKnight.Game
                     {
                         KeyPos = (key.x, key.y);
                         Current = Stage.KeyOnFloor;
+                    }
+                    else if (Room.afterBossRight >= 0)
+                    {
+                        Room.right = Room.afterBossRight;
+                        Current = Stage.RightExitOnly;
                     }
                     else Finish();
                     break;
