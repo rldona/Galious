@@ -19,6 +19,7 @@ Es la síntesis de la ingeniería inversa de las fases 0–3. Cada capítulo enl
 | 9 | [Audio](09_audio.md) | Músicas y efectos: cuándo suenan y qué comunican |
 | 10 | [Interfaz](10_interfaz.md) | Marcador, menú de objetos, pausa, contraseñas |
 | 11 | [Notas para el remake](11_remake.md) | Unidades, decisiones de adaptación, qué conservar y qué cambiar |
+| 12 | [Estilo visual](12_estilo_visual.md) | Capas, paletas por mundo, luces, posproceso, transiciones y producción del arte |
 
 ## Convenciones
 

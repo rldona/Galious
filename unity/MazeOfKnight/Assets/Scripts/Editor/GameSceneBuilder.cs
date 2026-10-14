@@ -86,6 +86,12 @@ namespace MazeOfKnight.EditorTools
             hud.bootstrap = bootstrap;
             hud.player = player;
             roomCamera.player = player;
+            // Estilo del remake (luces 2D, capas, niebla, posproceso): necesita URP con el renderer 2D.
+            RenderSetup.Setup();
+            var atmosphere = camGo.AddComponent<Game.Visuals.Atmosphere>();
+            atmosphere.game = bootstrap;
+            atmosphere.player = player;
+            atmosphere.mapView = mapView;
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             var scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };

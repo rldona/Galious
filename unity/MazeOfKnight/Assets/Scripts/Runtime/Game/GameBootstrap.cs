@@ -539,6 +539,7 @@ namespace MazeOfKnight.Game
         {
             var go = new GameObject(name);
             var sr = go.AddComponent<SpriteRenderer>();
+            StyleSprite(sr);
             sr.sprite = itemSprite;
             sr.color = color;
             sr.sortingOrder = 7;
@@ -903,6 +904,7 @@ namespace MazeOfKnight.Game
         {
             var go = new GameObject($"Proyectil {p.Weapon.name}");
             var sr = go.AddComponent<SpriteRenderer>();
+            StyleSprite(sr);
             sr.sprite = enemySprite;
             sr.color = p.Id switch { 1 => Color.white, 2 => new Color(0.9f, 0.8f, 0.6f), 3 => new Color(1f, 0.5f, 0.1f), 4 => new Color(1f, 0.2f, 0.1f), _ => Color.gray };
             sr.sortingOrder = 9;
@@ -958,10 +960,19 @@ namespace MazeOfKnight.Game
             return (Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0, 1), RoomCoords.PixelsPerUnit), b.dx, b.dy);
         }
 
+        // Con el estilo del remake, contorno de tinta y destello (Visuals/Atmosphere).
+        static void StyleSprite(SpriteRenderer sr)
+        {
+            if (Visuals.Atmosphere.CharacterMaterial != null) sr.sharedMaterial = Visuals.Atmosphere.CharacterMaterial;
+        }
+
+        public SpriteRenderer EnemyView(Enemy e) => e != null && enemyViews.TryGetValue(e, out var sr) ? sr : null;
+
         void ShowEnemy(Enemy e)
         {
             var go = new GameObject($"Enemigo 0x{e.Type:X2}");
             var sr = go.AddComponent<SpriteRenderer>();
+            StyleSprite(sr);
             sr.sprite = enemySprite;
             sr.color = EnemyColor(e);
             sr.sortingOrder = 8;
@@ -1239,6 +1250,7 @@ namespace MazeOfKnight.Game
             if (looseItems.Any(l => l.room == room && l.type == type)) return;
             var go = new GameObject($"Objeto 0x{type:X2} (sala {room.id})");
             var sr = go.AddComponent<SpriteRenderer>();
+            StyleSprite(sr);
             sr.sprite = itemSprite;
             sr.sortingOrder = 7;
             var p = RoomCoords.PixelToWorld(room, x + 8, y + 16);
@@ -1252,6 +1264,7 @@ namespace MazeOfKnight.Game
                 return;
             var go = new GameObject($"Objeto 0x{room.item.type:X2} (sala {room.id})");
             var sr = go.AddComponent<SpriteRenderer>();
+            StyleSprite(sr);
             sr.sprite = itemSprite;
             sr.sortingOrder = 5;
             go.transform.position = RoomCoords.PixelToWorld(room, room.item.x + 8, room.item.y + 16);

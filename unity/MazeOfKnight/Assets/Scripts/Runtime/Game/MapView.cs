@@ -22,19 +22,54 @@ namespace MazeOfKnight.Game
         public TileBase keyDoor;
         public TileBase revolvingDoor;
 
+        // Tiles del estilo del remake (Visuals/Atmosphere): si están puestos, sustituyen a los provisionales, se quita el
+        // fondo en damero y se añade el borde iluminado encima de cada suelo. La colisión no cambia.
+        public class StyleTiles
+        {
+            public TileBase Solid, SolidInner, SolidDeep, Rim, Ladder, Water, Lava, BossPassable;
+        }
+
+        public StyleTiles Style;
+
         Grid grid;
-        Tilemap front, rocks, keyDoors, doorsLayer;
+        Tilemap back, front, rim, rocks, keyDoors, doorsLayer;
+        MapData lastMap;
+        RoomWorld lastWorld;
+
+        // Tiles del estilo con otro color (cambio de paleta): los tilemaps copian el color al poner el tile.
+        public void RefreshStyle()
+        {
+            if (front != null) front.RefreshAllTiles();
+            if (rim != null) rim.RefreshAllTiles();
+        }
+
+        // Pone o quita el estilo sin rehacer el mapa (se conservan piedras, puertas y paredes abiertas).
+        public void SetStyle(StyleTiles style, StyleTiles placeholders)
+        {
+            Style = style;
+            if (front == null) return;
+            back.GetComponent<TilemapRenderer>().enabled = style == null;
+            rim.ClearAllTiles();
+            if (lastMap != null)
+                foreach (var data in lastMap.rooms)
+                    if (!data.room.shrine)
+                        RedrawCells(lastWorld, data.room, 0, 0, RoomCoords.Cols, RoomCoords.Rows);
+        }
 
         public void Build(MapData map, RoomWorld world)
         {
+            lastMap = map;
+            lastWorld = world;
             if (grid != null)
                 DestroyImmediate(grid.gameObject);
             grid = new GameObject($"{map.mapName} (salas)").AddComponent<Grid>();
             grid.transform.SetParent(transform, false);
             grid.cellSize = new Vector3(RoomCoords.TileSize, RoomCoords.TileSize, 0);
-            var back = Layer("Fondo", -10);
+            back = Layer("Fondo", -10);
+            back.GetComponent<TilemapRenderer>().enabled = Style == null;
             var doors = doorsLayer = Layer("Puertas", -8);
-            front = Layer("Colisión", -5);
+            front = Layer("Colisión", -6);
+            rim = Layer("Bordes", -5);
             rocks = Layer("Piedras", -4);
             keyDoors = Layer("Puertas con llave", -3);
 
@@ -47,9 +82,10 @@ namespace MazeOfKnight.Game
                     {
                         var cell = RoomCoords.Cell(room, col, row);
                         back.SetTile(cell, bg);
-                        var tile = TileFor(world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8));
+                        var tile = TileAtCell(world, room, col, row);
                         if (tile != null && !room.shrine)
                             front.SetTile(cell, tile);
+                        if (!room.shrine) UpdateRim(world, room, col, row);
                     }
                 if (room.doorWorld > 0)
                     Fill(doors, room, room.door.x, room.door.y, 4, 3, door);
@@ -67,11 +103,25 @@ namespace MazeOfKnight.Game
         // Vuelve a dibujar la capa de colisión de un rectángulo (en tiles) a partir del estado actual del mundo.
         public void RedrawCells(RoomWorld world, RoomModel room, int col, int row, int width, int height)
         {
-            for (int r = row; r < row + height; r++)
-                for (int c = col; c < col + width; c++)
+            // Con el estilo, el tono del macizo depende de los vecinos: se redibuja también un margen de 2.
+            int m = Style != null ? 2 : 0;
+            for (int r = row - m; r < row + height + m; r++)
+                for (int c = col - m; c < col + width + m; c++)
                     if (r >= 0 && r < RoomCoords.Rows && c >= 0 && c < RoomCoords.Cols)
-                        front.SetTile(RoomCoords.Cell(room, c, r),
-                            TileFor(world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8)));
+                        front.SetTile(RoomCoords.Cell(room, c, r), TileAtCell(world, room, c, r));
+            for (int r = row; r <= row + height; r++)
+                for (int c = col; c < col + width; c++)
+                    UpdateRim(world, room, c, r);
+        }
+
+        // Borde de arriba: un sólido con aire (o escalera, o agua) encima.
+        void UpdateRim(RoomWorld world, RoomModel room, int col, int row)
+        {
+            if (rim == null || row < 0 || row >= RoomCoords.Rows || col < 0 || col >= RoomCoords.Cols) return;
+            bool on = Style != null &&
+                      world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8) == TileClass.Solid &&
+                      world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8 - 8) != TileClass.Solid;
+            rim.SetTile(RoomCoords.Cell(room, col, row), on ? Style.Rim : null);
         }
 
         // Puerta de mundo que aparece en juego (la del mundo 10).
@@ -85,7 +135,10 @@ namespace MazeOfKnight.Game
                 for (int r = 0; r < RoomCoords.Rows; r++)
                     for (int c = 0; c < RoomCoords.Cols; c++)
                         if (world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8) == TileClass.Solid)
+                        {
                             front.SetTile(RoomCoords.Cell(room, c, r), null);
+                            rim.SetTile(RoomCoords.Cell(room, c, r), null);
+                        }
             }
             else
                 RedrawCells(world, room, 0, 0, RoomCoords.Cols, RoomCoords.Rows);
@@ -98,8 +151,12 @@ namespace MazeOfKnight.Game
             Fill(rocks, room, x, y, 2, 2, visible ? rock : null);
 
         // Vacía la colisión dibujada de un hueco (al romper una piedra).
-        public void ClearSolid(RoomModel room, int x, int y, int width, int height) =>
+        public void ClearSolid(RoomModel room, int x, int y, int width, int height)
+        {
             Fill(front, room, x, y, width, height, null);
+            if (lastWorld != null)
+                RedrawCells(lastWorld, room, x >> 3, (y - OriginalPhysics.RoomTopPx) >> 3, width, height + 1);
+        }
 
         static void Fill(Tilemap tm, RoomModel room, int x, int y, int width, int height, TileBase tile)
         {
@@ -110,8 +167,36 @@ namespace MazeOfKnight.Game
                         tm.SetTile(RoomCoords.Cell(room, c, r), tile);
         }
 
+        TileBase TileAtCell(RoomWorld world, RoomModel room, int col, int row)
+        {
+            var cls = world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8);
+            if (Style == null || cls != TileClass.Solid)
+                return TileFor(cls);
+            // Más oscuro cuanto más lejos del aire: el macizo se lee como masa y su borde como el sitio donde se pisa.
+            for (int d = 1; d <= 2; d++)
+                for (int dr = -d; dr <= d; dr++)
+                    for (int dc = -d; dc <= d; dc++)
+                    {
+                        if (System.Math.Max(System.Math.Abs(dr), System.Math.Abs(dc)) != d) continue;
+                        var t = world.TileAt(room, (col + dc) * 8, OriginalPhysics.RoomTopPx + (row + dr) * 8);
+                        if (t != TileClass.Solid && t != TileClass.BossPassable)
+                            return d == 1 ? Style.Solid : Style.SolidInner;
+                    }
+            return Style.SolidDeep;
+        }
+
         TileBase TileFor(TileClass cls)
         {
+            if (Style != null)
+                switch (cls)
+                {
+                    case TileClass.Solid: return Style.Solid;
+                    case TileClass.Ladder: return Style.Ladder;
+                    case TileClass.Water: return Style.Water;
+                    case TileClass.Lava: return Style.Lava;
+                    case TileClass.BossPassable: return Style.BossPassable;
+                    default: return null;
+                }
             switch (cls)
             {
                 case TileClass.Solid: return solid;

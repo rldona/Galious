@@ -19,3 +19,13 @@ Lo que falta por hacer en Unity. El estado de lo ya hecho está en [unity.md](un
 - **Eventos de sala de los mundos** (enemigos marcados): las escaleras y los bloques de muro salen del código [C]. Solo el del mundo 1, sala 12, está visto [O].
 - **Espadazos en el aire justo antes de aterrizar:** en la demo 0 (castillo 101), con espadazos cada 5 ticks y un aterrizaje hundido (169 → 168), el original anda un tick más tarde que el remake. Un espadazo suelto en el aire se comporta igual en los dos (player.md, "Comprobado con la demo 0").
 - **Campana en el mundo 10:** su lista de salas depende de E06E y no se ha mirado.
+
+## Prueba de partida completa
+
+- `Editor/Walkthrough/` recorre cada mapa con el motor del jugador (todas las teclas, tick a tick) y lleva la progresión del original hasta el final (menú **Maze of Knight → Prueba de partida completa**, informe en `logs/unity/walkthrough.md`). Escrito pero sin resultados: la búsqueda del castillo (con los ascensores) no acabó la primera pasada en 6 minutos. Falta reducir estados: buscar sala a sala desde sus entradas, quitar del estado lo que no cambia el movimiento y guardar los estados compactos en vez de copias del motor.
+- Encontrado al prepararla: las puertas de mundo están todas abiertas (`GameBootstrap.allDoorsOpen`). En el original cada una se desbloquea con la Gran Llave del mundo anterior (la del mundo 1, con la del castillo) y se abre con una animación (docs/state_machine.md, puertas). `BossFight` y `ShowWorld10Door` cambian el RoomModel importado en memoria (`right`, `doorWorld`).
+
+## Estilo visual
+
+- Arte dibujado para sustituir las siluetas generadas, la interfaz con filigrana, la estela del espadazo y las chispas, y el combate del jefe como cambio de luz (design_bible/12_estilo_visual.md).
+

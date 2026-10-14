@@ -1,7 +1,12 @@
 {
     "name": "MazeOfKnight.Editor",
     "rootNamespace": "MazeOfKnight.EditorTools",
-    "references": ["MazeOfKnight.Runtime"],
+    "references": [
+        "MazeOfKnight.Runtime",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime"
+    ],
     "includePlatforms": ["Editor"],
     "autoReferenced": true
 }
