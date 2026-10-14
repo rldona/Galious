@@ -77,6 +77,37 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void LaddersAtTheTopEdgeLeadIntoTheRoomAbove()
+        {
+            int n = 0;
+            var stuck = new System.Collections.Generic.List<string>();
+            foreach (var name in new[] { "castle" }.Concat(Enumerable.Range(1, 10).Select(OriginalWorlds.MapName)))
+            {
+                var world = World(Load(name));
+                foreach (var room in world.Rooms)
+                {
+                    var above = world.Room(room.up);
+                    if (above == null || room.shrine || above.shrine)
+                        continue;
+                    for (int c = 0; c < 31; c++)
+                    {
+                        if (room.collision[0][c] != 'H' || room.collision[0][c + 1] != 'H' || (c > 0 && room.collision[0][c - 1] == 'H'))
+                            continue;
+                        n++;
+                        var motor = new PlayerMotor(world, room, c * 8 + 8, 48);
+                        motor.Tick(new MotorInput { Up = true });
+                        for (int t = 0; t < 60 && motor.Room == room; t++)
+                            motor.Tick(new MotorInput { Up = true });
+                        if (motor.Room != above)
+                            stuck.Add($"{name} sala {room.id} col {c} (y {motor.Y}, {motor.State})");
+                    }
+                }
+            }
+            Assert.Greater(n, 0);
+            Assert.IsEmpty(stuck, string.Join("; ", stuck));
+        }
+
+        [Test]
         public void RocksSitOnSolidCells()
         {
             var castle = World(Load("castle"));

@@ -584,6 +584,46 @@ namespace MazeOfKnight.Tests
             }
         }
 
+        // Castillo, salas 95 y 85: la escalera de la 95 llega al borde de arriba y atraviesa el suelo de la 85.
+        static (RoomModel lower, RoomModel upper) StackedRooms()
+        {
+            var lower = FlatRoom(1, floorRow: 11, ladderCol: 24);
+            for (int r = 11; r < 20; r++)
+                lower.collision[r] = new string('#', 32);
+            var upper = FlatRoom(2, floorRow: 19);
+            lower.up = 2;
+            upper.down = 1;
+            return (lower, upper);
+        }
+
+        [Test]
+        public void ClimbingIntoTheRoomAboveStandsOnItsFloor()
+        {
+            var (lower, upper) = StackedRooms();
+            var motor = new PlayerMotor(new RoomWorld(new[] { lower, upper }), lower, 200, 120);
+            for (int t = 0; t < 120 && !(motor.Room == upper && motor.State == MotorState.Ground); t++)
+                motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(2, motor.Room.id, "cambia de sala sin otra pulsación");
+            Assert.AreEqual(MotorState.Ground, motor.State);
+            Assert.AreEqual(184, motor.Y, "de pie sobre el suelo de la sala de arriba");
+            for (int t = 0; t < 10; t++)
+                motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(184, motor.Y, "con ↑ mantenido no salta");
+        }
+
+        [Test]
+        public void DescendingThroughTheFloorIntoTheRoomBelow()
+        {
+            var (lower, upper) = StackedRooms();
+            var motor = new PlayerMotor(new RoomWorld(new[] { lower, upper }), upper, 200, 184);
+            motor.Tick(new MotorInput { Down = true });
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            for (int t = 0; t < 20; t++)
+                motor.Tick(new MotorInput { Down = true });
+            Assert.AreEqual(1, motor.Room.id);
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+        }
+
         [Test]
         public void WalkingOffTheRightEdgeEntersTheNeighbour()
         {

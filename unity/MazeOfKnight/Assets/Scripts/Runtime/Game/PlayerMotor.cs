@@ -359,9 +359,10 @@ namespace MazeOfKnight.Game
                 return true;
             if (dir > 0)
                 return false;
-            // Por el borde de arriba se sigue trepando (salida al castillo o escalera en la sala de arriba).
+            // Por el borde de arriba se sigue trepando: hacia la escalera de la sala de arriba, una salida al
+            // castillo o el suelo de la sala de arriba (que se cruza de golpe, como dentro de una sala).
             if (py < P.RoomTopPx)
-                return !SolidPairAt(X, py);
+                return true;
             return SolidPairAt(X, py);
         }
 
@@ -441,7 +442,8 @@ namespace MazeOfKnight.Game
         void CrossRoomEdges()
         {
             int dx = X < 0 ? -1 : X >= P.RoomWidthPx ? 1 : 0;
-            int dy = Y <= P.RoomTopPx && State != MotorState.Ground ? -1 : Y > P.RoomBottomPx ? 1 : 0;
+            // Arriba: en cuanto los pies pasan del borde (y < 32); de pie justo en el borde (y = 32) no se cambia.
+            int dy = Y < P.RoomTopPx ? -1 : Y > P.RoomBottomPx ? 1 : 0;
             if (dx == 0 && dy == 0)
                 return;
             var next = world.Neighbour(Room, dx, dy);
