@@ -30,7 +30,8 @@ namespace MazeOfKnight.Game.Visuals
         // Material de personajes (contorno + destello); null con el estilo quitado o sin el shader.
         public static Material CharacterMaterial { get; private set; }
 
-        const float RoomFadeSeconds = 0.33f, MapFadeSeconds = 0.8f;
+        // Entre salas no hay fundido: el corte seco del original es más fluido. Solo al entrar o salir de un mundo.
+        const float MapFadeSeconds = 0.8f;
         const float ParallaxFollow = 0.08f;          // cuánto "seguiría" una cámara virtual al jugador
 
         Camera cam;
@@ -56,7 +57,7 @@ namespace MazeOfKnight.Game.Visuals
         string shownMap;
         RoomModel shownRoom;
         int paletteOverride = -1;
-        WorldPalette palette;
+        WorldPalette palette, tiledPalette;
         float fadeLeft, fadeTotal;
         int lastHurt;
         bool subscribed;
@@ -376,7 +377,7 @@ namespace MazeOfKnight.Game.Visuals
             bool mapChanged = shownMap != game.mapName;
             if (mapChanged || motor.Room != shownRoom)
             {
-                if (shownRoom != null || mapChanged) StartFade(mapChanged && shownMap != null ? MapFadeSeconds : RoomFadeSeconds);
+                if (mapChanged && shownMap != null) StartFade(MapFadeSeconds);
                 shownMap = game.mapName;
                 shownRoom = motor.Room;
                 if (styled) BuildRoom(motor.Room);
@@ -397,7 +398,18 @@ namespace MazeOfKnight.Game.Visuals
         void BuildRoom(RoomModel room)
         {
             palette = WorldPalette.For(paletteOverride >= 0 ? paletteOverride : MapIndex());
-            ColorTiles(palette);
+            // Recolorear los tiles recorre todo el mapa: solo cuando cambia la paleta. Las capas del tema se generan
+            // entonces todas a la vez, para no generarlas al entrar en una sala.
+            if (palette != tiledPalette)
+            {
+                tiledPalette = palette;
+                ColorTiles(palette);
+                for (int v = 0; v < 3; v++)
+                    foreach (var d in new[] { ShapePainter.Depth.Far, ShapePainter.Depth.Mid, ShapePainter.Depth.Near })
+                        LayerSprite(palette.Theme, d, v);
+                LayerSprite(palette.Theme, ShapePainter.Depth.Front, 0);
+                LayerSprite(palette.Theme, ShapePainter.Depth.Front, 1);
+            }
             globalLight.color = palette.Ambient;
             globalLight.intensity = palette.AmbientIntensity;
             playerLight.color = Color.Lerp(Color.white, palette.Accent, 0.35f);

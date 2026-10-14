@@ -40,7 +40,7 @@ La cámara es fija por sala, como en el original. La profundidad sale de un para
 | Piedras, puertas, ascensores | −4 … 6 | 1 | provisionales | iluminado |
 | Personajes, enemigos, objetos | 7 – 11 | 1 | provisionales | contorno + destello |
 | Primer plano | 50 | 1,6 | silueta negra en los márgenes: matorral abajo, columnas o rocas en los bordes, lianas o estalactitas arriba | sin luz |
-| Fundido | 1000 | — | negro al cambiar de sala | sin luz |
+| Fundido | 1000 | — | negro al cambiar de mapa | sin luz |
 
 **Macizo de la sala.** Los tiles sólidos se oscurecen según su distancia al aire: el borde (1 tile) lleva el color de suelo, a 2 tiles es más oscuro y más adentro casi negro. Encima de cada suelo pisable va un borde iluminado con el color *Rim*. Así el macizo se lee como masa y su borde como el sitio donde se pisa.
 
@@ -83,8 +83,9 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 
 ## Transiciones
 
-- **Cambio de sala:** fundido desde negro en 0,33 s. Coincide con la pausa de 11 ticks del original, así que no añade tiempo de juego.
+- **Cambio de sala:** corte seco, como el original. Probamos un fundido desde negro de 0,33 s y quedaba menos fluido.
 - **Cambio de mapa** (entrar o salir de un mundo): fundido de 0,8 s.
+- Nada pesado al cambiar de sala: las capas de un tema se generan todas al cambiar de paleta y los tiles solo se recolorean entonces.
 
 ## Personajes y efectos
 
