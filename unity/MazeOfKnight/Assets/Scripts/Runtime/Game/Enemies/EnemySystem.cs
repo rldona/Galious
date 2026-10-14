@@ -77,8 +77,14 @@ namespace MazeOfKnight.Game.Enemies
         {
             Context.Tick++;
             foreach (var e in enemies)
-                if (e.Alive)
-                    e.Tick(Context);
+            {
+                if (!e.Alive)
+                    continue;
+                e.Tick(Context);
+                // b06:B452: se borra el enemigo que sale de la pantalla (y ≥ 0xB8 o x ≥ 0xF9).
+                if (e.Y >= 0xB8 || e.X >= 0xF9)
+                    e.Alive = false;
+            }
         }
 
         public int ImmuneItem(Enemy e) => catalog.TryGetValue(e.Type, out var info) ? info.immuneItem : 0;

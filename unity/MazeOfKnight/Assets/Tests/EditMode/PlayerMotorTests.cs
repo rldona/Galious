@@ -625,6 +625,38 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void JumpingAtTheTopDoesNotLeaveTheRoom()
+        {
+            // Medido (mundo 1, sala 1, salida al castillo arriba): desde y = 56 el salto llega a y = 37 y no sale.
+            var room = FlatRoom(floorRow: 3);
+            room.up = 0xFE;
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 108, 56);
+            int exit = 0, minY = 56;
+            motor.CastleExitReached += c => exit = c;
+            for (int t = 0; t < 60; t++)
+            {
+                motor.Tick(new MotorInput { Up = t < 30 });
+                minY = System.Math.Min(minY, motor.Y);
+            }
+            Assert.AreEqual(0, exit, "no sale del mundo");
+            Assert.AreEqual(37, minY);
+            Assert.AreEqual(56, motor.Y);
+        }
+
+        [Test]
+        public void CanWalkAwayFromAWallItOverlaps()
+        {
+            // Cayó pegado a una pared y la solapa por la derecha (x + 7 dentro del muro de la columna 30).
+            var room = FlatRoom(floorRow: 19);
+            for (int r = 0; r < 19; r++)
+                room.collision[r] = room.collision[r].Substring(0, 30) + "##";
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 235, 184);
+            for (int t = 0; t < 5; t++)
+                motor.Tick(new MotorInput { Left = true });
+            Assert.AreEqual(225, motor.X);
+        }
+
+        [Test]
         public void WalkingOffTheRightEdgeEntersTheNeighbour()
         {
             var a = FlatRoom(1);

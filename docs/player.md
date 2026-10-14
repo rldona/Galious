@@ -75,6 +75,7 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 | Punto más alto | 4 ticks quieto |
 | Bajada | tabla **1 2 3 4 4 5 5 6**, y luego 6 hasta tocar suelo (velocidad máxima de caída: 6 px/tick) |
 | Soltar ↑ (solo Popolon) | tras 1 tick sin moverse, salta a la última entrada de la subida (1), hace los 4 ticks arriba y baja. Aphrodite hace siempre el salto entero |
+| Borde de arriba | el salto no sale por arriba: la cabeza choca con el marcador por encima de y = 24 (mundo 1, sala 1: desde y = 56 sube hasta 37). Solo las escaleras llevan a la sala de arriba [O] |
 | Chocar con el techo | igual que soltar ↑. El tope de la cabeza está entre 9 y 13 px por encima de los pies (medido en la sala 97: choca en y = 110 y el paso de 1 px aún entra) |
 | Control en el aire durante el salto | 2 px/tick subiendo y en el primer tick arriba; **3 px/tick** desde el segundo tick arriba hasta el tick en que aterriza |
 | Caer por un borde (E500 = 2) | la caída empieza en la entrada "3" de la tabla de bajada (3 4 4 5 5 6…) y **no hay control horizontal** |

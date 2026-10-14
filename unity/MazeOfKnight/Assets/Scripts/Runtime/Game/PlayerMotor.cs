@@ -266,7 +266,7 @@ namespace MazeOfKnight.Game
             }
             // Remake: soltarse de la escalera hacia un lado con sitio libre (RemakeRules).
             int side = input.Left == input.Right ? 0 : input.Left ? -1 : 1;
-            if (RemakeRules.LeaveLadderSideways && side != 0 && !input.Up && !input.Down && !BodyBlockedAt(X + side))
+            if (RemakeRules.LeaveLadderSideways && side != 0 && !input.Up && !input.Down && !BodyBlockedAt(X + side, side))
             {
                 StartFall(0, true);
                 MoveHorizontal(input, P.AirSpeedFalling);
@@ -312,7 +312,7 @@ namespace MazeOfKnight.Game
         {
             for (int i = 0; i < P.KnockbackSpeed; i++)
             {
-                if (BodyBlockedAt(X + knockDir))
+                if (BodyBlockedAt(X + knockDir, knockDir))
                     break;
                 X += knockDir;
             }
@@ -451,14 +451,20 @@ namespace MazeOfKnight.Game
         bool HeadBlocked(int newY)
         {
             int py = newY - P.HeadHeight;
+            // Por encima de la sala está el marcador: el salto no pasa de y = 24 (medido en el mundo 1, sala 1:
+            // desde y = 56 sube hasta 37 y no sale por arriba). Solo las escaleras llevan a la sala de arriba.
+            if (py < P.RoomTopPx)
+                return py < P.RoomTopPx - 8;
             return world.Solid(Room, X + P.FootLeft, py) || world.Solid(Room, X, py) || world.Solid(Room, X + P.FootRight, py);
         }
 
-        bool BodyBlockedAt(int x)
+        // Pared en el borde hacia el que se mueve (dir), con el cuerpo en x. Solo ese borde: si el jugador ha caído
+        // pegado a una pared y la solapa por el otro lado, puede alejarse de ella.
+        bool BodyBlockedAt(int x, int dir)
         {
-            int edgeLeft = x + P.FootLeft, edgeRight = x + P.FootRight;
+            int edge = dir < 0 ? x + P.FootLeft : x + P.FootRight;
             foreach (int py in new[] { Y - P.HeadHeight, Y - 8, Y - 1 })
-                if (world.Solid(Room, edgeLeft, py) || world.Solid(Room, edgeRight, py))
+                if (world.Solid(Room, edge, py))
                     return true;
             return false;
         }
@@ -472,7 +478,7 @@ namespace MazeOfKnight.Game
             speed = ScaleHorizontal(speed);
             for (int i = 0; i < speed; i++)
             {
-                if (BodyBlockedAt(X + dir))
+                if (BodyBlockedAt(X + dir, dir))
                     break;
                 X += dir;
             }

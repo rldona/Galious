@@ -57,11 +57,16 @@ namespace MazeOfKnight.Game.Enemies
             if (Y > P.RoomBottomPx - Height) { Y = P.RoomBottomPx - Height; Vy = -Math.Abs(Vy); }
         }
 
+        // Ancho extra hacia donde mira (segundo sprite del esqueleto): cuenta para el contacto y la espada, no
+        // para chocar con las paredes, y en el original se dibuja encima de ellas.
+        public int FrontExtra;
+
         // Caja que hace daño (la parte visible si crece desde el suelo o el techo).
         public (float x0, float y0, float x1, float y1) Box()
         {
             float h = Height * Grow;
-            return GrowsDown ? (X, Y, X + Width, Y + h) : (X, Y + Height - h, X + Width, Y + Height);
+            float x0 = FacingLeft ? X - FrontExtra : X, x1 = FacingLeft ? X + Width : X + Width + FrontExtra;
+            return GrowsDown ? (x0, Y, x1, Y + h) : (x0, Y + Height - h, x1, Y + Height);
         }
 
         public bool GrowsDown;           // cuelga del techo (crece hacia abajo)

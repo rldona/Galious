@@ -108,6 +108,21 @@ namespace MazeOfKnight.Tests
             Assert.IsEmpty(stuck, string.Join("; ", stuck));
         }
 
+        // Toda la caja (cada 7 px, con 1 px de margen) sobre algún sólido que no sea una piedra: los generadores
+        // ponen a veces al enemigo encima de una piedra, como en el original (castillo, salas 12, 58 y 117).
+        static bool InsideWall(RoomWorld world, RoomModel room, Enemy e)
+        {
+            for (int dy = 1; dy < e.Height - 1; dy += 7)
+                for (int dx = 1; dx < e.Width - 1; dx += 7)
+                {
+                    int px = (int)e.X + dx, py = (int)e.Y + dy;
+                    bool rock = room.rocks.Any(r => px >= r.x && px < r.x + 16 && py >= r.y && py < r.y + 16);
+                    if (!rock && world.Solid(room, px, py))
+                        return true;
+                }
+            return false;
+        }
+
         [Test]
         public void ImplementedEnemiesRunInEveryRoom()
         {
@@ -127,13 +142,16 @@ namespace MazeOfKnight.Tests
                     sys.EnterRoom(world, room, motor);
                     enemies += sys.Enemies.Count;
                     for (int t = 0; t < 600; t++)
-                        sys.Tick();
-                    foreach (var e in sys.Enemies.Where(e => e is Skeleton || e is Roller))
                     {
-                        if (e.X < -1 || e.X + e.Width > 257 || e.Y < 31 || e.Y + e.Height > 193)
-                            problems.Add($"{name} {room.id} 0x{e.Type:X2} fuera de la sala ({e.X:0},{e.Y:0})");
-                        else if (world.Solid(room, (int)e.X + 4, (int)e.Y + 8))
-                            problems.Add($"{name} {room.id} 0x{e.Type:X2} dentro de un muro ({e.X:0},{e.Y:0})");
+                        sys.Tick();
+                        foreach (var e in sys.Enemies.Where(e => e.Alive && (e is Skeleton || e is Roller)))
+                        {
+                            if (e.X < -1 || e.X + e.Width > 257 || e.Y < 31 || e.Y >= 0xB8)   // b06:B452 los borra desde y = 0xB8
+                                problems.Add($"{name} {room.id} 0x{e.Type:X2} t{t} fuera de la sala ({e.X:0},{e.Y:0})");
+                            else if (InsideWall(world, room, e))
+                                problems.Add($"{name} {room.id} 0x{e.Type:X2} t{t} dentro de un muro ({e.X:0},{e.Y:0}) {e}");
+                        }
+                        if (problems.Count > 0) break;
                     }
                 }
             }

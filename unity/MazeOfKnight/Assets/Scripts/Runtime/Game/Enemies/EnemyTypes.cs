@@ -64,7 +64,9 @@ namespace MazeOfKnight.Game.Enemies
         }
     }
 
-    // 0x25: esqueleto (dos sprites, 32 x 16). Anda a 1,125 px/tick hacia el jugador, salta (vy -4,31 o -1,81,
+    // 0x25: esqueleto: sprite base de 16 px y un segundo sprite hacia donde mira (medido en openMSX: castillo sala 9,
+    // mirando a la derecha, sprites en x y x + 16; sala 83, a la izquierda, en x y x − 16). Choca con las paredes
+    // solo con el sprite base; el segundo puede quedar sobre un muro, como en el original. Anda a 1,125 px/tick hacia el jugador, salta (vy -4,31 o -1,81,
     // vx ±2, gravedad 0,3125, vy máx. 6), descansa 32..159 ticks. Al recibir golpes se enrosca (3 pasos), queda
     // enroscado 60 ticks y se desenrosca un paso cada 8 recuperando la vida (8).
     // [I] Simplificado: el original sondea plataformas para decidir el salto (b04:9A67, 9CA3); aquí, al acabar su
@@ -80,7 +82,7 @@ namespace MazeOfKnight.Game.Enemies
 
         public override void Init(EnemyContext ctx)
         {
-            Width = 32;
+            FrontExtra = 16;
             maxHp = Hp;
             walkTimer = ctx.Rand(32, 159);
             jumpTimer = ctx.Rand(0, 127);
@@ -108,7 +110,7 @@ namespace MazeOfKnight.Game.Enemies
                     bool edge = FacingLeft ? X <= 0x10 : X >= 0xD8;
                     if (wall || gap || edge)
                     {
-                        float land = FacingLeft ? X - 32 : X + 48;
+                        float land = FacingLeft ? X - 32 : X + 32;
                         if (!edge && !wall && Solid(ctx, land, Y + 32)) Jump(-1.8125f);
                         else { FacingLeft = !FacingLeft; Vx = -Vx; }
                         break;
@@ -132,7 +134,7 @@ namespace MazeOfKnight.Game.Enemies
                     {
                         if (steps < 0)
                         {
-                            if (Y - 1 < P.RoomTopPx || Solid(ctx, X + 4, Y - 1) || Solid(ctx, X + Width - 4, Y - 1))
+                            if (Y - 1 < P.RoomTopPx || Solid(ctx, X, Y - 1) || Solid(ctx, X + 8, Y - 1) || Solid(ctx, X + Width - 1, Y - 1))
                             {
                                 Vy = 0; yAcc = 0;
                                 break;
@@ -170,6 +172,8 @@ namespace MazeOfKnight.Game.Enemies
             }
             Grow = 0.5f + curl / 6f;
         }
+
+        public override string ToString() => $"fase {phase} vx {Vx:0.00} vy {Vy:0.00}";
 
         public override bool OnHit(EnemyContext ctx)
         {

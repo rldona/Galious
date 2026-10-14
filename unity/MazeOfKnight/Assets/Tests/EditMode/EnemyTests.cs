@@ -161,6 +161,22 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void SkeletonSecondSpriteIsOnTheSideItFaces()
+        {
+            // Medido: mirando a la izquierda el segundo sprite está en x − 16; a la derecha, en x + 16.
+            var (sys, motor, _) = Setup(Room(-1, new EntityJson { type = 0x25, x = 120, y = 104 }), 40, 120);
+            var skel = sys.Enemies[0];
+            Assert.IsTrue(skel.FacingLeft, "mira al jugador");
+            var (x0, _, x1, _) = skel.Box();
+            Assert.AreEqual(104, x0);
+            Assert.AreEqual(136, x1);
+            skel.FacingLeft = false;
+            (x0, _, x1, _) = skel.Box();
+            Assert.AreEqual(120, x0);
+            Assert.AreEqual(152, x1);
+        }
+
+        [Test]
         public void ContactBoxMatchesTheMeasurement()
         {
             // Medido con el esqueleto: daña desde que el borde derecho del jugador (x + 7) toca su borde izquierdo.

@@ -761,6 +761,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** el significado exacto de E500 = 0 (¿jugador quieto o andando?). No seguí 9D1C ni 9D2D en detalle.
 
 #### 0x25 — armadillo o caracol que se enrosca al recibir golpes (dos sprites, cae entre plataformas)
+- **Medido en openMSX** [O]: el segundo sprite va **hacia donde mira** (castillo, sala 9, mirando a la derecha: sprites en x y x + 16; sala 83, mirando a la izquierda: en x y x − 16). Se dibuja aunque quede sobre un muro: en la sala 9 nace medio metido en la pared. El contacto con el jugador abarca los dos sprites.
 - **Vida / recompensa:** 8 (se restaura) / `82 ac 0f 08 4e`.
 - **Inicio (98C0):** activa el bit 1 de IX+2 (objeto de dos sprites [I]) [C]. +08 = 0..127 y **mira al jugador** (7CA9) [C].
   Gravedad 0x50 (0,3125 px/frame²), +1A = 32..159 [C]. vx = ±**1,125 px/frame** hacia el jugador [C].
