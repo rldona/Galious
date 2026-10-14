@@ -229,6 +229,15 @@ namespace MazeOfKnight.Game
 
         void TickLadder(MotorInput input)
         {
+            // A la altura de un suelo (sólido bajo los pies) se puede salir de la escalera andando, también cuando
+            // la escalera atraviesa ese suelo y sigue por encima y por debajo.
+            if ((input.Left || input.Right) && !input.Up && !input.Down &&
+                ((Y - P.RoomTopPx) & 7) == 0 && SolidUnderFeet())
+            {
+                State = MotorState.Ground;
+                TickGround(input);
+                return;
+            }
             if (input.Up)
             {
                 Y -= P.LadderSpeed;

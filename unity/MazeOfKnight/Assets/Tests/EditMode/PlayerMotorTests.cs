@@ -180,6 +180,36 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void StepOffTheLadderAtAFloorItCrosses()
+        {
+            // Escalera que atraviesa el suelo (fila 11): sube desde abajo hasta y = 120 y sale andando.
+            var room = LadderThroughFloor();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 150);
+            motor.Tick(new MotorInput { Up = true });
+            while (motor.Y > 120)
+                motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            for (int t = 0; t < 5; t++)
+                motor.Tick(new MotorInput { Right = true });
+            Assert.AreEqual(MotorState.Ground, motor.State);
+            Assert.AreEqual(130, motor.X);
+            Assert.AreEqual(120, motor.Y);
+        }
+
+        [Test]
+        public void NoSteppingOffMidLadder()
+        {
+            var room = LadderThroughFloor();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 150);
+            motor.Tick(new MotorInput { Up = true });
+            motor.Tick(new MotorInput { Up = true });
+            for (int t = 0; t < 5; t++)
+                motor.Tick(new MotorInput { Right = true });
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            Assert.AreEqual(120, motor.X);
+        }
+
+        [Test]
         public void LadderEndingUnderAFloorExitsOnTop()
         {
             var room = LadderThroughFloor(ladderAbove: false);
