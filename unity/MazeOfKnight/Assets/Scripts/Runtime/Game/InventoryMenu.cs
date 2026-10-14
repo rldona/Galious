@@ -33,6 +33,7 @@ namespace MazeOfKnight.Game
             Open = true;
             row = 0;
             character = game.Motor.Character;
+            game.Lives[(int)character]++;      // el menú cuenta la vida en juego (E058 + E501)
             weapon = game.SelectedWeapon != 0 ? game.SelectedWeapon : OwnedWeapons().FirstOrDefault();
             game.SetPaused(true);
         }
@@ -40,7 +41,16 @@ namespace MazeOfKnight.Game
         void CloseMenu()
         {
             Open = false;
+            game.Lives[(int)character]--;      // al cerrar, el elegido gasta una
             game.ApplyMenu(character, weapon);
+            game.SetPaused(false);
+        }
+
+        // Cerrar sin elegir (Angel Ring, Ala): sigue el mismo personaje.
+        void CloseKeeping()
+        {
+            Open = false;
+            game.Lives[(int)game.Motor.Character]--;
             game.SetPaused(false);
         }
 
@@ -64,7 +74,8 @@ namespace MazeOfKnight.Game
                 if (row == 0)
                 {
                     var other = character == Character.Popolon ? Character.Aphrodite : Character.Popolon;
-                    string why = game.Inventory.WorldEntryBlocked(game.Inventory.CurrentWorld, other);
+                    string why = game.Lives[(int)other] <= 0 ? $"{other} no tiene vidas"
+                        : game.Inventory.WorldEntryBlocked(game.Inventory.CurrentWorld, other);
                     if (why == null) character = other;
                     else game.Say(why);
                 }
@@ -77,15 +88,14 @@ namespace MazeOfKnight.Game
             }
             if (kb.enterKey.wasPressedThisFrame && game.Inventory.Has(Inventory.AngelRing))
             {
-                Open = false;
-                game.SetPaused(false);
+                CloseKeeping();
                 game.UseAngelRing();
                 return;
             }
             for (int w = 1; w <= 9; w++)
                 if (kb[(Key)((int)Key.Digit1 + w - 1)].wasPressedThisFrame && game.Inventory.Has(Inventory.Wing))
                 {
-                    if (game.UseWing(w)) { Open = false; game.SetPaused(false); }
+                    if (game.UseWing(w)) CloseKeeping();
                     return;
                 }
         }
@@ -105,10 +115,11 @@ namespace MazeOfKnight.Game
 
             Box(R(0, 32, 256, 160), new Color(0, 0, 0, 0.92f));
             // Retratos (fila de personaje).
-            Box(R(96, 40, 16, 24), new Color(0.35f, 0.55f, 1f));
-            Box(R(144, 40, 16, 24), new Color(1f, 0.45f, 0.7f));
-            GUI.Label(R(80, 64, 48, 8), "Popolon", small);
-            GUI.Label(R(128, 64, 48, 8), "Aphrodite", small);
+            // El retrato solo sale si ese personaje tiene vidas.
+            if (game.Lives[1] > 0) Box(R(96, 40, 16, 24), new Color(0.35f, 0.55f, 1f));
+            if (game.Lives[0] > 0) Box(R(144, 40, 16, 24), new Color(1f, 0.45f, 0.7f));
+            GUI.Label(R(80, 64, 48, 8), $"Popolon x{game.Lives[1]}", small);
+            GUI.Label(R(128, 64, 48, 8), $"Aphrodite x{game.Lives[0]}", small);
             if (row != 0 || blink)
                 Frame(R(character == Character.Popolon ? 94 : 142, 38, 20, 28), Color.yellow);
 

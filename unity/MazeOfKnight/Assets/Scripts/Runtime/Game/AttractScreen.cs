@@ -14,6 +14,7 @@ namespace MazeOfKnight.Game
         public static Mode Current = Mode.Attract;
         public static int Trips, Demo;
         public static bool StartAtTitle;
+        public static bool LoadSave;          // L en el título: partida guardada (en el original, la contraseña)
 
         public static void Go(Mode mode, bool atTitle = false)
         {
@@ -80,6 +81,12 @@ namespace MazeOfKnight.Game
                     bool start = kb != null && (kb.spaceKey.wasPressedThisFrame || kb.mKey.wasPressedThisFrame) ||
                                  Gamepad.current?.buttonSouth.wasPressedThisFrame == true || Gamepad.current?.startButton.wasPressedThisFrame == true;
                     if (start) { Next(Stage.PlayStart); break; }
+                    if (kb != null && kb.lKey.wasPressedThisFrame && SaveData.Exists)
+                    {
+                        AttractMode.LoadSave = true;
+                        Next(Stage.PlayStart);
+                        break;
+                    }
                     if (frame >= data.Frames("title", 264))
                     {
                         if ((AttractMode.Trips & 1) == 0 && data.demos.Length > 0) { Running = false; AttractMode.Go(AttractMode.Mode.Demo); }
@@ -131,7 +138,10 @@ namespace MazeOfKnight.Game
                     GUI.Label(R(72, 8, 112, 96), "MAZE\nOF\nKNIGHT", big);
                     Sword(R);
                     if (stage == Stage.Title)
+                    {
                         GUI.Label(R(72, 136, 120, 8), "PUSH SPACE KEY", mid);
+                        if (SaveData.Exists) GUI.Label(R(0, 160, 256, 8), "L: CONTINUAR LA PARTIDA GUARDADA", small);
+                    }
                     else if (frame >= 1 && ((44 - (int)frame) & 4) == 0)   // E004 de 44 a 1: 4 frames sí, 4 no
                         GUI.Label(R(88, 136, 120, 8), "PLAY START", mid);
                     break;

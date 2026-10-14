@@ -33,6 +33,14 @@ namespace MazeOfKnight.Game
         // Vitalidad por personaje (Aphrodite = 0, Popolon = 1), en unidades del original.
         public readonly int[] Vitality = { OriginalPhysics.StartVitality, OriginalPhysics.StartVitality };
         public readonly int[] MaxVitality = { OriginalPhysics.StartVitality, OriginalPhysics.StartVitality };
+        // Daño, cura y relleno van a un pendiente que se aplica 1 unidad cada 4 ticks (b01:6171).
+        public readonly int[] PendingVitality = { 0, 0 };
+        int vitalityTicks;
+        // Vidas de reserva (E058 Aphrodite, E059 Popolon): al empezar 1 y 0. El personaje en juego no cuenta la suya.
+        public readonly int[] Lives = { 1, 0 };
+        // Crédito de resurrección de la Muerte (E05A/E05B): 1 para cada uno.
+        public readonly int[] ResurrectionCredit = { 1, 1 };
+        public bool GameOver { get; private set; }
         int liquidTicks;
 
         readonly Dictionary<string, MapData> maps = new Dictionary<string, MapData>();
@@ -118,6 +126,7 @@ namespace MazeOfKnight.Game
             Lifts = new LiftSystem(liftsJson != null ? JsonUtility.FromJson<LiftsData>(liftsJson.text) : null) { InCastle = mapName == "castle" };
             motor.Lifts = Lifts;
             motor.DoorEntered += EnterWorld;
+            motor.RoomChanged += OnRoomChanged;
             motor.CastleExitReached += ExitToCastle;
             player.Init(motor);
             player.Ticked += AfterTick;
@@ -138,6 +147,11 @@ namespace MazeOfKnight.Game
             var data = json != null ? JsonUtility.FromJson<AttractData>(json.text) : new AttractData();
             if (skipAttract && AttractMode.Current == AttractMode.Mode.Attract)
                 AttractMode.Current = AttractMode.Mode.Game;
+            if (AttractMode.Current == AttractMode.Mode.Game && AttractMode.LoadSave)
+            {
+                AttractMode.LoadSave = false;
+                if (!LoadSavedGame()) Say("No hay partida guardada");
+            }
             switch (AttractMode.Current)
             {
                 case AttractMode.Mode.Attract:
@@ -197,7 +211,7 @@ namespace MazeOfKnight.Game
                 if (room.hasItem && (room.item.x != 0 || room.item.y != 0) &&
                     !rocks.All.Any(r => !r.broken && r.room == room && r.x == room.item.x && r.y == room.item.y))
                     ShowItem(room);
-            ApplyCarpet();
+            ApplyWorldItems();
             foreach (var (m, id) in firedEvents)
                 if (m == name) ApplyEvent(id);
         }
@@ -245,6 +259,7 @@ namespace MazeOfKnight.Game
                 harpUsed = false;
             }
             motor.Shoes = Inventory.Has(Inventory.Shoes);
+            if (Collected.Count != itemsApplied) ApplyWorldItems();
             TickBossFight();
             if (TouchBaby())
                 return;
@@ -286,6 +301,25 @@ namespace MazeOfKnight.Game
             if (Keys != keysBefore)
                 Say($"Llave usada ({Keys})");
             LiquidDamage();
+            TickVitality();
+            if (mapName == "castle")
+            {
+                var spot = castleItems.Tick(motor, firedEvents.Contains((mapName, motor.Room.id)), Bosses.Defeated.Contains, Collected.Contains);
+                if (spot != null) { SpawnItem(motor.Room, spot.Value.Type, spot.Value.X, spot.Value.Y); Say("¡Ha aparecido algo!"); }
+            }
+            for (int i = looseItems.Count - 1; i >= 0; i--)
+            {
+                var (room, type, ix, iy, go) = looseItems[i];
+                if (room != motor.Room) { go.SetActive(false); continue; }
+                go.SetActive(true);
+                if (motor.X + OriginalPhysics.FootRight < ix || motor.X + OriginalPhysics.FootLeft > ix + 15 ||
+                    motor.Y - OriginalPhysics.HeadHeight > iy + 15 || motor.Y <= iy)
+                    continue;
+                Inventory.Add(type);
+                Destroy(go);
+                looseItems.RemoveAt(i);
+                Say(PickUp(type));
+            }
             // Recoger un objeto a la vista al tocarlo.
             for (int i = visibleItems.Count - 1; i >= 0; i--)
             {
@@ -303,7 +337,7 @@ namespace MazeOfKnight.Game
                 if (room.item.type == Inventory.GreatKey && Inventory.GreatKeyBoost(Vitality, MaxVitality, motor.Character))
                     Say($"Vitalidad máxima {MaxVitality[(int)motor.Character]}");
                 if (room.item.type == Inventory.Carpet)
-                    ApplyCarpet();
+                    ApplyWorldItems();
                 Destroy(go);
                 visibleItems.RemoveAt(i);
                 Say(PickUp(room.item.type));
@@ -318,7 +352,7 @@ namespace MazeOfKnight.Game
             if (enemy is Fairy)
             {
                 // El hada rellena la vitalidad (b04:612C).
-                Vitality[c] = MaxVitality[c];
+                Refill(c);
                 enemy.Alive = false;
                 Say("Vitalidad llena");
                 return;
@@ -352,12 +386,10 @@ namespace MazeOfKnight.Game
             if (HurtTicks > 0)
                 return;
             int c = (int)motor.Character;
-            Vitality[c] -= damage;
+            PendingVitality[c] -= damage;
             motor.Knockback(dir);
             HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
             Say(message);
-            if (Vitality[c] <= 0)
-                LoseLife();
         }
 
         // ---------- armas secundarias ----------
@@ -384,11 +416,23 @@ namespace MazeOfKnight.Game
         // ---------- eventos de sala ----------
 
         // Muere el último enemigo marcado de la sala: aparecen sus escaleras y se abren sus muros (en esta sala o en
-        // otra del mismo mundo) y se queda así. En el castillo pone E61C = 1 (objetos con condición, en el backlog).
+        // otra del mismo mundo) y se queda así. En el castillo pone E61C = 1 (objetos con condición, CastleItems).
         void OnRoomCleared(RoomModel room)
         {
             firedEvents.Add((mapName, room.id));
             if (ApplyEvent(room.id) > 0) Say("Se oye algo abrirse…");
+        }
+
+        // Mundo 3, sala 4: el pozo enlaza hacia arriba consigo mismo. Subir 5 veces seguidas abre el muro de arriba a la
+        // derecha (E0A0; salir de la sala por otro lado reinicia la cuenta, b00:479C).
+        int shaftClimbs;
+        void OnRoomChanged(RoomModel from, RoomModel to)
+        {
+            if (Inventory.CurrentWorld != 3 || from == null || from.id != 4) return;
+            if (to.id != 4 || motor.Y < OriginalPhysics.RoomBottomPx - 32) { shaftClimbs = 0; return; }
+            if (++shaftClimbs < 5 || firedEvents.Contains((mapName, -1))) return;
+            firedEvents.Add((mapName, -1));
+            if (ApplyEvent(-1) > 0) Say("Se oye algo abrirse…");
         }
 
         int ApplyEvent(int openerRoom)
@@ -497,7 +541,7 @@ namespace MazeOfKnight.Game
                             && World.Ladder(motor.Room, e.x, OriginalPhysics.RoomTopPx + 2);
                 if (!enter) continue;
                 if (s.state == 16 && s.entry.needsItem != 0 && !Inventory.Has(s.entry.needsItem)) return false;
-                shrineScreen.Show(new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys));
+                shrineScreen.Show(new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys, Lives, ResurrectionCredit, motor.Character));
                 SetPaused(true);
                 return true;
             }
@@ -507,6 +551,15 @@ namespace MazeOfKnight.Game
         public void LeaveShrine(ShrineVisit v)
         {
             Arrows = v.Arrows; Coins = v.Coins; Keys = v.Keys;
+            if (v.Revived)
+            {
+                // El otro personaje recupera 1 vida, la vitalidad al máximo y la experiencia a 0 (suena 0x30).
+                int o = v.RevivedCharacter;
+                Vitality[o] = MaxVitality[o];
+                PendingVitality[o] = 0;
+                Inventory.Experience[o] = 0;
+                Say($"{(Character)o} ha revivido");
+            }
             var s = v.Shrine;
             var room = World.Room(s.exit.toRoom);
             if (s.state == 16)
@@ -514,6 +567,71 @@ namespace MazeOfKnight.Game
             else
                 motor.PlaceOnLadder(room, s.exit.x, s.exit.y);
             SetPaused(false);
+        }
+
+        // ---------- partida guardada (Demeter; SaveGame.cs) ----------
+
+        public void SaveGameNow(ShrineVisit v)
+        {
+            var d = new SaveData
+            {
+                items = new List<int>(Collected),
+                worldItems = Inventory.WorldItemsPacked(),
+                openedWorlds = new List<int>(Inventory.OpenedDoors),
+                bossesDefeated = new List<int>(Bosses.Defeated),
+                bibleUses = Inventory.BibleUses,
+                experience = (int[])Inventory.Experience.Clone(),
+                vitality = (int[])Vitality.Clone(),
+                maxVitality = (int[])MaxVitality.Clone(),
+                lives = (int[])Lives.Clone(),
+                credits = (int[])ResurrectionCredit.Clone(),
+                arrows = v.Arrows, coins = v.Coins, keys = v.Keys,
+                weapon = SelectedWeapon, character = (int)motor.Character,
+                takenItems = SaveData.Pack(takenItems), brokenRocks = SaveData.Pack(brokenRocks),
+                openedDoors = SaveData.Pack(openedDoors), roomObjects = SaveData.Pack(roomObjectState),
+                firedEvents = SaveData.Pack(firedEvents),
+            };
+            for (int c = 0; c < 2; c++) d.vitality[c] = Mathf.Clamp(Vitality[c] + PendingVitality[c], 0, MaxVitality[c]);
+            try { d.Write(); Say("Partida guardada"); }
+            catch (System.Exception e) { Say($"No se pudo guardar: {e.Message}"); }
+        }
+
+        // Se carga desde el título (L) y se aparece a la salida del santuario de Demeter.
+        bool LoadSavedGame()
+        {
+            var d = SaveData.Read();
+            if (d == null) return false;
+            Collected.Clear();
+            Collected.AddRange(d.items);
+            Inventory.RestoreWorldItems(d.worldItems);
+            Inventory.OpenedDoors.Clear();
+            foreach (var w in d.openedWorlds) Inventory.OpenedDoors.Add(w);
+            Bosses.Defeated.Clear();
+            foreach (var w in d.bossesDefeated) Bosses.Defeated.Add(w);
+            Inventory.BibleUses = d.bibleUses;
+            for (int c = 0; c < 2; c++)
+            {
+                Inventory.Experience[c] = d.experience[c];
+                Vitality[c] = d.vitality[c];
+                MaxVitality[c] = d.maxVitality[c];
+                Lives[c] = d.lives[c];
+                ResurrectionCredit[c] = d.credits[c];
+            }
+            Arrows = d.arrows; Coins = d.coins; Keys = d.keys;
+            SelectedWeapon = d.weapon;
+            SaveData.Unpack(d.takenItems, takenItems);
+            SaveData.Unpack(d.brokenRocks, brokenRocks);
+            SaveData.Unpack(d.openedDoors, openedDoors);
+            SaveData.Unpack(d.roomObjects, roomObjectState);
+            SaveData.Unpack(d.firedEvents, firedEvents);
+            Inventory.EnterWorld(0);
+            LoadMap("castle");
+            var demeter = shrines.shrines.FirstOrDefault(s => s.map == "castle" && s.kind == "password");
+            var room = World.Room(demeter?.exit.toRoom ?? startRoom);
+            motor.Character = (Character)d.character;
+            motor.Place(World, room, demeter?.exit.x ?? startX, demeter?.exit.y ?? startY);
+            Say("Partida cargada");
+            return true;
         }
 
         // ---------- inventario ----------
@@ -575,12 +693,42 @@ namespace MazeOfKnight.Game
             int c = (int)motor.Character;
             if (Inventory.AddExperience(motor.Character, exp) && Vitality[c] < MaxVitality[c])
             {
-                Vitality[c] = MaxVitality[c];
+                Refill(c);
                 Say("Experiencia: vitalidad llena");
             }
         }
 
         // Carpet: en el mundo 8, las salas con lava se rellenan de piedra de la fila 12 a la 19.
+        // Objetos que cambian salas de su mundo: Carpet (mundo 8), Oar y Candle (mundo 5). Se aplican al cargar el mapa y
+        // cada vez que cambia lo que se lleva (tiendas, objetos recogidos).
+        void ApplyWorldItems()
+        {
+            itemsApplied = Collected.Count;
+            if (Inventory.CurrentWorld == 5)
+            {
+                // Oar (b03:B037): en las salas 12 y 13 la superficie del agua (B6, la fila de agua con aire encima) es suelo.
+                if (Inventory.Has(Inventory.Oar))
+                    foreach (var id in new[] { 12, 13 })
+                    {
+                        var room = World.Room(id);
+                        if (room == null) continue;
+                        for (int row = 0; row < room.collision.Length; row++)
+                            for (int col = 0; col < 32; col++)
+                                if (room.collision[row][col] == '~' && (row == 0 || room.collision[row - 1][col] != '~'))
+                                {
+                                    World.SetSolid(room, col, row, 1, 1);
+                                    mapView.RedrawCells(World, room, col, row, 1, 1);
+                                }
+                    }
+                // Candle (b00:55F7): sin ella la sala 6 es oscura: los muros se dibujan como el fondo y siguen ahí.
+                var dark = World.Room(6);
+                if (dark != null) mapView.SetDark(World, dark, !Inventory.Has(Inventory.Candle));
+            }
+            ApplyCarpet();
+        }
+
+        int itemsApplied;
+
         void ApplyCarpet()
         {
             if (Inventory.CurrentWorld != 8 || !Inventory.Has(Inventory.Carpet)) return;
@@ -760,21 +908,42 @@ namespace MazeOfKnight.Game
             if (++liquidTicks < every)
                 return;
             liquidTicks = 0;
-            int c = (int)motor.Character;
-            Vitality[c]--;
-            if (Vitality[c] <= 0)
+            PendingVitality[(int)motor.Character]--;
+        }
+
+        public void Refill(int c) => PendingVitality[c] = MaxVitality[c] - Vitality[c];
+
+        // b01:6171: cada 4 ticks, 1 unidad del pendiente de cada personaje. La vida se pierde cuando la barra llega a 0.
+        void TickVitality()
+        {
+            if (++vitalityTicks % 4 != 0) return;
+            for (int c = 0; c < 2; c++)
+            {
+                if (PendingVitality[c] > 0) { PendingVitality[c]--; if (Vitality[c] < MaxVitality[c]) Vitality[c]++; else PendingVitality[c] = 0; }
+                else if (PendingVitality[c] < 0) { PendingVitality[c]++; Vitality[c]--; }
+            }
+            if (Vitality[(int)motor.Character] <= 0)
                 LoseLife();
         }
 
-        // Sin vidas ni fin de partida todavía: vuelve a la entrada del mapa con la vitalidad llena.
+        // Vida perdida (estado 6; state_machine.md): se gasta una vida de reserva del personaje en juego y, si no le
+        // queda ninguna, una del otro, que pasa a jugar (b03:B337). Sin vidas en ninguno, game over (estado 7). El que
+        // muere se queda con la experiencia y la vitalidad a 0. [I] Se reaparece en la entrada del mapa (o en la sala
+        // del jefe durante el combate).
         void LoseLife()
         {
+            int c = (int)motor.Character, o = 1 - c;
+            Vitality[c] = 0;
+            Inventory.Experience[c] = 0;
+            PendingVitality[0] = PendingVitality[1] = 0;
+            liquidTicks = 0;
+            if (Lives[c] > 0) Lives[c]--;
+            else if (Lives[o] > 0) { Lives[o]--; motor.Character = (Character)o; c = o; }
+            else { StartGameOver(); return; }
+            if (Vitality[c] <= 0) Vitality[c] = MaxVitality[c];
             if (Bosses.InFight)
             {
                 // En pleno combate: se reaparece en la sala del jefe y se vuelve a invocar con toda su vida.
-                int ch = (int)motor.Character;
-                Vitality[ch] = MaxVitality[ch];
-                Inventory.Experience[ch] = 0;
                 var (bx, by) = StandSpot(motor.Room);
                 motor.Place(World, motor.Room, bx, by);
                 EnterEnemyRoom();
@@ -782,10 +951,6 @@ namespace MazeOfKnight.Game
                 Say("Vida perdida");
                 return;
             }
-            int c = (int)motor.Character;
-            Vitality[c] = MaxVitality[c];
-            Inventory.Experience[c] = 0;
-            liquidTicks = 0;
             int world = maps[mapName].e041 - 1;
             if (world >= 1 && OriginalWorlds.HasEntry(world))
             {
@@ -794,7 +959,17 @@ namespace MazeOfKnight.Game
             }
             else
                 motor.Place(World, World.Room(startRoom), startX, startY);
-            Say("Vida perdida");
+            Say(motor.Character == (Character)c ? "Vida perdida" : $"Vida perdida: juega {motor.Character}");
+        }
+
+        // Estado 7: GAME OVER unos 7 s y vuelta al logo.
+        float gameOverUntil;
+        void StartGameOver()
+        {
+            GameOver = true;
+            SetPaused(true);
+            gameOverUntil = Time.time + 7f;
+            Say("GAME OVER");
         }
 
         void OnRockBroken(Rocks.Rock rock)
@@ -805,6 +980,22 @@ namespace MazeOfKnight.Game
             if (room.hasItem && room.item.x == rock.x && room.item.y == rock.y)
                 ShowItem(room);
             Say("Piedra rota");
+        }
+
+        // Objeto suelto en una sala (los que aparecen con una condición): se queda hasta recogerlo.
+        readonly List<(RoomModel room, int type, int x, int y, GameObject go)> looseItems = new List<(RoomModel, int, int, int, GameObject)>();
+        readonly CastleItems castleItems = new CastleItems();
+
+        void SpawnItem(RoomModel room, int type, int x, int y)
+        {
+            if (looseItems.Any(l => l.room == room && l.type == type)) return;
+            var go = new GameObject($"Objeto 0x{type:X2} (sala {room.id})");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = itemSprite;
+            sr.sortingOrder = 7;
+            var p = RoomCoords.PixelToWorld(room, x + 8, y + 16);
+            go.transform.position = new Vector3(p.x, p.y, 0);
+            looseItems.Add((room, type, x, y, go));
         }
 
         void ShowItem(RoomModel room)
@@ -829,6 +1020,11 @@ namespace MazeOfKnight.Game
         {
             if (Message != "" && Time.time > messageUntil)
                 Message = "";
+            if (GameOver)
+            {
+                if (Time.time > gameOverUntil) { GameOver = false; AttractMode.Go(AttractMode.Mode.Attract); }
+                return;
+            }
             if (Busy)
                 return;
             // Depuración: K da una llave (en el original salen de piedras, enemigos y tiendas).

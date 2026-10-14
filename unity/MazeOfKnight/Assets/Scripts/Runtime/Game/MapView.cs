@@ -74,6 +74,20 @@ namespace MazeOfKnight.Game
                             TileFor(world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8)));
         }
 
+        // Sala oscura (mundo 5, sala 6, sin la Candle): los muros no se ven, pero siguen ahí.
+        public void SetDark(RoomWorld world, RoomModel room, bool dark)
+        {
+            if (dark)
+            {
+                for (int r = 0; r < RoomCoords.Rows; r++)
+                    for (int c = 0; c < RoomCoords.Cols; c++)
+                        if (world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8) == TileClass.Solid)
+                            front.SetTile(RoomCoords.Cell(room, c, r), null);
+            }
+            else
+                RedrawCells(world, room, 0, 0, RoomCoords.Cols, RoomCoords.Rows);
+        }
+
         // Puerta giratoria: columna de 1 x 3 tiles con su propio color, encima de la colisión.
         public void ShowRevolvingDoor(RoomModel room, int x, int y) => Fill(keyDoors, room, x, y, 1, 3, revolvingDoor);
 

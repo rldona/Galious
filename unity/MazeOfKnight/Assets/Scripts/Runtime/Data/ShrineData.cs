@@ -47,6 +47,7 @@ namespace MazeOfKnight.Data
     {
         public int quiverArrows = 100, keyAmount = 1, counterCap = 999;
         public int resurrectionArrows = 100, resurrectionCoins = 100, resurrectionKeys = 20;
+        public int deathAutoExitFrames = 180, sinkPixels = 16, sinkFrames = 64;
     }
 
     [Serializable]

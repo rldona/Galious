@@ -7,7 +7,8 @@ namespace MazeOfKnight.Game
     // Una visita a un santuario (docs/design_bible/08_santuarios.md). Tienda: ← → mueven la mano (salta los huecos
     // vacíos y lo ya comprado en esta visita), espacio compra; sin monedas suficientes sale "COINS ARE NOT ENOUGH.";
     // los escudos van en orden (plata pide cobre, oro pide plata). El carcaj da 100 flechas y la llave, 1 (tope 999).
-    // El juego no mira si ya tienes el objeto. Contraseña y Muerte preguntan YES/NO. ↓ sale.
+    // El juego no mira si ya tienes el objeto. Demeter (guardar, en vez de la contraseña) y la Muerte preguntan YES/NO.
+    // ↓ sale.
     public class ShrineVisit
     {
         public readonly Shrine Shrine;
@@ -20,13 +21,25 @@ namespace MazeOfKnight.Game
         public bool AskYesNo { get; private set; }
         public bool Yes = true;
         public bool Refused { get; private set; }   // último intento rechazado (sonido 0x2F)
+        // Muerte: vidas de reserva y crédito de resurrección (por personaje), y quién juega.
+        readonly int[] lives, credits;
+        readonly int other;
+        public bool Revived { get; private set; }
+        public int RevivedCharacter => other;
+        public bool SaveRequested { get; private set; }
+        // Tras la respuesta de la Muerte se sale sola a los 180 frames; mientras, ↓ no hace nada.
+        public int AutoExitFrames { get; private set; }
 
-        public ShrineVisit(Shrine shrine, ShrinesData data, Inventory inventory, int arrows, int coins, int keys)
+        public ShrineVisit(Shrine shrine, ShrinesData data, Inventory inventory, int arrows, int coins, int keys,
+            int[] lives = null, int[] credits = null, Character active = Character.Popolon)
         {
             Shrine = shrine;
             this.data = data;
             this.inventory = inventory;
             Arrows = arrows; Coins = coins; Keys = keys;
+            this.lives = lives ?? new[] { 1, 0 };
+            this.credits = credits ?? new[] { 1, 1 };
+            other = 1 - (int)active;
             switch (shrine.kind)
             {
                 case "shop":
@@ -38,8 +51,16 @@ namespace MazeOfKnight.Game
                     AskYesNo = true;
                     break;
                 case "resurrection":
-                    // [I] Sin vidas de repuesto en el remake (backlog) el otro personaje nunca está muerto: solo el aviso.
-                    Text = Format(data.Message(0x00));
+                    // Si el otro no tiene vidas, le queda crédito y llevas 100 flechas, 100 monedas y 20 llaves, lo ofrece.
+                    var r = data.rules;
+                    if (this.lives[other] == 0 && this.credits[other] > 0 && Arrows >= r.resurrectionArrows &&
+                        Coins >= r.resurrectionCoins && Keys >= r.resurrectionKeys)
+                    {
+                        Text = Format(data.Message(0x02));
+                        AskYesNo = true;
+                    }
+                    else
+                        Text = Format(data.Message(0x00));
                     break;
                 default:
                     Text = Format(shrine.messages.FirstOrDefault() ?? "");
@@ -75,8 +96,25 @@ namespace MazeOfKnight.Game
             if (AskYesNo)
             {
                 AskYesNo = false;
-                // [I] La contraseña del original se sustituirá por guardar la partida (backlog).
-                Text = Yes ? "(EL REMAKE GUARDARA AQUI LA PARTIDA)\n" + Format(data.Message(0x10)) : Format(data.Message(0x0E));
+                if (Shrine.kind == "resurrection")
+                {
+                    var r = data.rules;
+                    if (Yes)
+                    {
+                        Arrows -= r.resurrectionArrows; Coins -= r.resurrectionCoins; Keys -= r.resurrectionKeys;
+                        lives[other] = 1;
+                        credits[other]--;
+                        Revived = true;
+                        Text = Format(data.Message(0x03));
+                    }
+                    else
+                        Text = Format(data.Message(0x04));
+                    AutoExitFrames = r.deathAutoExitFrames > 0 ? r.deathAutoExitFrames : 180;
+                    return false;
+                }
+                // Remake: en vez de la contraseña, se guarda la partida (SaveGame.cs).
+                SaveRequested = Yes;
+                Text = Yes ? "PARTIDA GUARDADA.\n" + Format(data.Message(0x10)) : Format(data.Message(0x0E));
                 return false;
             }
             var item = Cursor >= 0 ? ItemAt(Cursor) : null;

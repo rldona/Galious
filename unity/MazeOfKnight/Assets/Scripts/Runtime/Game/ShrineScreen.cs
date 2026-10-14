@@ -13,6 +13,7 @@ namespace MazeOfKnight.Game
         public ShrineVisit Visit { get; private set; }
         GUIStyle text, small;
         bool downHeld = true;
+        float autoExit;
 
         public bool Open => Visit != null;
 
@@ -28,6 +29,13 @@ namespace MazeOfKnight.Game
             var kb = Keyboard.current;
             if (kb == null) return;
             bool down = kb.downArrowKey.isPressed || kb.sKey.isPressed;
+            if (Visit.AutoExitFrames > 0)
+            {
+                // La Muerte ya ha respondido: se sale sola a los 180 frames y ↓ no hace nada.
+                autoExit += Time.deltaTime * 60f;
+                if (autoExit >= Visit.AutoExitFrames) { var w = Visit; Visit = null; autoExit = 0; game.LeaveShrine(w); }
+                return;
+            }
             if (down && !downHeld)
             {
                 var v = Visit;
@@ -38,8 +46,11 @@ namespace MazeOfKnight.Game
             downHeld = down;
             if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame) Visit.Move(-1);
             if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame) Visit.Move(1);
-            if (kb.spaceKey.wasPressedThisFrame && Visit.Confirm())
-                game.Say("Comprado");
+            if (kb.spaceKey.wasPressedThisFrame)
+            {
+                if (Visit.Confirm()) game.Say("Comprado");
+                if (Visit.SaveRequested) game.SaveGameNow(Visit);
+            }
         }
 
         void OnGUI()

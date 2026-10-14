@@ -12,7 +12,7 @@ namespace MazeOfKnight.Game
     public class Inventory
     {
         public const int HolyWater = 0x07, Map = 0x0A, GreatKey = 0x0C, Necklace = 0x0D, Hoi = 0x13, Shoes = 0x11,
-            AngelRing = 0x15, Carpet = 0x18, HatHelmet = 0x19, Lamp = 0x1A, Vase = 0x1B, Bible = 0x20, Harp = 0x21,
+            AngelRing = 0x15, Oar = 0x10, Candle = 0x16, Carpet = 0x18, HatHelmet = 0x19, Lamp = 0x1A, Vase = 0x1B, Bible = 0x20, Harp = 0x21,
             ConchShell = 0x23, Dagger = 0x26, Wing = 0x27;
 
         public readonly ItemsData Data;
@@ -55,6 +55,24 @@ namespace MazeOfKnight.Game
             {
                 OpenedDoors.Add(world);
                 if (worldItems.TryGetValue(world, out var set)) Active.AddRange(set);
+            }
+        }
+
+        // Partida guardada: objetos de cada mundo como mundo * 256 + objeto.
+        public List<int> WorldItemsPacked()
+        {
+            var l = new List<int>();
+            foreach (var kv in worldItems) foreach (var t in kv.Value) l.Add(kv.Key * 256 + t);
+            return l;
+        }
+
+        public void RestoreWorldItems(IEnumerable<int> packed)
+        {
+            worldItems.Clear();
+            foreach (var v in packed)
+            {
+                if (!worldItems.TryGetValue(v / 256, out var set)) worldItems[v / 256] = set = new HashSet<int>();
+                set.Add(v % 256);
             }
         }
 
