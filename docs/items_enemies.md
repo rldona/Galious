@@ -125,7 +125,7 @@ Después, una tabla de saltos por tipo (b04:66B4) lleva a la rutina de inicializ
   - **B45E**: la rutina de **actualización** del tipo, en la tabla b06:B472. No se llama si el libro está congelando (E0D5), salvo para el tipo 0x5B;
   - B407: aplica la velocidad y borra al enemigo si sale de la pantalla (y ≥ 0xB8 o x ≥ 0xF9). La velocidad es 8.8: IX+0E/0F en x e IX+0C/0D en y, que se suman a la posición en b06:B0ED/B11B. IX+16/17 es una aceleración vertical que B14C suma a la velocidad y.
   - IX+11 empieza con el valor del descriptor, pero la IA la reescribe como atributo del sprite.
-  - Casi todos los enemigos se mueven solo en uno de cada dos frames [I], a juzgar por las grabaciones. Por eso las velocidades medidas en el emulador son más o menos la mitad de las del código.
+  - La IA de cada enemigo se ejecuta uno de cada dos frames: 30 veces por segundo, contado con breakpoints [O]. Por eso las velocidades medidas en el emulador son más o menos la mitad de las del código.
 - Diez rutinas de actualización se comparten entre tipos, por ejemplo 0x32/0x51, 0x3A/0x50 y 0x1D/0x1E/0x33/0x3F.
 - `tools/extract/enemy_ai.py` desensambla el inicio y la actualización de cada tipo en `extracted/ai/<tipo>.asm`, siguiendo el flujo. Necesita `z80dis`.
 

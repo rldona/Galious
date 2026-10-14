@@ -17,6 +17,28 @@ Leyenda: **[C]** leído en el código · **[I]** interpretación · **[O]** obse
   - un tile ≥ 0xBA es sólido.
 - **Variable sin identificar.** E045 escala la velocidad de los ataques dirigidos; los valores de las fichas suponen E045 = 0. Quizá sea la dificultad.
 
+## Comprobado en openMSX [O]
+
+Los tres tipos que en la primera medición salían "quietos" sí se mueven como dice el código. La primera medición fallaba por dos razones:
+- duraba solo 6 s y caía entera en la fase oculta;
+- el medidor contaba como enemigo nuevo cualquier salto de más de 24 px.
+
+- **0x12**, en el mundo 6, sala 5 (breakpoints en sus estados):
+  - estado 0: oculto unos 4,5 s, con IX+8 bajando 1 cada 2 frames;
+  - estado 1: emerge durante unos 3 s;
+  - estado 2: rueda (x de 112 a 97 en 4 s).
+
+  El sentido en que rueda lo decide b04:70FF comparando la **Y del jugador con la X del enemigo**. Parece un fallo del original [C].
+- **0x14**, en el mundo 4, sala 3, con sus tres huecos:
+  - oculto 4–5 s;
+  - emerge en dos fases, de 36 y 20 frames;
+  - pasea unos 5 s recorriendo la plataforma (por ejemplo, x de 15 a 113);
+  - se hunde (estados 4 y 5) y repite.
+
+  Los tiempos son el doble de los valores del código, 128–191 ticks.
+- **0x2A**, en el mundo 2, sala 4: alterna oculto y visible (IX+2 = 00 ↔ F0) y reaparece en otro sitio, con x entre 48 y 176 e y entre 40 y 168. Se teletransporta.
+- **Confirmado:** la IA de cada enemigo se ejecuta **uno de cada dos frames** (contado con breakpoints: 30 ejecuciones por segundo). Hay que tenerlo en cuenta al pasar a la remasterización las velocidades y los tiempos de las fichas, que están en ticks de IA.
+
 ## IA de enemigos — grupo G1 (0x01 0x02 0x03 0x04 0x05 0x07 0x0A 0x0B 0x0C 0x0E 0x0F 0x10 0x11 0x12)
 
 ### Notas previas (afectan a todas las fichas)
