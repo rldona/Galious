@@ -77,6 +77,6 @@ Para el remake, el jefe puede moverse suave (sprite o rig propio); el salto de 8
 
 Original (docs/ending.md): la piedra del bebé sale de (0..3) + (0..7); con 10 (1 de cada 32 veces) ninguna de las 10 piedras lo tiene y la sala, sin salidas, solo se deja perdiendo una vida. Opción del remake: una piedra al azar de las 10, siempre. Desactivada: se juega como el original.
 
-## RemakeRules.NoRoomChangePause (desactivado)
+## RemakeRules.NoRoomChangePause (activado)
 
-En el original, al cambiar de sala el juego se para 11 ticks (~0,37 s) mientras dibuja la sala nueva (medido con la demo 1; `OriginalPhysics.RoomChangePauseTicks`). Se nota como un parón. Con la regla activada el jugador sigue sin pausa. Las demos la llevan siempre, porque sin ella se desincronizan de la grabación.
+En el original, al cambiar de sala el juego se para 11 ticks (~0,37 s) mientras dibuja la sala nueva (medido con la demo 1; `OriginalPhysics.RoomChangePauseTicks`). Se nota como un parón. Con la regla activada el jugador sigue sin pausa. **Activado**: el usuario no quiere el parón. Las demos la llevan siempre, porque sin ella se desincronizan de la grabación.
