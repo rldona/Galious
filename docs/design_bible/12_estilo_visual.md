@@ -90,8 +90,9 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 ## Personajes y efectos
 
 - **Popolon y Aphrodite** (`CharacterArt.cs`, arte provisional pintado por código a 4 texels por píxel del original, con contorno de tinta):
-  - **Popolon:** yelmo corintio claro (la «máscara», con rendija en T), cresta roja transversal, escudo redondo de bronce y capa granate.
-  - **Aphrodite:** yelmo con alas, melena dorada, escudo de plata con una rosa y capa violeta.
+  - **Popolon:** yelmo corintio claro (la «máscara», con rendija en T), cresta roja transversal y capa granate; en el escudo, un sol.
+  - **Aphrodite:** yelmo con alas, melena dorada y capa violeta; en el escudo, una rosa.
+  - **Escudo:** solo si se tiene uno de las tiendas, con su metal (cobre, plata u oro; el mejor que se lleve, `Inventory.ShieldLevel`). Sin escudo se ve el brazo.
   - **Fotogramas:** quieto (2, respira), andar (4, avanzan con la distancia recorrida), preparar el salto, subir, caer, escalera (2, con la altura), espadazo (2: estocada hasta x + 18 y recogida) y golpe recibido.
   - **Estela del espadazo:** media luna aditiva sobre la zona que golpea, que se apaga en los 4 ticks del golpe.
   - Los pies están en el pivote y la hoja llega donde golpea la espada del original: el dibujo no cambia ninguna caja.

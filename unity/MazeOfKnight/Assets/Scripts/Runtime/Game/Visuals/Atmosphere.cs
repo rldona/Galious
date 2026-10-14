@@ -125,7 +125,7 @@ namespace MazeOfKnight.Game.Visuals
             playerLight.falloffIntensity = 0.6f;
 
             motes = BuildMotes();
-            characters = new CharacterArt();
+            characters = new CharacterArt { ShieldLevel = () => game != null && game.Inventory != null ? game.Inventory.ShieldLevel : 0 };
             slash = Layer("Estela del espadazo", 12, additive);
             slash.sprite = characters.SlashSprite;
             slash.enabled = false;
