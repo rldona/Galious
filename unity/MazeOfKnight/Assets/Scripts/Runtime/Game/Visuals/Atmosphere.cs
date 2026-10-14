@@ -47,6 +47,8 @@ namespace MazeOfKnight.Game.Visuals
         ColorAdjustments grade;
         Material unlit, additive, defaultSprite;
         Sprite dot, shaft, white;
+        CharacterArt characters;
+        SpriteRenderer slash;
         readonly Dictionary<(Theme, ShapePainter.Depth, int), Sprite> layerCache = new Dictionary<(Theme, ShapePainter.Depth, int), Sprite>();
         readonly Dictionary<int, Sprite> fogCache = new Dictionary<int, Sprite>();
         readonly Dictionary<WorldPalette, Sprite> skyCache = new Dictionary<WorldPalette, Sprite>();
@@ -123,6 +125,10 @@ namespace MazeOfKnight.Game.Visuals
             playerLight.falloffIntensity = 0.6f;
 
             motes = BuildMotes();
+            characters = new CharacterArt();
+            slash = Layer("Estela del espadazo", 12, additive);
+            slash.sprite = characters.SlashSprite;
+            slash.enabled = false;
             BuildVolume();
         }
 
@@ -326,7 +332,13 @@ namespace MazeOfKnight.Game.Visuals
             }
             if (mapView != null && mapView.Style != (on ? tiles : null))
                 mapView.SetStyle(on ? tiles : null, placeholderTiles);
-            if (player != null) { Outline(player.body); Outline(player.sword); }
+            if (player != null)
+            {
+                Outline(player.body);
+                Outline(player.sword);
+                player.Art = on ? characters : null;
+                player.Slash = slash;
+            }
             shownRoom = null;                        // vuelve a montar la sala
         }
 

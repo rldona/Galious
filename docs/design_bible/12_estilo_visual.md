@@ -89,11 +89,19 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 
 ## Personajes y efectos
 
+- **Popolon y Aphrodite** (`CharacterArt.cs`, arte provisional pintado por código a 4 texels por píxel del original, con contorno de tinta):
+  - **Popolon:** yelmo corintio claro (la «máscara», con rendija en T), cresta roja transversal, escudo redondo de bronce y capa granate.
+  - **Aphrodite:** yelmo con alas, melena dorada, escudo de plata con una rosa y capa violeta.
+  - **Fotogramas:** quieto (2, respira), andar (4, avanzan con la distancia recorrida), preparar el salto, subir, caer, escalera (2, con la altura), espadazo (2: estocada hasta x + 18 y recogida) y golpe recibido.
+  - **Estela del espadazo:** media luna aditiva sobre la zona que golpea, que se apaga en los 4 ticks del golpe.
+  - Los pies están en el pivote y la hoja llega donde golpea la espada del original: el dibujo no cambia ninguna caja.
+  - **Maze of Knight → Hoja de personajes** guarda todos los fotogramas en `logs/unity/personajes.png`.
+
 - **Shader `MazeOfKnight/SpriteOutlineFlash`:**
   - sprite sin iluminar con contorno de tinta de 1 texel;
   - destello de color al golpear: blanco 0,12 s en los enemigos, rojo 0,15 s en el jugador.
 - **Pendiente:**
-  - la estela del espadazo (media luna blanca);
+  - enemigos con forma propia;
   - chispas al golpear;
   - un temblor de cámara pequeño en los golpes fuertes;
   - partículas al romper piedras y paredes.
@@ -138,3 +146,4 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 | `Art/Resources/Shaders/SpriteOutlineFlash.shader` | contorno y destello de los personajes |
 | `Art/Resources/Shaders/Additive.shader` | brillos aditivos |
 | `Runtime/Game/MapView.cs` | tiles del estilo: macizo en 3 tonos y borde iluminado |
+| `Runtime/Game/Visuals/CharacterArt.cs` | Popolon y Aphrodite: fotogramas, animación y estela del espadazo |

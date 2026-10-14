@@ -11,6 +11,10 @@ namespace MazeOfKnight.Game
     {
         public SpriteRenderer body;
         public SpriteRenderer sword;
+        // Estilo del remake (Visuals/Atmosphere): fotogramas dibujados y la estela del espadazo. Null = provisional.
+        public Visuals.CharacterArt Art;
+        public SpriteRenderer Slash;
+        Sprite placeholder;
         public Color popolonColor = new Color(0.35f, 0.55f, 1f);
         public Color aphroditeColor = new Color(1f, 0.45f, 0.7f);
 
@@ -160,8 +164,33 @@ namespace MazeOfKnight.Game
         {
             // El sprite de 16 x 16 px tiene el pivote abajo en el centro: coincide con los pies del original.
             transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y) + new Vector2(0, HopPx / RoomCoords.PixelsPerUnit);
+            if (body != null && placeholder == null) placeholder = body.sprite;
+            if (Art != null && body != null)
+            {
+                body.sprite = Art.Frame(Motor, Time.deltaTime);
+                body.color = Color.white;
+                body.flipX = Motor.FacingLeft ^ HopFlip;
+                body.transform.localScale = Vector3.one;
+                if (sword != null) sword.enabled = false;
+                if (Slash != null)
+                {
+                    // Estela: media luna sobre la zona que golpea, que se apaga en los 4 ticks del golpe.
+                    Slash.enabled = Motor.AttackTicks > 0;
+                    if (Slash.enabled)
+                    {
+                        var (sx0, sx1, sy0, sy1) = Motor.SwordRect();
+                        var at = RoomCoords.PixelToWorld(Motor.Room, (sx0 + sx1 + 1) / 2, (sy0 + sy1) / 2 + 1);
+                        Slash.transform.position = new Vector3(at.x, at.y, 0);
+                        Slash.flipX = Motor.FacingLeft;
+                        Slash.color = new Color(1, 1, 1, Motor.AttackTicks / (float)OriginalPhysics.SwordTicks);
+                    }
+                }
+                return;
+            }
+            if (Slash != null) Slash.enabled = false;
             if (body != null)
             {
+                if (placeholder != null) body.sprite = placeholder;
                 var color = Motor.Character == Character.Popolon ? popolonColor : aphroditeColor;
                 // El original cambia de sprite en la escalera; aquí, provisionalmente, se oscurece.
                 body.color = Motor.State == MotorState.Ladder ? Color.Lerp(color, Color.black, 0.45f) : color;

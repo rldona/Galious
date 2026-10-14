@@ -27,5 +27,5 @@ Lo que falta por hacer en Unity. El estado de lo ya hecho está en [unity.md](un
 
 ## Estilo visual
 
-- Arte dibujado para sustituir las siluetas generadas, la interfaz con filigrana, la estela del espadazo y las chispas, y el combate del jefe como cambio de luz (design_bible/12_estilo_visual.md).
+- Enemigos con forma propia, arte dibujado para sustituir el generado, la interfaz con filigrana, las chispas y el combate del jefe como cambio de luz (design_bible/12_estilo_visual.md).
 

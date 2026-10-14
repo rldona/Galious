@@ -68,15 +68,15 @@ namespace MazeOfKnight.Game.Visuals
 
         // ---------- distancias ----------
 
-        static float Box(float px, float py, float cx, float cy, float hw, float hh)
+        internal static float Box(float px, float py, float cx, float cy, float hw, float hh)
         {
             float dx = Mathf.Abs(px - cx) - hw, dy = Mathf.Abs(py - cy) - hh;
             return Mathf.Sqrt(Mathf.Max(dx, 0) * Mathf.Max(dx, 0) + Mathf.Max(dy, 0) * Mathf.Max(dy, 0)) + Mathf.Min(Mathf.Max(dx, dy), 0);
         }
 
-        static float Circle(float px, float py, float cx, float cy, float r) => Mathf.Sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy)) - r;
+        internal static float Circle(float px, float py, float cx, float cy, float r) => Mathf.Sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy)) - r;
 
-        static float Segment(float px, float py, float ax, float ay, float bx, float by, float r)
+        internal static float Segment(float px, float py, float ax, float ay, float bx, float by, float r)
         {
             float pax = px - ax, pay = py - ay, bax = bx - ax, bay = by - ay;
             float h = Mathf.Clamp01((pax * bax + pay * bay) / (bax * bax + bay * bay));

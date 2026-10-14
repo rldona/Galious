@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using MazeOfKnight.Game;
 using MazeOfKnight.Game.Visuals;
@@ -71,6 +72,41 @@ namespace MazeOfKnight.EditorTools
                 Debug.Log($"[VisualPreview] {Shots.Length} capturas en {OutDir}");
                 if (Application.isBatchMode) EditorApplication.delayCall += () => EditorApplication.Exit(0);
             }
+        }
+
+        // Hoja con todos los fotogramas de Popolon (arriba) y Aphrodite (abajo): logs/unity/personajes.png.
+        [MenuItem("Maze of Knight/Hoja de personajes", false, 62)]
+        public static void CharacterSheet()
+        {
+            var art = new CharacterArt();
+            var cells = new List<(Character, CharacterArt.Anim, int)>();
+            foreach (var c in new[] { Character.Popolon, Character.Aphrodite })
+                foreach (var (a, n) in new[] { (CharacterArt.Anim.Idle, 2), (CharacterArt.Anim.Walk, 4), (CharacterArt.Anim.Prep, 1), (CharacterArt.Anim.Rise, 1),
+                             (CharacterArt.Anim.Fall, 1), (CharacterArt.Anim.Ladder, 2), (CharacterArt.Anim.Attack, 2), (CharacterArt.Anim.Hurt, 1) })
+                    for (int i = 0; i < n; i++) cells.Add((c, a, i));
+            var first = art.Get(Character.Popolon, CharacterArt.Anim.Idle, 0).texture;
+            int cw = first.width, ch = first.height, cols = 14;
+            var sheet = new Texture2D(cw * cols, ch * 2, TextureFormat.RGBA32, false);
+            var bg = new Color(0.23f, 0.28f, 0.38f);
+            var fill = new Color[sheet.width * sheet.height];
+            for (int i = 0; i < fill.Length; i++) fill[i] = bg;
+            sheet.SetPixels(fill);
+            for (int k = 0; k < cells.Count; k++)
+            {
+                var (c, a, i) = cells[k];
+                var px = art.Get(c, a, i).texture.GetPixels();
+                int ox = (k % cols) * cw, oy = (1 - k / cols) * ch;
+                for (int y = 0; y < ch; y++)
+                    for (int x = 0; x < cw; x++)
+                    {
+                        var p = px[y * cw + x];
+                        sheet.SetPixel(ox + x, oy + y, Color.Lerp(bg, new Color(p.r, p.g, p.b), p.a));
+                    }
+            }
+            sheet.Apply();
+            Directory.CreateDirectory(OutDir);
+            File.WriteAllBytes(Path.Combine(OutDir, "personajes.png"), sheet.EncodeToPNG());
+            Debug.Log($"[VisualPreview] hoja de personajes en {OutDir}");
         }
 
         static void Capture(Camera cam, string path)
