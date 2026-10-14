@@ -53,7 +53,7 @@ def rocks(rom, e041, room):
 
 def ladders(rom, e041, room):
     out = []
-    for k in range(15):
+    for k in range(13):          # 13 entradas; lo que sigue ya no es la tabla
         w, r = rom.byte(LADDER_ROOMS + 2 * k, 2), rom.byte(LADDER_ROOMS + 2 * k + 1, 2)
         if (w, r) == (e041, room):
             y, x, h, a, b = rom.block(LADDER_DATA + 5 * k, 5, 2)
