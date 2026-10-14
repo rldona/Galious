@@ -12,5 +12,9 @@ namespace MazeOfKnight.Game
         // ninguna de las 10 piedras lo tiene: solo se sale perdiendo una vida (docs/ending.md). Remake: una de las 10 al
         // azar, siempre.
         public static bool BabyAlwaysPresent = false;     // desactivado: se juega como el original
+
+        // Original: al cambiar de sala el juego se para 11 ticks (~0,37 s) mientras carga la sala nueva (medido con la
+        // demo 1). Remake: se sigue sin pausa. Las demos la llevan siempre.
+        public static bool NoRoomChangePause = false;     // desactivado: se juega como el original
     }
 }

@@ -43,7 +43,9 @@ namespace MazeOfKnight.Game
         public void Init(PlayerMotor motor)
         {
             Motor = motor;
-            Motor.RoomChanged += (_, __) => roomPause = OriginalPhysics.RoomChangePauseTicks;
+            // La demo siempre la lleva: sin ella se desincroniza de la grabación.
+            Motor.RoomChanged += (_, __) =>
+                roomPause = RemakeRules.NoRoomChangePause && Demo == null ? 0 : OriginalPhysics.RoomChangePauseTicks;
             UpdateVisual();
         }
 
