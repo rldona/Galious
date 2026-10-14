@@ -69,7 +69,8 @@ namespace MazeOfKnight.Game
         {
             if (input.Up && TryGrabLadder(Y - 1))
                 return;
-            if (input.Down && TryGrabLadder(Y))
+            // La escalera puede atravesar el suelo: la fila de los pies es sólida y sigue debajo.
+            if (input.Down && (TryGrabLadder(Y) || TryGrabLadder(Y + 8, Y)))
                 return;
             MoveHorizontal(input, P.WalkSpeed);
             if (input.Up)
@@ -157,13 +158,13 @@ namespace MazeOfKnight.Game
             {
                 Y -= P.LadderSpeed;
                 // Arriba del todo: sin escalera por encima de los pies, queda de pie.
-                if (((Y - P.RoomTopPx) & 7) == 0 && !LadderPairAt(X, Y - 1))
+                if (((Y - P.RoomTopPx) & 7) == 0 && !LadderContinues(Y - 1, -1))
                     State = MotorState.Ground;
             }
             else if (input.Down)
             {
                 Y += P.LadderSpeed;
-                if (((Y - P.RoomTopPx) & 7) == 0 && !LadderPairAt(X, Y))
+                if (((Y - P.RoomTopPx) & 7) == 0 && !LadderContinues(Y, 1))
                 {
                     if (SolidUnderFeet())
                         State = MotorState.Ground;
@@ -179,7 +180,23 @@ namespace MazeOfKnight.Game
         bool LadderPairAt(int x, int py) =>
             world.Ladder(Room, x - 1, py) && world.Ladder(Room, x, py);
 
-        bool TryGrabLadder(int py)
+        // En los mapas del original la escalera atraviesa los suelos: las columnas de la escalera son sólidas en
+        // la fila del suelo y la escalera sigue al otro lado (castillo, sala 1: suelo en la fila 11 y escalera
+        // en las filas 0-10 y 12-19). Se puede trepar a través de una fila así.
+        // Al subir también se atraviesa un suelo sin escalera encima, para salir de pie sobre él.
+        bool LadderContinues(int py, int dir)
+        {
+            if (LadderPairAt(X, py))
+                return true;
+            if (!SolidPairAt(X, py))
+                return false;
+            return dir > 0 ? LadderPairAt(X, py + 8) : !SolidPairAt(X, py - 8);
+        }
+
+        bool SolidPairAt(int x, int py) => world.Solid(Room, x - 1, py) && world.Solid(Room, x, py);
+
+        // floorPy >= 0: la escalera está bajo un suelo que hay que atravesar (sólido en sus dos columnas).
+        bool TryGrabLadder(int py, int floorPy = -1)
         {
             // El original alinea al jugador con la escalera: x = x de la escalera + 8 (docs/player.md).
             int col = X >> 3;
@@ -187,6 +204,8 @@ namespace MazeOfKnight.Game
             if (world.Ladder(Room, (col - 1) * 8, py) && world.Ladder(Room, col * 8, py)) left = col - 1;
             else if (world.Ladder(Room, col * 8, py) && world.Ladder(Room, (col + 1) * 8, py)) left = col;
             else return false;
+            if (floorPy >= 0 && !(world.Solid(Room, left * 8, floorPy) && world.Solid(Room, left * 8 + 8, floorPy)))
+                return false;
             int ladderX = left * 8 + 8;
             if (System.Math.Abs(ladderX - X) > 4)
                 return false;

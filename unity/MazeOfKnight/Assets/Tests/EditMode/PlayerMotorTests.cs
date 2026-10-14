@@ -149,6 +149,48 @@ namespace MazeOfKnight.Tests
             CollectionAssert.AreEqual(Enumerable.Repeat(-1, 9).ToArray(), dy.Skip(1).ToArray());
         }
 
+        // Sala 1 del castillo: la escalera atraviesa el suelo (fila 11 sólida, escalera en 0-10 y 12-19).
+        static RoomModel LadderThroughFloor(bool ladderAbove = true)
+        {
+            var room = FlatRoom(floorRow: 11);
+            for (int r = 0; r < 20; r++)
+                if (r != 11 && (r > 11 || ladderAbove))
+                    room.collision[r] = room.collision[r].Substring(0, 14) + "HH" + room.collision[r].Substring(16);
+            return room;
+        }
+
+        [Test]
+        public void LadderGoesDownThroughTheFloor()
+        {
+            var (motor, dy, _) = Run(LadderThroughFloor(), Character.Popolon, 121, 120, 20, t => new MotorInput { Down = true });
+            Assert.AreEqual(120, motor.X);
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            Assert.AreEqual(120 + 19, motor.Y);
+        }
+
+        [Test]
+        public void LadderClimbsBackUpThroughTheFloor()
+        {
+            var room = LadderThroughFloor();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 150);
+            for (int t = 0; t < 40; t++)
+                motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            Assert.AreEqual(150 - 39, motor.Y);   // el primer tick solo se engancha
+        }
+
+        [Test]
+        public void LadderEndingUnderAFloorExitsOnTop()
+        {
+            var room = LadderThroughFloor(ladderAbove: false);
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 150);
+            motor.Tick(new MotorInput { Up = true });
+            for (int t = 0; t < 60 && motor.State == MotorState.Ladder; t++)
+                motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(MotorState.Ground, motor.State);
+            Assert.AreEqual(120, motor.Y);
+        }
+
         [Test]
         public void WalkingOffTheRightEdgeEntersTheNeighbour()
         {
