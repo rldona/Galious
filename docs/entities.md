@@ -121,8 +121,8 @@ b02:9F82 (sigue en b03 a partir de A000) se ejecuta en el castillo, como mucho u
 | Sala | Objeto | Posición (x, y) | Condición |
 |---|---|---|---|
 | 48 | Hoi (0x13) | 0x50, 0x28 | matar a todos los enemigos marcados de la sala (E61C) [O: 7 enemigos 0x34] |
-| 75 | Candle (0x16) | 0x20, 0xA8 | igual |
-| 24 | Saber (0x25) | 0xD0, 0x68 | igual, y además el bit 2 de E068 (un jefe derrotado; según la guía, el del mundo 6) |
+| 75 | Candle (0x16) | 0x20, 0xA8 | igual (2 caballeros 0x0A) [O*: con E61C forzado aparece]. No logré matar al segundo caballero en la prueba: muy pocos golpes le quitan vida |
+| 24 | Saber (0x25) | 0xD0, 0x68 | igual, y además el bit 2 de E068 (un jefe derrotado; según la guía, el del mundo 6) [O: matando a los 4 murciélagos 0x0E. Con E068 forzado aparece; sin él, la sala queda limpia y no aparece] |
 | 40 | Vase (0x1B) | 0x80, 0x88 | bit 2 de E066 (según la guía, tras recuperar el mundo 4) y una **secuencia de 9 pasos** contados en E536: 3 espadazos mirando a la derecha (E503 = 0), 3 mirando a la izquierda y 3 saltos. Un paso fuera de orden pone la cuenta a 0. **No comprueba la posición del jugador** [O: forzando E066, desde la entrada de la sala] |
 | 43 | Dagger (0x26) | 0x60, 0x28 | estar **sobre el ascensor** (b09:A8CE, bit 0 de EC12/EC22) y pulsar **derecha, abajo, izquierda y arriba** (tabla A056). Cualquier otra tecla reinicia. Cada tecla debe mantenerse al menos 2 frames [O]. No hace falta matar a los murciélagos |
 
