@@ -106,9 +106,13 @@ namespace MazeOfKnight.Game.Enemies
         public event Action<Enemy> Killed;
         public event Action<Enemy> Hit;
 
-        public EnemySystem(IEnumerable<EnemyInfo> infos, int seed = 1, LootTable loot = null)
+        // Tabla de cajas de colisión (b14:9006); vacía = cajas físicas.
+        public IReadOnlyList<BoxRect> Boxes = new BoxRect[0];
+
+        public EnemySystem(IEnumerable<EnemyInfo> infos, int seed = 1, LootTable loot = null, IReadOnlyList<BoxRect> boxes = null)
         {
             if (loot != null) Loot = loot;
+            if (boxes != null) Boxes = boxes;
             catalog = infos.ToDictionary(e => e.type);
             Context.Random = new Random(seed);
         }
@@ -151,6 +155,11 @@ namespace MazeOfKnight.Game.Enemies
                 e.Hp = info.hp;
                 e.Damage = info.damage;
                 e.Invulnerable = info.invulnerable;
+                if (info.box >= 0 && info.box < Boxes.Count)
+                {
+                    e.HitBox = Boxes[info.box];
+                    if (info.box == 0x4E && Boxes.Count > 0x4F) e.LeftBox = Boxes[0x4F];
+                }
             }
             e.Init(Context);
             if (e is DeathExplosion boom)
@@ -192,7 +201,7 @@ namespace MazeOfKnight.Game.Enemies
         // Enemigo que toca al jugador (caja del jugador: x − 8 … x + 7, y − 16 … y − 1), o null.
         public Enemy Touching(PlayerMotor m, ICollection<int> collected)
         {
-            float px0 = m.X + P.FootLeft, px1 = m.X + P.FootRight + 1, py0 = m.Y - P.EnemyHitHeight, py1 = m.Y;
+            float px0 = m.X + P.ContactLeft, px1 = m.X + P.ContactRight + 1, py0 = m.Y + P.ContactTop, py1 = m.Y + P.ContactBottom + 1;
             foreach (var e in enemies)
             {
                 if (!e.Alive || !e.Visible || !e.Harmful || e.Damage <= 0 && !e.DiesOnTouch && !(e is Fairy))

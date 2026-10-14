@@ -317,7 +317,7 @@ namespace MazeOfKnight.Game
         // Zona de la espada en píxeles de la sala (incluidos los extremos).
         public (int x0, int x1, int y0, int y1) SwordRect() =>
             FacingLeft
-                ? (X - 1 - P.SwordReach, X - 1 - P.SwordFrom, Y - P.SwordTop, Y - P.SwordBottom)
+                ? (X - P.SwordReach, X - P.SwordFrom, Y - P.SwordTop, Y - P.SwordBottom)
                 : (X + P.SwordFrom, X + P.SwordReach, Y - P.SwordTop, Y - P.SwordBottom);
 
         void TickKnockback()

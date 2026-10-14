@@ -233,16 +233,19 @@ namespace MazeOfKnight.Game.Enemies
         // Animación (B0D6): cuenta un temporizador y cambia de fotograma al llegar a 0.
         public int Frame;
 
-        // Ancho extra hacia donde mira (segundo sprite del esqueleto): cuenta para el contacto y la espada, no
-        // para chocar con las paredes, y en el original se dibuja encima de ellas.
-        public int FrontExtra;
+        // Caja de colisión de la tabla (null = la caja física Width × Height). LeftBox: la del sprite mirando a la
+        // izquierda cuando es otra (0x25 y 0x0A: 4E a la derecha, 4F a la izquierda).
+        public BoxRect HitBox, LeftBox;
 
-        // Caja que hace daño (la parte visible si crece desde el suelo o el techo).
+        // Caja que toca al jugador y a la espada, semiabierta [x0, x1) × [y0, y1). Los que crecen (pinchos, brotes…)
+        // muestran solo una parte, desde el suelo o desde el techo.
         public (float x0, float y0, float x1, float y1) Box()
         {
-            float h = Height * Grow;
-            float x0 = FacingLeft ? X - FrontExtra : X, x1 = FacingLeft ? X + Width : X + Width + FrontExtra;
-            return GrowsDown ? (x0, Y, x1, Y + h) : (x0, Y + Height - h, x1, Y + Height);
+            var b = FacingLeft && LeftBox != null ? LeftBox : HitBox;
+            float x0 = b != null ? X + b.dx : X, y0 = b != null ? Y + b.dy : Y;
+            float w = b != null ? b.w + 1 : Width, hFull = b != null ? b.h + 1 : Height;
+            float h = hFull * Grow;
+            return GrowsDown ? (x0, y0, x0 + w, y0 + h) : (x0, y0 + hFull - h, x0 + w, y0 + hFull);
         }
 
         public bool GrowsDown;           // cuelga del techo (crece hacia abajo)

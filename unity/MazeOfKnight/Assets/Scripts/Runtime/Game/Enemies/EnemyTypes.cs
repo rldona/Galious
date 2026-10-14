@@ -82,7 +82,6 @@ namespace MazeOfKnight.Game.Enemies
 
         public override void Init(EnemyContext ctx)
         {
-            FrontExtra = 16;
             maxHp = Hp;
             walkTimer = ctx.Rand(32, 159);
             jumpTimer = ctx.Rand(0, 127);

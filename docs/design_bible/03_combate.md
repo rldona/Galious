@@ -12,18 +12,21 @@ Fuentes: [player.md](../player.md), [items_enemies.md](../items_enemies.md), [bo
 
 ## Armas secundarias (M)
 
-Gastan **flechas** (E046), 1 por disparo [O*]. El arma elegida va en E510 y el proyectil la lleva como tipo [C].
+Cada disparo gasta **1 flecha** (E046); sin flechas no se dispara. Pide pulsación nueva y no para al jugador. Las flechas se disparan también en el aire; las demás armas solo de pie en el suelo, y ninguna en la escalera. Velocidades en px por tick (1 tick = 2 frames) [C][O]. Detalle, cajas y fórmulas en [player.md](../player.md#armas-secundarias); números en `extracted/unity/weapons.json`.
 
-| # | Arma | Comportamiento | Cómo se consigue |
-|---|---|---|---|
-| 1 | Arrow | proyectil recto | bajo una piedra del castillo (sala 121) |
-| 2 | Ceramic Arrow | atraviesa enemigos, más lenta [G] | bajo una piedra (sala 71) |
-| 3 | Rolling Fire | recorre la plataforma en la que estás [G] | a la vista (sala 79) |
-| 4 | Fire | corre por el suelo y cae a la plataforma de abajo [G] | bajo una piedra (sala 147) |
-| 5 | Mine | daño alto, también a ti; contra jefes resta 2 [G][C] | Hefesto, 30 monedas |
-| 6 | Magnifying Glass | no es arma: con M delante de una lápida revela la palabra del jefe [G][C] | Ares, 20 monedas |
+| # | Arma | Comportamiento | Daño (enemigo / jefe) | Cómo se consigue |
+|---|---|---|---|---|
+| 1 | Arrow | recta, 8 px/tick; desaparece al dar | 1 / 1 | bajo una piedra del castillo (sala 121) |
+| 2 | Ceramic Arrow | recta, 4 px/tick; **atraviesa** enemigos y jefes (repite golpe cada 16 ticks) | 1 / 1 | bajo una piedra (sala 71) |
+| 3 | Rolling Fire | 4 px/tick; **da una vuelta** a la plataforma (encima, lateral, debajo, lateral) y muere donde nació | 1 / 1 | a la vista (sala 79) |
+| 4 | Fire | 4 px/tick por el suelo; en los bordes **cae recto** (4 px/tick) y sigue por la plataforma de abajo | 1 / 1 | bajo una piedra (sala 147) |
+| 5 | Mine | quieta; se arma al alejarte y estalla al tocarla (sin mecha). Explosión de 32×32 durante 70 ticks: 2 por golpe, hasta 3 golpes. Al jugador le quita 2 unidades de vitalidad | 2 por golpe / 2 | Hefesto, 30 monedas |
+| 6 | Magnifying Glass | no es arma: con M cerca de una lápida pasa al estado 12, el mensaje con la palabra del jefe [C][G] | — | Ares, 20 monedas |
 
-Límites a la vez [G]: Popolon, 2 flechas y 2 minas; Aphrodite, 3 y 3. Con Earrings, Popolon dispara 3 flechas; con Bracelet, pone 3 minas.
+- **Límites a la vez** [C][O]: Popolon, 2 proyectiles (3 flechas con Earrings) y 2 minas (3 con Bracelet); Aphrodite, 3 y 3. Los proyectiles 1–4 comparten los 3 huecos.
+- **Saber** (0x25): +1 por golpe (+2 la mina).
+- **Magic Rod** (0x09): no se gastan flechas contra el jefe.
+- **Piedras:** las armas 1–4 les quitan 5 con Popolon (1 con Aphrodite, 5 con el Ring). La mina no las daña.
 
 ## Daño a los enemigos
 

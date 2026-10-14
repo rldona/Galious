@@ -44,7 +44,9 @@ namespace MazeOfKnight.EditorTools
                 return;
             }
             EnsurePlaceholderTiles();
-            var files = Directory.GetFiles(BundleDir, "*.json").Where(f => Path.GetFileName(f) != "enemies.json")
+            // Solo los mapas (castle, worldNN); enemies.json, weapons.json e items.json son catálogos.
+            var files = Directory.GetFiles(BundleDir, "*.json")
+                .Where(f => Path.GetFileName(f) == "castle.json" || Path.GetFileName(f).StartsWith("world"))
                 .OrderBy(f => f).ToArray();
             // Las carpetas, antes de StartAssetEditing: dentro, IsValidFolder no ve las recién creadas y
             // CreateFolder acabaría haciendo duplicados ("Generated 1"...).
@@ -142,6 +144,7 @@ namespace MazeOfKnight.EditorTools
             var catalog = LoadOrCreate<EnemyCatalog>($"{GeneratedRoot}/Resources/Enemies.asset");
             catalog.enemies = data.enemies.ToList();
             catalog.loot = data.loot ?? new LootTable();
+            catalog.boxRects = (data.boxRects ?? new BoxRect[0]).ToList();
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
         }

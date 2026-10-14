@@ -35,8 +35,8 @@ namespace MazeOfKnight.Game
         public const int SwordTicks = 4;
         public const int SwordFrom = 8;
         public const int SwordReach = 18;
-        public const int SwordTop = 12;
-        public const int SwordBottom = 3;
+        public const int SwordTop = 7;            // b03:B8FB: franja y − 7 … y − 4 (bordes incluidos), x + 8 … x + 18
+        public const int SwordBottom = 4;         // a la derecha y x − 18 … x − 8 a la izquierda [C]
         public const int RockHp = 15;
         public const int RockDamagePopolon = 5;
         public const int RockDamageAphrodite = 1;
@@ -63,7 +63,9 @@ namespace MazeOfKnight.Game
         public const int KnockbackSpeed = 4;
         public static readonly int[] KnockbackDy = { -1, -1, 0, 0, 1, 1 };
         public const int HurtInvulnerableTicks = 42;
-        public const int EnemyHitHeight = 16;      // alto del jugador para el contacto con enemigos
+        // Caja del jugador contra los enemigos (b03:B8A0): x − 6 … x + 6, y − 14 … y − 2, bordes incluidos [C]. La misma
+        // para recoger el botín. No cambia en la escalera ni saltando.
+        public const int ContactLeft = -6, ContactRight = 6, ContactTop = -14, ContactBottom = -2;
 
         public const int RoomWidthPx = 256;
         public const int RoomTopPx = 32;           // la sala empieza bajo el marcador

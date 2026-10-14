@@ -61,7 +61,7 @@ namespace MazeOfKnight.Game
                 return;
             }
             var catalog = Resources.Load<EnemyCatalog>("Enemies");
-            Enemies = new EnemySystem(catalog != null ? catalog.enemies : new List<EnemyInfo>(), System.Environment.TickCount, catalog != null ? catalog.loot : null);
+            Enemies = new EnemySystem(catalog != null ? catalog.enemies : new List<EnemyInfo>(), System.Environment.TickCount, catalog != null ? catalog.loot : null, catalog != null ? catalog.boxRects : null);
             Enemies.Spawned += ShowEnemy;
             Enemies.HasItem = t => Collected.Contains(t);
             Enemies.Killed += e => { if (enemyViews.TryGetValue(e, out var v)) v.enabled = false; Say("Enemigo derrotado"); };

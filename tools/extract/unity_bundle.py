@@ -11,7 +11,9 @@ JsonUtility, sin diccionarios):
   - puertas de mundo y salas de dioses del castillo;
   - generadores periodicos de enemigos (periodic.py), en rooms[].periodic.
 
-  unity_bundle.py   -> extracted/unity/<mapa>.json y extracted/unity/enemies.json (catalogo de enemigos)
+  unity_bundle.py   -> extracted/unity/<mapa>.json, extracted/unity/enemies.json (catalogo de enemigos) y
+                       extracted/unity/weapons.json (armas secundarias, weapons.py)
+                       y extracted/unity/items.json (objetos, menu F1, vitalidad y mapas del menu, items_export.py)
 
 Todo sale de la ROM del usuario y se queda en local: extracted/ no se versiona.
 
@@ -21,6 +23,9 @@ Enlaces: -1 = sin salida (255 en la ROM); 0xF5-0xFE = salida al castillo desde l
 import json
 from galious_rom import Rom, ROOT
 from periodic import periodic_for
+import weapons
+import items_export
+from enemy_boxes import boxes, player_boxes, enemy_box_info
 
 DAMAGE_TABLE = 0x64E5   # b04: dano por contacto segun el tipo (b03:B39A; el Hat Helmet lo reduce a la mitad)
 LOOT_RULE = 0x647B      # b04: regla de botin segun el tipo (b06:B548), ver docs/items_enemies.md "Muerte y botin"
@@ -122,7 +127,11 @@ def main():
                         'lootLevel': 0 if damage < 3 else 1 if damage < 6 else 2 if damage < 9 else 3,
                         # explosiones al morir (cada una hace su tirada): 4 los grandes, 0 el 0x5C, 1 el resto
                         'deathExplosions': 4 if t in BIG_DEATH else 0 if t == 0x5C else 1,
-                        'experience': rom.byte(EXP_TABLE + t, 0)})
+                        'experience': rom.byte(EXP_TABLE + t, 0),
+                        # Cajas de colision (enemy_boxes.py; docs/items_enemies.md «Cajas de colisión»):
+                        # box = indice inicial en 'boxes' (IX+11), boxes = indices posibles, boxFrames = [{sprite, box}]
+                        # (caja segun el sprite IX+0A), boxSizeChanges, boxSpecial (caja calculada), boxNote
+                        **enemy_box_info(t, rom)})
     # Tirada (b04:6A77): v = (R + E604) & 15, uniforme 0-15. Con el nivel n: v < coinBelow[n] -> monedas (0x5E),
     # si no v < arrowBelow[n] -> flechas (0x5D), si no v < keyBelow[n] -> llaves (0x5F); si no, nada.
     # Cantidades BCD por nivel (6A6B); los contadores topan en 999. El objeto nace en (y & 0xF8, x & 0xF8),
@@ -132,8 +141,18 @@ def main():
     loot = {'coinBelow': [x[0] for x in th], 'arrowBelow': [x[1] for x in th], 'keyBelow': [x[2] for x in th],
             'arrowAmount': amount(0), 'coinAmount': amount(1), 'keyAmount': amount(2),
             'arrowObject': 0x5D, 'coinObject': 0x5E, 'keyObject': 0x5F, 'counterCap': 999}
-    (out_dir / 'enemies.json').write_text(json.dumps({'enemies': enemies, 'loot': loot}))
+    # boxes: tabla b14:9006 [dy, dx, alto, ancho] (dy/dx con signo) desde (IX+5, IX+7). Solape con bordes
+    # INCLUSIVOS (b03:B96D): A.y0 <= B.y0 + B.h y B.y0 <= A.y0 + A.h, igual en x; la caja ocupa (h+1) x (w+1) px.
+    # playerContactBox / swordBoxRight / swordBoxLeft: relativas a (y pies E505, x centro E507), mismo criterio.
+    # weaponBoxes: armas secundarias en E540 (weapon = tipo del hueco 1-5), relativas a (IY+5, IY+7).
+    # boxRects: la misma tabla como objetos {dy, dx, h, w} (JsonUtility no lee arrays anidados).
+    table = boxes(rom)
+    (out_dir / 'enemies.json').write_text(json.dumps({
+        'enemies': enemies, 'loot': loot, 'boxes': table,
+        'boxRects': [dict(zip(('dy', 'dx', 'h', 'w'), b)) for b in table], **player_boxes()}))
     print(f'catalogo: {len(enemies)} tipos de enemigo')
+    weapons.main()     # armas secundarias -> extracted/unity/weapons.json (campos en weapons.py)
+    items_export.main()   # objetos e inventario -> extracted/unity/items.json (campos en items_export.py)
 
 
 if __name__ == '__main__':

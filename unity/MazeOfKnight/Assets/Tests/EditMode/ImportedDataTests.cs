@@ -126,6 +126,19 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void CatalogHasTheCollisionBoxTable()
+        {
+            var catalog = Resources.Load<EnemyCatalog>("Enemies");
+            if (catalog == null)
+                Assert.Ignore("Sin catálogo de enemigos importado");
+            Assert.AreEqual(0x7A, catalog.boxRects.Count, "tabla b14:9006");
+            var skel = catalog.Find(0x25);
+            Assert.AreEqual(0x4E, skel.box);
+            var b = catalog.boxRects[skel.box];
+            Assert.AreEqual((1, 0, 15, 24), (b.dy, b.dx, b.h, b.w));
+        }
+
+        [Test]
         public void JumpAlongTheTopEdgeKeepsMovingSideways()
         {
             // Castillo, sala 73: plataformas en y = 56 pegadas al marcador, hueco de x 64 a 95. Al saltar la cabeza

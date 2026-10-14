@@ -37,7 +37,7 @@ El efecto en código sale de buscar quién lee la flag del objeto (E06F + tipo).
 | 0x04 | Fire | corre por el suelo y cae al de abajo [G] | |
 | 0x05 | Mine | mina: daño alto, también a ti. Popolon pone 2, Aphrodite 3. Se compra a Hefesto [G]. Tiene caso propio al dispararla [C] | b03:A72B |
 | 0x06 | Magnifying Glass | con M delante de una lápida, revela la palabra del jefe [G]. Activa E517 [C] | b03:AD46 |
-| 0x07–0x0A | Holy Water, Cloak, Magic Rod, Map | uno de cada en cada mundo [C]. Según la guía: daño doble al jefe, daño del jefe a la mitad, munición infinita contra el jefe y mapa del mundo en el menú [G] | b00:462E |
+| 0x07–0x0A | Holy Water, Cloak, Magic Rod, Map | uno de cada en cada mundo [C]. Según la guía: daño doble al jefe, daño del jefe a la mitad, munición infinita contra el jefe y mapa del mundo en el menú [G]. Magic Rod comprobado: con E078 y E0D2 ≠ 0 los disparos no gastan flechas (b03:AA8E) [C] | b00:462E |
 | 0x0B | Cross | necesaria para vencer a Galious [G]. Interviene en el combate con el jefe (b03:BBA8) [C] | b03:BBA8 |
 | 0x0C | Great Key | abre la puerta del mundo siguiente [C][O]. Sube 32 la vitalidad máxima, hasta 192 [G] | b03:B701 |
 | 0x0D | Necklace | **Popolon** lo necesita para entrar en el mundo 7 [C] | b02:9A41 |
@@ -56,8 +56,8 @@ El efecto en código sale de buscar quién lee la flag del objeto (E06F + tipo).
 | 0x1A | Lamp | marca en el mapa la sala del jefe [G]. Sprite indicador por mundo [C] | b01:668F |
 | 0x1B | Vase | duplica la experiencia que ganas [C]. Aparece tras recuperar el mundo 4 con una secuencia de 9 acciones de espada y salto (E536 = 9) [G][C] | b03:B62E, b02:9FC1 |
 | 0x1C | Pendant | **Aphrodite puede romper las paredes que suenan**; sin él, solo Popolon [O*]. Así se consigue el muñeco del mundo 2 | b09:A668 |
-| 0x1D | Earrings | Popolon dispara 3 flechas a la vez [G] | — |
-| 0x1E | Bracelet | Popolon pone 3 minas [G] | — |
+| 0x1D | Earrings | Popolon dispara 3 flechas a la vez (no los fuegos) [C][O] | b03:A99E (E08C) |
+| 0x1E | Bracelet | Popolon pone 3 minas [C][O] | b03:A9B7 (E08D) |
 | 0x1F | Ring | Aphrodite rompe piedras con 3 golpes en vez de 15 [O*] | b03:B841 |
 | 0x20 | Bible | CTRL congela a los enemigos, como mucho 16 veces [O*]. Yo medí unos 5 s; la guía dice 15 | b02:9BB6 |
 | 0x21 | Harp | un golpe de espada rompe todas las piedras [O*] | b01:6398 |
@@ -191,6 +191,227 @@ Experiencia (BF27) de los tipos de las salas: 01:6 02:3 03:1 04:1 05:5 07:2 0A:4
 - La mayoría aparece en un solo mundo: cada mundo tiene su propio bestiario. El murciélago 0x0E está en 8 mundos y suma 294 generadores.
 - Los más duros: 0x23 (vida 64), 0x15 (40), 0x40 (35), 0x16 y 0x22 (24), 0x4C (20).
 - No se pueden dañar: 0x20, 0x29, 0x31, 0x32, 0x36, 0x3A, 0x50, 0x51 y 0x69.
+
+## Cajas de colisión
+
+Todo sale del código (b03:B1C1, B492, B6C1, B8A0–B9AF; b06:B067–B0EC) [C]. Datos en `extracted/unity/enemies.json` (`tools/extract/enemy_boxes.py`).
+
+### La prueba de solape [C]
+
+Una sola rutina, b03:B96D, para contacto, espada y armas. Recibe la caja del atacante (E, D = y, x de la esquina; E′, D′ = alto, ancho) y la del enemigo (b03:B954: tabla **b14:9006 + 4·IX+11** = dy, dx, alto, ancho, con origen en (IX+5 + dy, IX+7 + dx); dy y dx con signo). Antes suma alto y ancho de las dos más 1 (b03:B23E/B4F4). Con aritmética de 8 bits, hay toque si
+
+- y_A ≤ y_B + alto_B **y** y_B ≤ y_A + alto_A, y lo mismo en x.
+
+Los **bordes son inclusivos**: el «alto» y el «ancho» de la tabla son la distancia entre el primer y el último píxel, así que una caja ocupa (alto + 1) × (ancho + 1) píxeles. Dos cajas que solo comparten la última fila o columna ya se tocan. Para el remake: rectángulo semiabierto [y, y + alto + 1) × [x, x + ancho + 1).
+
+### Jugador, espada y armas [C]
+
+Coordenadas del jugador: y = pies (E505), x = centro (E507). Rangos inclusivos.
+
+| Caja | Origen (y, x) | alto × ancho | Píxeles que cubre | Rutina |
+|---|---|---|---|---|
+| Contacto con enemigos y recogida de objetos | (y − 14, x − 6) | 12 × 12 | y − 14 … y − 2, x − 6 … x + 6 | b03:B8A0 |
+| Espada a la derecha (E503 = 0) | (y − 7, x + 8) | 3 × 10 | y − 7 … y − 4, x + 8 … x + 18 | b03:B8FB |
+| Espada a la izquierda (E503 ≠ 0) | (y − 7, x − 18) | 3 × 10 | y − 7 … y − 4, x − 18 … x − 8 | b03:B8FB |
+
+- La caja del jugador **no cambia con la postura**: es la misma en la escalera, en el salto y al golpear. No hay agachado.
+- **Contacto** (b03:B1C1, cada frame): recorre los huecos con IX+2 bit 6. Se para en el primer toque (E61F). No mira a nadie si el jugador es invulnerable (E518 ≠ 0), salvo los objetos 0x5D–0x5F, que se recogen igual. Tampoco hay contacto con 0x08, 0x2A, 0x28, 0x2E y 0x31 si están puestos E093, E07D, E07E, E086 y E091 (objetos protectores).
+- **Espada** (b03:B6C1): solo mientras E51B ≠ 0 (lo pone b03:A761 al empezar el espadazo). Prueba los 16 huecos con IX+2 bit 5. En el primer toque, E51B = 0: **un golpe por espadazo**. Con IX+2 bit 1 (escudo), el golpe solo vale si (IX+2 bit 0) = E503. Si no, se pierde sin daño. Con IX+2 bit 2 suena el «clinc» (b03:AE88) y no hace daño. La misma caja sirve contra las piedras (EC30, b03:B877) y contra el jefe (b03:BD55).
+- **Armas secundarias** (b03:B492 → B8B2): huecos E540 + 0x20·n (6), tipo IY+0 = 1–5 [I: el número de arma de `player.md`] con IY+2 bit 0. Origen (IY+5, IY+7):
+
+| Tipo | Origen | alto × ancho | Filtro |
+|---|---|---|---|
+| 1 flecha | ((y AND F8) + 2, (x AND F8) + 2) | 3 × 12 | — |
+| 2 flecha de cerámica | igual | 3 × 12 | no toca enemigos con IX+3 bit 5 (b03:B53D) |
+| 3 fuego rodante | (y, x) | 8 × 8 | — |
+| 4 fuego | (y, x) | 4 × 8 | — |
+| 5 mina | (y, x + 2) | 4 × 12 | — |
+| 5 mina explotada (IY+2 bit 2) | (y − 16, x) | 32 × 32 | no toca enemigos con IX+3 bit 4 (b03:B528) |
+
+[I] En la comprobación de la espada, b03:B528/B53D leen IY, que queda en E600 tras el bucle de armas. Esos filtros no se aplican a la espada salvo que E600 valga 2 o 5.
+
+### Cajas que no salen de la tabla [C]
+
+b03:B23E y B4F4 calculan la caja en estos casos:
+
+- **0x60** (`columnDown`, chorro): dy 0, dx 0, alto 8·((IX+9 AND 7) − 1), ancho 7 (B916).
+- **0x57** (`row`): dy 0, dx 0, alto 8, ancho 8·IX+1F (B926).
+- **0x62** (`columnUpDown`, rayo): n = IX+9 AND 7, alto 8·n, ancho 7, dx 0 y dy = −8·n si IX+15 bit 0 (B933).
+- **0x06** (`lowerSegment`, rayo de 0x69): caja de tabla (10), pero con origen en (IX+12, IX+13), salvo en el estado 4 (B2A0/B51D).
+- **0x5B** (explosión): IX+11 guarda el **tipo** del enemigo muerto, no una caja. Tiene IX+2 = 80, así que no hay contacto ni golpes.
+
+### Cómo cambia IX+11 [C]
+
+- **Valor inicial**: el 5.º byte del descriptor.
+- **XOR por animación**: b06:B0D6/B0DD (y B17F/B183, cada 8 o 4 frames) hacen IX+0A ^= D e IX+11 ^= B a la vez. Por eso la caja va emparejada con el sprite. Con B = 0 la caja no cambia.
+- **Ganchos**: algunas IA dejan en la pila b06:B067/B06C/B071/B076/B07B/B080/B085. Al volver, IX+11 = tabla[(IX+0A − A0)/4] (B085: base C4). Las tablas son B0A7, B0B0, B0B6, B0C1, B0C8, B09F y B0D0. 0x28 y 0x31 usan B088 con sus propias tablas (93CC y 8C17, base C4).
+- **Tablas de palabras** (sprite, caja) que lee b06:736F: 0x0F (73AA/73B2), 0x18/0x54/0x55 (6CC4), 0x2E (A0D1) y 0x25 (9A61). 0x41 elige caja según la dirección (8DC5).
+- **Escrituras directas**: ver la columna «Estados → caja».
+
+En `enemies.json`, cada tipo trae:
+
+- `box` (inicial) y `boxes` (todas las posibles);
+- `boxFrames` = [{sprite, box}]. Con ganchos y tablas es exacto. Con XOR es la pareja nominal [I: tras un cambio de estado la fase sprite/caja puede cruzarse; 0x07 conserva la caja en el salto];
+- `boxSizeChanges`, `boxSpecial` y `boxNote`.
+
+También van la tabla (`boxes` como [dy, dx, alto, ancho] y `boxRects` como objetos), `playerContactBox`, `swordBoxRight`/`swordBoxLeft` y `weaponBoxes`.
+
+### Contraste con el remake
+
+- **Contacto**: el remake usa x − 8 … x + 7, y − 16 … y − 1 (16 × 16). El original usa x − 6 … x + 6, y − 14 … y − 2 (13 × 13 px). Con el esqueleto 0x25 (caja 4E: dy 1, dx 0, 15 × 24), el daño empieza cuando x + 6 ≥ IX+7. La medida en openMSX daba «x + 7 toca el borde izquierdo», un píxel de diferencia [O pendiente de repetir con la caja exacta].
+- **Espada**: el alcance en x coincide a la derecha (x + 8 … x + 18). A la izquierda el remake va un píxel más allá (x − 19 … x − 9 frente a x − 18 … x − 8). En altura, el original cubre solo y − 7 … y − 4; el remake, y − 12 … y − 3.
+
+### Tabla b14:9006 (0x7A cajas; a partir de 91EE empiezan los punteros de los jefes, b03:BD73)
+
+Valores en decimal. dy y dx tienen signo.
+
+| i | dy dx alto ancho | i | dy dx alto ancho | i | dy dx alto ancho | i | dy dx alto ancho |
+|---|---|---|---|---|---|---|---|
+| 00 | 0 0 16 16 | 01 | -13 0 29 16 | 02 | 0 7 5 9 | 03 | 0 0 10 10 |
+| 04 | 1 1 7 7 | 05 | 0 0 6 14 | 06 | 0 0 8 9 | 07 | 0 0 9 9 |
+| 08 | 0 7 9 9 | 09 | 0 0 14 16 | 0A | 0 0 4 4 | 0B | 5 0 11 16 |
+| 0C | 2 2 14 14 | 0D | 2 0 14 14 | 0E | 0 0 11 16 | 0F | 0 0 9 16 |
+| 10 | 0 0 16 7 | 11 | 0 3 4 10 | 12 | 0 1 16 13 | 13 | 1 0 15 16 |
+| 14 | 0 0 8 8 | 15 | 0 2 16 11 | 16 | 0 1 16 15 | 17 | 0 0 16 11 |
+| 18 | 0 3 16 13 | 19 | 8 0 8 16 | 1A | 0 0 14 15 | 1B | 9 0 7 8 |
+| 1C | 6 0 10 10 | 1D | 3 0 13 13 | 1E | 12 0 4 16 | 1F | 0 0 7 16 |
+| 20 | 0 4 8 12 | 21 | 0 0 8 12 | 22 | 0 0 7 8 | 23 | 0 0 13 13 |
+| 24 | 0 2 12 14 | 25 | 0 0 12 14 | 26 | 10 2 6 11 | 27 | 8 2 8 11 |
+| 28 | 4 2 12 11 | 29 | 1 2 15 11 | 2A | 0 0 16 15 | 2B | 10 0 6 16 |
+| 2C | 0 0 5 6 | 2D | 0 0 9 14 | 2E | 0 0 7 12 | 2F | 0 0 8 15 |
+| 30 | 0 0 6 7 | 31 | 0 2 15 14 | 32 | 12 0 4 4 | 33 | 12 12 4 4 |
+| 34 | 8 0 8 8 | 35 | 8 8 8 8 | 36 | 4 0 12 12 | 37 | 4 4 12 12 |
+| 38 | 12 3 4 10 | 39 | 0 3 31 26 | 3A | 0 0 16 3 | 3B | 0 0 3 16 |
+| 3C | 1 5 15 22 | 3D | 6 6 20 20 | 3E | 2 1 7 15 | 3F | 2 0 7 15 |
+| 40 | 0 2 6 14 | 41 | 2 0 14 32 | 42 | 6 0 25 32 | 43 | 2 0 30 32 |
+| 44 | 0 0 6 6 | 45 | 5 0 22 32 | 46 | 2 0 12 16 | 47 | 1 3 13 10 |
+| 48 | 1 0 7 10 | 49 | 0 1 9 8 | 4A | 0 0 5 5 | 4B | 0 1 5 3 |
+| 4C | 0 0 13 14 | 4D | 2 0 14 16 | 4E | 1 0 15 24 | 4F | 1 -8 15 24 |
+| 50 | 0 1 14 14 | 51 | 0 0 8 6 | 52 | 0 2 16 12 | 53 | 0 0 13 9 |
+| 54 | 0 0 10 8 | 55 | 0 1 16 14 | 56 | 0 0 5 9 | 57 | 0 2 7 13 |
+| 58 | 6 0 10 16 | 59 | 6 2 10 14 | 5A | 6 0 10 14 | 5B | 0 0 32 32 |
+| 5C | 6 0 10 8 | 5D | 8 0 8 10 | 5E | 0 0 10 5 | 5F | 0 2 3 14 |
+| 60 | 0 0 3 14 | 61 | 0 0 12 12 | 62 | 0 4 16 8 | 63 | 4 0 8 16 |
+| 64 | 0 0 14 14 | 65 | 0 4 14 14 | 66 | 0 1 6 14 | 67 | 0 3 11 10 |
+| 68 | 0 1 9 14 | 69 | 1 0 9 16 | 6A | 0 2 14 28 | 6B | 2 5 14 22 |
+| 6C | 0 -2 24 14 | 6D | 3 2 12 12 | 6E | 3 2 10 10 | 6F | 4 4 8 8 |
+| 70 | 5 5 6 6 | 71 | 0 3 16 10 | 72 | 9 4 7 7 | 73 | 6 3 10 10 |
+| 74 | 4 2 10 12 | 75 | 2 2 12 12 | 76 | 0 4 7 7 | 77 | 0 3 9 10 |
+| 78 | 6 6 5 5 | 79 | 0 0 24 16 |  |  |  |  |
+
+### Cajas por tipo
+
+«Inicial» = índice (alto × ancho de la tabla). En las notas, «sprite → caja». «Cambia» marca un cambio de tamaño apreciable.
+
+| Tipo | Inicial | Cajas | Cambia | Estados → caja |
+|---|---|---|---|---|
+| 01 | 00 (16×16) | 00 01 13 | **sí** | patrulla 00↔13 cada 8 f (sprite ^4 a la derecha, ^0C a la izquierda); embestida AC/C0 → 01 (29 de alto, sube 13 px); A8 → 00 |
+| 02 | 75 (12×12) | 75 | no | caja fija |
+| 03 | 05 (6×14) | 05 66 74 77 | **sí** | quieta C4 → 66 (6x14); avanza C8 → 74, CC/D0 → 77 |
+| 04 | 22 (7×8) | 22 | no | caja fija |
+| 05 | 2A (16×15) | 00 02 16 2A 56 | no | gancho B080: caja según sprite cada frame |
+| 06 (hijo) | 10 (16×7) | 10 | no | `lowerSegment`: caja 10 con origen en IX+12/IX+13 (segmento inferior) salvo en el estado 4 |
+| 07 | 26 (6×11) | 26 27 | no | anda 26↔27 cada 10 f (sprite ^4, caja ^1); en el salto conserva la caja |
+| 08 (hijo) | 4D (14×16) | 07 0C 4D 50 | no | gancho B085 (base C4): CC → 0C, D0 → 50 |
+| 09 (hijo) | 13 (15×16) | 13 | no | caja fija |
+| 0A | 4E (15×24) | 4E 4F 55 | **sí** | anda a la derecha B0 → 4E y a la izquierda C0 → 4F (24 de ancho); escalera A0/A8 → 55 |
+| 0B | 3E (7×15) | 04 05 3E 3F | **sí** | nada A0/3F ↔ A4/05 (^3A cada 8 f); A8/05 ↔ AC/3F; al girar A0 → 3E (y A4 → 04) |
+| 0C | 51 (8×6) | 16 2A 51 52 53 54 | **sí** | gancho B067: crece A0 → 51 (8x6), A4/A8 → 52, AC → 53, B0 → 54; vuelo B4..C0 → 2A/16 |
+| 0D (hijo) | 00 (16×16) | 00 | no | caja fija |
+| 0E | 69 (9×16) | 0F 67 69 | **sí** | colgado A0 → 67; se suelta AC → 69; revolotea AC/69 ↔ B0/0F (^66 cada 4-6 f) |
+| 0F | 32 (4×4) | 00 32 33 34 35 36 | **sí** | crece por etapas (IX+1E 0..3): derecha C0/33, C8/35, D0/36, D8/00; izquierda A0/32, A8/34, B0/36, B8/00; anima solo el sprite |
+| 10 | 0B (11×16) | 0B | no | caja fija |
+| 11 | 58 (10×16) | 00 58 59 5A | **sí** | anda A4/B4 → 58; descansa B0 → 59 / C0 → 5A alternando; dispara AC/BC → 00 |
+| 12 | 13 (15×16) | 0A 13 16 2A | no | gancho B07B: emerge y rueda con cajas de 16 (13/16/2A); oculto con IX+2 bit 2 |
+| 13 | 2D (9×14) | 00 0C 15 1A 2D 2E 2F 30 31 | **sí** | gancho B071: anda A0..B0 (2D/2E/1A/2F), se desvanece B4 → 30 (6x7), vuela BC/C0 → 15/31 |
+| 14 | 38 (4×10) | 13 16 19 1E 2A 38 | **sí** | gancho B076: emerge A0 → 38 (4 alto), A4 → 1E (4), A8 → 19 (8); pasea AC..B8 → 16/13/2A/13 |
+| 15 | 42 (25×32) | 42 43 | no | sprites 08/09 alternando cada 8 f → 42/43 |
+| 16 | 01 (29×16) | 01 | no | caja fija |
+| 17 | 13 (15×16) | 09 13 | no | 13 ↔ 09 con la animación (^1A) |
+| 18 | 1E (4×16) | 0B 1E 1F 25 | **sí** | tabla 6CC4 por IX+1F: A0/1E (4 alto), A8/0B, AC/0B, A4/1F (7), B4/25 (12x14), B0/0B |
+| 19 | 4A (5×5) | 46 47 48 49 4A 4B | **sí** | nivel 0 D0/4A ↔ 4B (5x5); nivel 1 C8/48 ↔ 49; nivel 2 C0/46 ↔ 47 (^1) |
+| 1A (hijo) | 05 (6×14) | 05 | no | caja fija |
+| 1B (hijo) | 05 (6×14) | 05 | no | caja fija |
+| 1C (hijo) | 22 (7×8) | 22 | no | caja fija |
+| 1D (hijo) | 05 (6×14) | 05 | no | caja fija |
+| 1E (hijo) | 0A (4×4) | 0A | no | caja fija |
+| 1F | 00 (16×16) | 00 13 | no | corre 00 ↔ 13 (^13); salto A8/B4 → 00 |
+| 20 | 19 (8×16) | 19 | no | caja fija |
+| 21 (hijo) | 58 (10×16) | 58 59 5A | no | 58 ↔ 59 a la derecha, 58 ↔ 5A a la izquierda (^1 / ^2) |
+| 22 | 09 (14×16) | 09 | no | caja fija |
+| 23 | 6C (24×14) | 6C | no | caja fija |
+| 24 | 00 (16×16) | 00 09 | no | anda 00; tras saltar A8/B4 → 09; al aterrizar 00 |
+| 25 | 4E (15×24) | 0B 19 4D 4E 4F | **sí** | anda AC → 4E / B8 → 4F (24 de ancho); enroscado tabla 9A61 por IX+19: 2 A0/4D, 1 A4/0B, 0 A8/19 |
+| 26 | 12 (16×13) | 12 | no | caja fija |
+| 27 | 11 (4×10) | 00 11 | **sí** | dormida C4 → 11 (4x10); despierta C8/CC → 00 |
+| 28 | 62 (16×8) | 0C 0D 62 63 64 65 | no | tabla 93CC (base C4) según la dirección: 62, 63, 0D, 64, 0C, 65 |
+| 29 | 0E (11×16) | 0E 68 | no | 0E ↔ 68 cada 8 f (^66) |
+| 2A | 00 (16×16) | 00 | no | caja fija |
+| 2B | 13 (15×16) | 13 | no | caja fija |
+| 2C | 0B (11×16) | 0B 0C 0D | no | gancho B06C: A0/AC → 0B, A4/A8 → 0C, B0/B4 → 0D |
+| 2D | 0C (14×14) | 00 0C 0D | no | derecha A0/0C ↔ A4/00, izquierda AC/0D ↔ B0/00 (^0C/^0D cada 4 f) |
+| 2E | 26 (6×11) | 26 27 28 29 | **sí** | tabla A0D1 por IX+1E: C4/26 (6 alto), C8/27 (8), CC/28 (12), D0/29 y D4/29 (15) y vuelta |
+| 2F | 00 (16×16) | 00 | no | caja fija |
+| 30 (hijo) | 41 (14×32) | 41 | no | caja fija |
+| 31 | 1B (7×8) | 1B 72 73 74 75 76 77 | **sí** | tabla 8C17 (base C4). Suelo: C8/73, CC/74, D0/75; techo: D8/77, DC/74, E0/75. C4/D4 no dan contacto (IX+2 sin bit 6); sprite 00 oculto |
+| 32 | 79 (24×16) | 79 | no | caja fija |
+| 33 (hijo) | 5F (3×14) | 5F 60 | no | derecha C4 → 5F, izquierda C8 → 60 |
+| 34 | 22 (7×8) | 22 | no | caja fija |
+| 35 (hijo) | 13 (15×16) | 13 | no | caja fija |
+| 36 | 12 (16×13) | 11 12 | **sí** | 12 ↔ 11 cada 12 f (^3) |
+| 37 (hijo) | 3D (20×20) | 3C 3D | no | 3D ↔ 3C (^1) |
+| 38 (hijo) | 66 (6×14) | 66 67 | **sí** | quieta C4 → 66; cae C8 → 67 |
+| 39 (hijo) | 4C (13×14) | 4C | no | caja fija |
+| 3A | 00 (16×16) | 00 | no | caja fija |
+| 3B (hijo) | 61 (12×12) | 61 | no | caja fija |
+| 3C | 13 (15×16) | 13 | no | caja fija |
+| 3D (hijo) | 14 (8×8) | 14 | no | caja fija |
+| 3E (hijo) | 0F (9×16) | 0E 0F | no | 0F ↔ 0E (^1) |
+| 3F (hijo) | 05 (6×14) | 05 21 | no | A8 → 05; con E624 B4 → 21 |
+| 40 | 39 (31×26) | 39 | no | caja fija |
+| 41 (hijo) | 00 (16×16) | 00 3A 3B 75 | **sí** | tabla 8DC5 por dirección: horizontal A4 → 3A, vertical A8 → 3B, diagonal C8/BC → 75 |
+| 42 | 3C (15×22) | 3C | no | caja fija |
+| 43 | 41 (14×32) | 41 | no | caja fija |
+| 44 (hijo) | 1A (14×15) | 1A | no | caja fija |
+| 45 (hijo) | 44 (6×6) | 44 | no | caja fija |
+| 46 (hijo) | 44 (6×6) | 44 | no | caja fija |
+| 47 (hijo) | 5C (10×8) | 3D 5B 5C 5D | **sí** | proyectil C0/5C ↔ C4/5D; explosión 0A → 3D (20x20, x-8 y-8) y 0B → 5B (32x32) |
+| 48 (hijo) | 4A (5×5) | 4A | no | caja fija |
+| 49 | 6A (14×28) | 6A 6B | **sí** | 6A ↔ 6B (^1) |
+| 4A (hijo) | 0A (4×4) | 0A | no | caja fija |
+| 4B (hijo) | 0A (4×4) | 0A | no | caja fija |
+| 4C | 3D (20×20) | 3D | no | caja fija |
+| 4D (hijo) | 54 (10×8) | 54 | no | caja fija |
+| 4E | 00 (16×16) | 00 | no | caja fija |
+| 4F (hijo) | 00 (16×16) | 00 13 | no | A4 → 00; A8 → 13 |
+| 50 | 00 (16×16) | 00 | no | caja fija |
+| 51 | 79 (24×16) | 79 | no | caja fija |
+| 52 (hijo) | 69 (9×16) | 0F 69 | no | 69 ↔ 0F (^66) |
+| 53 (hijo) | 56 (5×9) | 48 56 | no | 56 ↔ 48 (^1E) |
+| 54 (hijo) | 00 (16×16) | 00 0B 1E 1F 25 | **sí** | como 0x18 (tabla 6CC4) |
+| 55 (hijo) | 00 (16×16) | 00 0B 1E 1F 25 | **sí** | como 0x18 (tabla 6CC4) |
+| 56 (hijo) | 51 (8×6) | 51 | no | caja fija |
+| 57 (hijo) | 00 (16×16) | 00 | **sí** | `row`: sin tabla: dy 0, dx 0, alto 8, ancho 8*IX+1F (b03:B926) |
+| 58 (hijo) | 6F (8×8) | 0D 6F | **sí** | 6F (8x8) ↔ 0D (14x14) (^62) |
+| 59 (hijo) | 70 (6×6) | 70 | no | caja fija |
+| 5A (hijo) | 6E (10×10) | 6E | no | caja fija |
+| 5B (hijo) | 00 (16×16) |  | no | explosión: IX+11 guarda el tipo muerto, no una caja; IX+2 = 80, sin contacto ni golpes |
+| 5C (hijo) | 00 (16×16) | 00 | no | caja fija |
+| 5D (hijo) | 00 (16×16) | 00 | no | caja fija |
+| 5E (hijo) | 00 (16×16) | 00 | no | caja fija |
+| 5F (hijo) | 00 (16×16) | 00 | no | caja fija |
+| 60 (hijo) | 00 (16×16) | 00 | **sí** | `columnDown`: sin tabla: dy 0, dx 0, alto 8*((IX+9 & 7) - 1), ancho 7 (b03:B916) |
+| 61 (hijo) | 0A (4×4) | 0A | no | caja fija |
+| 62 (hijo) | 00 (16×16) | 00 | **sí** | `columnUpDown`: sin tabla: dx 0, alto 8*n, ancho 7 con n = IX+9 & 7; dy = -8*n si IX+15 bit 0, si no 0 (b03:B933) |
+| 63 (hijo) | 00 (16×16) | 00 | no | caja fija |
+| 64 | 00 (16×16) | 00 0B 0C 0D | no |  |
+| 65 (hijo) | 71 (16×10) | 71 | no | caja fija |
+| 66 (hijo) | 6F (8×8) | 6F | no | caja fija |
+| 67 (hijo) | 55 (16×14) | 55 | no | caja fija |
+| 68 (hijo) | 00 (16×16) | 00 | no | caja fija |
+| 69 | 0E (11×16) | 0E | no | caja fija |
+| 6A (hijo) | 0B (11×16) | 0B | no | caja fija |
+| 6B (hijo) | 00 (16×16) | 00 | no | caja fija |
 
 ## Dónde está la IA [C]
 

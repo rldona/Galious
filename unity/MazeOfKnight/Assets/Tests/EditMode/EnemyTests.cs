@@ -175,31 +175,39 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
-        public void SkeletonSecondSpriteIsOnTheSideItFaces()
+        public void SkeletonBoxIsTwentyFourWideOnTheSideItFaces()
         {
-            // Medido: mirando a la izquierda el segundo sprite está en x − 16; a la derecha, en x + 16.
-            var (sys, motor, _) = Setup(Room(-1, new EntityJson { type = 0x25, x = 120, y = 104 }), 40, 120);
+            // Tabla b14:9006: 4E = (1, 0, 15, 24) mirando a la derecha y 4F = (1, −8, 15, 24) a la izquierda; bordes
+            // incluidos, así que cubren 25 × 16 px.
+            var boxes = Enumerable.Range(0, 0x50).Select(_ => new BoxRect { h = 16, w = 16 }).ToArray();
+            boxes[0x4E] = new BoxRect { dy = 1, dx = 0, h = 15, w = 24 };
+            boxes[0x4F] = new BoxRect { dy = 1, dx = -8, h = 15, w = 24 };
+            var catalog = Catalog.Select(i => i.type == 0x25 ? new EnemyInfo { type = 0x25, hp = 8, damage = 3, box = 0x4E } : i);
+            var room = Room(-1, new EntityJson { type = 0x25, x = 120, y = 104 });
+            var world = new RoomWorld(new[] { room });
+            var sys = new EnemySystem(catalog, 7, null, boxes);
+            sys.EnterRoom(world, room, new PlayerMotor(world, room, 40, 120));
             var skel = sys.Enemies[0];
             Assert.IsTrue(skel.FacingLeft, "mira al jugador");
-            var (x0, _, x1, _) = skel.Box();
-            Assert.AreEqual(104, x0);
-            Assert.AreEqual(136, x1);
+            var (x0, y0, x1, y1) = skel.Box();
+            Assert.AreEqual((112f, 105f, 137f, 121f), (x0, y0, x1, y1));
             skel.FacingLeft = false;
             (x0, _, x1, _) = skel.Box();
-            Assert.AreEqual(120, x0);
-            Assert.AreEqual(152, x1);
+            Assert.AreEqual((120f, 145f), (x0, x1));
         }
 
         [Test]
         public void ContactBoxMatchesTheMeasurement()
         {
-            // Medido con el esqueleto: daña desde que el borde derecho del jugador (x + 7) toca su borde izquierdo.
+            // Medido con el esqueleto: daña cuando el borde derecho del jugador toca su borde izquierdo (x + 7 en la medida,
+            // x + 6 en el código; se sigue el código).
             var (sys, motor, _) = Setup(Room(-1, new EntityJson { type = 0x18, x = 100, y = 104 }), 92, 120);
             sys.Enemies[0].X = 100;
-            motor.Place(sys.Room, 92, 120);
-            Assert.IsNull(sys.Touching(motor, new List<int>()), "x + 7 = 99: aún no toca");
+            // Caja del jugador b03:B8A0: x − 6 … x + 6 (bordes incluidos).
             motor.Place(sys.Room, 93, 120);
-            Assert.IsNotNull(sys.Touching(motor, new List<int>()), "x + 7 = 100: toca");
+            Assert.IsNull(sys.Touching(motor, new List<int>()), "x + 6 = 99: aún no toca");
+            motor.Place(sys.Room, 94, 120);
+            Assert.IsNotNull(sys.Touching(motor, new List<int>()), "x + 6 = 100: toca");
         }
 
         [Test]

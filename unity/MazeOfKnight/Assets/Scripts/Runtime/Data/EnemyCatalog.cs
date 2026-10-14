@@ -21,6 +21,15 @@ namespace MazeOfKnight.Data
         public int lootLevel;                 // 0..3
         public int deathExplosions = 1;       // los grandes explotan 4 veces (4 sorteos)
         public int experience;                // BF27[tipo]
+        public int box;                       // caja de colisión inicial: índice en la tabla b14:9006 (descriptor d4)
+    }
+
+    // Caja de colisión de la tabla b14:9006 (docs/items_enemies.md, "Cajas de colisión"): origen (y + dy, x + dx) y
+    // bordes incluidos, así que cubre (h + 1) × (w + 1) px.
+    [Serializable]
+    public class BoxRect
+    {
+        public int dy, dx, h, w;
     }
 
     // Sorteo del botín (b04:6A77, tablas 6A9E y 6A6B): v = 0..15; v < coinBelow → monedas, < arrowBelow → flechas,
@@ -43,12 +52,14 @@ namespace MazeOfKnight.Data
     {
         public EnemyInfo[] enemies = Array.Empty<EnemyInfo>();
         public LootTable loot = new LootTable();
+        public BoxRect[] boxRects = Array.Empty<BoxRect>();
     }
 
     public class EnemyCatalog : ScriptableObject
     {
         public List<EnemyInfo> enemies = new List<EnemyInfo>();
         public LootTable loot = new LootTable();
+        public List<BoxRect> boxRects = new List<BoxRect>();
 
         public EnemyInfo Find(int type) => enemies.Find(e => e.type == type);
     }
