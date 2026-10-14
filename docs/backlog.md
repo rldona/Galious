@@ -21,3 +21,18 @@ Lo que falta por hacer en Unity. El estado de lo ya hecho está en [unity.md](un
 - **Animación de entrar y salir de un santuario del castillo** (el jugador se hunde 16 px en ~1 s; música 0x8D / 0x88).
 - **Objetos con condición del castillo:** al matar a los marcados de ciertas salas (E61C = 1) aparecen objetos en las salas 48, 75 y 24 (entre ellos el Hoi).
 - **Muro del mundo 3, sala 4:** se abre al subir 5 veces seguidas por el pozo de la sala.
+
+## Enemigos y combate
+
+- **Escudos de los enemigos:** con el bit 2 de IX+2 (o el bit 1 si su lado no coincide) la espada hace "clink" sin daño y los proyectiles rebotan (invierten vx, suben a 8 px/tick, sonido 0x1D) (docs/player.md, "Armas secundarias").
+- **Cajas de colisión por fotograma:** ahora se usa la caja inicial de cada tipo; en el original cambia con cada fotograma (`boxFrames` en enemies.json).
+- **Simplificaciones de las IA** ([I] en el código): sondeos de salto entre pisos (9A67/9CA3), la fase latente del pistón 0x04, el modo forzado de las cabezas 0x69 (mundo 9, sala 0x19), el reparto de la desviación del rayo 0x06 y los tamaños de 32 px deducidos de los sprites.
+- **Experiencia del 0x19 por tamaño** (1, 2, 4, 4) y daño por tamaño con el Hat Helmet.
+
+## Comprobaciones pendientes en el emulador
+
+El barrido de tiles (docs/entities.md, "Barrido de tiles en openMSX") no llegó a activar:
+- **Muros que se cierran** de las salas 15, 17, 29, 41 y 76 del castillo.
+- **Escaleras que se retiran** de las salas 21, 60, 73, 102, 124 y 136 del castillo.
+- **Eventos de sala** (enemigos marcados): escaleras y bloques de muro de los mundos, y los objetos con condición del castillo.
+- **Umbral del toque de salto** entre 5 y 9 frames (medido: 4 frames no salta, 10 sí).
