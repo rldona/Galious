@@ -1,0 +1,14 @@
+# Propiedad de Konami: la ROM, el disco y todo lo derivado de ellos (graficos, mapas,
+# vistas ELF con el codigo, savestates, capturas) no se versiona. Se regenera con tools/.
+rom/
+extracted/
+logs/
+*.rom
+*.dsk
+*.oms
+
+# Sistema y Python
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
