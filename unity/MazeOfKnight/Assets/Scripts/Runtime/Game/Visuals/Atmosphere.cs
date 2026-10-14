@@ -72,17 +72,19 @@ namespace MazeOfKnight.Game.Visuals
             block = new MaterialPropertyBlock();
             var outline = Resources.Load<Shader>("Shaders/SpriteOutlineFlash");
             var add = Resources.Load<Shader>("Shaders/Additive");
-            var unlitShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
-            if (outline == null || add == null || unlitShader == null)
+            // Nada de Shader.Find: en el compilado solo están los shaders referenciados (los de Resources siempre).
+            if (outline == null || add == null)
             {
-                Debug.LogWarning("[Atmosphere] Faltan shaders (¿URP 2D sin configurar?): sin estilo del remake");
+                Debug.LogWarning($"[Atmosphere] Faltan shaders (contorno: {outline != null}, aditivo: {add != null}): sin estilo del remake");
                 styled = false;
                 enabled = false;
                 return;
             }
             CharacterMaterial = new Material(outline) { name = "Personajes (contorno)" };
             additive = new Material(add) { name = "Aditivo" };
-            unlit = new Material(unlitShader) { name = "Sin luz" };
+            // Sin luz = el shader de contorno sin contorno.
+            unlit = new Material(outline) { name = "Sin luz" };
+            unlit.SetFloat("_Outline", 0);
             dot = ShapePainter.ToSprite(ShapePainter.SoftDot(), 64, new Vector2(0.5f, 0.5f));
             shaft = ShapePainter.ToSprite(ShapePainter.Shaft(), 32, new Vector2(0.5f, 1f));
             var w = new Texture2D(1, 1);
