@@ -45,9 +45,27 @@ Las herramientas de `tools/extract/` generan, **en local y desde la ROM del usua
 - catálogos de enemigos y objetos (`enemies.json`, `items.json`);
 - jefes (`boss_index.json`), música (`score.json`) y efectos (`sfx.json`).
 
-Propuesta para la fase 5: un importador que lea esos JSON y cree los ScriptableObjects y Tilemaps de cada sala con **tiles y sprites nuevos**, mapeando cada tile original a una clase (sólido, fondo, escalera, agua, lava, puerta…). Así el remake reproduce la **disposición** del original sin distribuir sus gráficos.
+Propuesta para la fase 5: un importador que lea esos JSON y cree los ScriptableObjects y Tilemaps de cada sala con **tiles y sprites nuevos**, mapeando cada tile original a una clase (sólido, fondo, escalera, agua, lava) y cada objeto de sala a su prefab (puertas con llave, giratorias, de un sentido, muros que se cierran, paredes que se rompen). Así el remake reproduce la **disposición** del original sin distribuir sus gráficos.
 
-**Pendiente antes de importar:**
-- ~~la clase de colisión de cada tile~~: resuelta (sólido ≥ 0xBA, o ≥ 0xF0 con jefe; escalera 9A/9B; agua B6–B9). Cuadrícula por sala en `extracted/maps/collision/`; ver [world_maps.md](../world_maps.md#colisión-de-los-tiles-co);
-- los gráficos especiales de la sala del jefe y la animación del agua y la lava;
-- el sentido exacto de algunas variables (E1C5/E1C9, E500 = 4) y del objeto de sala de clase 3.
+**Antes de importar: todo resuelto.**
+- **Colisión de cada tile:**
+  - sólido ≥ 0xBA (≥ 0xF0 con jefe);
+  - escalera 9A/9B;
+  - agua B6/B7;
+  - lava B8/B9.
+
+  Cuadrícula por sala en `extracted/maps/collision/`; ver [world_maps.md](../world_maps.md#colisión-de-los-tiles-co).
+- **Agua y lava:** animación por color (agua) y por patrón (lava), daño por personaje y Carpet. Ver [world_maps.md](../world_maps.md#agua-y-lava-co).
+- **Sala del jefe:** la decoración se apaga y el jefe se dibuja con tiles. En el remake, el jefe será un sprite o rig propio y el "apagón" un cambio de iluminación. Ver [boss_ai.md](../boss_ai.md#cómo-se-dibuja-el-jefe-oc).
+- **Variables:**
+  - E1C5: tempo del combate;
+  - E1C9: música en pausa;
+  - E500 = 4: retroceso del jugador;
+  - objeto de sala de clase 3: puerta giratoria de un solo sentido.
+
+  Ver [music.md](../music.md), [boss_ai.md](../boss_ai.md) y [entities.md](../entities.md).
+
+**Queda abierto, sin bloquear el importador:**
+- quién activa E1C6 (silencio de canal);
+- cómo se mueve el bloque de tiles del jefe a resolución de píxel;
+- el gráfico de la puesta en escena en los jefes 2–10. Solo se ha visto el del mundo 1.

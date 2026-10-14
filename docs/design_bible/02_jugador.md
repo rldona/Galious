@@ -26,6 +26,7 @@ Popolon (E501 = 1) y Aphrodite (E501 = 0). Cada uno tiene su vitalidad, su exper
 |---|---|---|
 | Salto máximo | **54 px**, con altura variable según cuánto mantienes ↑ [O][G] | 42 px, de altura fija [O][G] |
 | Agua | se ahoga: −1 de vitalidad cada ~0,15 s [O] | aguanta: −1 cada 8–10 s [O]. Puede bajar al fondo de algunas salas de agua [C] |
+| Lava | muere en ~1,2 s [O] | igual: no resiste la lava [C][O] |
 | Piedras | 3 golpes (quita 5 de 15) [O*] | 15 golpes (quita 1); con el **Ring**, como Popolon [O*] |
 | Paredes que suenan | las rompe [O*] | solo con el **Pendant** [O*] |
 | Puertas de mundo | necesita el **Necklace** para el mundo 7 [C] | necesita la **Conch Shell** para el mundo 5 [C] |
@@ -43,8 +44,8 @@ Diseño: el juego obliga a alternar. Aphrodite es para el agua y los disparos m�
 | Alinearse con una escalera | x del jugador = x de la escalera + 8 [O] |
 | Salto | ver la tabla de personajes. Dos tablas de salto en b03:A951/A953 [C] |
 | Caída | se cae por los huecos de las plataformas. Caer a la sala de abajo es normal |
-| Colisión | caja de pies de 16 px (x − 8 … x + 7); sólido si tile ≥ 0xBA. Durante el combate con un jefe solo son sólidos F0–FF [C][O] |
-| Daño al tocar enemigos | retroceso y daño. Con las protecciones (Crown, Helmet, Armor, Triangle y Pitcher), los enemigos correspondientes no hacen daño por contacto [C] |
+| Colisión | caja de pies de 16 px (x − 8 … x + 7); sólido si tile ≥ 0xBA. Durante el combate con un jefe solo son sólidos F0–FF, porque los números 5A–EF pasan a dibujar al jefe [C][O] |
+| Daño al tocar enemigos | retroceso (estado E500 = 4: sale despedido 4 px por tick, alejándose) y daño. Con las protecciones (Crown, Helmet, Armor, Triangle y Pitcher), los enemigos correspondientes no hacen daño por contacto [C] |
 
 ## Vitalidad, experiencia y vidas
 

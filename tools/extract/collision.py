@@ -5,14 +5,14 @@ Reglas leidas del codigo (el juego usa el numero de tile del mapa de nombres en 
   - solido: tile >= F020, umbral que b00:554D pone a 0xBA, o a 0xF0 durante el combate con un jefe
     (E0D2 != 0). Lo comprueban b00:54FF-554C (jugador) y b00:4DC8 (enemigos, > 0xB9).
   - escalera: tiles 9A y 9B (b03:AEE1: tile - 9A < 2 en los dos lados del jugador).
-  - agua: B6 y B7 (E511 = 1) y B8 y B9 (E511 = 2), en b03:B028. En el mundo 5, salas 12 y 13,
-    con el Oar la B6 no hunde.
+  - agua: B6 y B7 (E511 = 1); lava: B8 y B9 (E511 = 2), en b03:B028. En el mundo 5, salas 12 y 13,
+    con el Oar la B6 no hunde. En el mundo 8, con el Carpet (E087) las filas 12-19 pasan a F0 (b00:5575).
   - todo lo demas es fondo atravesable.
 Incluye las superposiciones de la sala al cargar (piedras BA-BD, muros F0, estatuas F1-FC, columnas
 de puertas C5-D2, escaleras extra 9A 9B), tal como las pinta overlays.py.
 
   collision.py            -> extracted/maps/collision/<mapa>.json (filas de texto por sala)
-Leyenda: '#' solido, 'H' escalera, '~' agua (B6 B7), 'w' agua profunda (B8 B9), '.' fondo,
+Leyenda: '#' solido, 'H' escalera, '~' agua (B6 B7), 'L' lava (B8 B9), '.' fondo,
 'j' solido normal que es atravesable en combate de jefe (BA-EF).
 """
 import json
@@ -31,7 +31,7 @@ def tile_class(t, boss=False):
     if t in (0xB6, 0xB7):
         return '~'
     if t in (0xB8, 0xB9):
-        return 'w'
+        return 'L'
     if t >= SOLID:          # solo en combate: BA-EF dejan de ser solidos
         return 'j'
     return '.'

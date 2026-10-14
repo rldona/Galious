@@ -106,7 +106,7 @@ Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibbl
 |---|---|---|---|
 | 1 (tipo 0x01) | EA00, 2 huecos, columna C5 | **puerta con llave del castillo**: empujando contra ella unos 30 frames, a su altura exacta, gasta 1 llave (b09:A1F2, BCD en E04A) y suena 0x22 [C] | 15 salas del castillo |
 | 2 (0x02) | EA30, 2 huecos, C6 C7 C8 | **puerta con llave de los mundos**: lo mismo, con sonido 0x21; no actúa si no tienes llaves [C] | 34 en los mundos |
-| 3 (0x03, 0x13) | EA50, 1 hueco, CF; el bit 4 del tipo da el sentido | sin descifrar | 15 en los mundos |
+| 3 (0x03, 0x13) | EA50, 1 hueco, CF; el bit 4 del tipo da el sentido | **puerta giratoria de un solo sentido** (b09:A20A, por frame A22D) [C]. Gira si el jugador está en estado normal (E500 = 0), a la altura exacta (y = y_obj + 0x18), pegado a ella y empujando 30 frames en el único sentido que admite: tipo 0x03 → **hacia la izquierda** (desde x = x_obj + 0x10, mirando a la izquierda); tipo 0x13 → **hacia la derecha** (desde x = x_obj − 8). Entonces el jugador pasa a E500 = 7 (lo arrastra la puerta), la puerta da 4 pasos de 6 frames y suena 0x23. No consulta el Bread & Water: la cruzan los dos personajes, pero solo en un sentido | 15 en los mundos |
 | 4 (0x04) | EA60, 4 huecos, D0 D1 D2 | **puertas giratorias**: su rutina consulta E098, la flag del Bread & Water [C]. Según la guía [G], Popolon las cruza siempre y Aphrodite solo con ese objeto | 23 en los mundos |
 | 5 (0x05) | EAA0 | **muro que se cierra a tu espalda** (b09:A415–A4EC) [C][O]. Al pasar por su columna anota tu dirección; cuando avanzas 16 px más, crece un tile cada 15 frames hasta 3 y marca la sala (bit 1 persistente), así que al volver ya está cerrado | 16 salas del castillo |
 | 6 (0x06) | EAB0 | espera a que el jugador esté en y = 0x78. Por la guía, son las **piedras que aparecen si esperas en el borde** (mundo 5) [C][G] | mundo 5, sala 11 |
@@ -201,11 +201,10 @@ Las 13 escaleras extra del castillo (tabla b09:A6EB/A705, 5 bytes: y, x, alto, l
 - Las salas 19 y 102 (modo 1) solo la retiran al subirla [O en la 19].
 - Efecto de diseño [I]: no puedes volver por donde has venido hasta pasado un minuto.
 
-## Catálogo de sprites## Catálogo de sprites
+## Catálogo de sprites
 
 `extracted/entities/sprites_<tipo>.png` pinta los sprites de 16×16 que carga cada tipo, en blanco. Algunos reconocibles: 0x25 esqueleto, 0x0E y 0x49 murciélagos, 0x05 serpiente, 0x0A caballero, 0x08 y 0x31 fuego, 0x32 flecha, 0x54 huesos (el proyectil del jefe del mundo 1, que se dibuja con tiles). El tipo de generador no siempre es un tipo de sprite: algunos (0x50, 0x51, 0x04, 0x3A) se dibujan con tiles.
 
 ## Pendiente
 - La semántica de cada tipo de enemigo: IA, vida, daño y qué arma le afecta.
-- Los gráficos especiales de la sala del jefe y la animación del agua y la lava.
 - El evento del castillo (E61C → b03:A003, secuencia de direcciones).

@@ -75,8 +75,10 @@ Doce partículas de polvo deambulan sin hacer daño [C][O].
 
 - **Puertas con llave:** se empuja contra ellas unos 30 ticks y gastan una llave [C].
 - **Puertas giratorias:** las cruza Popolon; Aphrodite, con Bread & Water [G][C].
+- **Puertas giratorias de un solo sentido** (15, en los mundos 2, 3, 5–9): las cruzan los dos personajes, pero solo en el sentido marcado. Hay que pegarse a ellas y empujar ~1 s; la puerta arrastra al jugador al otro lado [C][O: mundo 2, sala 6]. Diseño: atajos de vuelta y caminos que no se pueden desandar.
 - **Agua:** daño continuo, mucho para Popolon y poco para Aphrodite. Con el Oar se camina sobre ella en el mundo 5. El monstruo del agua (0x42) se esconde si estás dentro.
-- **Lava del mundo 8:** el Carpet la convierte en piedra [G][C].
+- **Lava** (mundo 8, salas 15–20; también en el castillo y en los mundos 9 y 10): mata en ~1,2 s a los dos personajes. Burbujea en la superficie [C][O].
+- **Lava del mundo 8:** el Carpet la convierte en suelo de ladrillo, solo en ese mundo [G][C][O].
 - **Salas oscuras del mundo 5:** con la Candle se ven los muros [O*].
 - **Controles invertidos del mundo 8:** sin el Hoi, izquierda y derecha van al revés [O*].
 - **Piedras que aparecen** (mundo 5, sala 11): esperando en el borde del agua aparecen piedras para cruzar [G][C].

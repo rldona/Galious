@@ -49,6 +49,7 @@ Fuera de esa rutina se leen otras teclas:
 | Altura máxima de salto | **54 px** | 42 px |
 | Tabla del salto | b03:A951, 0x1A | b03:A953, 0x18 |
 | En el agua | pierde 1 de vitalidad cada ~0,15 s y se ahoga en poco más de 1 s | pierde 1 cada 8–10 s |
+| En la lava | muere en ~1,2 s | igual que Popolon |
 | Puertas (b02:9A25) [C] | necesita el Necklace (0x0D) para el mundo 7 | necesita la Conch Shell (0x23) para el mundo 5 |
 | Según la guía [G] | 2 flechas y 2 minas a la vez; el salto depende de cuánto mantienes ↑; empuja piedras y cruza puertas giratorias | 3 flechas y 3 minas; salto fijo |
 
@@ -58,6 +59,7 @@ Datos de la tabla:
   - b03:B058 marca "en el agua" (E511) y lleva un contador (E524). Cuando el contador supera el umbral del personaje (Popolon 0, Aphrodite 0xFE), resta 1 de vitalidad y suena 0x25.
   - Medido en el mundo 2, sala 11, sin enemigos.
   - En el agua, b03:A103 no deja que Aphrodite baje de y = 0xB9, salvo en la sala 11 del mundo 7.
+- **Lava** [C][O]: tiles B8/B9, E511 = 2. El umbral es 3 para los dos personajes (b03:B07D). Medido en el mundo 8, sala 16: los dos se hunden y mueren en ~1,2 s. Detalles y Carpet en [world_maps.md](world_maps.md#agua-y-lava-co).
 
 ## Pendiente
 

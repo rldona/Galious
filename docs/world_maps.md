@@ -101,19 +101,43 @@ El juego decide por el **número de tile** del mapa de nombres en RAM (ED00 + fi
 |---|---|---|---|
 | sólido | ≥ **0xBA**; **≥ 0xF0** durante el combate con un jefe (E0D2 ≠ 0) | b00:554D pone el umbral en F020; b00:54FF–554C (jugador); b00:4DC8 (enemigos, > 0xB9) | `#` (y `j`: BA–EF, que en combate se atraviesan) |
 | escalera | **9A, 9B** | b03:AEE1: tile − 9A < 2 en los dos lados del jugador; lo alinea a múltiplo de 8 y consulta las escaleras extra (EC00) | `H` |
-| agua | **B6, B7** (E511 = 1) y **B8, B9** (E511 = 2, más profunda [I]) | b03:B028; en el mundo 5, salas 12 y 13, con el Oar la B6 no hunde | `~` / `w` |
+| agua | **B6, B7** (E511 = 1) | b03:B028; en el mundo 5, salas 12 y 13, con el Oar la B6 no hunde | `~` |
+| lava | **B8, B9** (E511 = 2) | b03:B028; en el mundo 8, el Carpet la convierte en suelo (ver abajo) | `L` |
 | fondo | el resto | — | `.` |
 
 - **Correspondencia de coordenadas:** la y del jugador (E505) es la de los pies: está de pie sobre la fila r cuando y = 8·r + 32. Su caja de pies abarca de x − 8 a x + 7.
 - **Validación** [O]: 91 caídas en 12 salas (castillo y mundos 1, 3, 5, 6 y 8). En todas, el jugador acaba apoyado en un tile que la cuadrícula marca como sólido.
 - **Sin tile propio:**
-  - la lava del mundo 8 no tiene clase propia: el daño debe de venir de los enemigos y generadores de esas salas [I];
   - los pinchos son enemigos (0x31).
-- **Recuento en las 320 salas:** fondo 109 735 tiles, sólido 76 671, escalera 6 796, agua 2 406, agua profunda 3 432.
+- **Recuento en las 320 salas:** fondo 109 735 tiles, sólido 76 671, escalera 6 796, agua 2 406, lava 3 432.
+
+## Agua y lava [C][O]
+
+**Dónde.** La lava (`L`) está exactamente en las salas que b15:BD58 marca con E619 (tabla b15:BD72 por mundo):
+- castillo: 96 y 144–147;
+- mundo 8: salas 15–20;
+- mundo 9: salas 2–5;
+- mundo 10: salas 1–4.
+
+El agua (`~`) está en las salas 137–143 del castillo y en las de agua de los mundos.
+
+**Daño** (b03:B058–B093). Cada tick dentro del líquido sube el contador E524. Al superar el umbral, quita 1 de vitalidad y suena 0x25. Los estados de retroceso y de puerta (E500 4–7) no hacen daño.
+
+| | Popolon | Aphrodite |
+|---|---|---|
+| Agua (E511 = 1) | umbral 0: cada tick | umbral 0xFE: cada 255 ticks (~8,5 s) |
+| Lava (E511 = 2) | umbral 3 | umbral 3: **igual que Popolon** |
+
+Comprobado [O] en el mundo 8, sala 16: los dos personajes se hunden en la lava y mueren en ~1,2 s. Aphrodite no tiene ventaja en la lava.
+
+**Carpet** (objeto 0x18, flag E087). Al cargar una sala del mundo 8 con E619, b00:5575 rellena EF00–EFFF con F0, es decir, las filas 12–19 de la sala. La lava se vuelve muro de ladrillo, en la colisión y en pantalla [C][O: el jugador queda de pie en y = 0x80]. En la lava del castillo y de los mundos 9 y 10 no actúa.
+
+**Animación** (b15, desde el bucle de juego b00:5429):
+- **Agua** (si E617 ≠ 0; b15:BD06–BD57): rota a la izquierda (RLCA) los bytes de color de las filas del tile B6, en los tercios central e inferior. Las filas de abajo cambian más a menudo: filas 5–7 cada tick, 3–4 cada 2, 1–2 cada 4 y la 0 cada 8 (contador E618). Da un brillo que sube por la superficie.
+- **Lava** (si E619 ≠ 0; b15:BDA1): cuando E003 & 3 = 0 (una de cada 4 vueltas del contador) avanza un paso de 10 (E61A) y escribe 2–4 bytes del patrón del tile B8 en el tercio inferior (VRAM 15C0–15C7). Es un burbujeo en la superficie; el resto del tile es rojo liso. Tabla de pasos en b15:BDCE.
 
 ## Pendiente para completar la fase 3
 - Dibujar lo que el juego superpone a la sala: puertas, carteles de dioses y el emblema del jefe.
-- La animación de los tiles de agua y lava.
 - La última sala de cada mundo (sala de dios) y la sala 94 del castillo, que no se alcanza por enlaces.
 - Los enemigos de cada sala, los objetos que se recogen y los muros que se rompen.
 - La salida 0xF5 del mundo 10 y la condición de la puerta 10 (E06C/E06D/E06E).

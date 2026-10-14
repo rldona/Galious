@@ -28,6 +28,21 @@ Leyenda: **[C]** código · **[I]** interpretación · **[O]** observado en open
 
 **Fichas.** Las escribieron dos agentes a partir del desensamblado (re-trazado por ellos, porque la primera versión de la herramienta trataba como código las tablas de `CALL 4140`; ya está corregido). Solo se han comprobado en el emulador el número y la vida del jefe 1 y el ritmo de actualización.
 
+## Cómo se dibuja el jefe [O][C]
+
+Comparando la VRAM de la sala del jefe del mundo 1 antes y durante el combate (`w1_boss_room` → `w1_boss_fight`):
+- **El jefe se dibuja con tiles del fondo, no con sprites.** El esqueleto de dragón ocupa un bloque de 8 × 6 tiles
+  de la tabla de nombres (VRAM 3800) con números del 0x5A al 0xE0. Al empezar el combate se recargan los patrones y
+  colores de esos tiles en los tres tercios de pantalla (113 tiles cambiados por tercio) [O].
+- **La decoración del fondo desaparece:** los tiles de pared decorada (A0–A3) conservan su patrón, pero su color pasa a
+  0x00, negro sobre negro. Con ellos se va el emblema de la sala. Solo quedan los muros y suelos F0, las escaleras y
+  los proyectiles (sprites) [O].
+- **Consecuencia en la colisión:** como los números 0x5A–0xEF son ahora trozos del jefe, el umbral de sólido sube a
+  0xF0 mientras E0D2 ≠ 0 (b00:554D). Si no, el cuerpo del jefe sería un muro [C+I].
+- Sin descifrar: cómo se mueve el bloque a resolución de píxel (varios jefes van a 1 px/f), si con patrones
+  desplazados o reescribiendo patrones cada frame.
+- Solo comprobado en el jefe 1. El resto comparte el umbral 0xF0, así que se supone igual [I].
+
 ## IA de los jefes — grupo A (jefes 1, 2, 3, 4 y 6) + tabla de vulnerabilidades
 
 Leyenda: **[C]** leído en el código · **[I]** interpretación · **[G]** guía de GameFAQs.
@@ -322,8 +337,10 @@ Para estas fichas he desensamblado los rangos completos de b02 (grupo 0) y las a
     (+22 = 3) el sprite pasa por 0x1A (32 f) → 0x1B (32 f) → 0x1A (32 f), luego vuelve a 0x18 y se pone IX+2 bit 4
     (se mueve otra vez) [C]. Si +22 = 0 (disparo) dura +21 frames y vuelve a 0x18 [C].
   - Si **E500 = 4**, salta a 8765, que inicia la lengua: +20 = 1, +22 = 3, +21 = 32, sprite 0x1A y **se para**
-    (IX+2 bit 4 = 0). Lo hace cada frame mientras siga E500 = 4 [C]. Quien pone E500 = 4 es b03:BA7C, una rutina que
-    usa E70A/E707 [C]. → [I] es el retroceso del jugador al tocar al jefe, así que Big Lip saca la lengua cuando te golpea.
+    (IX+2 bit 4 = 0). Lo hace cada frame mientras siga E500 = 4 [C]. E500 = 4 es el **estado de retroceso del
+    jugador** (b03:A460: vy = −1,5 px, vx = ±4 px, alejándose) [C]. Lo ponen b03:BA6E al tocar el cuerpo del jefe (el
+    sentido sale de E707/E70A) y b03:B386 al tocar a cualquier enemigo o proyectil [C][O: watchpoint en E500]. Así que
+    Big Lip saca la lengua cada vez que te golpea.
   - Fase 0 (86A4): si +1E bit 0 y rnd&1 → dirección E71C = rnd&1, +1B = 8, +1F = 0, vx = +1 px/f (E71C = 0) o
     −1 px/f, fase 1. Si no → fase 2 [C].
   - Fase 1 (86C1), movimiento horizontal: los primeros 8 frames no mira los bordes. Después rebota (invierte vx) si
@@ -349,7 +366,7 @@ Para estas fichas he desensamblado los rangos completos de b02 (grupo 0) y las a
   golpear con E70A ≥ 0x19, es decir, con la boca abierta disparando (0x19) o con la lengua fuera (0x1A/0x1B) [C].
 - **Contraste con la guía:** «flechas de cerámica a la lengua». Encaja con el arma [C+I]. El código también deja
   golpear con el sprite 0x19 (disparando), no solo con la lengua [C].
-- **Dudas:** qué es exactamente E500 = 4 (b03:BA6E-BA81). Que 0x19 sea "boca abierta" y 0x1A/0x1B "lengua" sale solo
+- **Dudas:** que 0x19 sea "boca abierta" y 0x1A/0x1B "lengua" sale solo
   de la secuencia, sin ver los sprites. Tras rebotar, fase 3 da un viaje de más de 0x40 a 0x38 antes de pararse en 0x40.
 
 #### Jefe 8 — Monster (mundo 8; guía: ASCHER → Monster)
