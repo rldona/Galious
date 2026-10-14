@@ -11,13 +11,14 @@
 Teclas para run: left right up down space, separadas por comas (fila 8 de la matriz MSX).
 
 El servidor atiende un comando por conexion. Las lineas <log> de openMSX van a LOG.
+Con OMSX_SOCK=logs/omsx/otro.sock se puede tener una segunda instancia en paralelo.
 """
 import html, os, re, socket, subprocess, sys, threading, queue
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RUN = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'logs', 'omsx')
-SOCK = os.path.join(RUN, 'omsx.sock')
-LOG = os.path.join(RUN, 'openmsx.log')
+SOCK = os.environ.get('OMSX_SOCK', os.path.join(RUN, 'omsx.sock'))   # otro valor = segunda instancia
+LOG = os.path.join(RUN, 'openmsx.log' if 'OMSX_SOCK' not in os.environ else os.path.basename(SOCK)[:-5] + '.log')
 REPLY = re.compile(r'<reply result="(ok|nok)">(.*?)</reply>', re.S)
 
 
