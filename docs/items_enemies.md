@@ -55,7 +55,7 @@ El efecto en código sale de buscar quién lee la flag del objeto (E06F + tipo).
 | 0x19 | Hat Helmet | recibes la mitad de daño [C] | b03:B3BF |
 | 0x1A | Lamp | marca en el mapa la sala del jefe [G]. Sprite indicador por mundo [C] | b01:668F |
 | 0x1B | Vase | duplica la experiencia que ganas [C]. Aparece tras recuperar el mundo 4 con una secuencia de 9 acciones de espada y salto (E536 = 9) [G][C] | b03:B62E, b02:9FC1 |
-| 0x1C | Pendant | Aphrodite hace aparecer el muñeco del mundo 2 golpeando una pared [G]. La espada contra la lista EA20 [C] | b09:A668 |
+| 0x1C | Pendant | **Aphrodite puede romper las paredes que suenan**; sin él, solo Popolon [O*]. Así se consigue el muñeco del mundo 2 | b08:A668 |
 | 0x1D | Earrings | Popolon dispara 3 flechas a la vez [G] | — |
 | 0x1E | Bracelet | Popolon pone 3 minas [G] | — |
 | 0x1F | Ring | Aphrodite rompe piedras con 3 golpes en vez de 15 [O*] | b03:B841 |
@@ -73,12 +73,8 @@ El efecto en código sale de buscar quién lee la flag del objeto (E06F + tipo).
 | 0x2D–0x2F | carcaj, moneda, llave | +50 flechas, +10 monedas, +2 llaves [C][O] | b03:B701 |
 
 **Mecánicas que describe la guía y aún no están localizadas en la ROM:**
-- **Tiendas:** Hefesto, Ares y Demeter venden objetos por monedas.
-- **Asclepio:** cura.
-- **La Muerte:** resucita al personaje muerto una sola vez, a cambio de 100 flechas, 100 monedas, 20 llaves y la sal.
-- **Hadas:** quedarse quieto en ciertos puntos forma un hada que repone vitalidad.
+- **Asclepio:** cura. La Muerte (resurrección) solo está localizada en parte. Tiendas y hadas: ver `entities.md`.
 - **Experiencia:** llenar la barra repone la vitalidad.
-- **Paredes huecas:** suenan al golpearlas con la espada y se abren.
 - **Callejones que se cierran a tu espalda.**
 - **Piedras que aparecen** si esperas 15 s en el borde, en el mundo 5.
 - **Puertas giratorias** que Popolon cruza siempre y Aphrodite solo con Bread & Water.

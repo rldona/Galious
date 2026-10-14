@@ -110,9 +110,69 @@ Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibbl
 | 4 (0x04) | EA60, 4 huecos, D0 D1 D2 | **puertas giratorias**: su rutina consulta E098, la flag del Bread & Water [C]. Según la guía [G], Popolon las cruza siempre y Aphrodite solo con ese objeto | 23 en los mundos |
 | 5 (0x05) | EAA0 | **muro que se cierra a tu espalda** (b09:A415–A4EC) [C][O]. Al pasar por su columna anota tu dirección; cuando avanzas 16 px más, crece un tile cada 15 frames hasta 3 y marca la sala (bit 1 persistente), así que al volver ya está cerrado | 16 salas del castillo |
 | 6 (0x06) | EAB0 | espera a que el jugador esté en y = 0x78. Por la guía, son las **piedras que aparecen si esperas en el borde** (mundo 5) [C][G] | mundo 5, sala 11 |
-| 7 (0x07–0x37) | EAC0 | **pared que se rompe a espadazos**: bloque 4×3 de ladrillo [C][G] | castillo 97 (camino de la cruz), mundo 2 sala 4, mundo 4 sala 16, mundo 5 sala 7, mundo 6 sala 6, mundo 9 sala 26 |
+| 7 (0x07–0x37) | EA20 (se dibuja como bloque 4×3 de F0) | **pared que se rompe a espadazos**, ver abajo [C][O] | castillo 97 (camino de la cruz), mundo 2 sala 4, mundo 4 sala 16, mundo 5 sala 7, mundo 6 sala 6, mundo 9 sala 26 |
 
-**Contraste con el mapa de mars2000you** (marcas N, "muro temporal que aparece después de pasar"): 14 de sus 16 marcas N caen en salas con objeto de clase 5. Sus marcas T, "escalera que puede desaparecer", caen en 12 de las 13 salas de la tabla de escaleras extra. Sus marcas FY, puntos donde aparece un hada, están en las salas 25, 91 y 110 del castillo; esa mecánica está sin localizar en la ROM.
+**Contraste con el mapa de mars2000you** (marcas N, "muro temporal que aparece después de pasar"): 14 de sus 16 marcas N caen en salas con objeto de clase 5. Sus marcas T, "escalera que puede desaparecer", caen en 12 de las 13 salas de la tabla de escaleras extra. Sus marcas FY, puntos donde aparece un hada, están en las salas 25, 91 y 110 del castillo (ver "Hadas").
+
+## Paredes que suenan y se rompen [C][O]
+
+Son los objetos de clase 7 (b08:A634).
+- **Estado:** EA20 = activa, posición y golpes restantes. Nace rota si el bit 2 del byte persistente de la sala está puesto.
+- **Golpes necesarios** según el nibble alto del tipo (tabla A65D):
+
+  | Tipo | Golpes |
+  |---|---|
+  | 0x07 | 30 |
+  | 0x17 | 20 |
+  | 0x27 | 10 |
+  | 0x37 | 3 |
+
+- **El golpe** (E526) cuenta si el jugador está a la altura de la pared y a menos de 14 px de su lado, mirando hacia ella.
+- **Sonidos:** cada golpe suena **0x1E**, que es la pista de "la pared suena" de la guía. Al llegar a 0 la pared desaparece, se marca la sala (bit 2) y suena 0x2E.
+- **Quién puede romperla:** b00:4DDB deja a **Popolon siempre**, y a **Aphrodite solo con el Pendant** (0x1C).
+- **Comprobado en la sala 97 del castillo** (tipo 0x37, camino de la cruz): Popolon la rompe en 3 golpes; Aphrodite sin Pendant no le hace nada; con Pendant, 3 golpes.
+
+## Hadas [C][O]
+
+En las salas 25, 91 y 110 del castillo hay 12 enemigos **0x4E**: "polvo mágico" que deambula y no se puede golpear.
+- **Cómo se invoca:** hay que quedarse quieto en un punto concreto durante 112 ticks de IA, unos 3,7 s (b04:8247):
+  - sala 110: x = 0xC0–0xCF, y = 0x58;
+  - sala 25: x = 0x60–0x6F, y = 0x58;
+  - sala 91: x = 0x60–0x6F, y = 0x78.
+
+  Coinciden con las marcas FY del mapa de mars2000you.
+- **Qué pasa:** el polvo vuela al centro (0x70, 0x80). Cuando llega la última partícula aparece el **hada (0x4F)**, que revolotea por la sala. La primera vez suena 0x83 y se pone E63D = 1.
+- **Comprobado en la sala 25** con Popolon a 6 de vitalidad: tras 4 s aparece el hada; al tocarla la vitalidad sube al máximo (8 en esa partida) y el hada desaparece.
+
+## Santuarios y tiendas [C][G]
+
+El tipo de sala de dios (E690, tabla del castillo en `castle.json` → `gods`) elige qué se puede hacer en ella. Las tiendas venden tres artículos: lista en b02:9253 + 2·tipo, pares (precio en BCD, objeto). b02:918C hace la compra:
+- comprueba que tienes monedas suficientes (E048);
+- las resta (b02:922B);
+- activa la flag del objeto y suena 0x2D.
+
+Casos especiales:
+- el carcaj da **+100 flechas** (dos sumas de 50);
+- la llave da **+1 llave**;
+- los escudos van **en orden**: no se puede comprar uno sin tener el anterior (E097 + 0x2A ≥ objeto).
+
+| Tipo | Sala | Dios (según la guía) | Se vende |
+|---|---|---|---|
+| 1 | castillo 72 | Demeter | contraseña (sin tienda) |
+| 2 | castillo 115 | Hefesto | Mine 30, llave 5, carcaj 20 |
+| 3 | castillo 87 | la Muerte | resurrección: comprueba 100 flechas y 100 monedas (b02:8FD8); para entrar hace falta la Salt |
+| 4 | castillo 143 | Ares | carcaj 20, Copper Shield 30, Magnifying Glass 20 |
+| 5 | castillo 65 | Ares | carcaj 20, Silver Shield 40, llave 5 |
+| 6 | castillo 5 | Hefesto | Harp 30, carcaj 20, llave 5 |
+| 7 | castillo 55 | Hefesto | carcaj 20, Conch Shell 25, llave 5 |
+| 8 | castillo 54 | sin tienda: Asclepio o Atenea, consejo o curación [G] | — |
+| 9 | castillo 4 | Ares | carcaj 20, Gold Shield 50, llave 5 |
+| 10 | castillo 10 | Ares | carcaj 20, Hat Helmet 50, llave 5 |
+| 11 | castillo 32 | Demeter | carcaj 20, Necklace 25, llave 5 |
+| 12 | mundo 5 | Demeter | Oar 30 |
+| 13 | mundo 8 | Demeter | Carpet 30 |
+
+Los precios coinciden con los de la guía de GameFAQs.
 
 ## Escaleras que se retiran [C][O]
 
