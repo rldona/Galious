@@ -12,6 +12,7 @@ namespace MazeOfKnight.Game
         readonly Dictionary<int, RoomModel> rooms = new Dictionary<int, RoomModel>();
         readonly Dictionary<int, char[][]> grids = new Dictionary<int, char[][]>();
         public bool BossFight;
+        public RoomModel LockedRoom;
 
         public RoomWorld(IEnumerable<RoomModel> models)
         {
@@ -47,6 +48,10 @@ namespace MazeOfKnight.Game
             // Salta a la sala vecina si el punto está fuera (una sala de distancia como mucho). Más allá de una
             // salida al castillo el paso está libre.
             int dx = px < 0 ? -1 : px >= OriginalPhysics.RoomWidthPx ? 1 : 0;
+            int dyOut = py < OriginalPhysics.RoomTopPx ? -1 : py >= OriginalPhysics.RoomBottomPx ? 1 : 0;
+            // Sala del jefe durante el combate: todas las salidas cerradas (state_machine.md, estado 15).
+            if (room == LockedRoom && (dx != 0 || dyOut != 0))
+                return TileClass.Solid;
             if (dx != 0)
             {
                 if (CastleExit(room, dx, 0) != 0) return TileClass.Empty;

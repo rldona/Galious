@@ -55,6 +55,10 @@ namespace MazeOfKnight.Game
         bool harpUsed;               // el arpa rompe las piedras con el primer espadazo de cada visita a la sala
         string typed = "";           // letras tecleadas (la daga: UMBRELLA)
         ShrinesData shrines = new ShrinesData();
+        public BossFight Bosses { get; private set; }
+        // En la sala del jefe las letras sirven para escribir la palabra: I, G y K no hacen nada más.
+        public bool TypingWord => Bosses != null && Bosses.Listening;
+        GameObject keyView;
         ShrineScreen shrineScreen;
         bool downWasHeld;
         // Eventos de sala ya disparados (mapa, sala): escaleras que aparecen y muros que se abren se quedan así.
@@ -94,6 +98,10 @@ namespace MazeOfKnight.Game
             shrineScreen = gameObject.AddComponent<ShrineScreen>();
             shrineScreen.game = this;
             Enemies.RoomCleared += OnRoomCleared;
+            var bossesJson = Resources.Load<TextAsset>("Bosses");
+            Bosses = new BossFight(bossesJson != null ? JsonUtility.FromJson<BossesData>(bossesJson.text) : null);
+            Bosses.Message += Say;
+            Enemies.BossDefeated += _ => Bosses.OnBossDefeated();
             if (UnityEngine.InputSystem.Keyboard.current != null)
                 UnityEngine.InputSystem.Keyboard.current.onTextInput += OnTextInput;
             LoadMap(mapName);
@@ -182,6 +190,7 @@ namespace MazeOfKnight.Game
                 harpUsed = false;
             }
             motor.Shoes = Inventory.Has(Inventory.Shoes);
+            TickBossFight();
             bool downPressed = motor.LastInput.Down && !downWasHeld;
             downWasHeld = motor.LastInput.Down;
             if (TryEnterShrine(downPressed))
@@ -266,7 +275,7 @@ namespace MazeOfKnight.Game
             }
             if (Inventory.ImmuneTo(enemy.Type))
                 return;
-            int dir = enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1;
+            int dir = enemy is Boss boss ? boss.KnockbackDir(motor.X) : enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1;
             // Escudo: para el proyectil si el jugador lo mira y no está dando un espadazo.
             if (enemy.DiesOnTouch && Inventory.ShieldBlocks(enemy.Type) && motor.AttackTicks == 0 && (dir < 0) != motor.FacingLeft)
             {
@@ -311,8 +320,8 @@ namespace MazeOfKnight.Game
                 return;
             }
             if (Weapons.CanFire(w, motor, Collected, Arrows) != null) return;
-            if (Weapons.Fire(w, motor, World, Enemies, rocks, Collected) != null)
-                Arrows -= w.cost;
+            if (Weapons.Fire(w, motor, World, Enemies, rocks, Collected) != null && !(Bosses.InFight && Inventory.Has(0x09)))
+                Arrows -= w.cost;   // con la Magic Rod, en el combate contra el jefe no gasta
         }
 
         // ---------- eventos de sala ----------
@@ -346,6 +355,43 @@ namespace MazeOfKnight.Game
                 }
             }
             return n;
+        }
+
+        // ---------- jefes ----------
+
+        void TickBossFight()
+        {
+            Bosses.Tick(Enemies, () => Enemies.SpawnBoss(Bosses.Info, Inventory.Has(0x07), Inventory.Has(0x08), Inventory.Has(0x0B)));
+            World.LockedRoom = Bosses.LocksExits ? Bosses.Room : null;
+            World.BossFight = Bosses.InFight;
+            if (Bosses.FreezesPlayer) motor.Stunned = 2;
+            if (Bosses.Current == BossFight.Stage.KeyOnFloor)
+            {
+                var (kx, ky) = Bosses.KeyPos;
+                if (keyView == null) keyView = ShowPickup(motor.Room, kx, ky, new Color(1f, 0.85f, 0.2f), "Gran Llave");
+                if (motor.X + OriginalPhysics.FootRight >= kx && motor.X + OriginalPhysics.FootLeft <= kx + 15 &&
+                    motor.Y - OriginalPhysics.HeadHeight <= ky + 15 && motor.Y > ky)
+                {
+                    Destroy(keyView);
+                    keyView = null;
+                    Inventory.Add(Inventory.GreatKey);
+                    if (Inventory.GreatKeyBoost(Vitality, MaxVitality, motor.Character))
+                        Say($"Gran Llave: vitalidad máxima {MaxVitality[(int)motor.Character]}");
+                    Bosses.KeyTaken();
+                }
+            }
+        }
+
+        GameObject ShowPickup(RoomModel room, int x, int y, Color color, string name)
+        {
+            var go = new GameObject(name);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = itemSprite;
+            sr.color = color;
+            sr.sortingOrder = 7;
+            var p = RoomCoords.PixelToWorld(room, x + 8, y + 16);
+            go.transform.position = new Vector3(p.x, p.y, 0);
+            return go;
         }
 
         // ---------- santuarios ----------
@@ -467,6 +513,7 @@ namespace MazeOfKnight.Game
         // Daga: tecleando UMBRELLA mueren los murciélagos de la sala (con su experiencia y botín).
         void OnTextInput(char ch)
         {
+            if (player != null && !player.Paused) Bosses?.Type(ch);
             if (!char.IsLetter(ch)) return;
             typed = (typed + char.ToUpperInvariant(ch));
             if (typed.Length > 8) typed = typed.Substring(typed.Length - 8);
@@ -503,6 +550,7 @@ namespace MazeOfKnight.Game
                 if (v != null) Destroy(v.gameObject);
             enemyViews.Clear();
             Enemies.EnterRoom(World, motor.Room, motor, motor.Room.markedRoom && !firedEvents.Contains((mapName, motor.Room.id)));
+            Bosses.EnterRoom(Inventory.CurrentWorld, motor.Room);
         }
 
         // Colores provisionales: los de las primeras fichas y, para el resto, un tono fijo por tipo. Los proyectiles
@@ -563,7 +611,7 @@ namespace MazeOfKnight.Game
             {
                 if (sr == null) continue;
                 sr.enabled = e.Alive && e.Visible;
-                var (x0, y0, x1, y1) = e.Box();
+                var (x0, y0, x1, y1) = e.DrawRect();
                 var bottomLeft = RoomCoords.PixelToWorld(e.Room, (int)x0, (int)y1);
                 sr.transform.position = new Vector3(bottomLeft.x, bottomLeft.y, 0);
                 sr.transform.localScale = new Vector3((x1 - x0) / 16f, Mathf.Max(0.05f, (y1 - y0) / 16f), 1);
@@ -618,6 +666,19 @@ namespace MazeOfKnight.Game
         // Sin vidas ni fin de partida todavía: vuelve a la entrada del mapa con la vitalidad llena.
         void LoseLife()
         {
+            if (Bosses.InFight)
+            {
+                // En pleno combate: se reaparece en la sala del jefe y se vuelve a invocar con toda su vida.
+                int ch = (int)motor.Character;
+                Vitality[ch] = MaxVitality[ch];
+                Inventory.Experience[ch] = 0;
+                var (bx, by) = StandSpot(motor.Room);
+                motor.Place(World, motor.Room, bx, by);
+                EnterEnemyRoom();
+                Bosses.PlayerDied();
+                Say("Vida perdida");
+                return;
+            }
             int c = (int)motor.Character;
             Vitality[c] = MaxVitality[c];
             Inventory.Experience[c] = 0;
@@ -666,7 +727,7 @@ namespace MazeOfKnight.Game
             if (Message != "" && Time.time > messageUntil)
                 Message = "";
             // Depuración: K da una llave (en el original salen de piedras, enemigos y tiendas).
-            if (UnityEngine.InputSystem.Keyboard.current?.kKey.wasPressedThisFrame == true)
+            if (!TypingWord && UnityEngine.InputSystem.Keyboard.current?.kKey.wasPressedThisFrame == true)
             {
                 Keys = Mathf.Min(999, Keys + 1);
                 Say($"[depuración] +1 llave ({Keys})");
@@ -679,8 +740,20 @@ namespace MazeOfKnight.Game
                 Enemies.FreezeTicks = Inventory.BibleTicks;
                 Say($"Biblia: enemigos congelados ({16 - Inventory.BibleUses} usos)");
             }
+            // Depuración: F2 lleva a la sala del jefe del mundo en el que estás.
+            if (UnityEngine.InputSystem.Keyboard.current?.f2Key.wasPressedThisFrame == true && Inventory.CurrentWorld > 0 && !Bosses.Active)
+            {
+                var info = Bosses.InfoFor(Inventory.CurrentWorld);
+                var room = info != null ? World.Room(info.room) : null;
+                if (room != null)
+                {
+                    var (bx, by) = StandSpot(room);
+                    motor.Place(World, room, bx, by);
+                    Say($"[depuración] sala del jefe: escribe {info.word}");
+                }
+            }
             // Depuración: G da las seis armas y 50 flechas para probarlas.
-            if (UnityEngine.InputSystem.Keyboard.current?.gKey.wasPressedThisFrame == true)
+            if (!TypingWord && UnityEngine.InputSystem.Keyboard.current?.gKey.wasPressedThisFrame == true)
             {
                 for (int id = 1; id <= 6; id++)
                     Inventory.Add(id);

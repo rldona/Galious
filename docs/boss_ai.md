@@ -61,6 +61,236 @@ Comparando la VRAM de la sala del jefe antes y durante el combate (mundo 1: `w1_
 
   En todos el fondo queda negro, con muros, suelos, escaleras y, en el mundo 2, el agua.
 
+## Invocación (estado 15) [C][O]
+
+Datos para Unity: `extracted/unity/bosses.json` (`tools/extract/bosses.py`). Medido en el mundo 1 (YOMAR, sala 13).
+
+- **Dónde:** en la sala del jefe (`bossRoom` de `worldNN.json`, b00:5DFB[E041]), en cualquier punto. Al cargar la
+  sala (b02:9AE5), si el jefe no está derrotado (bit 2 de E061 + E041) y E0D2 = 0: E615 = 1 (escuchando) y el búfer
+  E6B0–E6BF a 0. Las salas de jefe no tienen enemigos propios ni generadores.
+- **Teclado** (b02:9C13, una vez por tick desde el bucle de juego, b00:5360): lee las filas 0–7 de la matriz (SNSMAT)
+  y toma la **primera tecla pulsada** (fila más baja, bit más bajo). Tabla b02:9C3B: dígitos, A–Z y Return; el resto
+  (símbolos, Shift, F1…) da 0 y no cuenta. Al ser la matriz, **no hay mayúsculas ni minúsculas**. Las flechas y el
+  espacio están en la fila 8, que no se lee: se puede escribir andando o saltando.
+- Un carácter solo entra si es distinto del último leído (E616); al soltar todo, E616 = 0. **Para repetir una letra
+  hay que soltarla.**
+- **Búfer de 16** (b02:9B3C): cada carácter entra por la derecha. Hay invocación si **los últimos N caracteres son la
+  palabra** (b02:9B18, tabla 9B55). Las letras equivocadas no borran nada y **no hay tiempo límite**. Salir de la sala
+  vacía el búfer.
+- **Secuencia** (E615 = 0, E020 = 1 → estado 15; el estado 15 corre **1 vez por frame**):
+
+  | Sub | Qué hace | Frames [O] |
+  |---|---|---|
+  | 0 | cierra las 4 salidas (E648–E64B = FF), **música 0x81** (fanfarria de 5,3 s), E64D = 60 | 1 |
+  | 1 | parpadeo del borde/fondo (VDP R7): color 1 ↔ 14 cada 2 frames | 60 |
+  | 2 | b15:BE1C: la decoración y el emblema **se deshacen en puntos** (máscara de bits sobre los patrones en VRAM). Al acabar, E0D2 = 1, E0D3 = jefe y se recarga la sala en modo jefe (b00:5561: decoración en negro) | 128 |
+  | 3 | carga los patrones del jefe (b00:5848) → estado 5 | 5 |
+
+- **Aparición** (ya en el estado 5, b01:7EFC, por tick):
+  - E0D2 = 1 → 2: E640 = 0x41 y **música 0x90** (combate).
+  - E0D2 = 2: cada tick E640 − 1. Cuando E640 & 7 = 0 (8 veces: 0x40, 0x38 … 0x08) crea un **destello 0x63** en
+    b02:8003[(++E643) & 7], 8 puntos (x, y): (70,40) (98,60) (90,80) (50,60) (40,40) (B0,40) (60,80) (80,60). El
+    destello no toca ni se golpea (IX+2 = 0x80) y alterna los sprites 0x0C/0x0D. Vive **80 ticks** [O].
+  - Cada destello usa 4 sprites. En el mundo 1 (E636 = 17) solo caben **4**: los 4 últimos intentos fallan [O].
+  - Con E640 = 0 espera a **E620 = 0** (ningún enemigo vivo, destellos incluidos). Entonces E0D2 = 3: vida (7F97, /2 con
+    el Holy Water), IX+1 = 0, IX+2 = F0 y la rutina de inicio. Después E0D2 = 4: combate.
+  - Mundo 1, desde la última letra hasta el combate: 408 frames ≈ 6,8 s (193 del estado 15 y 105 ticks de aparición) [O].
+- **Durante el combate** (E0D2 ≠ 0):
+  - salidas cerradas;
+  - fondo negro: solo quedan muros, suelos, escaleras y el agua;
+  - umbral de sólido 0xF0 (`collisionBoss`);
+  - el jefe se dibuja con tiles (ver «Cómo se dibuja el jefe»).
+- **Muerte durante el combate** [O]: se reaparece en la misma sala (estados 6 → 4) y el jefe **vuelve a aparecer
+  desde E0D2 = 1**, sin palabra ni estado 15 y con la vida llena.
+- **No hay revancha:** al derrotarlo se pone el bit 2 de E061 + E041 y b00:5DE4 deja de reconocer la sala.
+
+## Derrota (estados 19 y 20) [C][O]
+
+- **Golpe final** (b03:BD32): sonido 0x84 (3,9 s), música 0x91 en espera (0x8B con Galious) y E02C = 1. En el tick
+  siguiente → estado 19. Los estados 19 y 20 corren **1 vez por frame**.
+- **Estado 19:**
+  - sub 0 (1 frame): E698 = 1.
+  - sub 1 (128 frames): el jefe se deshace en puntos (b15:BE1C). Después b01:79F4 borra su dibujo, E0D2 = E0D3 = 0,
+    E700 = 0, E02C = 0 y pone el bit 2 de E061 + E041 (derrotado).
+  - sub 2, mundos 1–9: **suelta la Great Key** (objeto 0x0C en E740) y E0D4 = 1 (música 0x91 en bucle mientras la
+    llave esté en el suelo) → estado 5. La posición sale de b00:4BCD[E041]: un byte, con y = (b & F0) − 8 y
+    x = (b & 0F)·16.
+
+    | Mundo | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+    |---|---|---|---|---|---|---|---|---|---|
+    | (x, y) | 128,136 | 128,104 | 128,104 | 128,136 | 112,136 | 96,168 | 128,168 | 128,104 | 128,168 |
+
+  - sub 2, mundo 10 (Galious): no hay llave. E64B = 6 (la salida derecha lleva a la sala 6) → estado 5.
+- Después del estado 19, las salidas siguen cerradas y el fondo negro: **no se sale de la sala sin coger la llave**
+  [C][O].
+- **Recogida** (b03:B701, la misma prueba que cualquier objeto de mundo, `items_enemies.md`):
+  - E07B = 1, sonidos 0xFC y 0x85;
+  - `(E061 + E041 + 1) |= 2`: desbloquea la puerta del mundo siguiente (E064 = 2 tras el mundo 1);
+  - música 0x8B, E031 = 1 → estado 20, E0D4 = 0.
+- **Estado 20**, 480 frames = 8 s [O]:
+  - el jugador da **9 saltitos** en el sitio (vy = −10 px, g = +0,5 px por frame², 40 frames cada uno) y se gira en cada
+    aterrizaje (b03:BE81);
+  - después, 120 frames con el texto « I HAVE TAKEN WORLD n BACK !» (b03:BF0B) a media altura de la sala;
+  - al acabar se recargan los enlaces (salidas abiertas) y la sala normal, con su decoración (b00:5218, 5561) → estado 5.
+
+## Cajas de los jefes [C]
+
+Todo está en `bosses.json` (`sprites[]`). Origen de las cajas: (E705 + dy, E707 + dx), es decir, la esquina superior
+izquierda del bloque del jefe. Los bordes son **inclusivos**, como en los enemigos: una caja ocupa (h + 1) × (w + 1) px.
+
+- **Armas** (b03:BB5D): hace falta IX+2 bit 5. Luego, la prueba de b03:BB7A. Para las cajas normales (BBAD), la caja
+  sale de b14:91EC[E700] según el sprite E70A; la del arma, de `weapons.json`. La espada usa la misma prueba (BD55).
+- **Contacto con el cuerpo** (b03:B9B2, cada tick): hace falta E700 ≠ 0, el jugador vulnerable (E518 = 0) e IX+2 bit 6.
+  Prueba por jefe: b03:B9D9. Las cajas normales salen de **b14:928A**, una tabla distinta y casi siempre más grande. El
+  jugador cuenta como un cuadrado de **16 × 16** desde (y − 14, x − 6) (b03:BAEA), algo mayor que su caja de 12 × 12
+  contra los enemigos.
+- **Al tocarlo** (b03:BA6E):
+  - daño b03:BAD2[jefe] (8 = barra llena; la mitad con el Cloak);
+  - retroceso: E500 = 4, E518 = 1 (invulnerable), vy = −1,5 y vx = +4 si x_jefe + ref[sprite] < x_jugador − 6, si no −4;
+  - ref = b03:BA9A[sprite]: 0x20 (sprites 00–0F y 18–1F), 0x10 (10–13), 0x18 (14–17). Para los sprites ≥ 0x20 la ROM
+    lee bytes de código; los valores van tal cual en `knockbackRefDx`.
+- **Explosión de mina** (b03:BC33): esta tabla está **desplazada una posición** a partir del jefe 6 respecto a las
+  otras [C]:
+  - King Dragon: no tiene prueba;
+  - Big Lip: usa la del King Dragon;
+  - Monster, Galious y Donra: caja de contacto;
+  - Jump Slime: usa la de Donra (caja de contacto; la de la cabeza sale de E719, que en el slime es otra cosa).
+  - Consecuencia: **la explosión de una mina daña a Galious sin la Cross**. Le toca si se solapa con su caja de
+    contacto y no está invisible. Lo que sí exige la Cross es que una mina **sin explotar** le toque el núcleo [C].
+
+Tamaño del bloque de tiles (b14:9D90, ancho × alto en tiles) y cajas por sprite, (dy, dx, h, w):
+
+| Jefe | Sprite | Tiles (px) | Armas (91EC) | Contacto (928A) | Otra caja |
+|---|---|---|---|---|---|
+| 1 Bony Dragon | 0C | 10×6 (80×48) | 12,4,32,16 | 4,4,40,72 | |
+| | 0D, 0F | 10×6 | 4,4,32,16 | 4,4,40,72 | |
+| | 0E | 10×7 (80×56) | 4,4,32,16 | 12,4,40,72 | |
+| 2 Elusive Dragon | 06–0B | 16×3 (128×24) | calculada | calculada | |
+| 3 Arlyane | 3A–3C | 10×5 (80×40) | 12,32,12,16 | 4,4,32,72 | |
+| 4 Sea Anemone | 10 | 6×6 (48×48) | — | 16,8,32,32 | |
+| | 11 | 6×6 | — | 8,8,40,32 | |
+| | 12, 13 | 6×6 | 0,16,8,16 | 8,8,40,32 | |
+| 6 King Dragon | 34 | 15×9 (120×72) | 16,16,16,24 · 0,40,16,24 · 8,64,16,24 | 0,40,72,60 | cabeza 16,16,16,24 |
+| | 35 | 15×9 | 16,8,16,24 · 32,24,16,24 · 0,64,16,24 | 4,44,64,56 | cabeza 16,8,24,36 |
+| | 36 | 15×9 | 48,0,16,24 · 8,16,16,24 · 0,56,16,24 | 4,20,64,72 | cabeza 48,0,16,120 |
+| 7 Big Lip | 18 | 8×8 (64×64) | — | 20,12,24,40 | |
+| | 19, 1A | 8×8 | 32,24,16,16 | 4,12,56,40 · 16,12,36,40 | |
+| | 1B | 8×8 | 32,24,24,16 | 12,12,40,40 | |
+| 8 Monster | 24–29 | 6×3 (48×24) | 4,4,20,40 | 4,4,20,40 | |
+| | 2A | 4×4 (32×32) | 4,4,28,24 | 4,4,28,24 | |
+| 9 Galious | 37, 38 | 7×7 (56×56) | 40,24,8,8 (núcleo) | 0,8,56,40 | |
+| 10 Donra | 1C, 1D cuerpo | 10×4 (80×32) | — | 4,24,24,84 | |
+| | 1E–21 cabeza | 2×4 (16×32) | 8 + 8k,0,8,24 (k = 0…3) | ídem (b03:BA32) | |
+| | 22, 23 boca | 2×1 (16×8) | — | — | |
+| 11 Jump Slime | 2B | 10×5 (80×40) | 32,16,8,48 | 16,8,8,64 | 24,0,16,80 |
+| | 2C | | 32,24,8,32 | 12,20,12,40 | 24,8,16,64 |
+| | 2D | | 32,24,8,24 | 0,32,16,32 | 16,12,24,48 |
+| | 2E | | 32,32,8,24 | 0,16,16,32 | 16,20,24,48 |
+| | 2F | | 24,40,16,12 | 0,40,24,40 | 8,20,32,32 |
+| | 30 | | 24,28,16,12 | 0,0,24,40 | 8,28,32,32 |
+
+- **Pruebas especiales:**
+  - **Sea Anemone** (BB96): solo con sprite ≥ 0x12 (abierta).
+  - **Big Lip** (BB9F): solo con sprite ≥ 0x19 (boca abierta o lengua).
+  - **Galious** (BBA8): solo con la Cross (E07A).
+  - **King Dragon** (BBBF): vale cualquiera de las 3 cajas de su pose (b03:BBDB/BBE8/BBF5). En el contacto, el cuerpo
+    o la cabeza (b03:BA12).
+  - **Donra** (BC02): usa un momento E70A = E719 (sprite de la cabeza), así que solo cuenta la cabeza. En el contacto,
+    el cuerpo (sprite E70A) o la cabeza (b03:BA32 por E719).
+  - **Jump Slime**: contacto con cualquiera de sus dos cajas (928A y b03:BA56).
+- **Elusive Dragon** (cajas calculadas; n = ancho en tiles, IX+0B en el lado izquierdo e IX+15 en el derecho; xa = x
+  del jefe & F8):
+  - **contacto** (BD98): 0 ≤ y_jugador − y_jefe < 40 y 0 ≤ x_jugador − xa < 8·n + 8: todo el cuello y la cabeza;
+  - **armas** (BB90 → BDD7): 0 ≤ y_arma − y_jefe < alto_arma + 24, y en x solo los **64 px del lado de la cabeza**:
+    - lado izquierdo (cuello que crece hacia la derecha desde x = 0): x_arma ∈ [máx(8n − 64, 0), 8n);
+    - lado derecho (cabeza en x): x_arma + 8 ∈ [xa, xa + mín(8n, 64)).
+    - Si el arma tiene IY+10 ≠ 0, a x_arma se le suma 8 (BC15).
+  - La mina explotada usa una variante de la misma ventana (BD9D) [C].
+- **Daño de cada arma** (b03:BC75–BD2C):
+  - 1 por golpe; la mina, 2. La espada da un golpe por espadazo.
+  - La flecha, el fuego rodante y el fuego **se destruyen al tocar**, aunque el arma no valga contra ese jefe; en ese
+    caso suena 0x1D y no quita vida.
+  - La flecha de cerámica **atraviesa**: marca IX+3 bit 5 y no vuelve a dañar hasta que E604 sea múltiplo de 16.
+  - La mina estalla al tocarlo y marca IX+3 bit 4. Mientras dura la explosión vuelve a dañar cada vez que E604 es
+    múltiplo de 32.
+  - Si el jefe tiene apagado IX+2 bit 5 (Elusive escondido, Galious teletransportándose), no hay golpe ni sonido.
+
+## Hijos de los jefes [C]
+
+Son enemigos normales (huecos E800+, por tick). Vida, daño por contacto y caja están en `enemies.json` por su tipo, y
+las tablas, en `bosses.json` → `children`.
+
+| Tipo | Padre | Vida | Contacto | Caja |
+|---|---|---|---|---|
+| 0x54 hueso | Bony Dragon | 5 | 1 | por sprite (b06 6CC4) |
+| 0x55 medio hueso | 0x54 | 1 | 1 | ídem |
+| 0x57 llamarada | Elusive, King Dragon, Donra | invulnerable | 6 | fila de 8 × 8·n |
+| 0x58 tiro en abanico | Arlyane | 1 | 4 | 4,4,8,8 ↔ 2,0,14,14 |
+| 0x59 espora | Sea Anemone | 1 | 1 | 5,5,6,6 |
+| 0x65 tiro de Big Lip | Big Lip | 1 | 4 | 0,3,16,10 |
+| 0x67 bola de Galious | Galious | 16 | 12 | 0,1,16,14 |
+| 0x68 bola rebotadora | Monster | 1 | 10 | 0,0,16,16 |
+| 0x69 nube | King Dragon | invulnerable | 7 | ver enemy_ai.md |
+| 0x63 destello | invocación | invulnerable, sin contacto | 0 | — |
+
+- **0x54 hueso** (inicio b04:6EED, actualización b06:ACE8):
+  - salen 3 a la vez en (x, y) del jefe, con B = 2, 1 y 0 (tabla b04:6F43);
+  - B = 0: vx −2,25 y vy −4; B = 1: vx −1,1875 y vy −3,75; B = 2: vx −0,125 y vy −3,5. Gravedad +0,1875 px/tick²;
+  - siempre hacia la izquierda; atraviesa paredes y muere al salir por abajo; anima el sprite cada 2 ticks.
+  - **Cualquier golpe** (espada, arma o mina; b03:B575 → B5A7) pone IX+1C = 1. En su siguiente tick crea **dos 0x55**
+    en su sitio y desaparece.
+- **0x55 medio hueso** (b06:AD05/AD13): toma las variantes 1 y 2 de la tabla del 0x54 (vx −1,1875 / −0,125, vy −3,75 /
+  −3,5, misma gravedad). Los primeros **8 ticks** no se le puede golpear (IX+2 bit 5 a 0).
+- **0x57 llamarada** (b06:AD51/AD8C):
+  - se dibuja con tiles; sonido 0x1C al nacer;
+  - n (IX+1F) empieza en 1 y sube 1 por tick; desaparece al llegar a 13 con B = 0 o 1 (12 ticks) y a 9 con B = 2
+    (8 ticks);
+  - caja: alto 8, ancho 8·n (b03:B926). Largo máximo: 96 px (B = 0 y 1) o 64 px (B = 2);
+  - **B = 0** (Elusive, lado izquierdo): x fija, crece hacia la **derecha**;
+  - **B = 1** (Elusive, lado derecho) y **B = 2** (King Dragon, Donra): x −= 8 cada tick. El extremo derecho queda fijo
+    y crece hacia la **izquierda**.
+- **0x58 tiro en abanico** (b06:ADB2):
+  - Arlyane suelta 6 a la vez (B = 5…0) en (x + 0x20, y + 0x10);
+  - cada uno apunta desde su (y + 8, x + 8) hacia (y_jugador − 16, x_jugador − 8);
+  - al ángulo le suma (B − 3)·8 + rnd(−8…7), con 256 unidades por vuelta. Son 6 rumbos separados 11,25° (de −33,75° a
+    +22,5°) más hasta ±11° de ruido;
+  - va en línea recta a 0x70/32 = **3,5 px/tick**, atraviesa paredes y anima cada 4 ticks.
+- **0x59 espora** (b06:AE03): B = rnd(0…15) e i = B >> 1. vy = (−4,5, −8, −7,5, −7, −6,5, −6, −5,5, −5)[i] y
+  |vx| = (3, 0, 2, 3, 1, 4, 3, 2)[i], negativa si B es impar. Gravedad +0,5 px/tick². Sale en (x + 0x10, y − 8).
+- **0x65 tiro de Big Lip** (b06:A560):
+  - sale en (x + 0x18, y + 0x18) y va en línea recta;
+  - casilla = 3·columna + fila:
+    - columna 0 si x_jugador ≤ x_jefe, 1 si ≤ x_jefe + 0x40, 2 si no;
+    - fila 0 si y_jugador ≤ y_jefe, 1 si ≤ y_jefe + 0x40, 2 si no;
+  - (vx, vy) por casilla: 0 (−1,41, −1,41) · 1 (−2, 0) · 2 (−1,41, +1,41) · 3 (0, −2) · 4 (0, +2) · 5 (0, +2) ·
+    6 (+1,41, −1,41) · 7 (+2, 0) · 8 (+1,41, +1,41). Sprites b06:A5D7.
+- **0x67 bola de Galious** (b06:A5E0/A5F3). Galious crea 8 al empezar, con ángulos 00 40 80 C0 20 60 A0 E0.
+  - **Órbita** (A92F):
+    - ángulo += 8 por tick (vuelta en 32 ticks; sentido horario en pantalla);
+    - y = c_y + r·sen(á) y x = c_x + r·sen(á + 0x40), con sen de la tabla b06:B374 (64 valores, máx. 0xFF) y r·sen/256;
+    - centro (c_x, c_y) = (E71D, E71E) = (x + 0x14, y + 0x18) de Galious;
+    - r empieza en 50. Con E71C = 0x70 crece 0,4375 px/tick hasta 50; con 0x90 encoge al mismo ritmo hasta 24;
+    - se ocultan (sin contacto) fuera de y 8…0xB7.
+  - **Lanzamiento** (A6D1):
+    - Galious lanza 4 hijos, de E800 o de E880 (E724), en una pasada;
+    - cada uno toma la dirección E720 (0…15; empieza en rnd & 15 y resta 4, es decir, 90°, en cada bola);
+    - velocidad = tabla b04:7E49/7E69 × 8: **8 px/tick**. Componentes de la tabla: 1, 0,86, 0,71, 0,5, 0…; dirección
+      0 = derecha, 4 = arriba, 8 = izquierda, 12 = abajo;
+    - si el hueco de turno está vacío (bola destruida), ese lanzamiento se pierde.
+  - **Bumerán** (A65A): espera a que su ángulo de órbita valga b06:A798[dir] = 0xC0 − 0x10·dir. Entonces el **centro de
+    su órbita** avanza 9 ticks a 8 px/tick (72 px), invierte la velocidad, vuelve 7 ticks y salta al centro de
+    Galious. Mientras, sigue girando.
+  - Se les puede destruir con cualquier arma: 16 de vida, 1 por golpe (2 con la mina). Sin bolas, Galious no ataca.
+- **0x68 bola rebotadora** (b05:9F3F/9F6B):
+  - el Monster crea 5 en 5 ticks;
+  - el rumbo diagonal rota con E62F: (vy, vx) = (−4, −4), (−4, +4), (+4, +4), (+4, −4), en px/tick;
+  - espera 8 ticks quieta, se alinea a la rejilla y se mueve **rebotando** en los tiles sólidos (mira el tile delante
+    en cada eje) y en y < 0x20;
+  - desaparece a los 192 ticks.
+- **0x63 destello de invocación** (b04:6AC4/6ACB): 4 sprites, sin contacto ni golpe, vive 80 ticks [O].
+- **0x69 nubes** del King Dragon: ficha en `enemy_ai.md` (grupo G4). En su sala (E041 = 10, sala 0x19) se fuerza el
+  modo apuntado.
+
 ## IA de los jefes — grupo A (jefes 1, 2, 3, 4 y 6) + tabla de vulnerabilidades
 
 Leyenda: **[C]** leído en el código · **[I]** interpretación · **[G]** guía de GameFAQs.
@@ -77,12 +307,13 @@ y mezclan trozos del banco 6 con direcciones del banco 2). Se ha vuelto a desens
 - **Despachador.** b01:7EFC según E0D2: 1 → 7FD0 (E0D2++, E640=0x41, 5CC4 con 0x90); 2 → 7FDB (cuenta atrás de E640,
   cada 8 ticks dibuja algo con la tabla 8003; al acabar espera E620=0 y E0D2++); 3 → 7F56 (E0D2++, E700=E0D3,
   vida = 7F97[E700] (/2 con E076), IX+1=0, IX+2=F0 y llama al inicio de la tabla 7F82); ≥4 → cada tick:
-  b06:B3E7/B3F7 (apagan los bits 5/4 de IX+3 cada 16/32 ticks: parpadeo de golpe [I]), si E0D5 (libro) ≠ 0 no hace
+  b06:B3E7/B3F7 (apagan los bits 5/4 de IX+3 cuando E604 es múltiplo de 16/32: son las marcas «ya me dio una flecha de
+  cerámica» (b03:B5AC) y «ya me dio una explosión de mina» (b03:BD1C), no un parpadeo), si E0D5 (libro) ≠ 0 no hace
   nada más; si no, actualización (tabla 7F40[E700−1]) y, si IX+2 bit 4, integra la velocidad (7F2F → b06:B0ED).
-- **¿1 de cada 2 frames?** 7EFC se llama desde el bucle de juego b00:53ED **sin comprobar paridad**; el bucle de
-  enemigos (b06:B3C5, llamado en b00:53C6, mismo bucle) tampoco la comprueba [C]. Así que el jefe se actualiza
-  **al mismo ritmo que los enemigos** (30 veces/s medido para estos), es decir, la mitad de ritmo se debe al bucle
-  de juego entero y no a un filtro propio [I]. Los tiempos de abajo están en ticks de IA.
+- **Ritmo:** 7EFC se llama una vez por pasada del bucle de juego (b00:53ED), sin mirar la paridad; el bucle de
+  enemigos (b06:B3C5, en b00:53C6, antes que el jefe) tampoco [C]. El bucle entero tarda 2 frames (3 con mucha carga):
+  E003 sube 1 cada 2 frames y la x del Bony Dragon (0,5 px/tick) cambia 1 px cada 4 frames [O]. Jefe, hijos y
+  enemigos van al mismo ritmo: **1 tick = 2 frames**. Los tiempos de abajo están en ticks.
 - B0ED suma vy (+0C/0D) a y (+4/5) y vx (+0E/0F) a x (+6/7); para E700 = 0x0A (jefe 10) solo suma el byte alto [C]
   (la lista de tipos 0x24, 0x25, 0x0D, 0x2D, 0x0A es la de enemigos, pero se aplica también al jefe 10 por coincidencia [I]).
 - **IX+2 bit 5 = el jefe se puede golpear**: b03:BB5D sale si E702 bit 5 = 0 [C]. F0 y E0 lo tienen puesto.
@@ -118,10 +349,12 @@ y mezclan trozos del banco 6 con direcciones del banco 2). Se ha vuelto a desens
 - **Ataques / hijos:** 80DC crea **3 huesos (0x54)** en (x, y) con B = 2, 1, 0 y suena 0x11 [C]. 0x54 (b04:6EED,
   tabla 6F43 por E624): vx = −2,25 / −1,19 / −0,125; vy = −4 / −3,75 / −3,5; gravedad 0,1875 [C]. **Siempre hacia
   la izquierda** (el jefe está a la derecha de la sala) [C]. Si el hueso tiene IX+1C ≠ 0 se parte en dos 0x55
-  (vx −1,19 y −0,125) y desaparece [C]; quién pone +1C no se ha seguido [I: el impacto con el suelo o con un arma].
+  (vx −1,19 y −0,125) y desaparece [C]. IX+1C lo pone cualquier golpe del jugador, espada o arma (b03:B575 → B592/B5A7)
+  [C]; ver «Hijos de los jefes».
 - **Debilidad:** BD0A[1] = 0x21 → **flecha** y espada [C]. Siempre se le puede golpear (IX+2 = F0 fijo) [C].
 - **Contraste con la guía:** "usar flechas" [G] ✓ con BD0A [C].
-- **Dudas:** quién pone IX+1C del hueso 0x54 (b06:ACE8); qué es exactamente el sprite 0x0E con y = 0x60 (810E).
+- **Dudas:** qué es exactamente el sprite 0x0E con y = 0x60 (810E) (su caja de contacto baja 8 px: dy 12 en vez de 4,
+  así que la caja queda en el mismo sitio de la pantalla).
 
 #### Jefe 2 — Elusive Dragon (mundo 3)
 - **Vida:** 64 (32) [C].
@@ -160,9 +393,11 @@ y mezclan trozos del banco 6 con direcciones del banco 2). Se ha vuelto a desens
   colisión es especial (b03:BB90 → BC15/BDD7), con anchura según IX+0B o IX+15 [C].
 - **Contraste con la guía:** "atacar con fuego" [G] ✓ [C]. "Elusive": aparece por un lado u otro a distintas
   alturas y se esconde [C].
-- **Dudas:** **en el lado derecho nada del código del jefe incrementa IX+15** (solo 8305 lo pone a 1), y sin embargo
-  se compara con 12 y 16; tiene que actualizarlo otra rutina (¿el dibujo o b03:BD70?) [duda; sin ella el dragón
-  derecho no pararía]. Significado exacto de E503 (caso 0). Qué hace 587B (b00) en cada paso.
+- **IX+15 en el lado derecho (resuelto):** lo escribe el dibujo del jefe (b01:6CEB → 6DDC): es el **ancho visible en
+  tiles**, recortado por el borde derecho de la pantalla (b14:9D90 da 16 tiles para los sprites 6–11). Al entrar desde
+  x = 0xF8 a 2 px/tick crece 1 cada 4 ticks; con 16 está entero [C].
+- **Dudas:** significado exacto de E503 (caso 0); 587B (b00) sube por pasos los tiles del cuerpo (tablas b00:6175 y
+  621A) [C], el detalle no hace falta para el remake.
 
 #### Jefe 3 — Arlyane (mundo 6)
 - **Vida:** 56 (28) [C].
@@ -319,11 +554,12 @@ Para estas fichas he desensamblado los rangos completos de b02 (grupo 0) y las a
 
 ### Notas comunes (aplican a todas las fichas)
 
-- **Frecuencia:** b00:53ED llama a b01:7EFC una vez por pasada del bucle principal. Ni 7EFC ni 7F38 miran la paridad del
-  frame (a diferencia de los enemigos normales) [C]. → [I] la IA del jefe corre **cada frame**; los hijos son enemigos
-  normales (huecos E800+) y siguen la regla de 1 de cada 2.
-- Antes de la IA, b06:B3E7/B3F7 borran los bits 5 y 4 de IX+3 cuando el contador de frames E604 es múltiplo de 16/32
-  [C]. El bit 4 lo pone un golpe de mina (b03:BD1C) [C].
+- **Frecuencia (corregido):** b00:53ED llama a b01:7EFC una vez por pasada del bucle de juego, igual que a los enemigos
+  (b06:B3C5), y esa pasada dura 2 frames [C][O]. **En estas fichas «f» y «frames» son ticks de la lógica (2 frames)**,
+  no frames de vídeo: «1 px/f» = 1 px por tick = 30 px/s.
+- Antes de la IA, b06:B3E7/B3F7 borran los bits 5 y 4 de IX+3 cuando el contador E604 es múltiplo de 16/32
+  [C]. El bit 5 lo pone la flecha de cerámica (b03:B5AC) y el bit 4 la mina (b03:BD1C): mientras estén puestos, esa
+  arma no vuelve a dañar al jefe [C].
 - **Integración (b06:B0ED):** y += vy y x += vx en 8.8, pero para los tipos 0x24, 0x25, 0x0D, 0x2D y **0x0A** solo se
   suma el byte alto de vy. Como E700 = 10 (0x0A) para Donra, **a Donra se le aplica esa regla**: su vy se mueve en
   píxeles enteros (IX+0D) [C]. [I] Seguramente es casual (la comprobación es para tipos de enemigo).
@@ -472,11 +708,11 @@ Para estas fichas he desensamblado los rangos completos de b02 (grupo 0) y las a
   encaja [C]. Las bolas son los 8 hijos 0x67, y si se destruyen todos Galious deja de atacar (fase 0 solo cuenta para
   teletransportarse) [C]. [I] Pero el código le deja golpear con cualquier arma, no solo con el fuego rodante.
   [I] Con las bolas cerradas a 24 px cuando te acercas, protegen el centro, y eso explica que haya que eliminarlas antes.
-- **Dudas:** la resistencia y el daño de los hijos 0x67 (lo decide el sistema de enemigos, no lo he mirado). El cálculo
-  de posición de la órbita (b06:A92F) y la velocidad exacta de b04:7E25 con B = 8. Si el modo 4 (E71B = 4) dura solo
-  un frame antes de que la fase 0 lo ponga a 0, ¿se pierde el lanzamiento cuando los hijos se actualizan en el frame
-  impar? Los flags de 8E3E al volver (8D5B `RET NZ`) dependen del último `ADD` de 4136 y no los he resuelto. El estado
-  de E718 al empezar (índice de 8ED7) se da por 0.
+- **Resuelto** (ver «Hijos de los jefes», 0x67): los hijos tienen 16 de vida y quitan 12 al tocar; la órbita y el
+  lanzamiento (8 px/tick) están medidos en el código. El modo 4 dura un solo tick y basta: en cada tick los enemigos se
+  actualizan **antes** que el jefe (b00:53C6 y luego 53ED), así que en el tick siguiente a la fase 4 los 8 hijos pasan
+  por A6D1 en orden de hueco y los 4 lanzamientos se hacen en esa misma pasada; luego la fase 0 vuelve a E71B = 0 [C].
+- **Dudas:** los flags de 8E3E al volver (8D5B `RET NZ`) dependen del último `ADD` de 4136. E718 al empezar se da por 0.
 
 #### Jefe 10 — Donra (mundo 5; guía: HEOTYMEO → Donra)
 - **Vida:** 72 [C].

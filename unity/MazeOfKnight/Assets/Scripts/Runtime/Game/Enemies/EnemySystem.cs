@@ -186,6 +186,34 @@ namespace MazeOfKnight.Game.Enemies
             return e;
         }
 
+        // Crea el jefe (b01:7F56): vida de 7F97 (a la mitad con el Holy Water) y su posición inicial.
+        public Boss SpawnBoss(BossInfo info, bool holyWater, bool cloak, bool cross)
+        {
+            Boss b = info.id switch
+            {
+                1 => new BonyDragon(), 2 => new ElusiveDragon(), 3 => new Arlyane(), 4 => new SeaAnemone(), 6 => new KingDragon(),
+                7 => new BigLip(), 8 => new Monster(), 9 => new Galious { HasCross = cross }, 10 => new Donra(), 11 => new JumpSlime(),
+                _ => null,
+            };
+            if (b == null) return null;
+            b.BossId = info.id; b.Info = info; b.Type = 0x100 + info.id; b.Room = Room;
+            b.MaxHp = info.hp;
+            b.Hp = holyWater ? info.hpHolyWater : info.hp;
+            b.WeaponMask = info.weaponMask;
+            b.Damage = cloak ? info.contactDamageCloak : info.contactDamage;
+            b.X = info.init.x; b.Y = info.init.y;
+            b.Init(Context);
+            enemies.Add(b);
+            Spawned?.Invoke(b);
+            return b;
+        }
+
+        public Enemy Spawn(int type, float x, float y, int param = 0) => Create(type, x, y, param);
+
+        public int AliveCount => enemies.Count(e => e.Alive);
+
+        public Boss ActiveBoss => enemies.OfType<Boss>().FirstOrDefault(b => b.Alive);
+
         // Un enemigo crea otro (b04:6551 / 65DA) en (x, y). Se añade al final y empieza a moverse en el tick siguiente.
         Enemy SpawnChild(int type, float x, float y) => Create(type, x, y, 0);
 
@@ -215,7 +243,7 @@ namespace MazeOfKnight.Game.Enemies
                 e.Tick(Context);
                 // b06:B452: se borra el enemigo que sale de la pantalla (y ≥ 0xB8 o x ≥ 0xF9; por debajo de 0 el byte
                 // da la vuelta y también cuenta).
-                if (e.Y >= 0xB8 || e.X >= 0xF9 || e.X < 0 || e.Y < 0)
+                if (!e.KeepOffScreen && (e.Y >= 0xB8 || e.X >= 0xF9 || e.X < 0 || e.Y < 0))
                     e.Alive = false;
             }
             enemies.RemoveAll(e => !e.Alive);
@@ -234,11 +262,26 @@ namespace MazeOfKnight.Game.Enemies
                 int immune = ImmuneItem(e);
                 if (immune != 0 && collected.Contains(immune))
                     continue;
-                var (x0, y0, x1, y1) = e.Box();
-                if (px0 < x1 && px1 > x0 && py0 < y1 && py1 > y0)
-                    return e;
+                // Contra el cuerpo de un jefe el jugador cuenta como 16 × 16 desde (y − 14, x − 6) (b03:B9B2).
+                float qx0 = px0, qx1 = px1, qy0 = py0, qy1 = py1;
+                if (e is Boss) { qx0 = m.X - 6; qx1 = m.X + 10; qy0 = m.Y - 14; qy1 = m.Y + 2; }
+                foreach (var (x0, y0, x1, y1) in e.ContactRects())
+                    if (qx0 < x1 && qx1 > x0 && qy0 < y1 && qy1 > y0)
+                        return e;
             }
             return null;
+        }
+
+        // Golpe válido a un jefe: resta vida (sonido 0x27) y, si llega a 0, se acaba el combate.
+        public event Action<Boss> BossDefeated;
+        public void HitBoss(Boss b, int damage)
+        {
+            b.Hp -= damage;
+            Hit?.Invoke(b);
+            b.OnBossHit(Context);
+            if (b.Hp > 0) return;
+            b.Alive = false;
+            BossDefeated?.Invoke(b);
         }
 
         // Quita vida a un enemigo (espada o arma): al llegar a 0 muere, explota y sortea el botín; si no, avisa del golpe.
@@ -270,8 +313,7 @@ namespace MazeOfKnight.Game.Enemies
             {
                 if (!e.Alive || !e.Visible || e is LootDrop || e is DeathExplosion)
                     continue;
-                var (ex0, ey0, ex1, ey1) = e.Box();
-                if (x0 < ex1 && x1 > ex0 && y0 < ey1 && y1 > ey0)
+                if (e.WeaponRects().Any(r => x0 < r.x1 && x1 > r.x0 && y0 < r.y1 && y1 > r.y0))
                     list.Add(e);
             }
             return list;
@@ -286,9 +328,14 @@ namespace MazeOfKnight.Game.Enemies
             {
                 if (!e.Alive || !e.Visible)
                     continue;
-                var (x0, y0, x1, y1) = e.Box();
-                if (sx1 < x0 || sx0 >= x1 || sy1 < y0 || sy0 >= y1)
+                if (!e.WeaponRects().Any(r => !(sx1 < r.x0 || sx0 >= r.x1 || sy1 < r.y0 || sy0 >= r.y1)))
                     continue;
+                if (e is Boss boss)
+                {
+                    // Jefes: la espada vale con todos (bit 0), si su prueba de choque lo deja; el Saber no suma.
+                    if (boss.CanBeHitNow && boss.Vulnerable(0)) HitBoss(boss, 1);
+                    continue;
+                }
                 if (!e.OnHit(Context))
                     continue;
                 Damage(e, damage);

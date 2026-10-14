@@ -76,6 +76,9 @@ namespace MazeOfKnight.Game.Enemies
         // metido en un muro.
         public virtual bool ThroughFloors => false;
 
+        // No se borra al salir de la pantalla (b06:B452 no se aplica a los jefes; las bolas de Galious se ocultan).
+        public virtual bool KeepOffScreen => false;
+
         public virtual void Init(EnemyContext ctx) { }
         public abstract void Tick(EnemyContext ctx);
 
@@ -250,5 +253,11 @@ namespace MazeOfKnight.Game.Enemies
         }
 
         public bool GrowsDown;           // cuelga del techo (crece hacia abajo)
+
+        // Cajas contra el jugador y contra la espada y las armas (los jefes tienen varias y distintas). Semiabiertas.
+        public virtual IEnumerable<(float x0, float y0, float x1, float y1)> ContactRects() { yield return Box(); }
+        public virtual IEnumerable<(float x0, float y0, float x1, float y1)> WeaponRects() { yield return Box(); }
+        // Rectángulo que se dibuja (provisional, sin gráficos).
+        public virtual (float x0, float y0, float x1, float y1) DrawRect() => Box();
     }
 }

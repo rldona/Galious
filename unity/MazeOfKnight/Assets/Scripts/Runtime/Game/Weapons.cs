@@ -190,8 +190,16 @@ namespace MazeOfKnight.Game
                 // Daña cada 32 ticks (E604 múltiplo de 32) a los enemigos que alcanza.
                 if (enemies.Context.Tick % p.Weapon.rehitPeriodTicks == 0)
                     foreach (var e in enemies.Overlapping(x0, y0, x1, y1))
-                        if (e.Hittable && !e.Invulnerable)
+                    {
+                        if (e is Boss boss)
+                        {
+                            // Explosión de mina: 2 por golpe a los jefes de la máscara. [C] Por un desfase de la tabla
+                            // b03:BC33, la explosión daña a Galious sin la Cross.
+                            if (boss.Vulnerable(5) && (boss.CanBeHitNow || boss is Galious && boss.Visible)) enemies.HitBoss(boss, 2);
+                        }
+                        else if (e.Hittable && !e.Invulnerable)
                             enemies.Damage(e, p.Weapon.damage + (items.Contains(ItemSaber) ? p.Weapon.saberBonus : 0));
+                    }
                 if (!p.HurtPlayer && TouchesPlayer(mi.playerBox, m, x0, y0, x1, y1))
                 {
                     p.HurtPlayer = true;
@@ -238,6 +246,17 @@ namespace MazeOfKnight.Game
             int damage = w.damage + (items.Contains(ItemSaber) ? w.saberBonus : 0);
             foreach (var e in enemies.Overlapping(x0, y0, x1, y1))
             {
+                if (e is Boss boss)
+                {
+                    // Jefes: solo las armas de su máscara (b03:BD0A) y si su prueba de choque lo deja; 1 por golpe y
+                    // el Saber no suma. La flecha y los fuegos desaparecen aunque no valga el arma (sonido 0x1D).
+                    if (!boss.CanBeHitNow) continue;
+                    bool first = p.Touched.Add(boss);
+                    bool counts = !w.piercing || first || enemies.Context.Tick % w.rehitPeriodTicks == 0;
+                    if (counts && boss.Vulnerable(w.id)) enemies.HitBoss(boss, 1);
+                    if (!w.piercing) { p.Alive = false; return; }
+                    continue;
+                }
                 if (!e.Hittable) continue;            // sin el bit 5: no se le puede dar
                 if (w.piercing)
                 {

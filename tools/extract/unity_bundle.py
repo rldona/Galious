@@ -15,6 +15,7 @@ JsonUtility, sin diccionarios):
                        extracted/unity/weapons.json (armas secundarias, weapons.py)
                        y extracted/unity/items.json (objetos, menu F1, vitalidad y mapas del menu, items_export.py)
                        y extracted/unity/shrines.json (santuarios: tiendas, contraseña, resurreccion, pistas; shrines.py)
+                       y extracted/unity/bosses.json (jefes: invocacion, cajas, derrota, hijos; bosses.py)
 
 Todo sale de la ROM del usuario y se queda en local: extracted/ no se versiona.
 
@@ -27,6 +28,7 @@ from periodic import periodic_for
 import weapons
 import items_export
 import shrines
+import bosses
 from enemy_boxes import boxes, player_boxes, enemy_box_info
 
 DAMAGE_TABLE = 0x64E5   # b04: dano por contacto segun el tipo (b03:B39A; el Hat Helmet lo reduce a la mitad)
@@ -197,6 +199,7 @@ def main():
     weapons.main()     # armas secundarias -> extracted/unity/weapons.json (campos en weapons.py)
     items_export.main()   # objetos e inventario -> extracted/unity/items.json (campos en items_export.py)
     shrines.main()        # santuarios -> extracted/unity/shrines.json (campos en shrines.py; despues de los mapas)
+    bosses.main()         # jefes, invocacion, derrota e hijos -> extracted/unity/bosses.json (campos en bosses.py)
 
 
 if __name__ == '__main__':

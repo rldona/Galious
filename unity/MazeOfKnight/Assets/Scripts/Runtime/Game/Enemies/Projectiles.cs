@@ -34,6 +34,16 @@ namespace MazeOfKnight.Game.Enemies
             { 0x4F, () => new Fairy() },
             { 0x60, () => new WaterJet() },
             { 0x62, () => new Beam() },
+            // de los jefes (docs/boss_ai.md, "Hijos de los jefes")
+            { 0x54, () => new Bone() },
+            { 0x55, () => new Bone() },
+            { 0x57, () => new FlameRow() },
+            { 0x58, () => new FanShot() },
+            { 0x59, () => new Spore2() },
+            { 0x63, () => new SummonSpark() },
+            { 0x65, () => new LipShot() },
+            { 0x67, () => new GaliousOrb() },
+            { 0x68, () => new MonsterBall() },
         };
     }
 

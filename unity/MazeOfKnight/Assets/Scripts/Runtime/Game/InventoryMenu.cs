@@ -50,7 +50,7 @@ namespace MazeOfKnight.Game
         {
             var kb = Keyboard.current;
             if (kb == null || game == null || game.Inventory == null) return;
-            if (kb.f1Key.wasPressedThisFrame || kb.iKey.wasPressedThisFrame || Gamepad.current?.startButton.wasPressedThisFrame == true)
+            if (kb.f1Key.wasPressedThisFrame || kb.iKey.wasPressedThisFrame && !game.TypingWord || Gamepad.current?.startButton.wasPressedThisFrame == true)
             {
                 Toggle();
                 return;

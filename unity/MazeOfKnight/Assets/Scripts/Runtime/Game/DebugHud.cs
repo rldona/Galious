@@ -16,7 +16,7 @@ namespace MazeOfKnight.Game
             style ??= new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(12, Screen.height / 45) };
             var m = player.Motor;
             string text =
-                "← → andar   ↑ saltar / subir   ↓ bajar / entrar   Espacio espada   M arma   F1 (o I) objetos   K +1 llave   G armas   Esc salir\n" +
+                "← → andar   ↑ saltar / subir   ↓ bajar / entrar   Espacio espada   M arma   F1 (o I) objetos   K +1 llave   G armas   F2 sala del jefe   Esc salir\n" +
                 $"VIT Popolon {Bar(bootstrap.Vitality[1], bootstrap.MaxVitality[1])}   Aphrodite {Bar(bootstrap.Vitality[0], bootstrap.MaxVitality[0])}" +
                 (bootstrap.Inventory != null ? $"   EXP {bootstrap.Inventory.Experience[(int)m.Character]}/48" : "") +
                 $"   flechas {bootstrap.Arrows:000}   monedas {bootstrap.Coins:000}   llaves {bootstrap.Keys:000}   arma: {bootstrap.WeaponName(bootstrap.SelectedWeapon)}\n" +
@@ -25,6 +25,8 @@ namespace MazeOfKnight.Game
                 (bootstrap.Collected.Count > 0 ? $"   objetos: {bootstrap.Collected.Count}" : "") +
                 (bootstrap.Enemies != null && bootstrap.Enemies.Missing > 0 ? $"   enemigos sin implementar aquí: {bootstrap.Enemies.Missing}" : "") +
                 (m.Room.doorWorld > 0 ? $"   puerta al mundo {m.Room.doorWorld}" : "") +
+                (bootstrap.Bosses?.Boss != null && bootstrap.Bosses.Boss.Alive ? $"   {bootstrap.Bosses.Info.name}: {bootstrap.Bosses.Boss.Hp}/{bootstrap.Bosses.Boss.MaxHp}" : "") +
+                (bootstrap.Bosses != null && bootstrap.Bosses.Listening ? "   (sala del jefe: escribe la palabra)" : "") +
                 (bootstrap.Message != "" ? $"\n{bootstrap.Message}" : "");
             GUI.Label(new Rect(8, 4, Screen.width - 16, style.fontSize * 6f), text, style);
         }

@@ -7,7 +7,6 @@ Lo que falta por hacer en Unity. El estado de lo ya hecho está en [unity.md](un
 - **Remo** (0x10): en el mundo 5, salas 12 y 13, el tile de la superficie del agua (B6) se vuelve suelo.
 - **Vela** (0x16): sin ella, la sala 6 del mundo 5 es oscura (sus paredes se dibujan como el fondo: muros invisibles, con la misma colisión).
 - **Campana** (0x14): suena (0x28) al entrar en ciertas salas del castillo, según la puerta de mundo desbloqueada y aún sin abrir. Depende del sonido.
-- **Objetos contra los jefes:** Holy Water (vida del jefe a la mitad), Cloak (daño de su cuerpo a la mitad), Magic Rod (disparos gratis en el combate), Cross (sin ella no se daña a Galious). Depende de los jefes.
 
 ## Personajes
 
@@ -36,3 +35,10 @@ El barrido de tiles (docs/entities.md, "Barrido de tiles en openMSX") no llegó 
 - **Escaleras que se retiran** de las salas 21, 60, 73, 102, 124 y 136 del castillo.
 - **Eventos de sala** (enemigos marcados): escaleras y bloques de muro de los mundos, y los objetos con condición del castillo.
 - **Umbral del toque de salto** entre 5 y 9 frames (medido: 4 frames no salta, 10 sí).
+
+## Jefes
+
+- **Final del juego:** tras vencer a Galious la salida derecha lleva a la sala 6 del mundo 10 (E64B = 6); falta lo que pasa después (rescate del bebé, final).
+- **Animaciones del combate:** la invocación (borde parpadeando 60 frames, la decoración que se deshace en puntos 128), la disolución del jefe vencido y los 9 saltos de la celebración; ahora son esperas con un mensaje.
+- **Repetir una letra pide soltarla** (el original lee la tecla una vez por tick y solo si cambia); el remake acepta cada pulsación del sistema.
+- **Fondo negro durante el combate** (la decoración se apaga) y el dibujo del jefe con tiles (necesita gráficos).
