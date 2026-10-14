@@ -105,7 +105,7 @@ El juego decide por el **número de tile** del mapa de nombres en RAM (ED00 + fi
 | lava | **B8, B9** (E511 = 2) | b03:B028; en el mundo 8, el Carpet la convierte en suelo (ver abajo) | `L` |
 | fondo | el resto | — | `.` |
 
-- **Correspondencia de coordenadas:** la y del jugador (E505) es la de los pies: está de pie sobre la fila r cuando y = 8·r + 32. Su caja de pies abarca de x − 8 a x + 7.
+- **Correspondencia de coordenadas:** la y del jugador (E505) es la de los pies: está de pie sobre la fila r cuando y = 8·r + 32. Su caja abarca de x − 8 a x + 7 para las paredes; para apoyarse en el suelo solo cuenta x − 4 … x + 4 (medido, ver player.md).
 - **Validación** [O]: 91 caídas en 12 salas (castillo y mundos 1, 3, 5, 6 y 8). En todas, el jugador acaba apoyado en un tile que la cuadrícula marca como sólido.
 - **Sin tile propio:**
   - los pinchos son enemigos (0x31).

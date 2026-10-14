@@ -494,6 +494,27 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void FallsIntoATwoTileHoleWhereTheOriginalDoes()
+        {
+            // Mundo 1, sala 2: hueco en las columnas 15-16 (x = 120..135) del suelo de la fila 7 (y = 88).
+            var room = FlatRoom(floorRow: 7);
+            for (int r = 7; r < 20; r++)
+                room.collision[r] = room.collision[r].Substring(0, 15) + ".." + room.collision[r].Substring(17);
+            foreach (var (x0, dir, expected) in new[] { (100, 1, 124), (101, 1, 125), (156, -1, 130), (157, -1, 131) })
+            {
+                var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, x0, 88);
+                int fellAt = -1;
+                for (int t = 0; t < 40 && fellAt < 0; t++)
+                {
+                    int x = motor.X;
+                    motor.Tick(new MotorInput { Right = dir > 0, Left = dir < 0 });
+                    if (motor.State == MotorState.Fall) fellAt = motor.X;
+                }
+                Assert.AreEqual(expected, fellAt, $"desde x = {x0}");
+            }
+        }
+
+        [Test]
         public void WalkingOffTheRightEdgeEntersTheNeighbour()
         {
             var a = FlatRoom(1);

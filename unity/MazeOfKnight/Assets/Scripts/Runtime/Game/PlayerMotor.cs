@@ -363,10 +363,10 @@ namespace MazeOfKnight.Game
 
         bool SolidUnderFeet()
         {
-            for (int px = X + P.FootLeft; px <= X + P.FootRight; px += 5)
+            for (int px = X + P.SupportLeft; px <= X + P.SupportRight; px += 4)
                 if (world.Solid(Room, px, Y))
                     return true;
-            return world.Solid(Room, X + P.FootRight, Y);
+            return false;
         }
 
         // De pie si hay sólido bajo los pies o la parte de arriba de una escalera que baja.

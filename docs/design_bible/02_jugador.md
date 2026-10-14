@@ -45,7 +45,7 @@ Diseño: el juego obliga a alternar. Aphrodite es para el agua y los disparos m�
 | Escaleras | 0,5 px/frame (1 px/tick). Con Shoes, 0,62 px/frame [O*] |
 | Alinearse con una escalera | x del jugador = x de la escalera + 8 [O] |
 | Caída | se cae por los huecos de las plataformas. Caer a la sala de abajo es normal |
-| Colisión | caja de pies de 16 px (x − 8 … x + 7); sólido si tile ≥ 0xBA. Durante el combate con un jefe solo son sólidos F0–FF, porque los números 5A–EF pasan a dibujar al jefe [C][O] |
+| Colisión | caja de 16 px (x − 8 … x + 7) contra las paredes; apoyo en el suelo solo bajo x − 4 … x + 4 [O]; sólido si tile ≥ 0xBA. Durante el combate con un jefe solo son sólidos F0–FF, porque los números 5A–EF pasan a dibujar al jefe [C][O] |
 | Daño al tocar enemigos | retroceso (estado E500 = 4: sale despedido 4 px por tick, alejándose) y daño. Con las protecciones (Crown, Helmet, Armor, Triangle y Pitcher), los enemigos correspondientes no hacen daño por contacto [C] |
 
 ## Vitalidad, experiencia y vidas

@@ -24,6 +24,10 @@ namespace MazeOfKnight.Game
         // de x - 8 a x + 7 en horizontal y hasta 13 px por encima de los pies.
         public const int FootLeft = -8;
         public const int FootRight = 7;
+        // El suelo solo cuenta bajo el centro de los pies: x - 4 .. x + 4. Medido en el mundo 1, sala 2 (hueco
+        // de 2 tiles en x = 120..135): se cae en x = 124/125 viniendo por la izquierda y en 130/131 por la derecha.
+        public const int SupportLeft = -4;
+        public const int SupportRight = 4;
         public const int HeadHeight = 13;         // sala 97: choca en y = 110 y aún sube 1 px
 
         // Espada (docs/player.md, "Espada"): 4 ticks, alcance hasta x + 18 delante del centro. La franja vertical
