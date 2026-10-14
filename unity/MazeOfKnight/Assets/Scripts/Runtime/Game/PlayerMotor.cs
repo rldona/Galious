@@ -467,7 +467,10 @@ namespace MazeOfKnight.Game
             // desde y = 56 sube hasta 37 y no sale por arriba). Solo las escaleras llevan a la sala de arriba.
             if (py < P.RoomTopPx)
                 return py < P.RoomTopPx - 8;
-            return world.Solid(Room, X + P.FootLeft, py) || world.Solid(Room, X, py) || world.Solid(Room, X + P.FootRight, py);
+            // [I] El techo se mira con el mismo ancho que el suelo (x − 4 … x + 4): al caer pegado a una pared el cuerpo
+            // queda unos píxeles metido en ella, y con el ancho entero la pared contaba como techo y no se podía saltar
+            // hasta apartarse.
+            return world.Solid(Room, X + P.SupportLeft, py) || world.Solid(Room, X, py) || world.Solid(Room, X + P.SupportRight, py);
         }
 
         // Pared en el borde hacia el que se mueve (dir), con el cuerpo en x. Solo ese borde: si el jugador ha caído

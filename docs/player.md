@@ -27,9 +27,7 @@ Fuera de esa rutina se leen otras teclas:
 - **Saltar** con ↑. Se puede dirigir a izquierda y derecha en el aire. La altura depende del personaje (ver abajo).
 - **Subir y bajar escaleras.** Para bajar hay que estar alineado con la escalera: x del jugador = x de la escalera + 8.
 - **Espada.** Rompe piedras (15 de vida) y daña enemigos. El objeto 0x25 suma 1 de daño por golpe.
-- **Arma secundaria** con M: gasta munición. Con la flecha, cada disparo resta 1 al primer contador del marcador (E046, que son las **flechas**) y crea un proyectil en E540 y siguientes [O*]. Hay seis armas:
-  - las cuatro que se recogen en el castillo: 1 flecha, 2 flecha de cerámica, 3 fuego rodante y 4 fuego;
-  - la 5, la **mina** (b03:A72B), y la 6, la **lupa** (b03:AD46, activa E517). Las dos se compran en santuarios; con la lupa, M delante de una lápida revela la palabra del jefe [G].
+- **Arma secundaria** con M: cada disparo gasta 1 flecha (E046). Seis armas: 1 flecha, 2 flecha de cerámica, 3 fuego rodante, 4 fuego (las cuatro, en el castillo), 5 mina y 6 lupa (las dos, en santuarios). Detalle en «Armas secundarias», más abajo.
 - **Entrar** por puertas y objetos de sala con ↓.
 - **Usar objetos y cambiar de personaje** en el menú de objetos (F1).
 - **Pronunciar palabras (hechizos).** En la sala del jefe de cada mundo se escribe con el teclado la palabra de ese mundo (YOMAR, ELOHIM…) y aparece el jefe (estado 15; ver `state_machine.md`). La palabra se descubre leyendo la lápida del mundo con la lupa [G]. No hay magia de ataque: el daño a distancia sale de las armas secundarias.
@@ -51,7 +49,8 @@ Fuera de esa rutina se leen otras teclas:
 | En el agua | pierde 1 de vitalidad cada ~0,15 s y se ahoga en poco más de 1 s | pierde 1 cada 8–10 s |
 | En la lava | muere en ~1,2 s | igual que Popolon |
 | Puertas (b02:9A25) [C] | necesita el Necklace (0x0D) para el mundo 7 | necesita la Conch Shell (0x23) para el mundo 5 |
-| Según la guía [G] | 2 flechas y 2 minas a la vez; el salto depende de cuánto mantienes ↑; empuja piedras y cruza puertas giratorias | 3 flechas y 3 minas; salto fijo |
+| Armas secundarias [C][O] | 2 proyectiles y 2 minas a la vez (3 flechas con Earrings, 3 minas con Bracelet); quita 5 a las piedras | 3 y 3; quita 1 a las piedras (5 con el Ring) |
+| Según la guía [G] | el salto depende de cuánto mantienes ↑; empuja piedras y cruza puertas giratorias | salto fijo |
 
 Datos de la tabla:
 - **Salto** [C][O]: medido manteniendo ↑, la mayor altura en varias salas.
@@ -76,7 +75,7 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 | Bajada | tabla **1 2 3 4 4 5 5 6**, y luego 6 hasta tocar suelo (velocidad máxima de caída: 6 px/tick) |
 | Soltar ↑ (solo Popolon) | tras 1 tick sin moverse, salta a la última entrada de la subida (1), hace los 4 ticks arriba y baja. Aphrodite hace siempre el salto entero |
 | Borde de arriba | el salto no sale por arriba: la cabeza choca con el marcador por encima de y = 24 (mundo 1, sala 1: desde y = 56 sube hasta 37). Solo las escaleras llevan a la sala de arriba [O]. La franja del marcador no es pared: con la cabeza en ella el salto sigue avanzando de lado (castillo, sala 73, se puede saltar el hueco entre las dos plataformas de arriba) [I] |
-| Chocar con el techo | igual que soltar ↑. El tope de la cabeza está entre 9 y 13 px por encima de los pies (medido en la sala 97: choca en y = 110 y el paso de 1 px aún entra) |
+| Chocar con el techo | igual que soltar ↑. El tope de la cabeza está entre 9 y 13 px por encima de los pies (medido en la sala 97: choca en y = 110 y el paso de 1 px aún entra). El remake mira el techo con el ancho del suelo (x − 4 … x + 4), para que una pared pegada al cuerpo tras una caída no corte el salto [I] |
 | Control en el aire durante el salto | 2 px/tick subiendo y en el primer tick arriba; **3 px/tick** desde el segundo tick arriba hasta el tick en que aterriza |
 | Caer por un borde (E500 = 2) | la caída empieza en la entrada "3" de la tabla de bajada (3 4 4 5 5 6…) y **no hay control horizontal** |
 | Aterrizar | el último paso puede meter los pies en el suelo; se corrige al borde superior de la fila |
@@ -119,8 +118,92 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 
 Estados de E500 vistos: 0 de pie o andando, 1 salto, 2 caída, 3 escalera, 4 retroceso, 7 arrastrado por una puerta giratoria.
 
+## Armas secundarias
+
+Código en b03 (grupo 0): entrada A72B, creación y movimiento A9CF–AE97, contra enemigos B492–B5E7, contra el jugador B40C, contra piedras B7D5–B85C y contra el jefe BB24–BD52. Medido con `tools/openmsx/weapon_measure.py` (salida en `logs/omsx/weapon_measure.txt`). Números para Unity: `extracted/unity/weapons.json` (`tools/extract/weapons.py`, que documenta cada campo). Valores en px y ticks (1 tick = 2 frames). Coordenadas: y del jugador = fila de arriba del tile que pisa (E505); x = su centro (E507).
+
+**Disparo** [C][O]
+- M pide **una pulsación nueva**: mantenerla no repite el disparo. Disparar **no para al jugador** ni tiene animación: se sigue andando o saltando.
+- Sin flechas (E046 = 0) no sale nada. Las armas 1–5 gastan **1 flecha** al crearse el proyectil (b03:AA99). Si no se puede crear, no gasta.
+- **Magic Rod** (0x09, E078): en el combate contra el jefe (E0D2 ≠ 0) no gasta flechas.
+- Huecos: 3 para proyectiles (E540/E560/E580, cuenta E51C), compartidos por las armas 1–4, y 3 para minas (E5A0/E5C0/E5E0, cuenta E51D). Al cambiar de sala se borran todos.
+- Límite a la vez (b03:A995–A9CA), contando todo lo vivo del mismo grupo de huecos:
+
+  | | Popolon | Aphrodite |
+  |---|---|---|
+  | Flecha y cerámica | 2; **3 con Earrings** (0x1D, E08C) | 3 |
+  | Fuego rodante y fuego | 2 (las Earrings no cuentan) | 3 |
+  | Mina | 2; **3 con Bracelet** (0x1E, E08D) | 3 |
+
+- Dónde se puede disparar:
+  - **flechas**: de pie, saltando o cayendo (E500 < 4). No en la escalera (E503 ≥ 2) ni durante el retroceso;
+  - **fuego rodante, fuego y mina**: solo de pie en el suelo (E500 = 0) y no sobre el ascensor (bit 0 de EC12/EC22). El fuego rodante y la mina, además, con E52A = 0.
+- Orientación: E503 (0 derecha, 1 izquierda).
+- Al crearlo, el proyectil ya se mueve una vez en ese mismo tick.
+- Cualquier proyectil muere si, tras moverse, x < 8, x ≥ 248 o y ≥ 184 (b03:AD61).
+- **Pared** = tile ≥ 0xBA (≥ 0xF0 durante el combate con el jefe).
+
+**Cada arma** [C][O]
+
+| Arma | Sale en (respecto a x, y del jugador) | Movimiento por tick | Termina |
+|---|---|---|---|
+| 1 Flecha | x (derecha) o x − 8 (izquierda); y' = (y − 8) redondeada a 8 hacia abajo, mínimo 32. Primera posición visible: x + 8 / x − 16 | **8 px** en línea recta | pared en su tile o en el siguiente; borde; **primer enemigo** |
+| 2 Flecha de cerámica | igual | **4 px** en línea recta | pared o borde. **Atraviesa enemigos y jefes** |
+| 3 Fuego rodante | x − 4, y − 8 | **4 px**, **rodea la plataforma** (abajo) | pared o suelo de frente; enemigo; al acabar la vuelta |
+| 4 Fuego | x − 8, y − 8. El primer tick solo se asienta: baja 4 hasta quedar a 4 px del suelo | **4 px** por el suelo (y = suelo − 4). Si no hay suelo bajo (x, y + 4) ni bajo (x + 8, y + 4), **cae recto a 4 px/tick**; al tocar suelo sigue en el mismo sentido | pared, borde o enemigo |
+| 5 Mina | x − 8, y − 4, quieta. Necesita suelo sólido en (x − 6, y) y (x + 7, y), es decir, bajo sus dos bordes | — | al estallar (abajo) |
+| 6 Lupa | no crea nada (abajo) | | |
+
+- **Fuego rodante** (estados 2–4 del hueco):
+  - va por encima (y = suelo − 8);
+  - donde se acaba la plataforma, baja por el lateral a 4 px/tick (x alineada a 8; +8 si iba a la izquierda);
+  - cuando el lateral deja de ser sólido, pasa por debajo en sentido contrario (y alineada a 8; en la sala 3 del castillo, plataforma en y = 88–95: arriba y = 80, debajo y = 96);
+  - sube por el otro lateral y vuelve arriba;
+  - tras **una vuelta** muere al cruzar la x en la que nació;
+  - si al bajar encuentra suelo debajo, o al subir encuentra techo, muere. En un suelo que ocupa toda la sala, simplemente corre hasta el borde.
+- **Mina:**
+  - Mientras el jugador siga encima no se arma: hace falta que salga de 0 ≤ y − y_mina < 21 y −8 ≤ x − x_mina ≤ 24. Hasta entonces nada la detona.
+  - Armada, parpadea (colores 0F 07 05 04 05 07, uno cada 4 ticks). **No tiene mecha**: espera hasta que la toque un enemigo, el jefe o el jugador.
+  - Al estallar se desplaza (y − 12, x − 8) y dura **70 ticks**. Suena 0x26.
+  - **Daño al jugador**: 2 unidades de vitalidad (de 8), retroceso alejándose de la mina e invulnerabilidad normal. Una sola vez por mina. Con el jugador invulnerable (E518) la mina no lo ve [C][O].
+
+**Daño** [C][O] (medido con el esqueleto 0x25, de 8 de vida, en la sala 104 del castillo)
+
+| Arma | Enemigo | Con Saber (0x25, E094) | Jefe | Piedra (15 de vida) |
+|---|---|---|---|---|
+| Flecha, fuego rodante, fuego | 1, y el proyectil desaparece | 2 | 1, y desaparece aunque el jefe sea inmune | Popolon 5; Aphrodite 1, o 5 con el Ring |
+| Cerámica | 1, y sigue. Vuelve a dañar al mismo enemigo cada vez que E604 es múltiplo de 16 (1 o 2 golpes al cruzar un esqueleto) | 2 | 1, igual cada 16 | igual que la flecha; la piedra la detiene |
+| Mina | estalla al tocarla. **2 por golpe**, repetido cada vez que E604 es múltiplo de 32 mientras dura la explosión: hasta 3 golpes (8 → 6 → 4 → 2) | 4 por golpe | 2 | **no daña piedras** |
+
+- **Jefe**: solo si el arma está en su máscara (b03:BD0A; bit 1 mina, 2 fuego rodante, 3 fuego, 4 cerámica, 5 flecha). Si no está, suena 0x1D (la mina, sin sonido). Ver `boss_ai.md`.
+- **Inmunes**:
+  - enemigos sin el bit 5 de IX+2 (no se les puede golpear);
+  - vida FE/FF (invulnerables, `items_enemies.md`).
+- **Escudos**: con el bit 2 de IX+2, o con el bit 1 si su lado (bit 0) no coincide con la orientación del proyectil, el enemigo lo **rebota**. Sin hacer daño, el proyectil invierte vx, sube a 8 px/tick y suena 0x1D. Las minas no rebotan.
+- Los enemigos congelados con la Biblia (E0D5) siguen recibiendo daño [O].
+- Sonidos: disparo 0x14 (flecha), 0x15 (cerámica), 0x16 (fuego rodante, fuego y mina). Golpe 0x1E, muerte 0x20, jefe 0x27.
+
+**Cajas** (b03:B8B2, tabla B8EF) [C][O]. Caja cerrada del proyectil [y + dy, y + dy + alto] × [x + dx, x + dx + ancho]. Hay golpe si se solapa con la caja cerrada del enemigo, [ey + dy, ey + dy + alto] × [ex + dx, ex + dx + ancho] (b14:9006).
+
+| Proyectil | dy, dx | alto × ancho |
+|---|---|---|
+| Flecha y cerámica | 2, 2, sobre (y, x) redondeados a 8 (se pintan como 2 tiles del fondo, no como sprite) | 3 × 12 |
+| Fuego rodante | 0, 0 | 8 × 8 |
+| Fuego | 0, 0 | 4 × 8 |
+| Mina sin estallar | 0, 2 | 4 × 12 |
+| Explosión | −16, 0, sobre la posición ya desplazada (es decir, −28, −8 desde donde se puso) | 32 × 32 |
+
+- Piedra: [y, y + 16] × [x, x + 20].
+- Jugador contra la mina: [y − 16, y] × [x − 8, x + 8]. Por ejemplo, la mina puesta en x_m estalla con el jugador en el mismo suelo y x entre x_m − 6 y x_m + 22.
+
+**Lupa** (arma 6) [C]
+- Con M, E517 = 1 (b03:AD46) y b03:B194 lo consume en el mismo tick. No gasta flechas.
+- Si la sala tiene lápida (E678 ≠ 0) y el jugador está cerca, E01B = tipo de lápida y el juego pasa al **estado 12**, la pantalla del mensaje, de la que se sale con M. «Cerca» quiere decir y − 16 − y_lápida entre −16 y 16, y x − 8 − x_lápida entre −16 y 16.
+- Las lápidas salen de b02:9C83 + 2·(E041 − 2), con 3 bytes por lápida (sala, tipo y posición). Tipo 0 → E678 = 0xFF; el tipo 1–10 está en una sola sala por mundo [I: la de la palabra del jefe]. La lista va en `weapons.json`, en `magnifier.tombstones`.
+
 ## Pendiente
 
 - Las otras ramas por personaje del banco 3 (A9C1, AE9A, B06D, B301, B337) y las del banco 2 (904E, 9089, 96BA): posibles diferencias de alcance, daño o defensa.
 - Qué hacen F5 y CTRL.
-- Contrastar en el código lo que dice la guía [G]: número de flechas y minas por personaje, y salto variable de Popolon.
+- Contrastar en el código lo que dice la guía [G] sobre el salto variable de Popolon (los límites de flechas y minas ya están comprobados).
+- Armas secundarias: dónde se filtra M para que haga falta una pulsación nueva (A71E lee E008); qué hacen con IX+1C = 1 los tipos 0x0F, 0x25, 0x27, 0x49, 0x52 y 0x54 al recibir un proyectil (b03:B592); qué es E52A, que impide el fuego rodante y la mina; cajas propias de los tipos 0x06, 0x57, 0x60 y 0x62 (b03:B4DF).

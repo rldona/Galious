@@ -126,6 +126,18 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void JumpsAfterFallingNextToAWall()
+        {
+            // Al caer por un borde (sin control en el aire) el cuerpo, de x − 8 a x + 7, puede quedar unos píxeles
+            // metido en la pared de al lado: el salto no debe tomarla por techo.
+            var room = FlatRoom();
+            for (int r = 0; r < 11; r++)
+                room.collision[r] = "########" + room.collision[r].Substring(8);   // pared hasta x = 63
+            var (_, dy, _) = Run(room, Character.Popolon, 69, 120, 20, t => new MotorInput { Up = t < 15 });
+            Assert.Less(dy.Sum(), -40, "salta entero");
+        }
+
+        [Test]
         public void DescendingStopsOnTheFloorUntilPressedAgain()
         {
             // Medido: bajando con ↓ mantenido se queda de pie en el suelo (y = 120) aunque la escalera siga debajo.
