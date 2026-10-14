@@ -116,7 +116,7 @@ Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibbl
 
 ## Paredes que suenan y se rompen [C][O]
 
-Son los objetos de clase 7 (b08:A634).
+Son los objetos de clase 7 (b09:A634).
 - **Estado:** EA20 = activa, posición y golpes restantes. Nace rota si el bit 2 del byte persistente de la sala está puesto.
 - **Golpes necesarios** según el nibble alto del tipo (tabla A65D):
 

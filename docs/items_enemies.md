@@ -55,7 +55,7 @@ El efecto en código sale de buscar quién lee la flag del objeto (E06F + tipo).
 | 0x19 | Hat Helmet | recibes la mitad de daño [C] | b03:B3BF |
 | 0x1A | Lamp | marca en el mapa la sala del jefe [G]. Sprite indicador por mundo [C] | b01:668F |
 | 0x1B | Vase | duplica la experiencia que ganas [C]. Aparece tras recuperar el mundo 4 con una secuencia de 9 acciones de espada y salto (E536 = 9) [G][C] | b03:B62E, b02:9FC1 |
-| 0x1C | Pendant | **Aphrodite puede romper las paredes que suenan**; sin él, solo Popolon [O*]. Así se consigue el muñeco del mundo 2 | b08:A668 |
+| 0x1C | Pendant | **Aphrodite puede romper las paredes que suenan**; sin él, solo Popolon [O*]. Así se consigue el muñeco del mundo 2 | b09:A668 |
 | 0x1D | Earrings | Popolon dispara 3 flechas a la vez [G] | — |
 | 0x1E | Bracelet | Popolon pone 3 minas [G] | — |
 | 0x1F | Ring | Aphrodite rompe piedras con 3 golpes en vez de 15 [O*] | b03:B841 |
