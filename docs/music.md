@@ -95,6 +95,8 @@ La guía cita también "Stone Monuments", que no está identificada.
 - **Formato:** cada efecto es un **guion**, con el mismo formato que los instrumentos de la música, en b13:73DC + 2·id. Suena en el canal de efectos (E15D, intérprete b13:64A5).
 - **Órdenes:** 0xFA–0xFF son fundido, parada, pausa y reanudación de la música (b00:4F52–50B3).
 
+**Comprobado** [O]: grabando el PSG durante un espadazo, el canal C reproduce frame a frame los 9 pasos del guion 0x13 (periodo, volumen y periodo de ruido). Los efectos suenan en el **canal C**, que se quita a la música mientras dura el efecto.
+
 Hay 48 efectos (0x01–0x30). La columna "qué es" sale del código que los pide: "ficha" quiere decir que lo cita la ficha del enemigo en `enemy_ai.md`. Los que solo tienen dirección están sin identificar.
 
 | Id | Duración | Tono (inicio→fin) | Ruido | Qué es |
