@@ -95,7 +95,7 @@ def convert(frames):
             ev.append((t, [0x89, 38 if (r[6] & 0x1F) > 8 else 42, 0])); on = False
     tracks.append(track(ev))
     tempo = track([(0, [0xFF, 0x51, 0x03, *struct.pack('>I', round(60_000_000 / BPM))[1:]])])
-    hdr = b'MThd' + struct.pack('>HHH', 1, len(tracks) + 1, TPQ)
+    hdr = b'MThd' + struct.pack('>IHHH', 6, 1, len(tracks) + 1, TPQ)
     return hdr + tempo + b''.join(tracks), notes_total
 
 
