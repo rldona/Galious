@@ -76,20 +76,22 @@ Prioridad del despacho en el estado 5 [C]: E020 → 15, E01F=1 → 8, E01F=2 →
 - **E0D2** es la fase del jefe: 0 ninguno, 2 apareciendo, 4 luchando. El objeto del jefe empieza en E700: E700 = número de jefe, E705 = Y, E706 = X, E710 = vida (20 = 0x14 en el jefe 1).
 - **Daño** (b03:BC9F–BD40): solo cuentan las armas permitidas por la tabla de vulnerabilidades de 0xBD0A (un byte por jefe; el bit 0 es el arma principal). Si el arma no vale, suena 0x1D y no hace daño. Cada golpe resta 1 o 2 a E710; en 0 → E02C = 1 (estado 19), sonido 0x84.
 
-| Mundo | Sala del jefe | Palabra | Vulnerabilidad (0xBD0A) |
-|---|---|---|---|
-| 1 | 13 | YOMAR | 0x21 |
-| 2 | 9 | ELOHIM | 0x09 |
-| 3 | 13 | HAHAKLA | 0x29 |
-| 4 | 14 | BARECHET | 0x21 |
-| 5 | 17 | HEOTYMEO | 0x00 |
-| 6 | 13 | LEPHA | 0x11 |
-| 7 | 10 | NAWABRA | 0x11 |
-| 8 | 7 | ASCHER | 0x05 |
-| 9 | 25 | XYWOLEH | 0x3F |
-| 10 | 5 | HAMALECH | 0x21 |
+| Mundo | Sala del jefe | Palabra | Jefe (5E05) | Vulnerabilidad (0xBD0A[jefe]) |
+|---|---|---|---|---|
+| 1 | 13 | YOMAR | 1 | 0x21 |
+| 2 | 9 | ELOHIM | 4 | 0x21 |
+| 3 | 13 | HAHAKLA | 2 | 0x09 |
+| 4 | 14 | BARECHET | 11 | 0x03 |
+| 5 | 17 | HEOTYMEO | 10 | 0x21 |
+| 6 | 13 | LEPHA | 3 | 0x29 |
+| 7 | 10 | NAWABRA | 7 | 0x11 |
+| 8 | 7 | ASCHER | 8 | 0x05 |
+| 9 | 25 | XYWOLEH | 6 | 0x11 |
+| 10 | 5 | HAMALECH | 9 | 0x3F |
 
-Comprobado jugando en el mundo 1 [O*], con invencibilidad, viaje forzado a la sala 13 y la vida del jefe bajada a 1 antes del golpe final; todo lo demás lo hizo el juego: YOMAR → estado 15 → aparece el esqueleto de dragón → golpe con la espada → estado 19 → llave → estado 20 → E064 = 2. La correspondencia entre las armas y los bits 1–5 de la tabla está pendiente.
+La tabla BD0A está indexada por número de jefe, no por mundo (corregido; antes se leía por mundo). Bits y fichas de cada jefe en `boss_ai.md`.
+
+Comprobado jugando en el mundo 1 [O*], con invencibilidad, viaje forzado a la sala 13 y la vida del jefe bajada a 1 antes del golpe final; todo lo demás lo hizo el juego: YOMAR → estado 15 → aparece el esqueleto de dragón → golpe con la espada → estado 19 → llave → estado 20 → E064 = 2. Bits: 0 espada, 1 mina, 2 fuego rodante, 3 fuego, 4 flecha de cerámica, 5 flecha (`boss_ai.md`).
 
 ## Salas de dioses (objetos E680) en el castillo [O*]
 E680–E685: tipo, ?, Y, X, puntero (2 bytes). Recorridas las salas 0–130 del castillo con `tools/openmsx/scan_rooms.py` y probado cada objeto con `try_object.py`:

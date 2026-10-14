@@ -17,6 +17,7 @@ from rom_views import GAME, RAM
 from z80dis import z80
 
 INIT, UPDATE, NTYPES, GROUP = 0x66B4, 0xB472, 107, 1
+FOREIGN = set()      # destinos que estan en otro grupo de bancos: se anotan, no se siguen
 VECTORS = {0x4050: 'jump_table_a', 0x4053: 'read_word_table', 0x4056: 'vec_4da1', 0x4059: 'sound_request',
            0x405C: 'neg_hl', 0x405F: 'vec_4db5', 0x4062: 'add_a_to_hl', 0x4065: 'add_a_to_de',
            0x4068: 'neg_de', 0x406B: 'vec_4dcf', 0x406E: 'vec_4dc8'}
@@ -55,13 +56,13 @@ def disasm_routine(rom, entry):
             tgt = re.search(r'0x([0-9a-fA-F]{4})$', text)
             if op in ('JR', 'JP', 'CALL', 'DJNZ') and tgt and '(' not in text:
                 t = int(tgt.group(1), 16)
-                if op == 'CALL' and t == 0x4050:                  # tabla de saltos en linea
+                if op == 'CALL' and t in (0x4050, 0x4140):        # tabla de saltos en linea (vector o directa)
                     a = pc + 3
                     while 0x6000 <= (w := read(rom, a) | read(rom, a + 1) << 8) < 0xC000 and a not in seen:
                         lines[a] = f'{a:04X}  {w & 0xFF:02x} {w >> 8:02x}        .word 0x{w:04X} ; caso {(a - pc - 3) // 2}'
                         seen.update((a, a + 1)); todo.append(w); a += 2
                     break
-                if 0x6000 <= t < 0xC000:
+                if 0x6000 <= t < 0xC000 and t not in FOREIGN:
                     todo.append(t)
                 if op in ('JP', 'JR') and ',' not in text:      # salto incondicional
                     break

@@ -28,7 +28,7 @@ Fuera de esa rutina se leen otras teclas:
 - **Subir y bajar escaleras.** Para bajar hay que estar alineado con la escalera: x del jugador = x de la escalera + 8.
 - **Espada.** Rompe piedras (15 de vida) y daña enemigos. El objeto 0x25 suma 1 de daño por golpe.
 - **Arma secundaria** con M: gasta munición. Con la flecha, cada disparo resta 1 al primer contador del marcador (E046, que son las **flechas**) y crea un proyectil en E540 y siguientes [O*]. Hay seis armas:
-  - las cuatro que se recogen en el castillo: 1 flecha, 2 flecha doble, 3 fuego rodante y 4 fuego;
+  - las cuatro que se recogen en el castillo: 1 flecha, 2 flecha de cerámica, 3 fuego rodante y 4 fuego;
   - la 5, la **mina** (b03:A72B), y la 6, la **lupa** (b03:AD46, activa E517). Las dos se compran en santuarios; con la lupa, M delante de una lápida revela la palabra del jefe [G].
 - **Entrar** por puertas y objetos de sala con ↓.
 - **Usar objetos y cambiar de personaje** en el menú de objetos (F1).

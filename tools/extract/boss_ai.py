@@ -17,6 +17,9 @@ from galious_rom import Rom, ROOT
 
 INIT, UPDATE, HP, COUNT, WORLD_BOSS = 0x7F82, 0x7F40, 0x7F97, 11, 0x5E05
 enemy_ai.GROUP = 0                       # bancos 1-3: 8000-9FFF es el banco 2
+# las ayudas de movimiento son del banco 6 (A000-BFFF del grupo 1): en el grupo 0 esas direcciones
+# serian el banco 3, asi que no se siguen (b01:7FA3-7FCD las llaman mapeando el banco 6)
+enemy_ai.FOREIGN.update({0xB0ED, 0xB13E, 0xB137, 0xB145, 0xB14C, 0xB15F, 0xB3E7, 0xB3F7})
 enemy_ai.NAMES.update({0xE700: 'jefe_tipo', 0xE710: 'jefe_vida', 0xE0D2: 'jefe_fase', 0xE615: 'escuchando_palabra',
                        0x7FA3: 'vx=DE (b06:B13E)', 0x7FAC: 'invierte vx (b06:B15F)', 0x7FB5: 'vy=DE (b06:B137)',
                        0x7FBE: 'ay=DE (b06:B145)', 0x7FC7: 'vy+=ay (b06:B14C)'})
