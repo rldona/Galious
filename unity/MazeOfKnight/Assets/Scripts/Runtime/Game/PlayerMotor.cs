@@ -161,6 +161,56 @@ namespace MazeOfKnight.Game
         bool shoeWalk;
         int shoeLadder;
 
+        // Copia del estado para las búsquedas de recorrido (Walkthrough): sin suscriptores ni ascensores (los pone quien
+        // copia).
+        public PlayerMotor Clone()
+        {
+            var c = (PlayerMotor)MemberwiseClone();
+            c.RoomChanged = null;
+            c.DoorEntered = null;
+            c.CastleExitReached = null;
+            c.Lifts = null;
+            return c;
+        }
+
+        // Todo lo que decide los ticks siguientes, empaquetado (sin LastInput, la espada ni el retroceso: la búsqueda no
+        // ataca ni recibe golpes). Los contadores que solo cuentan en módulo se reducen.
+        public (ulong, ulong) StateKey()
+        {
+            ulong a = (ulong)(Room.id & 511)
+                      | (ulong)((X + 64) & 1023) << 9
+                      | (ulong)((Y + 64) & 511) << 19
+                      | (ulong)Character << 28
+                      | (ulong)State << 29
+                      | (FacingLeft ? 1UL : 0) << 32
+                      | (ulong)(prepTicks & 3) << 33
+                      | (ulong)(riseIndex & 15) << 35
+                      | (ulong)(apexTicks & 7) << 39
+                      | (cutDone ? 1UL : 0) << 42
+                      | (ulong)System.Math.Min(fallIndex, P.FallTable.Length) << 43
+                      | (airControl ? 1UL : 0) << 47
+                      | (ulong)Liquid << 48
+                      | (ulong)(liquidSub & 3) << 51
+                      | (ulong)(jumpDir + 1) << 53
+                      | (hitWall ? 1UL : 0) << 55
+                      | (upHeld ? 1UL : 0) << 56
+                      | (downHeld ? 1UL : 0) << 57
+                      | (ulong)(hoverTicks & 7) << 58
+                      | (Shoes ? 1UL : 0) << 61
+                      | (shoeWalk ? 1UL : 0) << 62;
+            ulong b = (ulong)(vAcc & 255)
+                      | (ulong)(hAcc & 255) << 8
+                      | (ulong)(carryWait & 31) << 16
+                      | (ulong)(carryTicks & 31) << 21
+                      | (ulong)(carryDir + 1) << 26
+                      | (ulong)(carrySpeed & 3) << 28
+                      | (ulong)((landY + 1) & 511) << 30
+                      | (ulong)(shoeLadder & 3) << 39
+                      | (ulong)(JumpedFromShaft & 7) << 41
+                      | (ulong)(Stunned & 127) << 44;
+            return (a, b);
+        }
+
         public void Tick(MotorInput input)
         {
             TickPlayer(input);
@@ -452,7 +502,7 @@ namespace MazeOfKnight.Game
         }
 
         // Puerta de mundo del castillo: y = Y_puerta + 0x18, x entre X_puerta + 14 y + 18 (state_machine.md, estado 8).
-        bool AtDoor() =>
+        public bool AtDoor() =>
             Room.doorWorld > 0 && Y == Room.door.y + 0x18 && X >= Room.door.x + 14 && X <= Room.door.x + 18;
 
         // Zona de la espada en píxeles de la sala (incluidos los extremos).

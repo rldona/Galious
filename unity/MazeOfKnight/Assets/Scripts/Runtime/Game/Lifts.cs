@@ -29,10 +29,11 @@ namespace MazeOfKnight.Game
             public int X => (X256 >> 8) & 0xFF;
             public int Y => (Y256 >> 8) & 0xFF;
             public int RoomId => Vertical ? Shaft.rooms[Index] : Slide.room;
+            public Lift MemberwiseCloneLift() => (Lift)MemberwiseClone();
         }
 
         readonly LiftsData data;
-        readonly List<Lift> shafts = new List<Lift>();
+        List<Lift> shafts = new List<Lift>();
         Lift slide;
         int roomId = -1;
         int forcedUp;                      // E52C/E52D: saltó desde ese vertical y salió por arriba
@@ -47,6 +48,50 @@ namespace MazeOfKnight.Game
         {
             this.data = data ?? new LiftsData();
             Reset();
+        }
+
+        // Copia completa (búsquedas de recorrido, Walkthrough).
+        public LiftSystem Clone()
+        {
+            var c = (LiftSystem)MemberwiseClone();
+            c.shafts = new List<Lift>(shafts.Count);
+            foreach (var s in shafts) c.shafts.Add(s.MemberwiseCloneLift());
+            c.slide = slide?.MemberwiseCloneLift();
+            return c;
+        }
+
+        // Estado de los ascensores que importa en esa sala (los de otras salas no tocan al jugador hasta que llegan).
+        public ulong StateKey(int room)
+        {
+            ulong k = (ulong)(roomId & 511) | (skipMove ? 1UL : 0) << 9 | (slideFresh ? 1UL : 0) << 10 | (ulong)(forcedUp & 7) << 11;
+            var s = ShaftInRoom(room);
+            if (s != null)
+                k |= 1UL << 14 | (ulong)(s.Index & 7) << 15 | (ulong)(s.Y256 & 0xFFFF) << 18 | (s.Speed < 0 ? 1UL : 0) << 34
+                     | (s.Riding ? 1UL : 0) << 35 | (ulong)(s.Cooldown & 7) << 36 | (s.Aboard ? 1UL : 0) << 39;
+            var h = SlideInRoom;
+            if (h != null && h.Slide.room == room)
+                k |= 1UL << 40 | (ulong)((h.X256 >> 8) & 0xFF) << 41 | (ulong)(h.X256 & 0xFF) << 49 | (h.Speed < 0 ? 1UL : 0) << 57
+                     | (h.Riding ? 1UL : 0) << 58 | (ulong)(h.Cooldown & 7) << 59;
+            return k;
+        }
+
+        // Pone el vertical de esa columna entrando en la sala (bajando por arriba o subiendo por abajo), como si el
+        // jugador lo hubiera esperado. false si no pasa por ahí en ese sentido.
+        public bool ArriveShaft(int room, bool down)
+        {
+            foreach (var s in shafts)
+            {
+                int i = System.Array.IndexOf(s.Shaft.rooms, room);
+                if (i < 0) continue;
+                if (down ? room == s.Shaft.topRoom : room == s.Shaft.bottomRoom) return false;
+                s.Index = i;
+                s.Y256 = (down ? data.box.enterFromAboveY : data.box.enterFromBelowY) << 8;
+                s.Speed = down ? System.Math.Abs(s.Speed) : -System.Math.Abs(s.Speed);
+                s.Riding = s.Aboard = false;
+                s.Cooldown = 0;
+                return true;
+            }
+            return false;
         }
 
         // Partida nueva (b01:63C2): cada vertical en su sala de arriba, bajando.
