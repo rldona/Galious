@@ -24,9 +24,9 @@ Leyenda: **[C]** código · **[I]** interpretación · **[O]** observado en open
 - **Daño:** la mina resta 2 y lo demás 1. Si el arma no vale, suena 0x1D. Además, cada jefe tiene su propio test de colisión (tabla b03:BB7A).
 - **Las debilidades coinciden con los consejos de la guía en los 10 jefes.**
 - **Ritmo** [O]: todo el bucle del juego (jefe y enemigos) corre unos 26–30 ciclos por segundo, uno cada dos frames. Breakpoint en la rutina del Bony Dragon: 26 por segundo. IA de enemigos: 416, es decir, 16 huecos × 26. Los tiempos en "t" o "frames" de las fichas son ciclos del juego.
-- **Código:** las tablas de inicio y actualización están en b01:7F82 y b01:7F40, y el código de cada jefe en el banco 2. Para moverlos se usan las ayudas de velocidad del banco 6 (b01:7FA3–7FCD). Desensamblado:  → .
+- **Código:** las tablas de inicio y actualización están en b01:7F82 y b01:7F40, y el código de cada jefe en el banco 2. Para moverlos se usan las ayudas de velocidad del banco 6 (b01:7FA3–7FCD). Desensamblado: `tools/extract/boss_ai.py` → `extracted/ai/boss_NN.asm`.
 
-**Fichas.** Las escribieron dos agentes a partir del desensamblado (re-trazado por ellos, porque la primera versión de la herramienta trataba como código las tablas de ; ya está corregido). Solo se han comprobado en el emulador el número y la vida del jefe 1 y el ritmo de actualización.
+**Fichas.** Las escribieron dos agentes a partir del desensamblado (re-trazado por ellos, porque la primera versión de la herramienta trataba como código las tablas de `CALL 4140`; ya está corregido). Solo se han comprobado en el emulador el número y la vida del jefe 1 y el ritmo de actualización.
 
 ## IA de los jefes — grupo A (jefes 1, 2, 3, 4 y 6) + tabla de vulnerabilidades
 
@@ -242,7 +242,7 @@ y mezclan trozos del banco 6 con direcciones del banco 2). Se ha vuelto a desens
 | 5 | 0x20 | flecha (tipo 1) |
 
 El tipo 2 es la flecha de **cerámica** (lo confirman King Dragon y Big Lip, para los que la guía pide cerámica):
-`docs/player.md` la llama "flecha doble" y habría que corregirlo [I].
+`docs/player.md` la llamaba "flecha doble"; ya está corregido.
 
 #### Byte de cada jefe (BD0A = 21 09 29 21 00 11 11 05 3F 21 03) [C]
 | jefe | nombre (mundo) | byte | armas | guía [G] |
