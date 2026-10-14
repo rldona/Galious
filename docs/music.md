@@ -86,6 +86,68 @@ Con guiones se hacen los arpegios, glissandos y percusiones, y las fanfarrias co
 
 La guía cita también "Stone Monuments", que no está identificada.
 
+## Efectos de sonido [C]
+
+`python3 tools/extract/sfx.py` → `extracted/sfx/sfx.json` y `sfx_<id>.wav`. Los WAV son una síntesis aproximada del PSG (onda cuadrada y ruido blanco), solo para identificarlos de oído; no se versionan.
+
+- **Petición:** `sound_request` con A < 0x80 (b00:4F12).
+- **Prioridad:** el propio número. Un efecto solo entra si su id es mayor o igual que el que está sonando (E1B0). Excepción: 0x25 (daño en el agua) no se reinicia si ya estás en el agua.
+- **Formato:** cada efecto es un **guion**, con el mismo formato que los instrumentos de la música, en b13:73DC + 2·id. Suena en el canal de efectos (E15D, intérprete b13:64A5).
+- **Órdenes:** 0xFA–0xFF son fundido, parada, pausa y reanudación de la música (b00:4F52–50B3).
+
+Hay 48 efectos (0x01–0x30). La columna "qué es" sale del código que los pide: "ficha" quiere decir que lo cita la ficha del enemigo en `enemy_ai.md`. Los que solo tienen dirección están sin identificar.
+
+| Id | Duración | Tono (inicio→fin) | Ruido | Qué es |
+|---|---|---|---|---|
+| 0x01 | 0.18 s | A8→A7 | sí | b03:A2A1 |
+| 0x02 | 0.10 s | A6→A8 | sí | b03:A3CC, b03:A52E |
+| 0x03 | 0.15 s | D#5→F6 |  | bloque 0x2F que imita el salto [C ficha] |
+| 0x04 | 0.12 s | C#7→A#7 |  | b09:A5E6 |
+| 0x05 | 0.42 s | D7→D7 | sí | soldado 0x2D dispara [C ficha] |
+| 0x06 | 0.43 s | E5→C5 |  | ave 0x27 cada 64 ticks [C ficha] |
+| 0x07 | 0.43 s | A7→D7 | sí | b04:76C8 |
+| 0x08 | 0.67 s | G2→F4 |  | 0x14 emerge del suelo [C ficha] |
+| 0x09 | 0.35 s | B2→C3 |  | b04:7028, b06:ABC9 |
+| 0x0a | 0.43 s | D3→D3 | sí | b02:815C, b06:A166 |
+| 0x0b | 0.27 s | A8→A5 |  | gota 0x03 [C ficha] |
+| 0x0c | 0.47 s | C8→C8 |  | orbes 0x36 al aterrizar [C ficha] |
+| 0x0d | 0.65 s | — | sí | b04:78C8 |
+| 0x0e | 0.40 s | F3→D3 | sí | b05:8FC5, b05:9F32 |
+| 0x0f | 0.30 s | C#5→C7 |  | escupefuego 0x22 [C ficha] |
+| 0x10 | 0.27 s | A4→C3 |  | erizo 0x11 / torreta 0x32 disparan [C ficha] |
+| 0x11 | 0.43 s | B6→D#2 |  | b02:80F1, b02:874D |
+| 0x12 | 0.43 s | A3→F3 | sí | b02:841F, b02:84CD, b05:91F9 |
+| 0x13 | 0.15 s | A8→A7 | sí | **espadazo** (b03:A747) [C][O] |
+| 0x14 | 0.22 s | D7→A7 | sí | b03:AA89 |
+| 0x15 | 0.32 s | F#8→D7 | sí | (sin petición directa) |
+| 0x16 | 0.08 s | G#6→D7 | sí | b03:ACD6 |
+| 0x17 | 0.80 s | B3→B4 |  | b05:8468, b05:858E |
+| 0x18 | 0.68 s | D6→D2 |  | b05:962B |
+| 0x19 | 0.30 s | B7→D9 |  | b05:8DC0 |
+| 0x1a | 0.67 s | B2→C#3 |  | b02:8909 |
+| 0x1b | 0.43 s | B6→D#2 |  | b02:8C1A |
+| 0x1c | 0.75 s | D3→D3 | sí | b04:775F, b06:AD77 |
+| 0x1d | 0.70 s | A8→D7 | sí | **golpe sin efecto** (arma que no vale contra el jefe, b03:BCF4) [C] |
+| 0x1e | 0.38 s | G#4→D#3 |  | **golpe en piedra o pared que suena** (b03:B83C, b09:A69E) [C][O] |
+| 0x1f | 0.43 s | A8→A8 | sí | esqueleto 0x25 al enroscarse [C ficha] |
+| 0x20 | 0.53 s | F4→B3 |  | **piedra rota** (b03:B857) [C] |
+| 0x21 | 0.85 s | G2→F2 |  | **puerta con llave de los mundos** (b09:A19B) y embestida de 0x01 [C] |
+| 0x22 | 0.67 s | A8→D8 | sí | **puerta con llave del castillo** (b09:A0A0) [C] |
+| 0x23 | 1.00 s | D3→D#4 |  | **puerta giratoria** (b09:A278, A3B8) [C] |
+| 0x24 | 0.75 s | A3→F3 | sí | **entrar en el agua** (b03:B063) [C] |
+| 0x25 | 0.10 s | A2→A7 |  | **daño en el agua** (b03:B08E) [C][O] |
+| 0x26 | 0.72 s | F5→A#2 |  | b03:AE63 |
+| 0x27 | 0.82 s | B3→F#2 | sí | **golpe al jefe / jefe derrotado** (b03:BC94, BD50) [C] |
+| 0x28 | 1.58 s | A7→A7 |  | **campana** (b00:5D63) [C] |
+| 0x29 | 0.50 s | C#5→F#6 |  | b01:6153, al sumar vitalidad o experiencia [I] |
+| 0x2a | 0.53 s | D7→D6 |  | **aviso de vitalidad baja** (< 6, b03:B3DC) [C] |
+| 0x2b | 0.53 s | E5→C7 |  | **vida perdida** (estado 6, b00:44DD) [C] |
+| 0x2c | 0.60 s | A6→F#7 |  | b01:686A, b02:934A |
+| 0x2d | 0.60 s | D5→A#7 |  | **recoger un objeto / comprar** (b03:B764, b02:91CF) [C] |
+| 0x2e | 1.12 s | C7→E7 |  | **algo se abre**: pared rota, evento de sala, objeto con condición, escalera retirada (b09:A6B0, b08:9D9D, b03:A051, A630) [C][O] |
+| 0x2f | 0.35 s | B5→B5 |  | **no tienes monedas** en la tienda (b02:9220) [C] |
+| 0x30 | 1.40 s | F#5→F#7 |  | santuario (b02:90AB; ¿resurrección?) [I] |
+
 ## Conversión a MIDI (`psg_to_midi.py`)
 
 - **Notas:** frecuencia = 1789772,5 / (16 · periodo). Empieza una nota cuando el canal tiene el tono activo y volumen, y cambia el periodo o sube el volumen. El volumen (0–15) pasa a velocity.
@@ -99,5 +161,5 @@ La guía cita también "Stone Monuments", que no está identificada.
 
 ## Pendiente
 
-- Los efectos de sonido (peticiones < 0x80): tabla y catálogo.
+- Identificar los efectos que solo tienen dirección (sobre todo los de b02 y los de enemigos sin ficha).
 - Identificar 0x82, 0x89, 0x91 y 0x94 en el juego.
