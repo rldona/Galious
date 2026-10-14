@@ -66,6 +66,23 @@ Las vistas generadas se compararon a ojo con los mapas montados desde capturas d
 
 La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](world_maps.md)).
 
+## Escena de juego y compilado
+
+- **Escena:** `Assets/Scenes/Game.unity` (menú **Maze of Knight → Crear escena de juego**). Carga `Resources/Maps/castle` y coloca a Popolon donde empieza el original: castillo, sala 1, x = 192, y = 120.
+- **Movimiento:** `PlayerMotor` aplica los números medidos en el original, tick a tick a 30 ticks/s (docs/player.md, «Física del movimiento»). Los tests de `Assets/Tests/EditMode` comparan sus curvas con las medidas:
+  ```bash
+  /Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity -batchmode -projectPath unity/MazeOfKnight -runTests -testPlatform EditMode -testResults "$PWD/logs/unity/tests.xml"
+  ```
+- **Compilado para macOS:** menú **Maze of Knight → Compilar para macOS**, o en batch con `-executeMethod MazeOfKnight.EditorTools.GameBuild.BuildMac -quit`. Sale en `unity/MazeOfKnight/Builds/MazeOfKnight.app`.
+  - Lleva dentro las salas de la ROM: es para probar en local y no se versiona.
+- **Controles:**
+  - ← → (o A D, o mando) andar;
+  - ↑ saltar o subir escalera (también botón sur del mando);
+  - ↓ bajar escalera;
+  - Tab cambiar de personaje;
+  - Esc salir.
+
 ## Pendiente
-- Pipeline URP con renderer 2D (para las luces).
-- Escena de juego: cargar una sala, transiciones entre salas y jugador con los números de la Design Bible (cap. 2).
+- Salidas al castillo y puertas de mundo (enlaces 0xF5–0xFE).
+- Agua y lava (daño), objetos de sala (puertas, muros), enemigos, espada y armas.
+- Pipeline URP con renderer 2D (luces) y el estilo visual del remake.
