@@ -83,10 +83,11 @@ def main():
         upd = read(rom, UPDATE + 2 * (t - 1)) | read(rom, UPDATE + 2 * t - 1) << 8
         key = f'{t:#04x}'
         index[key] = {'init': f'{ini:04X}', 'update': f'{upd:04X}', 'in_rooms': key in ent}
-        if key not in ent:
-            continue
-        text = (f'; tipo {key}  vida {ent[key]["hp"]}  patron observado: '
-                f'{(ent[key].get("observed") or {}).get("pattern")}\n'
+        if key in ent:
+            head = f'; tipo {key}  vida {ent[key]["hp"]}  patron observado: {(ent[key].get("observed") or {}).get("pattern")}'
+        else:      # hijo (proyectil o enemigo que crea otro): no aparece en las salas
+            head = f'; tipo {key}  (hijo, no aparece en salas)  descriptor {rom.block(0x67B6 + 5 * t, 5, 1).hex(" ")}'
+        text = (f'{head}\n'
                 f'; ---- inicio (b04:66B4[{t - 1}]) ----\n{disasm_routine(rom, ini)}\n'
                 f'; ---- actualizacion (b06:B472[{t - 1}]) ----\n{disasm_routine(rom, upd)}\n')
         (out / f'{t:02x}.asm').write_text(text)

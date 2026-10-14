@@ -73,7 +73,7 @@ namespace MazeOfKnight.Game.Enemies
     // temporizador, salta al azar alto o bajo, y ante un hueco o una pared salta si hay suelo a 48 px, o da la vuelta.
     public class Skeleton : Enemy
     {
-        const float Walk = 1.125f, Gravity = 0.3125f;
+        const float WalkSpeed = 1.125f, Gravity = 0.3125f;
         enum Phase { Walk, Air, Pause, Curling, Curled, Uncurling }
         Phase phase;
         int walkTimer, jumpTimer, pauseTimer, curl = 3, curlTimer;
@@ -87,7 +87,7 @@ namespace MazeOfKnight.Game.Enemies
             walkTimer = ctx.Rand(32, 159);
             jumpTimer = ctx.Rand(0, 127);
             FacingLeft = ctx.Player.X < X + 16;
-            Vx = FacingLeft ? -Walk : Walk;
+            Vx = FacingLeft ? -WalkSpeed : WalkSpeed;
         }
 
         // Pared a lo alto de toda la caja (arriba, centro y abajo) en la columna x.
@@ -146,7 +146,7 @@ namespace MazeOfKnight.Game.Enemies
                             if (((int)Y + 16 - P.RoomTopPx) % 8 == 0 && FloorUnder(ctx))
                             {
                                 phase = Phase.Walk;
-                                Vx = FacingLeft ? -Walk : Walk;
+                                Vx = FacingLeft ? -WalkSpeed : WalkSpeed;
                                 yAcc = 0;
                                 break;
                             }
@@ -268,7 +268,6 @@ namespace MazeOfKnight.Game.Enemies
             X += Vx;
         }
 
-        void Turn() { FacingLeft = !FacingLeft; Vx = -Vx; }
     }
 
     // 0x34: bloque que sube y baja, más rápido cuanto más cerca está el jugador. Velocidad = término x (por

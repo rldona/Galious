@@ -123,6 +123,15 @@ namespace MazeOfKnight.Tests
             return false;
         }
 
+        // Los que andan por las plataformas: nunca deben meterse en un muro ni salir de la sala.
+        static readonly System.Type[] Walkers =
+        {
+            typeof(Skeleton), typeof(Roller), typeof(Charger), typeof(Snake), typeof(Hopper), typeof(Knight),
+            typeof(Runner), typeof(Soldier), typeof(Dart), typeof(Lurker), typeof(Hedgehog), typeof(Armadillo),
+            typeof(Emerger), typeof(Sentinel), typeof(SlowCharger), typeof(LevelJumper), typeof(InchWorm),
+            typeof(WideWalker), typeof(GrowingBall),
+        };
+
         [Test]
         public void ImplementedEnemiesRunInEveryRoom()
         {
@@ -140,18 +149,22 @@ namespace MazeOfKnight.Tests
                     var motor = new PlayerMotor(world, room, 128, 120);
                     var sys = new EnemySystem(catalog.enemies, room.id);
                     sys.EnterRoom(world, room, motor);
+                    if (sys.Missing > 0) problems.Add($"{name} {room.id}: {sys.Missing} sin implementar");
                     enemies += sys.Enemies.Count;
+                    int before = problems.Count;
                     for (int t = 0; t < 600; t++)
                     {
                         sys.Tick();
-                        foreach (var e in sys.Enemies.Where(e => e.Alive && (e is Skeleton || e is Roller)))
+                        // El jugador va y viene por la sala para que reaccionen.
+                        motor.Place(room, 24 + (t * 2) % 208, 120);
+                        foreach (var e in sys.Enemies.Where(e => e.Alive && !e.ThroughFloors && Walkers.Contains(e.GetType())))
                         {
                             if (e.X < -1 || e.X + e.Width > 257 || e.Y < 31 || e.Y >= 0xB8)   // b06:B452 los borra desde y = 0xB8
                                 problems.Add($"{name} {room.id} 0x{e.Type:X2} t{t} fuera de la sala ({e.X:0},{e.Y:0})");
                             else if (InsideWall(world, room, e))
                                 problems.Add($"{name} {room.id} 0x{e.Type:X2} t{t} dentro de un muro ({e.X:0},{e.Y:0}) {e}");
                         }
-                        if (problems.Count > 0) break;
+                        if (problems.Count > before) break;
                     }
                 }
             }

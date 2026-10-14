@@ -179,7 +179,24 @@ namespace MazeOfKnight.Game
         void HurtBy(Enemy enemy)
         {
             int c = (int)motor.Character;
+            if (enemy is Fairy)
+            {
+                // El hada rellena la vitalidad (b04:612C).
+                Vitality[c] = MaxVitality[c];
+                enemy.Alive = false;
+                Say("Vitalidad llena");
+                return;
+            }
+            if (enemy is Shot shot && shot.Stuns)
+            {
+                motor.Stunned = 60;   // E500 = 6, E50F = 60
+                enemy.Alive = false;
+                Say("Paralizado");
+                return;
+            }
             Vitality[c] -= enemy.Damage;
+            if (enemy.DiesOnTouch)
+                enemy.Alive = false;
             int dir = enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1;
             motor.Knockback(dir);
             HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
@@ -196,9 +213,11 @@ namespace MazeOfKnight.Game
             Enemies.EnterRoom(World, motor.Room, motor);
         }
 
-        static Color EnemyColor(int type)
+        // Colores provisionales: los de las primeras fichas y, para el resto, un tono fijo por tipo. Los proyectiles
+        // (hijos que mueren al tocar) salen más claros.
+        static Color EnemyColor(Enemy e)
         {
-            switch (type)
+            switch (e.Type)
             {
                 case 0x0E: return new Color(0.75f, 0.45f, 0.95f);   // murciélago
                 case 0x25: return new Color(0.92f, 0.92f, 0.85f);   // esqueleto
@@ -206,8 +225,9 @@ namespace MazeOfKnight.Game
                 case 0x18: return new Color(0.95f, 0.55f, 0.25f);   // rodador
                 case 0x34: return new Color(0.60f, 0.30f, 0.30f);   // bloque
                 case 0x2E: return new Color(0.40f, 0.90f, 0.40f);   // brote
-                default: return Color.red;
             }
+            var c = Color.HSVToRGB((e.Type * 0.137f) % 1f, e.DiesOnTouch ? 0.35f : 0.75f, 0.95f);
+            return c;
         }
 
         void ShowEnemy(Enemy e)
@@ -215,7 +235,7 @@ namespace MazeOfKnight.Game
             var go = new GameObject($"Enemigo 0x{e.Type:X2}");
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = enemySprite;
-            sr.color = EnemyColor(e.Type);
+            sr.color = EnemyColor(e);
             sr.sortingOrder = 8;
             enemyViews[e] = sr;
         }
@@ -224,6 +244,11 @@ namespace MazeOfKnight.Game
         {
             if (motor == null)
                 return;
+            foreach (var e in enemyViews.Keys.Where(e => !e.Alive).ToList())
+            {
+                if (enemyViews[e] != null) Destroy(enemyViews[e].gameObject);
+                enemyViews.Remove(e);
+            }
             foreach (var (e, sr) in enemyViews.Select(kv => (kv.Key, kv.Value)))
             {
                 if (sr == null) continue;

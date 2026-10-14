@@ -85,10 +85,11 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
 ## Hecho en el prototipo
 - Puertas de mundo y salidas al castillo; espada y piedras; agua, lava y vitalidad; puertas con llave.
 - Mecanismos de sala (`RoomObjects`): puertas giratorias (clases 3 y 4), muros que se cierran (5), paredes que se rompen (7) y escaleras extra que se retiran 60 s.
-- Enemigos (`Enemies/`): combate medido (daño por tipo, retroceso, invulnerabilidad, espada) y 6 tipos: 0x0E murciélago, 0x25 esqueleto, 0x31 pinchos, 0x18 rodador, 0x34 bloque, 0x2E brote (≈45 % de los generadores). El resto aún no aparece; la ayuda en pantalla dice cuántos faltan en la sala.
+- Enemigos (`Enemies/`): combate medido (daño por tipo, retroceso, invulnerabilidad, espada) y **los 53 tipos de las salas más sus 25 hijos** (proyectiles, la mosca que se divide, el murciélago grande 0x37 y el hada 0x4F), según las fichas de `enemy_ai.md`. Ficheros: `EnemyTypes.cs` (los 6 primeros), `EnemyWalkers.cs` (los que andan y saltan), `EnemyFlyers.cs` (voladores, deambuladores y trepamuros), `EnemyFixed.cs` (trampas y torretas) y `Projectiles.cs` (hijos). El disparo 0x3F del soldado paraliza 60 ticks (`PlayerMotor.Stunned`) y el soldado carga entonces contra el jugador.
+  - Simplificaciones [I], todas marcadas en el código: sondeos de salto entre pisos (9A67/9CA3) reducidos a "suelo bajo los pies y cuerpo libre"; los que caen chocan con paredes y techos y se posan en cualquier sólido bajo su caja (para no quedar metidos en un muro); el rayo 0x06 reparte su desviación por igual entre segmentos; el pistón 0x04 hace daño pero no es sólido; los tamaños de 32 px (0x40, 0x37, murciélagos de nivel 2) están deducidos de los sprites; la fase latente del pistón y el modo forzado de las cabezas 0x69 (mundo 9, sala 0x19) no se usan.
 
 ## Pendiente
-- Los otros 47 tipos de enemigo, el botín al matarlos y los generadores periódicos; armas secundarias, objetos de mundo e inventario.
+- El botín al matar enemigos y los generadores periódicos; armas secundarias, objetos de mundo e inventario.
 - Salas de dios de los mundos y puerta del mundo 10.
 - Piedras que aparecen (clase 6, mundo 5) y muros que abren los eventos de sala (dependen de los enemigos).
 - Pipeline URP con renderer 2D (luces) y el estilo visual del remake.

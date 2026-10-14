@@ -102,8 +102,16 @@ namespace MazeOfKnight.Game
             AttackTicks = 0;
         }
 
+        // Paralizado (E500 = 6, E50F ticks [I]): lo deja así el disparo 0x3F del soldado; no responde a los mandos.
+        public int Stunned;
+
         public void Tick(MotorInput input)
         {
+            if (Stunned > 0)
+            {
+                Stunned--;
+                input = default;
+            }
             bool upPressed = input.Up && !upHeld, downPressed = input.Down && !downHeld;
             upHeld = input.Up;
             downHeld = input.Down;

@@ -1492,3 +1492,277 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 6. 0x69: el cálculo de dirección 75AD con el jugador a la derecha lee más allá de la tabla 7626.
 7. Contadores globales que no se reinician en estas rutinas: E633/E634 (0x36), E62A/E62B/E629 (0x69),
    E637/E638.. (0x2C/0x64), E63D (0x4E), E603 (0x42/0x43).
+
+## IA de enemigos — hijos (proyectiles y enemigos creados)
+
+(0x06 0x1A 0x1D 0x1E 0x33 0x37 0x3B 0x3D 0x3F 0x41 0x44 0x45 0x46 0x47 0x48 0x4A 0x4B 0x4D 0x4F 0x52 0x53 0x56 0x60 0x61 0x62)
+
+### Notas previas
+
+- Fuente: `extracted/ai/<tt>.asm` (regenerados, ya sin el corte en `RET cc`) más desensamblado lineal de los auxiliares.
+  Entradas reales: tabla de inicio b04:66B4[t−1] y de actualización b06:B472[t−1] [C]. Velocidades y tiempos **por tick
+  de IA** (1 tick = 2 frames), aunque se escriba «px/f».
+- **Descriptor** (b04:67B6 + 5·t): byte 0 = d0 (IX+9), byte 1 = sprite, byte 2 = color, **byte 3 = vida** (FE/FF =
+  invulnerable), byte 4 = IX+11 [C]. **d0 & 7 = número de sprites hardware** que ocupa: al borrar el enemigo, B431 resta
+  ese número de E621 [C]. d0 = 0xC0|n en los tipos «columna» (0x06, 0x60, 0x62): n segmentos de 16×16 apilados que
+  la IA hace crecer o encoger con INC/DEC IX+9 [C]. 0x37 y la explosión de 0x47 usan 4 sprites (32×32 [I]); el hada
+  0x4F, 2 [C/I].
+- Creación: 6551 (A = tipo, D = y, E = x, **HL → vx**, vy = 0, B → E624) y 65DA (igual con velocidad 0) [C].
+- **IX+3 bit 6** (lo pone la rutina común 6C42, que usan casi todos los proyectiles): al tocar al jugador, tras aplicar
+  el daño por contacto, el proyectil **se destruye** (b03:B285 → 4257) [C]. Sin ese bit, sigue su camino.
+- Apuntados (B18F/B195): apuntan desde su propia (y, x) al punto (jugador_y − 16, jugador_x − 8), con módulo
+  (S + 8·E045)/32 px/tick: S = 0x40 → 2, 0x60 → 3, 0x80 → 4 [C]. El rumbo se cuantiza con la tabla atan B274 [C].
+  La velocidad no cambia después: **línea recta, atraviesa paredes** y muere al salir de pantalla (y ≥ 0xB8 o
+  x ≥ 0xF9; salir por arriba o por la izquierda también da la vuelta a ≥ 0xB8/0xF9) [C].
+- Proyectiles horizontales (0x1A, 0x1D, 0x1E, 0x33, 0x3F; update común **98A7**): cada tick miran el tile en
+  (x + 16 si vx ≥ 0, x − 1 si vx < 0; y) y se destruyen si es sólido (≥ 0xBA) [C]. La vx la pone el padre por HL.
+- **Daño por contacto** (b04:64E5 + tipo) [C]: 0x06: 18 · 0x1A: 3 · 0x1D: 1 · 0x1E: 1 · 0x33: 1 · 0x37: 0 · 0x3B: 2 ·
+  0x3D: 2 · 0x3F: 0 (efecto especial, ver ficha) · 0x41: 4 · 0x44: 2 · 0x45: 4 · 0x46: 2 · 0x47: 2 · 0x48: 1 · 0x4A: 2 ·
+  0x4B: 1 · 0x4D: 1 · 0x4F: 0 (es el hada) · 0x52: 2 · 0x53: 1 · 0x56: 2 · 0x60: 2 · 0x61: 2 · 0x62: 8.
+- **Quién escribe IX+1C («me han golpeado»)** [C]: el código de impacto del arma, **b03:B54D** (IY = arma, IX =
+  enemigo). Llama a B592, que da Z si el tipo es 0x0F, 0x25, 0x27, 0x49, 0x52 o 0x54, y entonces B5A7 hace
+  `LD (IX+1C),1`. Después resta 1 a la vida (IX+10), o 2 si E094 ≠ 0; si llega a 0, el enemigo muere (B604). El arma
+  de tipo 5 entra por B5B1 (mismo aviso, resta 2 o 4). Si el enemigo tiene IX+2 bit 2 (p. ej. 0x06), salta a AE68
+  sin quitar vida [C]. **0x53 no está en la lista**: por eso no se divide.
+- **E045** [C/I]: no hay ninguna escritura directa (ni `LD (E045),A`, ni vía HL/IX/IY con esa dirección). Se pone a 0 en
+  el borrado de E016–E0FE al empezar partida (b00:4AC3 y 4CB0). Se lee en 9 sitios (bancos 4–6). Además de en los
+  apuntados, b04:6320 lo usa como índice de una tabla {3,3,3,4,4,5…} y calcula 0x70 − 2·E045. Es un **nivel de
+  dificultad** que en la práctica vale 0 [I]. Quizá lo escriba un LDIR de bloque o la carga de contraseña; no lo he
+  encontrado.
+
+---
+
+#### 0x06 — rayo (lo lanzan las cabezas 0x69)
+- **Vida:** invulnerable (FF); además IX+2 bit 2 = 1, así que el arma rebota (AE68) [C]. Contacto 18. Sonido 0x07 al nacer.
+- **No es un proyectil con velocidad:** vx = vy = 0 (B124). Es una **cadena de segmentos de 16×16** que baja en zigzag.
+  El renderizador (b01:717B) dibuja IX+16 segmentos desde (y, x) hacia abajo, cada uno 16 px más abajo, con los
+  patrones IX+18.. y el color IX+15. Deja en IX+12/13 la posición del **último segmento** [C].
+- **Trazado:** los patrones salen de un flujo de bytes en **77FB** (A0, A4, A8, AC, B0 = 5 formas de rayo). La
+  «dirección» E624 (0..9) solo elige el punto de arranque, 77FB + 8·dir. Entre una forma s y la siguiente s', la x se
+  desplaza salida[s] − entrada[s'], con salida 77C5 = {1, 6, 10, 10, 14} y entrada 77CA = {6, 7, 0, 15, 4} [C].
+  Deriva horizontal acumulada en los primeros 8 segmentos [C]: dir 0: −40 · 1: −36 · 2: −23 · 3: −21 ·
+  4: −4 (casi vertical) · 5: +24 · 6: +14 · 7: +26 · 8: +54 · 9: ≈ +55. La 9 lee más allá de la tabla (78 4B..,
+  bytes de código) a partir del 9.º segmento.
+- **Corrección en los bordes** (inicio): si x < 0x27 y dir < 5 → dir + 5; si x ≥ 0xD5 y dir ≥ 5 → dir − 5; es decir,
+  junto a un borde se fuerza la deriva hacia dentro [C/I].
+- **Ciclo** [C]:
+  - Est. 0: crece 1 segmento por tick, de 1 a 6, con la cabeza fija en el origen.
+  - Est. 1: toda la cadena **baja 16 px por tick** (y += 16, x según el zigzag, puntero +1) hasta que el último segmento
+    (IX+12) llega a y ≥ 0x90.
+  - Est. 2: encoge desde arriba, 1 segmento por tick (y += 16, d0−−). Al quedar uno, mira el tile en (IX+13, 0xB8):
+    - si **no** es sólido, desaparece;
+    - si es sólido, se convierte en un **chispazo**: sprite B4, color 8, y = 0xA8, sonido 0x1C, durante 48 ticks
+      (sprite ^ 0x0C cada 4); luego se borra.
+  - Color cíclico: cada tick, IX+15 = 82E4[i], con 21 pasos (la misma tabla que 0x4E) [C].
+- **Colisión:** b03:B2A0/B51D usan para el 0x06 una caja con origen en IX+12/13, es decir, el segmento inferior [C].
+  [I] Solo hace daño la punta del rayo.
+
+#### 0x1A — escupitajo de la serpiente 0x05
+- **Vida** 1. Contacto 3. Sonido 0x0E al nacer. 0x05 lo crea en (y+4, x) con vx = ±4 px/tick (HL) y B = 0 (derecha) o
+  1 (izquierda) [C].
+- **Inicio:** IX+8 = 32. Si E624 ≠ 0 (va a la izquierda): sprite BC e IX+3 bit 6 [C]. **Peculiaridad:** el que va a la
+  derecha no tiene el bit 6, así que **no desaparece al tocar al jugador** [C].
+- **Movimiento:** recto a 4 px/tick. Muere a los **32 ticks** (128 px) o al chocar con un tile sólido (98A7) [C].
+
+#### 0x1D — púa del erizo 0x11
+- **Vida:** inv. (FF). Contacto 1. Inicio 6C42 (desaparece al tocarte). Sin sonido propio (el 0x11 pide el 0x10) [C].
+- Horizontal a ±4 px/tick (HL del padre). Muere contra un tile sólido o al salir de pantalla [C].
+
+#### 0x1E — bola del armadillo 0x12
+- **Vida:** inv. (FF). Contacto 1. Sonido 0x0F. Horizontal a ±2 px/tick. Muere contra sólido o al salir [C].
+
+#### 0x33 — flecha de las torretas 0x32 y 0x51
+- **Vida** 1. Contacto 1. Sonido 0x10. Si vx < 0: sprite C8 y attr 0x60 [C].
+- Horizontal a ±4 px/tick. Muere contra sólido o al salir [C].
+
+#### 0x3F — disparo paralizante del soldado 0x2D
+- **Vida:** inv. (FF). Contacto 0. Si E624 ≠ 0: sprite B4, attr 0x21 (izquierda) [C]. Horizontal a ±4 px/tick; muere contra
+  sólido o al salir [C].
+- **Al tocar al jugador** (b03:B2E2) [C]: se destruye y, en lugar del daño normal, pone **E500 = 6 con E50F = 60**
+  (estado especial del jugador, 60 frames). Si el jugador está en E500 = 3, solo hace el retroceso (E500 = 4) sin
+  daño. [I] Es un estado de parálisis: el 0x2D **carga** contra el jugador precisamente cuando E500 = 6.
+  `items_enemies.md` lo describía como «restaura algo»; no es así.
+
+#### 0x3B — bola de las bocas de pared 0x3A y 0x50
+- **Vida** 1. Contacto 2. Sonido 0x12.
+- **Inicio:** apunta a rapidez 0x60 (**3 px/tick**) como si saliera de y' = y + (E604 & 31) − 8, es decir, de −8 a +23 px
+  respecto a su y real, lo que añade una dispersión vertical. Update: RET (recto) [C].
+
+#### 0x3D — bola del hechicero 0x3C
+- **Vida** 1. Contacto 2. Sonido 0x0F. Apuntado a **2 px/tick** (S = 0x40), recto [C].
+
+#### 0x41 — disparo en 8 direcciones del espíritu 0x40
+- **Vida:** inv. (FF). Contacto 4. Sonido 0x19. Update: RET [C].
+- **Inicio:** calcula el ángulo hacia el jugador desde (y+8, x+8) (B1DB) y lo redondea a 1 de 8: ((ángulo + 0x10) >> 5) & 7.
+  Cada entrada de la tabla **8DC5** (8 bytes) da sprite, vy, vx, el desplazamiento de salida (dy, dx) y el attr [C]:
+
+  | i | sprite | (vx, vy) px/tick | salida (dy, dx) |
+  |---|---|---|---|
+  | 0 | A4 | (+4, 0) → | (+13, +16) |
+  | 1 | C8 | (+4, +4) ↘ | (+13, +16) |
+  | 2 | A8 | (0, +4) ↓ | (+13, +16) |
+  | 3 | BC | (−4, +4) ↙ | (+13, 0) |
+  | 4 | A4 | (−4, 0) ← | (+13, 0) |
+  | 5 | C8 | (−4, −4) ↖ | (−3, 0) |
+  | 6 | A8 | (0, −4) ↑ | (−3, +16) |
+  | 7 | BC | (+4, −4) ↗ | (−3, +16) |
+
+  Las diagonales van a 4 px por eje (5,66 px/tick) [C]. [I] El sentido de giro de los índices sale de la tabla
+  (y hacia abajo); no lo he comprobado en el emulador.
+
+#### 0x44 / 0x56 — bola del espectro 0x13 (0x44) y del hombre-llama 0x0C (0x56)
+- **Vida:** 0x44 inv. (FF); 0x56 vida 1. Contacto 2. Sonido 0x0F (0x44) o 0x0E (0x56). Sprites B4 / A0 [C].
+- Apuntados a **2 px/tick** (S = 0x40), rectos. La vx basura que pasa el padre se sobrescribe [C].
+
+#### 0x45 — bola del guardián orbital 0x15
+- **Vida:** inv. (FF). Contacto 4. Sonido 0x0E. Apuntado a **2 px/tick**, recto [C].
+
+#### 0x46 — rastro de la aparición 0x16
+- **Vida:** inv. (FF). Contacto 2. Sonido 0x0F. Apuntado a **4 px/tick** (S = 0x80, B18D), recto [C].
+
+#### 0x47 — bomba rodante del centinela 0x17
+- **Vida:** inv. (FF). Contacto 2. Durante el rodado, d0 = C4 ^ 45 = 0x81 (1 sprite). E624 = dirección del padre
+  (bit 0 = 1 → izquierda). IX+1A = **jugador_x en el momento del disparo** (objetivo) [C].
+- **Est. 0, rodar:** cada tick recalcula vx según la distancia |x − objetivo| (**frena al acercarse**) [C]:
+  ≥ 132: 3,5 px/tick · 116–131: 3,0 · 96–115: 2,5 · 72–95: 2,0 · 40–71: 1,5 · < 40: 1,0. La animación (sprite ^ 4) va
+  cada 3, 6, 9, 12, 15 o 18 ticks, respectivamente. Se para cuando:
+  - pasa el objetivo (x ≥ objetivo yendo a la derecha, x < objetivo yendo a la izquierda);
+  - no hay suelo delante (6BEE);
+  - hay pared delante o llega al borde de pantalla (6C04).
+- **Est. 1, mecha:** quieta (bit 4 = 0) durante 32..63 ticks al azar [C].
+- **Est. 2, explosión:** d0 = C4 (4 sprites), x −= 8, y −= 8, patrón 0x0A, color 6, attr 0x3D, sonido 0x18. A los 8 ticks,
+  patrón 0x0B y attr 0x5B; a los 16 ticks se borra [C]. [I] Explosión de 32×32 centrada en la bomba.
+
+#### 0x48 — murcielaguito que sueltan 0x19 y 0x37
+- **Vida:** inv. (FF). Contacto 1. Sprite D8. Inicio 6C42.
+- **Movimiento:** vagabundeo: rumbo al azar entre 16 a **1 px/tick**, nuevo rumbo cada **16 ticks** (87BA). No mira tiles;
+  muere al salir de pantalla o al tocarte [C].
+
+#### 0x4A — llamarada del escupefuego 0x22
+- **Vida:** inv. (FF). Contacto 2. Sprite CC. Inicio 6C42. El sonido 15 lo pide el padre [C].
+- **Inicio:** vy = −4 px/tick (hacia arriba); vx = ±{0, 2, 4, 3}[r & 3] px/tick, con signo al azar. Gravedad
+  IX+14 = 0x40 → **vy += 0,25 px/tick²** (el cálculo aleatorio de 812D siempre da 0x40) [C].
+- **Movimiento:** parábola. Sube unos 32 px en 16 ticks y luego cae; atraviesa paredes y muere al salir por abajo
+  (y ≥ 0xB8) [C].
+
+#### 0x4B — bola del fantasma orbitante 0x26
+- **Vida:** inv. (FF). Contacto 1. Sonido 0x0F. Apuntado a **3 px/tick** (S = 0x60), recto [C].
+
+#### 0x4D — espora ondulante de 0x4C
+- **Vida:** inv. (FF). Contacto 1. Color 1. Inicio 6C42 [C].
+- **Movimiento:** cada 8 ticks, rumbo = 9064[base + k] a **1 px/tick** (7E25). La tabla 9064 es (i + 1) & 15, así que
+  rumbo = (base + k + 1) & 15. base = r & 15 se fija al nacer, y k oscila 1, 2, 3, 4, 3, 2, 1, 0, 1… [C].
+  Resultado: **ondula ±2 rumbos (±45°) alrededor del rumbo base + 3**, con un periodo de 64 ticks. Animación: cada 4
+  ticks, sprite = C0 | ((sprite + 4) & 15), es decir, C0 → C4 → C8 → CC [C]. Atraviesa paredes [C].
+
+#### 0x4F — hada (la crean las almas 0x4E al reunirse)
+- **Vida 0** (descriptor `82 a4 0f 00 00`); al nacer, IX+2 bits 5 y 6 = 0 (intocable). Velocidad 0. Nace en
+  (0x70, 0x80) [C].
+- **Fase 0 (aparición, 80 ticks):** quieta, sprite A4 parpadeando (^ 0x0C cada 2 ticks) [C].
+- **Al acabar:** attr 0x13, **IX+2 bit 6 = 1** (ya se puede tocar), d0 = C2 (2 sprites), patrón 0, color 8, música
+  **0x89** (4080) [C].
+- **Fase 1:** revolotea con el deambulador común 8145, a 1 px/tick, rumbo al azar de 16 cada 3..31 ticks y vuelta al
+  centro si sale de la caja (caja pequeña, porque d0 bit 2 = 0). Patrón 0 y color 8 si va a la derecha; patrón 2 y
+  color 9 si va a la izquierda; el patrón alterna ^ 1 cada 2 ticks [C].
+- **Al tocarla** (b03:B2FE): se destruye y llama a 612C con A = vitalidad máxima del personaje (E053 Aphrodite /
+  E057 Popolon). Eso suma la vitalidad máxima al incremento pendiente (E05E/E061): **rellena la vitalidad**. Sonido
+  0x29 [C]. Coincide con lo observado en `entities.md` («Hadas») [O]. No muere por tiempo [C].
+
+#### 0x37 — murciélago grande (fusión final de 0x19)
+- **Vida 8**. Descriptor `c4 0e 0e 08 3d`: 4 sprites (32×32 [I]), patrón 0x0E, color 14. **Contacto 0** en la tabla
+  64E5: la tabla por niveles B3AE {1, 2, 4, 8} solo se aplica al tipo 0x19, así que el 0x37 solo empuja (E500 = 4,
+  sin restar vitalidad) [C]. [I] Puede ser un descuido del original.
+- **Inicio (8681):** nivel IX+1B = 3, IX+8 = 4, primer disparo a los 48 ticks (IX+1C = 0x30), estado 0, **IX+18 bit 7 = 1
+  (sin pareja)**, así que nunca intenta fusionarse. La B que pasa el padre se ignora [C].
+- **Comportamiento (868F, compartido con 0x19):**
+  - Deambula con 8145 a 1 px/tick (rumbo de 16 al azar cada 3..31 ticks), con la caja grande porque d0 bit 2 = 1: si
+    x ∈ [0xB8, 0xF0) o y ∈ [0x7F, 0xDF), vuelve hacia el centro 24 ticks [C].
+  - Animación: patrón ^ 1 cada 8 ticks [C].
+  - Cada **64 ticks** (el primero a los 48) crea un **0x48** en (y+16, x+16). E62F vale ya 3, así que siempre dispara [C].
+- No atraviesa ninguna lógica de tiles; muere solo por vida [C].
+
+#### 0x52 / 0x53 — moscas divididas (de 0x49)
+- **Vida:** 0x52 = 3, 0x53 = 1. Contacto 2 / 1. Sprites AC / A4 [C].
+- **Nacimiento:** al recibir un golpe que no lo mata, el 0x49 pone IX+1C = 1. En su siguiente update crea **dos 0x52** en
+  su misma (y, x) (E624 = 1 y 0, que no se usan) y se borra. Un 0x52 golpeado hace lo mismo con **dos 0x53** [C].
+- **Inicio (A0F1):** IX+14 = 8 → **8 ticks sin poder ser golpeado** (IX+2 bit 5 = 0; el 0x49 solo tiene 1).
+  IX+15 = 1 → elige rumbo en el primer update. Velocidad 0. E63E = 1 [C].
+- **Comportamiento (A109):**
+  - Rebota en la caja y ∈ [0x20, 0xB0), x ∈ [8, 0xE0) invirtiendo vy o vx (930E) [C].
+  - Cada 16..31 ticks, rumbo de 16 al azar a **2 px/tick** (las dos hermanas lo eligen por separado) [C].
+  - Aleteo cada 8 ticks: 0x52 hace sprite ^ 0x1C y attr ^ 0x66; 0x53 hace sprite ^ 0x0C y attr ^ 0x1E [C].
+  - Sin sonido: el 0x0A periódico es solo del 0x49 [C].
+- **División:** el 0x52 está en la lista de B592, así que se divide al primer golpe que no lo mata (vida 3). El 0x53 no
+  está y muere con 1 de daño [C]. Total por cada 0x49: 1 → 2 → 4 moscas.
+
+#### 0x60 — chorro de agua del monstruo 0x42
+- **Vida 4**. Contacto 2. Descriptor `c7 d8 0a 04 00`. El 0x42 lo crea en y = 0xA0, x ≈ jugador_x ± (ver su ficha) [C].
+- **Inicio:** d0 &= 0xFA → C2 (2 segmentos), IX+16 = 0xA0 (base), vy = **−4 px/tick**, vx = 0, sonido 0x17 [C].
+- **Ciclo** [C]:
+  - Est. 0: sube hasta y = 0x90 (4 ticks); d0 = C3.
+  - Est. 1: cada 16 px de subida (y & 15 = 0) añade un segmento, hasta C7 (7). Con 7 segmentos y y = 0x40, invierte:
+    vy = +4.
+  - Est. 2: baja a 4 px/tick quitando un segmento cada 16 px; al pasar por y = 0x90 pone **E628 = 1**, que avisa al
+    0x42; en y = 0xA0 se borra.
+  - Ida y vuelta: 0xA0 → 0x40 → 0xA0, es decir, 24 + 24 ticks.
+- **Dibujo** (b01:70C6): sprite base D0 (color 4) en y = 0xA0, cabeza en y (sprite D8) y segmentos D4 entre ambos. Columna de
+  16 px de ancho y hasta 112 px de alto. La caja de colisión crece con el número de segmentos (B916) [C].
+
+#### 0x61 — bola del monstruo del agua 0x42
+- **Vida:** inv. (FF). Contacto 2. Sonido 0x0F. Apuntado a **2 px/tick**, recto [C].
+
+#### 0x62 — rayo vertical del patrullero 0x43
+- **Vida 4**. **Contacto 8**. Descriptor `86 c4 08 04 00`. Nace en (y, x+14) [C].
+- **Inicio:** d0 = 0x81 y sin mover. Elige el sentido [C]:
+  - **abajo** (y += 12, sprite CC, vy = +4, IX+15 = 1) si y < 0x30, o si y < 0xA0 y jugador_y ≥ y;
+  - **arriba** en otro caso (y −= 4, sprite C4, vy = −4).
+- **Ciclo** [C]:
+  - Est. 0: sonido 0x17, d0 = C2, color 12, IX+16 = y de origen; empieza a moverse.
+  - Est. 1: se alarga a 4 px/tick y añade un segmento cada 4 ticks (16 px), hasta 4 más (d0 hasta C6). Para si llega al
+    límite: y ≥ 0xB0 bajando o y < 0x20 subiendo.
+  - Est. 2: quieto **16 ticks**.
+  - Est. 3: invierte vy y se recoge hacia el origen a 4 px/tick quitando un segmento cada 4 ticks; al llegar a 0
+    segmentos se borra.
+- **Dibujo:** base C8 en el origen, cabeza C4/CC y segmentos C8 hacia el origen (+16 o −16 según IX+15). La caja crece
+  con los segmentos y se desplaza hacia arriba si el rayo va hacia abajo (B933) [C].
+- Mientras exista, el 0x43 espera (E620 = 1) [C].
+
+---
+
+### Tabla resumen
+
+| Tipo | Padre | Vida | Contacto | Movimiento | Muere | Sonido |
+|---|---|---|---|---|---|---|
+| 0x06 | 0x69 | inv. | 18 | rayo de 16×16 en zigzag: crece a 6 segmentos y baja 16 px/tick; deriva según dir 0..9 (77FB) | al encoger; chispazo de 48 ticks si hay suelo en y = 0xB8 | 0x07; 0x1C |
+| 0x1A | 0x05 | 1 | 3 | ±4 px/tick horizontal | 32 ticks, tile sólido; a la derecha no desaparece al tocarte | 0x0E |
+| 0x1D | 0x11 | inv. | 1 | ±4 horizontal | sólido / pantalla / jugador | (padre 0x10) |
+| 0x1E | 0x12 | inv. | 1 | ±2 horizontal | sólido / pantalla / jugador | 0x0F |
+| 0x33 | 0x32, 0x51 | 1 | 1 | ±4 horizontal | sólido / pantalla / jugador | 0x10 |
+| 0x37 | 0x19 (fusión) | 8 | 0 | deambula 1 px/tick (caja grande) | vida | — |
+| 0x3B | 0x3A, 0x50 | 1 | 2 | apuntado 3 con dispersión vertical | pantalla / jugador | 0x12 |
+| 0x3D | 0x3C | 1 | 2 | apuntado 2 | pantalla / jugador | 0x0F |
+| 0x3F | 0x2D | inv. | 0 | ±4 horizontal | sólido / pantalla / jugador → E500 = 6 durante 60 frames (parálisis [I]) | (padre 5) |
+| 0x41 | 0x40 | inv. | 4 | 8 direcciones, 4 px por eje (8DC5) | pantalla / jugador | 0x19 |
+| 0x44 | 0x13 | inv. | 2 | apuntado 2 | pantalla / jugador | 0x0F |
+| 0x45 | 0x15 | inv. | 4 | apuntado 2 | pantalla / jugador | 0x0E |
+| 0x46 | 0x16 | inv. | 2 | apuntado 4 | pantalla / jugador | 0x0F |
+| 0x47 | 0x17 | inv. | 2 | rueda hacia la x del jugador, de 3,5 a 1 px/tick frenando | mecha 32..63 ticks → explosión 32×32 de 16 ticks | 0x18 |
+| 0x48 | 0x19, 0x37 | inv. | 1 | 16 rumbos al azar a 1 px/tick, cambia cada 16 ticks | pantalla / jugador | — |
+| 0x4A | 0x22 | inv. | 2 | parábola: vy −4, g = 0,25, vx ∈ {0, ±2, ±3, ±4} | pantalla / jugador | (padre 15) |
+| 0x4B | 0x26 | inv. | 1 | apuntado 3 | pantalla / jugador | 0x0F |
+| 0x4D | 0x4C | inv. | 1 | 1 px/tick ondulando ±45° (cambio cada 8 ticks) | pantalla / jugador | — |
+| 0x4F | 0x4E | 0 | — | 80 ticks quieta; luego deambula 1 px/tick | al tocarla: rellena la vitalidad | 0x89; 0x29 |
+| 0x52 | 0x49 | 3 | 2 | 16 rumbos a 2 px/tick, rebota en la caja | golpe → 2 × 0x53 | — |
+| 0x53 | 0x52 | 1 | 1 | igual | vida | — |
+| 0x56 | 0x0C | 1 | 2 | apuntado 2 | pantalla / jugador | 0x0E |
+| 0x60 | 0x42 | 4 | 2 | columna de agua: sube de 0xA0 a 0x40 y baja a 4 px/tick (2..7 segmentos) | al volver a 0xA0 (E628 = 1) | 0x17 |
+| 0x61 | 0x42 | inv. | 2 | apuntado 2 | pantalla / jugador | 0x0F |
+| 0x62 | 0x43 | 4 | 8 | rayo vertical hacia el jugador: se alarga a 4 px/tick hasta 6 segmentos, 16 ticks quieto, se recoge | al recogerse | 0x17 |
+
+### Dudas
+1. E045: no he encontrado quién lo escribe. Con 0 en la práctica, las velocidades de arriba son las reales.
+2. 0x37: daño por contacto 0 (tabla 64E5). ¿Querían usar la tabla por niveles de 0x19 (8)?
+3. 0x1A hacia la derecha no desaparece al tocar al jugador (falta el bit 6). ¿Fallo del original?
+4. 0x3F: el significado exacto de E500 = 6 y E50F (parálisis o aturdimiento) está por comprobar en el emulador.
+5. 0x06 dir 9 lee bytes de código más allá de 77FB+0x50 a partir del 9.º segmento.
+6. 0x41: la correspondencia entre el índice 0..7 y el ángulo de B1DB se ha deducido de la tabla, no se ha medido.

@@ -18,6 +18,18 @@ namespace MazeOfKnight.Tests
             new EnemyInfo { type = 0x18, hp = 1, damage = 2 },
             new EnemyInfo { type = 0x34, hp = 4, damage = 6 },
             new EnemyInfo { type = 0x2E, hp = 2, damage = 2, immuneItem = 0x17 },
+            new EnemyInfo { type = 0x0B, hp = 1, damage = 10 },
+            new EnemyInfo { type = 0x11, hp = 2, damage = 2 },
+            new EnemyInfo { type = 0x1D, invulnerable = true, damage = 1 },
+            new EnemyInfo { type = 0x19, hp = 1, damage = 1 },
+            new EnemyInfo { type = 0x2A, hp = 3, damage = 1 },
+            new EnemyInfo { type = 0x2C, hp = 4, damage = 2 },
+            new EnemyInfo { type = 0x64, hp = 4, damage = 2 },
+            new EnemyInfo { type = 0x36, invulnerable = true, damage = 6 },
+            new EnemyInfo { type = 0x47, invulnerable = true, damage = 2 },
+            new EnemyInfo { type = 0x49, hp = 5, damage = 8 },
+            new EnemyInfo { type = 0x52, hp = 3, damage = 2 },
+            new EnemyInfo { type = 0x53, hp = 1, damage = 1 },
         };
 
         // Suelo en la fila 11 (y = 120); techo opcional en la fila 'ceiling'.
@@ -211,6 +223,139 @@ namespace MazeOfKnight.Tests
             CollectionAssert.AreEqual(new[] { 85, 89, 93, 97, 101, 105 }, xs);
             CollectionAssert.AreEqual(new[] { 119, 118, 118, 118, 119, 120 }, ys);
             Assert.AreEqual(MotorState.Ground, motor.State);
+        }
+    
+        // Espadazo desde el suelo (y = 120), con el enemigo bajado a esa altura.
+        static void Hit(EnemySystem sys, PlayerMotor motor, Enemy e)
+        {
+            e.X = 120; e.Y = 104;
+            motor.Place(sys.Room, 102, 120);
+            motor.Tick(new MotorInput { Right = true });
+            motor.Place(sys.Room, 102, 120);
+            motor.Tick(new MotorInput { Attack = true });
+            sys.Strike(motor, new List<int>());
+            for (int i = 0; i < 4; i++) motor.Tick(new MotorInput());
+        }
+
+        [Test]
+        public void DartRunsAtFourPixelsPerTick()
+        {
+            var (sys, _, _) = Setup(Room(-1, new EntityJson { type = 0x0B, x = 120, y = 104 }));
+            float x0 = sys.Enemies[0].X;
+            sys.Tick();
+            Assert.AreEqual(4f, System.Math.Abs(sys.Enemies[0].X - x0), 0.01);
+        }
+
+        [Test]
+        public void HedgehogShootsASpineAtThePlayer()
+        {
+            var (sys, _, _) = Setup(Room(-1, new EntityJson { type = 0x11, x = 120, y = 104 }), 90, 120);
+            Enemy spine = null;
+            for (int t = 0; t < 80 && spine == null; t++)
+            {
+                sys.Tick();
+                spine = sys.Enemies.FirstOrDefault(e => e.Type == 0x1D);
+            }
+            Assert.IsNotNull(spine, "dispara antes de 60 ticks si el jugador está a menos de 65 px");
+            Assert.AreEqual(-4f, spine.Vx, 0.01, "a 4 px/tick hacia el jugador");
+        }
+
+        [Test]
+        public void SplitFlyBecomesTwoThenFour()
+        {
+            var (sys, motor, _) = Setup(Room(-1, new EntityJson { type = 0x49, x = 120, y = 80 }));
+            sys.Tick();
+            Hit(sys, motor, sys.Enemies[0]);
+            Assert.AreEqual(2, sys.Enemies.Count(e => e.Alive && e.Type == 0x52));
+            for (int i = 0; i < 8; i++) sys.Tick();
+            foreach (var fly in sys.Enemies.Where(e => e.Alive && e.Type == 0x52).ToList())
+                Hit(sys, motor, fly);
+            Assert.AreEqual(4, sys.Enemies.Count(e => e.Alive && e.Type == 0x53));
+        }
+
+        [Test]
+        public void FusingBatsMergeIntoABiggerOne()
+        {
+            var (sys, _, _) = Setup(Room(-1, new EntityJson { type = 0x19, x = 100, y = 80 }, new EntityJson { type = 0x19, x = 140, y = 80 }));
+            bool merged = false;
+            for (int t = 0; t < 400 && !merged; t++)
+            {
+                sys.Tick();
+                merged = sys.Enemies.OfType<FusingBat>().Any(b => b.Alive && b.Level == 1);
+            }
+            Assert.IsTrue(merged);
+            Assert.AreEqual(1, sys.Enemies.Count(e => e.Alive && e.Type == 0x19));
+            Assert.AreEqual(2, sys.Enemies.First(e => e.Alive).Hp);
+        }
+
+        [Test]
+        public void TeleporterAlwaysAppearsOnAPlatform()
+        {
+            var (sys, _, world) = Setup(Room(-1, new EntityJson { type = 0x2A, x = 48, y = 104 }));
+            var ghost = sys.Enemies[0];
+            int seen = 0;
+            for (int t = 0; t < 600; t++)
+            {
+                sys.Tick();
+                if (!ghost.Visible) continue;
+                seen++;
+                Assert.IsTrue(world.Solid(sys.Room, (int)ghost.X, (int)ghost.Y + 16), $"suelo bajo ({ghost.X},{ghost.Y})");
+                Assert.IsFalse(world.Solid(sys.Room, (int)ghost.X, (int)ghost.Y + 15));
+            }
+            Assert.Greater(seen, 0);
+        }
+
+        [Test]
+        public void InchWormHeadAndTailTakeTurns()
+        {
+            var (sys, _, _) = Setup(Room(-1, new EntityJson { type = 0x2C, x = 80, y = 104 }, new EntityJson { type = 0x64, x = 64, y = 104 }));
+            var head = sys.Enemies[0];
+            var tail = sys.Enemies[1];
+            int both = 0, moves = 0;
+            for (int t = 0; t < 400; t++)
+            {
+                float h = head.X, tl = tail.X;
+                sys.Tick();
+                bool hm = head.X != h, tm = tail.X != tl;
+                if (hm && tm) both++;
+                if (hm || tm) moves++;
+            }
+            Assert.AreEqual(0, both, "nunca se mueven a la vez");
+            Assert.Greater(moves, 100);
+            head.Alive = false;
+            float run = 0;
+            for (int t = 0; t < 40; t++) { float x = tail.X; sys.Tick(); run += System.Math.Abs(tail.X - x); }
+            Assert.Greater(run, 40, "sola, corre a 2 px/tick");
+        }
+
+        [Test]
+        public void ChainOrbsRelayOneAtATime()
+        {
+            var spawns = Enumerable.Range(0, 9).Select(i => new EntityJson { type = 0x36, x = 24 + 24 * i, y = 72 }).ToArray();
+            var (sys, _, _) = Setup(Room(-1, spawns));
+            int landings = 0;
+            int before = sys.Enemies.OfType<ChainOrb>().Count(o => o.State == 2 || o.State == 1);
+            for (int t = 0; t < 600; t++)
+            {
+                var flying = sys.Enemies.OfType<ChainOrb>().Where(o => o.State != 0).ToList();
+                sys.Tick();
+                Assert.LessOrEqual(sys.Enemies.OfType<ChainOrb>().Count(o => o.State == 2), 1, "solo una en vuelo");
+                landings += flying.Count(o => o.State == 0);
+            }
+            Assert.AreEqual(1, before);
+            Assert.Greater(landings, 3);
+        }
+
+        [Test]
+        public void RollingBombStopsAtThePlayersXAndExplodes()
+        {
+            var (sys, _, _) = Setup(Room(-1, new EntityJson { type = 0x47, x = 40, y = 104 }), 160, 120);
+            var bomb = sys.Enemies[0];
+            for (int t = 0; t < 200 && bomb.Width == 16; t++) sys.Tick();
+            Assert.AreEqual(32, bomb.Width, "explota (32 × 32)");
+            Assert.AreEqual(152 - 8, bomb.X, 4, "se paró en la x del jugador");
+            for (int t = 0; t < 17; t++) sys.Tick();
+            Assert.IsFalse(bomb.Alive);
         }
     }
 }

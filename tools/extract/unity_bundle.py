@@ -92,11 +92,16 @@ def main():
     print(f'total: {total} salas -> {out_dir}')
     rom = Rom()
     cat = json.loads((ROOT / 'extracted' / 'entities' / 'enemies.json').read_text())
-    enemies = [{'type': int(k, 16), 'hp': v['hp'], 'invulnerable': v['invulnerable'],
-                'damage': rom.byte(DAMAGE_TABLE + int(k, 16), 1),
-                'immuneItem': int(v['immune_with_item'], 16) if isinstance(v.get('immune_with_item'), str)
-                else (v.get('immune_with_item') or 0)}
-               for k, v in sorted(cat.items())]
+    # Todos los tipos (también los hijos: proyectiles y enemigos que crea otro): vida del descriptor b04:67B6
+    # (FE/FF = invulnerable), daño de b04:64E5 y objeto que protege (solo se conoce para los de las salas).
+    enemies = []
+    for t in range(1, 108):
+        hp = rom.block(0x67B6 + 5 * t, 5, 1)[3]
+        v = cat.get(f'{t:#04x}', {})
+        immune = v.get('immune_with_item')
+        enemies.append({'type': t, 'hp': 0 if hp >= 0xFE else hp, 'invulnerable': hp >= 0xFE,
+                        'damage': rom.byte(DAMAGE_TABLE + t, 1),
+                        'immuneItem': int(immune, 16) if isinstance(immune, str) else (immune or 0)})
     (out_dir / 'enemies.json').write_text(json.dumps({'enemies': enemies}))
     print(f'catalogo: {len(enemies)} tipos de enemigo')
 
