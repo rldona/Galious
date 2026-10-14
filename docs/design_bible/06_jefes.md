@@ -9,7 +9,7 @@ Fuentes: [boss_ai.md](../boss_ai.md) (fichas leídas del código), [state_machin
    - Estado 15, jingle 0x81 [C][O].
    - Aparece el jefe con la vida de su tabla (a la mitad con el Holy Water) [C].
 3. **Combate:** música 0x90, "Great Demons". Según la vida restante, la música sube de tempo en dos escalones, al cuarto y al octavo de la vida (E1C5) [C][G].
-   - **Puesta en escena:** al empezar el combate se apaga la decoración del fondo y desaparece el emblema. La sala queda negra, con solo muros, suelos y escaleras. El jefe es una imagen grande dibujada con tiles del fondo, no con sprites [O, mundo 1].
+   - **Puesta en escena:** al empezar el combate se apaga la decoración del fondo y desaparece el emblema. La sala queda negra, con solo muros, suelos y escaleras. El jefe es una imagen grande dibujada con tiles del fondo, no con sprites, y se mueve a saltos de 8 px [O, los 10 jefes].
 4. **Derrota:** estado 19 y jingle 0x84. Cae la Great Key, cuya fanfarria es el estado 20 [C][O].
 5. Los objetos del mundo cambian las reglas del combate: Holy Water, vida a la mitad; Cloak, mitad de daño recibido [G]; Magic Rod, munición infinita [G].
 

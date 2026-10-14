@@ -56,7 +56,7 @@ Propuesta para la fase 5: un importador que lea esos JSON y cree los ScriptableO
 
   Cuadrícula por sala en `extracted/maps/collision/`; ver [world_maps.md](../world_maps.md#colisión-de-los-tiles-co).
 - **Agua y lava:** animación por color (agua) y por patrón (lava), daño por personaje y Carpet. Ver [world_maps.md](../world_maps.md#agua-y-lava-co).
-- **Sala del jefe:** la decoración se apaga y el jefe se dibuja con tiles. En el remake, el jefe será un sprite o rig propio y el "apagón" un cambio de iluminación. Ver [boss_ai.md](../boss_ai.md#cómo-se-dibuja-el-jefe-oc).
+- **Sala del jefe:** la decoración se apaga y el jefe se dibuja con tiles, comprobado en los 10. En el remake, el jefe será un sprite o rig propio y el "apagón" un cambio de iluminación. Ver [boss_ai.md](../boss_ai.md#cómo-se-dibuja-el-jefe-oc).
 - **Variables:**
   - E1C5: tempo del combate;
   - E1C9: música en pausa;
@@ -65,7 +65,9 @@ Propuesta para la fase 5: un importador que lea esos JSON y cree los ScriptableO
 
   Ver [music.md](../music.md), [boss_ai.md](../boss_ai.md) y [entities.md](../entities.md).
 
-**Queda abierto, sin bloquear el importador:**
-- quién activa E1C6 (silencio de canal);
-- cómo se mueve el bloque de tiles del jefe a resolución de píxel;
-- el gráfico de la puesta en escena en los jefes 2–10. Solo se ha visto el del mundo 1.
+**Cerrado también:**
+- E1C6 es una variable muerta del driver;
+- el jefe se mueve con posición lógica al píxel y dibujo ajustado a la rejilla de 8 px;
+- la puesta en escena (decoración apagada y jefe hecho de tiles) se cumple en los 10 jefes.
+
+Para el remake, el jefe puede moverse suave (sprite o rig propio); el salto de 8 px es una limitación del MSX, no parte del diseño.

@@ -60,7 +60,7 @@ Con guiones se hacen los arpegios, glissandos y percusiones, y las fanfarrias co
 - **Variables del driver** [C]:
   - **E1C5:** escalón de tempo de la música del combate (0, 1 o 2 según quede más de 1/4, entre 1/8 y 1/4 o menos de 1/8 de la vida del jefe; b03:BC9F). Con 1 o 2, b13:61F5 toma la duración de las notas de otra tabla (62E8 o 6300), más rápida.
   - **E1C9:** **música en pausa**. La orden 0xFD (b00:4F87) la pone a 1, guarda en E1B3–E1BA el estado del driver (E1C0, E1C1, E1B1, E1C2) y los registros 0, 1, 8, 9 y 10 del PSG (tono del canal A y los tres volúmenes). La orden 0xFE (b00:5014) la pone a 0 y lo restaura. Con E1C9 = 1 no se aplican ni el tempo de E1C5 ni el silencio de E1C6, así que el jingle de pausa suena normal.
-  - **E1C6:** si vale ≠ 0, b13:615E pone a 0 el volumen del canal. Solo se escribe al iniciar el sonido (b00:4DFC, a 0); no he encontrado quién la activa.
+  - **E1C6:** si vale ≠ 0, b13:615E pone a 0 el volumen del canal. **Variable muerta**: solo se escribe con 0, al iniciar el sonido (b00:4DFC) y en el borrado de RAM del arranque (b00:40B9). No hay punteros, IX/IY, escrituras de 16 bits ni copias en bloque que la alcancen [C]. Un watchpoint de valores ≠ 0 durante un combate, la pausa, el menú y la partida no saltó [O]. Seguramente es un resto del driver compartido con otros juegos de Konami [I].
 
 ## Canciones
 

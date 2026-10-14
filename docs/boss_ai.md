@@ -30,7 +30,7 @@ Leyenda: **[C]** código · **[I]** interpretación · **[O]** observado en open
 
 ## Cómo se dibuja el jefe [O][C]
 
-Comparando la VRAM de la sala del jefe del mundo 1 antes y durante el combate (`w1_boss_room` → `w1_boss_fight`):
+Comparando la VRAM de la sala del jefe antes y durante el combate (mundo 1: `w1_boss_room` → `w1_boss_fight`; luego los 10):
 - **El jefe se dibuja con tiles del fondo, no con sprites.** El esqueleto de dragón ocupa un bloque de 8 × 6 tiles
   de la tabla de nombres (VRAM 3800) con números del 0x5A al 0xE0. Al empezar el combate se recargan los patrones y
   colores de esos tiles en los tres tercios de pantalla (113 tiles cambiados por tercio) [O].
@@ -39,9 +39,27 @@ Comparando la VRAM de la sala del jefe del mundo 1 antes y durante el combate (`
   los proyectiles (sprites) [O].
 - **Consecuencia en la colisión:** como los números 0x5A–0xEF son ahora trozos del jefe, el umbral de sólido sube a
   0xF0 mientras E0D2 ≠ 0 (b00:554D). Si no, el cuerpo del jefe sería un muro [C+I].
-- Sin descifrar: cómo se mueve el bloque a resolución de píxel (varios jefes van a 1 px/f), si con patrones
-  desplazados o reescribiendo patrones cada frame.
-- Solo comprobado en el jefe 1. El resto comparte el umbral 0xF0, así que se supone igual [I].
+- **Movimiento a rejilla de 8 px** [O]. La posición lógica del jefe (E705 = y, E707 = x) va píxel a píxel, pero el
+  dibujo se ajusta a la rejilla: el jefe se redibuja en la tabla de nombres cuando x o y cruzan un múltiplo de 8, o
+  cuando cambia su fotograma de animación (que también es otro juego de nombres de tile). Durante el combate **los
+  patrones no cambian nunca**: 0 bytes en 240 frames en cada uno de los 10 jefes. Ejemplo: Big Lip avanza a 0,5 px/f y
+  se redibuja cada 16 frames, justo en x = 144, 152, 160…
+- **Comprobado en los 10 jefes** (`tools/openmsx/boss_all.py`; invocación con su palabra en su sala, desde `worldNN_entry`):
+
+  | Mundo | Jefe | Tiles de decoración apagados | Frames con redibujado en 239 |
+  |---|---|---|---|
+  | 1 | Bony Dragon | 56 | 18 |
+  | 2 | Sea Anemone | 62 | 0 (quieto; el agua sigue visible) |
+  | 3 | Elusive Dragon | 76 | 28 (en la captura está en su fase invisible) |
+  | 4 | Jump Slime | 78 | 21 |
+  | 5 | Donra | 85 | 53 |
+  | 6 | Arlyane | 49 | 24 |
+  | 7 | Big Lip | 66 | 15 |
+  | 8 | Monster | 81 | 23 (animación cada 8 frames) |
+  | 9 | King Dragon | 48 | 33 |
+  | 10 | Galious | 78 | 2 |
+
+  En todos el fondo queda negro, con muros, suelos, escaleras y, en el mundo 2, el agua.
 
 ## IA de los jefes — grupo A (jefes 1, 2, 3, 4 y 6) + tabla de vulnerabilidades
 
