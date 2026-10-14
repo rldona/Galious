@@ -43,6 +43,7 @@ Diseño: el juego obliga a alternar. Aphrodite es para el agua y los disparos m�
 | Alinearse con una escalera | x del jugador = x de la escalera + 8 [O] |
 | Salto | ver la tabla de personajes. Dos tablas de salto en b03:A951/A953 [C] |
 | Caída | se cae por los huecos de las plataformas. Caer a la sala de abajo es normal |
+| Colisión | caja de pies de 16 px (x − 8 … x + 7); sólido si tile ≥ 0xBA. Durante el combate con un jefe solo son sólidos F0–FF [C][O] |
 | Daño al tocar enemigos | retroceso y daño. Con las protecciones (Crown, Helmet, Armor, Triangle y Pitcher), los enemigos correspondientes no hacen daño por contacto [C] |
 
 ## Vitalidad, experiencia y vidas

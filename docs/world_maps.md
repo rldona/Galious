@@ -91,6 +91,26 @@ Con `--compare` (necesita Pillow) compara cada sala con su captura del emulador.
 
 **Paleta.** openMSX arranca con una máquina MSX2, cuya BIOS carga la paleta por defecto (3 bits por canal), así que las capturas usan esa paleta y `render_rooms.py` también.
 
+## Colisión de los tiles [C][O]
+
+`python3 tools/extract/collision.py` → `extracted/maps/collision/<mapa>.json`: 20 filas × 32 columnas por sala, incluidas las superposiciones (piedras, muros, estatuas, puertas, escaleras extra). La sala del jefe trae además la versión de combate.
+
+El juego decide por el **número de tile** del mapa de nombres en RAM (ED00 + fila·32 + columna):
+
+| Clase | Tiles | Código | Leyenda |
+|---|---|---|---|
+| sólido | ≥ **0xBA**; **≥ 0xF0** durante el combate con un jefe (E0D2 ≠ 0) | b00:554D pone el umbral en F020; b00:54FF–554C (jugador); b00:4DC8 (enemigos, > 0xB9) | `#` (y `j`: BA–EF, que en combate se atraviesan) |
+| escalera | **9A, 9B** | b03:AEE1: tile − 9A < 2 en los dos lados del jugador; lo alinea a múltiplo de 8 y consulta las escaleras extra (EC00) | `H` |
+| agua | **B6, B7** (E511 = 1) y **B8, B9** (E511 = 2, más profunda [I]) | b03:B028; en el mundo 5, salas 12 y 13, con el Oar la B6 no hunde | `~` / `w` |
+| fondo | el resto | — | `.` |
+
+- **Correspondencia de coordenadas:** la y del jugador (E505) es la de los pies: está de pie sobre la fila r cuando y = 8·r + 32. Su caja de pies abarca de x − 8 a x + 7.
+- **Validación** [O]: 91 caídas en 12 salas (castillo y mundos 1, 3, 5, 6 y 8). En todas, el jugador acaba apoyado en un tile que la cuadrícula marca como sólido.
+- **Sin tile propio:**
+  - la lava del mundo 8 no tiene clase propia: el daño debe de venir de los enemigos y generadores de esas salas [I];
+  - los pinchos son enemigos (0x31).
+- **Recuento en las 320 salas:** fondo 109 735 tiles, sólido 76 671, escalera 6 796, agua 2 406, agua profunda 3 432.
+
 ## Pendiente para completar la fase 3
 - Dibujar lo que el juego superpone a la sala: puertas, carteles de dioses y el emblema del jefe.
 - La animación de los tiles de agua y lava.

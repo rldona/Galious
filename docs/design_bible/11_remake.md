@@ -41,13 +41,13 @@ Las decisiones de este capítulo son **propuestas [I]**, no hechos del original.
 ## Datos para el importador de Unity
 
 Las herramientas de `tools/extract/` generan, **en local y desde la ROM del usuario**:
-- salas (`rooms.json`, `blocks.json`), enlaces, entidades (`entities.json`) y eventos de sala (`room_events.json`);
+- salas (`rooms.json`, `blocks.json`), **colisión por sala** (`collision/<mapa>.json`), enlaces, entidades (`entities.json`) y eventos de sala (`room_events.json`);
 - catálogos de enemigos y objetos (`enemies.json`, `items.json`);
 - jefes (`boss_index.json`), música (`score.json`) y efectos (`sfx.json`).
 
 Propuesta para la fase 5: un importador que lea esos JSON y cree los ScriptableObjects y Tilemaps de cada sala con **tiles y sprites nuevos**, mapeando cada tile original a una clase (sólido, fondo, escalera, agua, lava, puerta…). Así el remake reproduce la **disposición** del original sin distribuir sus gráficos.
 
 **Pendiente antes de importar:**
-- la clase de colisión de cada tile: hoy solo se sabe que tile ≥ 0xBA es sólido;
+- ~~la clase de colisión de cada tile~~: resuelta (sólido ≥ 0xBA, o ≥ 0xF0 con jefe; escalera 9A/9B; agua B6–B9). Cuadrícula por sala en `extracted/maps/collision/`; ver [world_maps.md](../world_maps.md#colisión-de-los-tiles-co);
 - los gráficos especiales de la sala del jefe y la animación del agua y la lava;
 - el sentido exacto de algunas variables (E1C5/E1C9, E500 = 4) y del objeto de sala de clase 3.
