@@ -83,6 +83,16 @@ namespace MazeOfKnight.Game
         public void Clear(RoomModel room, int col, int row, int width, int height) =>
             Fill(room, col, row, width, height, '.');
 
+        // Copia un rectángulo de una cuadrícula de la sala importada (por ejemplo, la colisión sin escaleras extra).
+        public void CopyFrom(RoomModel room, string[] source, int col, int row, int width, int height)
+        {
+            var grid = grids[room.id];
+            for (int r = row; r < row + height && r < grid.Length && r < source.Length; r++)
+                for (int c = col; c < col + width && c < 32; c++)
+                    if (r >= 0 && c >= 0)
+                        grid[r][c] = source[r][c];
+        }
+
         public void SetSolid(RoomModel room, int col, int row, int width, int height) =>
             Fill(room, col, row, width, height, '#');
 

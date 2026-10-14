@@ -82,7 +82,12 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
   - Tab cambiar de personaje;
   - Esc salir.
 
+## Hecho en el prototipo
+- Puertas de mundo y salidas al castillo; espada y piedras; agua, lava y vitalidad; puertas con llave.
+- Mecanismos de sala (`RoomObjects`): puertas giratorias (clases 3 y 4), muros que se cierran (5), paredes que se rompen (7) y escaleras extra que se retiran 60 s.
+
 ## Pendiente
-- Salidas al castillo y puertas de mundo (enlaces 0xF5–0xFE).
-- Agua y lava (daño), objetos de sala (puertas, muros), enemigos, espada y armas.
+- Enemigos, armas secundarias, objetos de mundo e inventario.
+- Salas de dios de los mundos y puerta del mundo 10.
+- Piedras que aparecen (clase 6, mundo 5) y muros que abren los eventos de sala (dependen de los enemigos).
 - Pipeline URP con renderer 2D (luces) y el estilo visual del remake.

@@ -11,7 +11,8 @@ Reglas leidas del codigo (el juego usa el numero de tile del mapa de nombres en 
 Incluye las superposiciones de la sala al cargar (piedras BA-BD, muros F0, estatuas F1-FC, columnas
 de puertas C5-D2, escaleras extra 9A 9B), tal como las pinta overlays.py.
 
-  collision.py            -> extracted/maps/collision/<mapa>.json (filas de texto por sala)
+  collision.py            -> extracted/maps/collision/<mapa>.json (filas de texto por sala; en las salas con
+                             escalera extra, tambien 'rows_without_ladders', para cuando se retira)
 Leyenda: '#' solido, 'H' escalera, '~' agua (B6 B7), 'L' lava (B8 B9), '.' fondo,
 'j' solido normal que es atravesable en combate de jefe (BA-EF).
 """
@@ -37,10 +38,14 @@ def tile_class(t, boss=False):
     return '.'
 
 
-def room_names(rom, e041, room, ent, castle):
+def room_names(rom, e041, room, ent, castle, ladders=True):
     _, tm = tilemap(rom, e041, room)
     names = bytearray(128) + bytes(sum(tm, []))
-    overlays.apply(names, overlays.stamps(rom, e041, room, ent, castle))
+    stamps = overlays.stamps(rom, e041, room, ent, castle)
+    if not ladders:                          # sin las escaleras extra (las que se retiran)
+        extra = {(l['x'] // 8, l['y'] // 8) for l in overlays.ladders(rom, e041, room)}
+        stamps = [s for s in stamps if (s[0], s[1]) not in extra]
+    overlays.apply(names, stamps)
     return names[128:]                       # 20 filas x 32 columnas de la sala
 
 
@@ -61,6 +66,10 @@ def main():
             names = room_names(rom, e041, room, ent[name][str(room)], castle)
             rows = [''.join(tile_class(names[32 * y + x]) for x in range(32)) for y in range(20)]
             rooms[room] = {'rows': rows}
+            if overlays.ladders(rom, e041, room):
+                bare = room_names(rom, e041, room, ent[name][str(room)], castle, ladders=False)
+                rooms[room]['rows_without_ladders'] = [''.join(tile_class(bare[32 * y + x]) for x in range(32))
+                                                       for y in range(20)]
             if room == boss_room:
                 rooms[room]['rows_boss_fight'] = [''.join(tile_class(names[32 * y + x], True) for x in range(32))
                                                   for y in range(20)]

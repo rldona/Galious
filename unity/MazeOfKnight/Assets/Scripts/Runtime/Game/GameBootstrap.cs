@@ -38,6 +38,8 @@ namespace MazeOfKnight.Game
         readonly HashSet<(string, int)> takenItems = new HashSet<(string, int)>();
         readonly HashSet<(string, int, int, int)> openedDoors = new HashSet<(string, int, int, int)>();
         KeyDoors keyDoors;
+        RoomObjects roomObjects;
+        readonly HashSet<(string, int, int, int)> roomObjectState = new HashSet<(string, int, int, int)>();
         readonly List<(RoomModel room, GameObject go)> visibleItems = new List<(RoomModel, GameObject)>();
         Rocks rocks;
         PlayerMotor motor;
@@ -72,7 +74,12 @@ namespace MazeOfKnight.Game
             keyDoors = new KeyDoors(name, World, openedDoors);
             keyDoors.Changed += d => mapView.ShowKeyDoor(d.room, d.x, d.y, d.height);
             keyDoors.Opened += d => Say(d.cls == 1 ? "Puerta abierta (se cerrará detrás)" : "Puerta abierta");
+            roomObjects = new RoomObjects(name, World, roomObjectState);
+            roomObjects.CellsChanged += (room, col, row, w, h) => mapView.RedrawCells(World, room, col, row, w, h);
+            roomObjects.Message += Say;
             mapView.Build(map, World);
+            foreach (var d in roomObjects.RevolvingDoors)
+                mapView.ShowRevolvingDoor(d.room, d.x, d.y);
             foreach (var r in rocks.All)
                 mapView.ShowRock(r.room, r.x, r.y, !r.broken);
             foreach (var d in keyDoors.All)
@@ -117,7 +124,11 @@ namespace MazeOfKnight.Game
         void AfterTick()
         {
             if (motor.AttackStartedThisTick)
+            {
                 rocks.Strike(motor, World);
+                roomObjects.Strike(motor, Collected);
+            }
+            roomObjects.Tick(motor, Collected);
             int keysBefore = Keys;
             Keys = keyDoors.Tick(motor, Keys);
             if (Keys != keysBefore)

@@ -27,7 +27,8 @@ namespace MazeOfKnight.Data
     {
         public int x;
         public int y;
-        public int height;
+        public int height;      // en tiles
+        public int mode;        // se retira al subirla (1), al bajarla (2) o en los dos casos (3)
     }
 
     [Serializable]
@@ -44,6 +45,7 @@ namespace MazeOfKnight.Data
         public int right = -1;
         public string[] collision = Array.Empty<string>();      // 20 filas de 32 caracteres, fila 0 arriba
         public string[] collisionBoss = Array.Empty<string>();  // solo en la sala del jefe, durante el combate
+        public string[] collisionNoLadders = Array.Empty<string>(); // sin las escaleras extra (las que se retiran)
         public EntityJson[] spawns = Array.Empty<EntityJson>();
         public EntityJson[] objects = Array.Empty<EntityJson>();
         public bool hasItem;

@@ -121,6 +121,16 @@ Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibbl
 - **Castillo (clase 1):** se vuelve a cerrar en cuanto pasas (vuelve a 3 tiles y a la fase 0), así que **cada paso cuesta una llave**. Funciona en los dos sentidos.
 - **Mundos (clase 2):** tras pasar, su entrada en EA30 queda a 0. La tomo como **abierta para siempre** [I]: la vuelta desde el otro lado no se pudo medir, porque el arrastre sacó al jugador de la sala.
 
+### Puertas giratorias, muros que se cierran y paredes que se rompen, medidos en openMSX [O]
+
+`tools/openmsx/room_object_measure.py`. Datos en `logs/omsx/room_object_measure.json`.
+- **Puertas giratorias (clases 3 y 4):** empujar **30 ticks** pegado a la puerta (x − 8 o x + 16, y + 0x18). Luego la puerta gira (4 pasos de 6 ticks) y arrastra al jugador (E500 = 7) **24 px a 1 px/tick** hasta el otro lado. La puerta sigue cerrada después.
+  - Clase 3 (mundo 2, sala 6, tipo 0x03): pasa hacia la izquierda; empujando hacia la derecha no ocurre nada.
+  - Clase 4 (mundo 1, sala 7): Popolon pasa en los dos sentidos; **Aphrodite no la mueve** sin el Bread & Water.
+- **Muro que se cierra (clase 5; castillo, sala 48, columna en x = 160):** anota tu sentido cuando tu centro pasa la columna (x = 168). Empieza a cerrarse cuando estás entero al otro lado (x = 176). Crece **desde arriba, 1 tile cada 15 ticks**, hasta 3 (+4 de su entrada en EAA0). La captura `logs/omsx/wall5_after.png` lo muestra.
+  - Para medirlo hubo que forzar la invulnerabilidad (E518 = 1): los enemigos de la sala echaban atrás al jugador (E500 = 4).
+- **Pared que se rompe (clase 7; castillo, sala 97, tipo 0x37):** Popolon la rompe con **3 espadazos**, uno por ataque. Aphrodite sin el Pendant no le quita nada.
+
 **Contraste con el mapa de mars2000you** (marcas N, "muro temporal que aparece después de pasar"): 14 de sus 16 marcas N caen en salas con objeto de clase 5. Sus marcas T, "escalera que puede desaparecer", caen en 12 de las 13 salas de la tabla de escaleras extra. Sus marcas FY, puntos donde aparece un hada, están en las salas 25, 91 y 110 del castillo (ver "Hadas").
 
 ## Objetos que aparecen con una condición [C][O]

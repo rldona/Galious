@@ -20,6 +20,7 @@ namespace MazeOfKnight.Game
         public TileBase rock;
         public TileBase door;
         public TileBase keyDoor;
+        public TileBase revolvingDoor;
 
         Grid grid;
         Tilemap front, rocks, keyDoors;
@@ -62,6 +63,19 @@ namespace MazeOfKnight.Game
             Fill(keyDoors, room, x, y, 1, 3, null);
             Fill(keyDoors, room, x, y, 1, height, keyDoor);
         }
+
+        // Vuelve a dibujar la capa de colisión de un rectángulo (en tiles) a partir del estado actual del mundo.
+        public void RedrawCells(RoomWorld world, RoomModel room, int col, int row, int width, int height)
+        {
+            for (int r = row; r < row + height; r++)
+                for (int c = col; c < col + width; c++)
+                    if (r >= 0 && r < RoomCoords.Rows && c >= 0 && c < RoomCoords.Cols)
+                        front.SetTile(RoomCoords.Cell(room, c, r),
+                            TileFor(world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8)));
+        }
+
+        // Puerta giratoria: columna de 1 x 3 tiles con su propio color, encima de la colisión.
+        public void ShowRevolvingDoor(RoomModel room, int x, int y) => Fill(keyDoors, room, x, y, 1, 3, revolvingDoor);
 
         public void ShowRock(RoomModel room, int x, int y, bool visible) =>
             Fill(rocks, room, x, y, 2, 2, visible ? rock : null);
