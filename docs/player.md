@@ -18,8 +18,8 @@ Fuera de esa rutina se leen otras teclas:
 - **F1**: menú de objetos (estado 11).
 - **F2**: pausa (estado 9).
 - **L** en el título: contraseña (estado 18).
-- **F5**: lo lee b01:3EF3 (E032); no se ha visto qué hace.
-- **CTRL**: lo lee b02:5BD8 (E5D5); no se ha visto qué hace.
+- **F5**: continuar partida, si se activó con ZEUS [G]. Lo lee b01:3EF3 (E032) [C].
+- **CTRL**: usar la Biblia, que congela a los enemigos (b02:9BB6) [O*].
 
 ## Acciones (las mismas para los dos personajes)
 
@@ -29,10 +29,13 @@ Fuera de esa rutina se leen otras teclas:
 - **Espada.** Rompe piedras (15 de vida) y daña enemigos. El objeto 0x25 suma 1 de daño por golpe.
 - **Arma secundaria** con M: gasta munición. Con la flecha, cada disparo resta 1 al primer contador del marcador (E046, que son las **flechas**) y crea un proyectil en E540 y siguientes [O*]. Hay seis armas:
   - las cuatro que se recogen en el castillo: 1 flecha, 2 flecha doble, 3 fuego rodante y 4 fuego;
-  - la 5 y la 6, que tienen casos propios en el código (b03:A72B y AD46). La 6 activa E517. Están sin identificar.
+  - la 5, la **mina** (b03:A72B), y la 6, la **lupa** (b03:AD46, activa E517). Las dos se compran en santuarios; con la lupa, M delante de una lápida revela la palabra del jefe [G].
 - **Entrar** por puertas y objetos de sala con ↓.
 - **Usar objetos y cambiar de personaje** en el menú de objetos (F1).
-- **Pronunciar palabras.** En la sala del jefe de cada mundo se escribe con el teclado la palabra de ese mundo (YOMAR, ELOHIM…) y aparece el jefe (estado 15; ver `state_machine.md`). Es lo más parecido a un **hechizo** que tiene el juego. No hay magia de ataque: el daño a distancia sale de las armas secundarias.
+- **Pronunciar palabras (hechizos).** En la sala del jefe de cada mundo se escribe con el teclado la palabra de ese mundo (YOMAR, ELOHIM…) y aparece el jefe (estado 15; ver `state_machine.md`). La palabra se descubre leyendo la lápida del mundo con la lupa [G]. No hay magia de ataque: el daño a distancia sale de las armas secundarias.
+- **Palabras secretas fuera de esa sala** [G]:
+  - UMBRELLA, con la daga, elimina a los murciélagos;
+  - ZEUS, escrita en pausa, activa la continuación con F5. F5 es la tecla que lee b01:3EF3 (E032).
 
 ## Los dos personajes
 
@@ -46,7 +49,8 @@ Fuera de esa rutina se leen otras teclas:
 | Altura máxima de salto | **54 px** | 42 px |
 | Tabla del salto | b03:A951, 0x1A | b03:A953, 0x18 |
 | En el agua | pierde 1 de vitalidad cada ~0,15 s y se ahoga en poco más de 1 s | pierde 1 cada 8–10 s |
-| Puertas | necesita el objeto 0x23 para la puerta 5 y el 0x0D para la 7 (b02:9A25) | — |
+| Puertas (b02:9A25) [C] | necesita el Necklace (0x0D) para el mundo 7 | necesita la Conch Shell (0x23) para el mundo 5 |
+| Según la guía [G] | 2 flechas y 2 minas a la vez; el salto depende de cuánto mantienes ↑; empuja piedras y cruza puertas giratorias | 3 flechas y 3 minas; salto fijo |
 
 Datos de la tabla:
 - **Salto** [C][O]: medido manteniendo ↑, la mayor altura en varias salas.
@@ -59,4 +63,4 @@ Datos de la tabla:
 
 - Las otras ramas por personaje del banco 3 (A9C1, AE9A, B06D, B301, B337) y las del banco 2 (904E, 9089, 96BA): posibles diferencias de alcance, daño o defensa.
 - Qué hacen F5 y CTRL.
-- Las armas secundarias 5 y 6.
+- Contrastar en el código lo que dice la guía [G]: número de flechas y minas por personaje, y salto variable de Popolon.
