@@ -57,6 +57,14 @@ namespace MazeOfKnight.Game
         public const int KeyDoorCarryTicks = 12;
         public const int KeyDoorCarrySpeed = 2;
 
+        // Golpe de un enemigo (medido con el esqueleto, castillo sala 104; código b03:A460): retroceso alejándose del
+        // enemigo a 4 px/tick durante 6 ticks con un arco de -1 -1 0 0 +1 +1 px (y luego cae si no hay suelo);
+        // invulnerable 42 ticks.
+        public const int KnockbackSpeed = 4;
+        public static readonly int[] KnockbackDy = { -1, -1, 0, 0, 1, 1 };
+        public const int HurtInvulnerableTicks = 42;
+        public const int EnemyHitHeight = 16;      // alto del jugador para el contacto con enemigos
+
         public const int RoomWidthPx = 256;
         public const int RoomTopPx = 32;           // la sala empieza bajo el marcador
         public const int RoomBottomPx = RoomTopPx + 160;

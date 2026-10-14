@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MazeOfKnight.Data;
+using MazeOfKnight.Game.Enemies;
 using UnityEngine;
 
 namespace MazeOfKnight.Game
@@ -21,6 +22,7 @@ namespace MazeOfKnight.Game
         public MapView mapView;
         public PlayerController player;
         public Sprite itemSprite;
+        public Sprite enemySprite;
 
         public RoomWorld World { get; private set; }
         public string Message { get; private set; } = "";
@@ -43,6 +45,9 @@ namespace MazeOfKnight.Game
         readonly List<(RoomModel room, GameObject go)> visibleItems = new List<(RoomModel, GameObject)>();
         Rocks rocks;
         PlayerMotor motor;
+        public EnemySystem Enemies { get; private set; }
+        readonly Dictionary<Enemy, SpriteRenderer> enemyViews = new Dictionary<Enemy, SpriteRenderer>();
+        public int HurtTicks { get; private set; }   // invulnerable tras un golpe (parpadea)
         float messageUntil;
 
         void Start()
@@ -55,6 +60,10 @@ namespace MazeOfKnight.Game
                 enabled = false;
                 return;
             }
+            var catalog = Resources.Load<EnemyCatalog>("Enemies");
+            Enemies = new EnemySystem(catalog != null ? catalog.enemies : new List<EnemyInfo>(), System.Environment.TickCount);
+            Enemies.Spawned += ShowEnemy;
+            Enemies.Killed += e => { if (enemyViews.TryGetValue(e, out var v)) v.enabled = false; Say("Enemigo derrotado"); };
             LoadMap(mapName);
             motor = new PlayerMotor(World, World.Room(startRoom), startX, startY) { Character = startCharacter };
             motor.DoorEntered += EnterWorld;
@@ -123,6 +132,19 @@ namespace MazeOfKnight.Game
 
         void AfterTick()
         {
+            if (Enemies.Room != motor.Room)
+                EnterEnemyRoom();
+            Enemies.Tick();
+            if (motor.AttackStartedThisTick)
+                Enemies.Strike(motor, Collected);
+            if (HurtTicks > 0)
+                HurtTicks--;
+            else if (motor.State != MotorState.Knockback && motor.State != MotorState.Carried)
+            {
+                var enemy = Enemies.Touching(motor, Collected);
+                if (enemy != null)
+                    HurtBy(enemy);
+            }
             if (motor.AttackStartedThisTick)
             {
                 rocks.Strike(motor, World);
@@ -150,6 +172,71 @@ namespace MazeOfKnight.Game
                 visibleItems.RemoveAt(i);
                 Say(PickUp(room.item.type));
             }
+        }
+
+        // Golpe de un enemigo (medido, docs/player.md): daño de la tabla b04:64E5, retroceso alejándose de él e
+        // invulnerabilidad de 42 ticks.
+        void HurtBy(Enemy enemy)
+        {
+            int c = (int)motor.Character;
+            Vitality[c] -= enemy.Damage;
+            int dir = enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1;
+            motor.Knockback(dir);
+            HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
+            Say($"-{enemy.Damage} (0x{enemy.Type:X2})");
+            if (Vitality[c] <= 0)
+                LoseLife();
+        }
+
+        void EnterEnemyRoom()
+        {
+            foreach (var v in enemyViews.Values)
+                if (v != null) Destroy(v.gameObject);
+            enemyViews.Clear();
+            Enemies.EnterRoom(World, motor.Room, motor);
+        }
+
+        static Color EnemyColor(int type)
+        {
+            switch (type)
+            {
+                case 0x0E: return new Color(0.75f, 0.45f, 0.95f);   // murciélago
+                case 0x25: return new Color(0.92f, 0.92f, 0.85f);   // esqueleto
+                case 0x31: return new Color(0.80f, 0.80f, 0.95f);   // pinchos
+                case 0x18: return new Color(0.95f, 0.55f, 0.25f);   // rodador
+                case 0x34: return new Color(0.60f, 0.30f, 0.30f);   // bloque
+                case 0x2E: return new Color(0.40f, 0.90f, 0.40f);   // brote
+                default: return Color.red;
+            }
+        }
+
+        void ShowEnemy(Enemy e)
+        {
+            var go = new GameObject($"Enemigo 0x{e.Type:X2}");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = enemySprite;
+            sr.color = EnemyColor(e.Type);
+            sr.sortingOrder = 8;
+            enemyViews[e] = sr;
+        }
+
+        void LateUpdate()
+        {
+            if (motor == null)
+                return;
+            foreach (var (e, sr) in enemyViews.Select(kv => (kv.Key, kv.Value)))
+            {
+                if (sr == null) continue;
+                sr.enabled = e.Alive && e.Visible;
+                var (x0, y0, x1, y1) = e.Box();
+                var bottomLeft = RoomCoords.PixelToWorld(e.Room, (int)x0, (int)y1);
+                sr.transform.position = new Vector3(bottomLeft.x, bottomLeft.y, 0);
+                sr.transform.localScale = new Vector3((x1 - x0) / 16f, Mathf.Max(0.05f, (y1 - y0) / 16f), 1);
+                sr.flipX = e.FacingLeft;
+            }
+            // Parpadeo del jugador mientras es invulnerable.
+            if (player.body != null)
+                player.body.enabled = HurtTicks <= 0 || (HurtTicks / 2) % 2 == 0;
         }
 
         // Recursos (docs/items_enemies.md): 0x2D +50 flechas, 0x2E +10 monedas, 0x2F +2 llaves.

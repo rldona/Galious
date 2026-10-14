@@ -10,7 +10,7 @@ JsonUtility, sin diccionarios):
   - enemigos, objetos de sala, objeto, piedras y escaleras extra (entities.py);
   - puertas de mundo y salas de dioses del castillo.
 
-  unity_bundle.py   -> extracted/unity/<mapa>.json
+  unity_bundle.py   -> extracted/unity/<mapa>.json y extracted/unity/enemies.json (catalogo de enemigos)
 
 Todo sale de la ROM del usuario y se queda en local: extracted/ no se versiona.
 
@@ -18,7 +18,9 @@ Enlaces: -1 = sin salida (255 en la ROM); 0xF5-0xFE = salida al castillo desde l
 (ver world_maps.md). En la rejilla, y crece hacia arriba (la ROM la guarda hacia abajo).
 """
 import json
-from galious_rom import ROOT
+from galious_rom import Rom, ROOT
+
+DAMAGE_TABLE = 0x64E5   # b04: dano por contacto segun el tipo (b03:B39A; el Hat Helmet lo reduce a la mitad)
 
 MAPS = ['castle'] + [f'world{k:02d}' for k in range(1, 11)]
 DIRS = ('up', 'down', 'left', 'right')
@@ -88,6 +90,15 @@ def main():
         total += len(rooms)
         print(f'{name}: {len(rooms)} salas')
     print(f'total: {total} salas -> {out_dir}')
+    rom = Rom()
+    cat = json.loads((ROOT / 'extracted' / 'entities' / 'enemies.json').read_text())
+    enemies = [{'type': int(k, 16), 'hp': v['hp'], 'invulnerable': v['invulnerable'],
+                'damage': rom.byte(DAMAGE_TABLE + int(k, 16), 1),
+                'immuneItem': int(v['immune_with_item'], 16) if isinstance(v.get('immune_with_item'), str)
+                else (v.get('immune_with_item') or 0)}
+               for k, v in sorted(cat.items())]
+    (out_dir / 'enemies.json').write_text(json.dumps({'enemies': enemies}))
+    print(f'catalogo: {len(enemies)} tipos de enemigo')
 
 
 if __name__ == '__main__':

@@ -39,6 +39,12 @@ Los tres tipos que en la primera medición salían "quietos" sí se mueven como 
 - **0x2A**, en el mundo 2, sala 4: alterna oculto y visible (IX+2 = 00 ↔ F0) y reaparece en otro sitio, con x entre 48 y 176 e y entre 40 y 168. Se teletransporta.
 - **Confirmado:** la IA de cada enemigo se ejecuta **uno de cada dos frames** (contado con breakpoints: 30 ejecuciones por segundo). Hay que tenerlo en cuenta al pasar a la remasterización las velocidades y los tiempos de las fichas, que están en ticks de IA.
 
+## Daño por contacto [C][O]
+
+Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su tamaño: 1, 2, 4, 8; con el Hat Helmet, E088, se divide entre 2 salvo si es 1). Comprobado con el esqueleto: quita 3 [O].
+
+0x01: 8 · 0x02: 5 · 0x03: 1 · 0x04: 2 · 0x05: 7 · 0x07: 3 · 0x0A: 3 · 0x0B: 10 · 0x0C: 7 · 0x0E: 1 · 0x0F: 5 · 0x10: 2 · 0x11: 2 · 0x12: 4 · 0x13: 6 · 0x14: 6 · 0x15: 10 · 0x16: 8 · 0x17: 4 · 0x18: 2 · 0x19: 1 · 0x1F: 4 · 0x20: 3 · 0x22: 8 · 0x23: 0 · 0x24: 3 · 0x25: 3 · 0x26: 3 · 0x27: 8 · 0x28: 1 · 0x29: 5 · 0x2A: 1 · 0x2B: 10 · 0x2C: 2 · 0x2D: 3 · 0x2E: 2 · 0x2F: 1 · 0x31: 2 · 0x32: 0 · 0x34: 6 · 0x36: 6 · 0x3A: 0 · 0x3C: 5 · 0x40: 12 · 0x42: 20 · 0x43: 10 · 0x49: 8 · 0x4C: 7 · 0x4E: 0 · 0x50: 0 · 0x51: 0 · 0x64: 2 · 0x69: 7
+
 ## IA de enemigos — grupo G1 (0x01 0x02 0x03 0x04 0x05 0x07 0x0A 0x0B 0x0C 0x0E 0x0F 0x10 0x11 0x12)
 
 ### Notas previas (afectan a todas las fichas)

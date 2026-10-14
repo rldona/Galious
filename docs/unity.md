@@ -85,9 +85,10 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
 ## Hecho en el prototipo
 - Puertas de mundo y salidas al castillo; espada y piedras; agua, lava y vitalidad; puertas con llave.
 - Mecanismos de sala (`RoomObjects`): puertas giratorias (clases 3 y 4), muros que se cierran (5), paredes que se rompen (7) y escaleras extra que se retiran 60 s.
+- Enemigos (`Enemies/`): combate medido (daño por tipo, retroceso, invulnerabilidad, espada) y 6 tipos: 0x0E murciélago, 0x25 esqueleto, 0x31 pinchos, 0x18 rodador, 0x34 bloque, 0x2E brote (≈45 % de los generadores). El resto aún no aparece; la ayuda en pantalla dice cuántos faltan en la sala.
 
 ## Pendiente
-- Enemigos, armas secundarias, objetos de mundo e inventario.
+- Los otros 47 tipos de enemigo, el botín al matarlos y los generadores periódicos; armas secundarias, objetos de mundo e inventario.
 - Salas de dios de los mundos y puerta del mundo 10.
 - Piedras que aparecen (clase 6, mundo 5) y muros que abren los eventos de sala (dependen de los enemigos).
 - Pipeline URP con renderer 2D (luces) y el estilo visual del remake.

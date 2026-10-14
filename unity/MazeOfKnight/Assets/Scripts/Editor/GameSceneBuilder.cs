@@ -16,6 +16,7 @@ namespace MazeOfKnight.EditorTools
         const string PlayerSpritePath = "Assets/Art/Placeholder/player.png";
         const string SwordSpritePath = "Assets/Art/Placeholder/sword.png";
         const string ItemSpritePath = "Assets/Art/Placeholder/item.png";
+        const string EnemySpritePath = "Assets/Art/Placeholder/enemy.png";
 
         [MenuItem("Maze of Knight/Crear escena de juego", false, 20)]
         public static void Build()
@@ -23,6 +24,9 @@ namespace MazeOfKnight.EditorTools
             GaliousImporter.EnsurePlaceholderTiles();
             var playerSprite = EnsurePlayerSprite();
             EnsureSprite(SwordSpritePath, 11, 2, SpriteAlignment.Center, (x, y) => Color.white);
+            // Enemigo: cuadrado blanco de 16 x 16 con borde, pivote abajo a la izquierda (se escala a su caja).
+            EnsureSprite(EnemySpritePath, 16, 16, SpriteAlignment.BottomLeft,
+                (x, y) => x == 0 || y == 0 || x == 15 || y == 15 ? new Color(0.35f, 0.35f, 0.35f) : Color.white);
             EnsureSprite(ItemSpritePath, 12, 12, SpriteAlignment.BottomCenter,
                 (x, y) => System.Math.Abs(x - 5.5f) + System.Math.Abs(y - 5.5f) <= 6 ? new Color(1f, 0.85f, 0.2f) : new Color(0, 0, 0, 0));
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
@@ -33,6 +37,7 @@ namespace MazeOfKnight.EditorTools
             playerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlayerSpritePath);
             var swordSprite = AssetDatabase.LoadAssetAtPath<Sprite>(SwordSpritePath);
             var itemSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ItemSpritePath);
+            var enemySprite = AssetDatabase.LoadAssetAtPath<Sprite>(EnemySpritePath);
 
             var camGo = new GameObject("Main Camera");
             camGo.tag = "MainCamera";
@@ -76,6 +81,7 @@ namespace MazeOfKnight.EditorTools
             bootstrap.mapView = mapView;
             bootstrap.player = player;
             bootstrap.itemSprite = itemSprite;
+            bootstrap.enemySprite = enemySprite;
             var hud = game.AddComponent<DebugHud>();
             hud.bootstrap = bootstrap;
             hud.player = player;

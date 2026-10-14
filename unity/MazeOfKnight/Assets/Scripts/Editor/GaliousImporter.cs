@@ -44,7 +44,8 @@ namespace MazeOfKnight.EditorTools
                 return;
             }
             EnsurePlaceholderTiles();
-            var files = Directory.GetFiles(BundleDir, "*.json").OrderBy(f => f).ToArray();
+            var files = Directory.GetFiles(BundleDir, "*.json").Where(f => Path.GetFileName(f) != "enemies.json")
+                .OrderBy(f => f).ToArray();
             // Las carpetas, antes de StartAssetEditing: dentro, IsValidFolder no ve las recién creadas y
             // CreateFolder acabaría haciendo duplicados ("Generated 1"...).
             EnsureFolder($"{MapsRoot}");
@@ -65,6 +66,7 @@ namespace MazeOfKnight.EditorTools
             }
             foreach (var file in files)
                 BuildOverviewScene(Path.GetFileNameWithoutExtension(file));
+            ImportEnemyCatalog();
             Debug.Log($"[GaliousImporter] {files.Length} mapas, {rooms} salas importadas");
             if (!Application.isBatchMode)
                 OpenMap("castle");
@@ -128,6 +130,19 @@ namespace MazeOfKnight.EditorTools
             }
             EditorUtility.SetDirty(map);
             return bundle.rooms.Length;
+        }
+
+        // Catálogo de enemigos en Resources/Enemies.asset.
+        static void ImportEnemyCatalog()
+        {
+            string json = Path.Combine(BundleDir, "enemies.json");
+            if (!File.Exists(json))
+                return;
+            var data = JsonUtility.FromJson<EnemyCatalogJson>(File.ReadAllText(json));
+            var catalog = LoadOrCreate<EnemyCatalog>($"{GeneratedRoot}/Resources/Enemies.asset");
+            catalog.enemies = data.enemies.ToList();
+            EditorUtility.SetDirty(catalog);
+            AssetDatabase.SaveAssets();
         }
 
         static T LoadOrCreate<T>(string path) where T : ScriptableObject

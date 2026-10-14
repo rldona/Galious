@@ -1,6 +1,7 @@
 using System.Linq;
 using MazeOfKnight.Data;
 using MazeOfKnight.Game;
+using MazeOfKnight.Game.Enemies;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -105,6 +106,40 @@ namespace MazeOfKnight.Tests
             }
             Assert.Greater(n, 0);
             Assert.IsEmpty(stuck, string.Join("; ", stuck));
+        }
+
+        [Test]
+        public void ImplementedEnemiesRunInEveryRoom()
+        {
+            var catalog = Resources.Load<EnemyCatalog>("Enemies");
+            if (catalog == null)
+                Assert.Ignore("Sin catálogo de enemigos importado");
+            int rooms = 0, enemies = 0;
+            var problems = new System.Collections.Generic.List<string>();
+            foreach (var name in new[] { "castle" }.Concat(Enumerable.Range(1, 10).Select(OriginalWorlds.MapName)))
+            {
+                var world = World(Load(name));
+                foreach (var room in world.Rooms.Where(r => r.spawns.Any(s => EnemySystem.Implemented(s.type))))
+                {
+                    rooms++;
+                    var motor = new PlayerMotor(world, room, 128, 120);
+                    var sys = new EnemySystem(catalog.enemies, room.id);
+                    sys.EnterRoom(world, room, motor);
+                    enemies += sys.Enemies.Count;
+                    for (int t = 0; t < 600; t++)
+                        sys.Tick();
+                    foreach (var e in sys.Enemies.Where(e => e is Skeleton || e is Roller))
+                    {
+                        if (e.X < -1 || e.X + e.Width > 257 || e.Y < 31 || e.Y + e.Height > 193)
+                            problems.Add($"{name} {room.id} 0x{e.Type:X2} fuera de la sala ({e.X:0},{e.Y:0})");
+                        else if (world.Solid(room, (int)e.X + 4, (int)e.Y + 8))
+                            problems.Add($"{name} {room.id} 0x{e.Type:X2} dentro de un muro ({e.X:0},{e.Y:0})");
+                    }
+                }
+            }
+            Assert.Greater(enemies, 400);
+            Assert.IsEmpty(problems, string.Join("; ", problems.Take(15)));
+            TestContext.WriteLine($"{rooms} salas, {enemies} enemigos simulados 600 ticks");
         }
 
         [Test]

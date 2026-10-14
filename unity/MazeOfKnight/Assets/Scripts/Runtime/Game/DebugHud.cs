@@ -22,6 +22,7 @@ namespace MazeOfKnight.Game
                 $"{bootstrap.mapName}  sala {m.Room.id}   x {m.X}  y {m.Y}   {m.State}   {m.Character}" +
                 (m.InLiquid ? $"   en {(m.Liquid == MazeOfKnight.Data.TileClass.Lava ? "lava" : "agua")}" : "") +
                 (bootstrap.Collected.Count > 0 ? $"   objetos: {bootstrap.Collected.Count}" : "") +
+                (bootstrap.Enemies != null && bootstrap.Enemies.Missing > 0 ? $"   enemigos sin implementar aquí: {bootstrap.Enemies.Missing}" : "") +
                 (m.Room.doorWorld > 0 ? $"   puerta al mundo {m.Room.doorWorld}" : "") +
                 (bootstrap.Message != "" ? $"\n{bootstrap.Message}" : "");
             GUI.Label(new Rect(8, 4, Screen.width - 16, style.fontSize * 6f), text, style);

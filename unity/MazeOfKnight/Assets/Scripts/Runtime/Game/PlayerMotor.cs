@@ -5,7 +5,7 @@ namespace MazeOfKnight.Game
 {
     public enum Character { Aphrodite = 0, Popolon = 1 }
 
-    public enum MotorState { Ground, JumpPrep, Jump, Fall, Ladder, Carried }
+    public enum MotorState { Ground, JumpPrep, Jump, Fall, Ladder, Carried, Knockback }
 
     public struct MotorInput
     {
@@ -38,6 +38,9 @@ namespace MazeOfKnight.Game
         public TileClass Liquid { get; private set; }
         public bool InLiquid => Liquid == TileClass.Water || Liquid == TileClass.Lava;
         int vAcc, hAcc, liquidSub;
+
+        // Retroceso tras un golpe (E500 = 4).
+        int knockDir, knockStep;
 
         // Arrastrado por una puerta: espera y luego avanza sin colisión.
         int carryWait, carryTicks, carryDir, carrySpeed;
@@ -89,6 +92,16 @@ namespace MazeOfKnight.Game
             AttackTicks = 0;
         }
 
+        // Golpe de un enemigo: sale despedido alejándose de él (dir = -1 izquierda, 1 derecha).
+        public void Knockback(int dir)
+        {
+            State = MotorState.Knockback;
+            knockDir = dir;
+            knockStep = 0;
+            fallIndex = P.LedgeFallStart;
+            AttackTicks = 0;
+        }
+
         public void Tick(MotorInput input)
         {
             bool upPressed = input.Up && !upHeld, downPressed = input.Down && !downHeld;
@@ -120,6 +133,7 @@ namespace MazeOfKnight.Game
                 case MotorState.Fall: TickFall(input); break;
                 case MotorState.Ladder: TickLadder(input); break;
                 case MotorState.Carried: TickCarried(); break;
+                case MotorState.Knockback: TickKnockback(); break;
             }
             CrossRoomEdges();
         }
@@ -293,6 +307,33 @@ namespace MazeOfKnight.Game
             FacingLeft
                 ? (X - 1 - P.SwordReach, X - 1 - P.SwordFrom, Y - P.SwordTop, Y - P.SwordBottom)
                 : (X + P.SwordFrom, X + P.SwordReach, Y - P.SwordTop, Y - P.SwordBottom);
+
+        void TickKnockback()
+        {
+            for (int i = 0; i < P.KnockbackSpeed; i++)
+            {
+                if (BodyBlockedAt(X + knockDir))
+                    break;
+                X += knockDir;
+            }
+            if (knockStep < P.KnockbackDy.Length)
+            {
+                int dy = P.KnockbackDy[knockStep++];
+                if (dy < 0 && !HeadBlocked(Y + dy))
+                    Y += dy;
+                else if (dy > 0 && !Supported())
+                    Y += dy;
+                if (knockStep == P.KnockbackDy.Length && Supported())
+                    State = MotorState.Ground;
+                return;
+            }
+            // Sin suelo al acabar el arco: sigue cayendo (con el empuje horizontal) hasta aterrizar.
+            int fall = P.FallTable[System.Math.Min(fallIndex++, P.FallTable.Length - 1)];
+            for (int i = 0; i < fall && !Supported(); i++)
+                Y++;
+            if (Supported())
+                State = MotorState.Ground;
+        }
 
         void TickCarried()
         {

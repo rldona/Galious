@@ -106,6 +106,16 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 | Daño | 1 unidad cada **4 ticks**: Popolon en el agua y los dos en la lava. Aphrodite en el agua, 1 cada **255 ticks** (contador E524). Con 8 unidades, Popolon se ahoga en ~1,1 s |
 | Muerte | al llegar a 0: E500 = 5 y estado 6 (vida perdida) |
 
+**Golpes de los enemigos** [O][C] (`tools/openmsx/contact_measure.py` y `hitbox_measure.py`, con el esqueleto 0x25 del castillo, sala 104):
+
+| | Valor |
+|---|---|
+| Daño | por tipo de enemigo, de la tabla **b04:64E5 + tipo** (b03:B39A); el 0x19 usa otra según su tamaño (1, 2, 4, 8). Con el Hat Helmet (E088) se divide entre 2, salvo si es 1 [C]. El esqueleto quita 3 [O] |
+| Retroceso (E500 = 4) | **6 ticks a 4 px/tick** alejándose del enemigo, con un arco de −1 −1 0 0 +1 +1 px; acaba de pie [O] |
+| Invulnerabilidad | E518 = 1 durante **42 ticks** (84 frames) tras el golpe [O] |
+| Caja de contacto | horizontal: la del jugador (x − 8 … x + 7) contra la del enemigo (el esqueleto, de dos sprites, mide 32 px). Vertical: daña con los pies entre 2 y 30 px por debajo de la y del enemigo (el jugador cuenta como 16 px de alto) [O] |
+| Espada contra enemigos | 1 de vida por ataque (2 con el Saber), desde 18 px (x + 18), igual que con las piedras [O][C] |
+
 Estados de E500 vistos: 0 de pie o andando, 1 salto, 2 caída, 3 escalera, 4 retroceso, 7 arrastrado por una puerta giratoria.
 
 ## Pendiente
