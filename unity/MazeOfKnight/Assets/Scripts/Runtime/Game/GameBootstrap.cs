@@ -61,8 +61,9 @@ namespace MazeOfKnight.Game
                 return;
             }
             var catalog = Resources.Load<EnemyCatalog>("Enemies");
-            Enemies = new EnemySystem(catalog != null ? catalog.enemies : new List<EnemyInfo>(), System.Environment.TickCount);
+            Enemies = new EnemySystem(catalog != null ? catalog.enemies : new List<EnemyInfo>(), System.Environment.TickCount, catalog != null ? catalog.loot : null);
             Enemies.Spawned += ShowEnemy;
+            Enemies.HasItem = t => Collected.Contains(t);
             Enemies.Killed += e => { if (enemyViews.TryGetValue(e, out var v)) v.enabled = false; Say("Enemigo derrotado"); };
             LoadMap(mapName);
             motor = new PlayerMotor(World, World.Room(startRoom), startX, startY) { Character = startCharacter };
@@ -76,6 +77,7 @@ namespace MazeOfKnight.Game
         {
             mapName = name;
             var map = maps[name];
+            if (Enemies != null) Enemies.Context.E041 = map.e041;
             World = new RoomWorld(map.rooms.Select(r => r.room));
             rocks = new Rocks(name, World, brokenRocks);
             rocks.Broken += OnRockBroken;
@@ -135,6 +137,9 @@ namespace MazeOfKnight.Game
             if (Enemies.Room != motor.Room)
                 EnterEnemyRoom();
             Enemies.Tick();
+            var drop = Enemies.PickUp(motor);
+            if (drop != null)
+                Say(TakeLoot(drop));
             if (motor.AttackStartedThisTick)
                 Enemies.Strike(motor, Collected);
             if (HurtTicks > 0)
@@ -225,6 +230,10 @@ namespace MazeOfKnight.Game
                 case 0x18: return new Color(0.95f, 0.55f, 0.25f);   // rodador
                 case 0x34: return new Color(0.60f, 0.30f, 0.30f);   // bloque
                 case 0x2E: return new Color(0.40f, 0.90f, 0.40f);   // brote
+                case 0x5B: return new Color(1f, 0.85f, 0.3f, 0.6f);  // explosión
+                case 0x5D: return new Color(0.85f, 0.85f, 0.85f);   // flechas
+                case 0x5E: return new Color(1f, 0.8f, 0.1f);        // monedas
+                case 0x5F: return new Color(0.3f, 0.9f, 1f);        // llaves
             }
             var c = Color.HSVToRGB((e.Type * 0.137f) % 1f, e.DiesOnTouch ? 0.35f : 0.75f, 0.95f);
             return c;
@@ -262,6 +271,16 @@ namespace MazeOfKnight.Game
             // Parpadeo del jugador mientras es invulnerable.
             if (player.body != null)
                 player.body.enabled = HurtTicks <= 0 || (HurtTicks / 2) % 2 == 0;
+        }
+
+        // Botín de un enemigo (b03:B2CB): suma al contador, con tope 999.
+        string TakeLoot(LootDrop d)
+        {
+            var loot = Enemies.Loot;
+            if (d.Type == loot.arrowObject) { Arrows = Mathf.Min(loot.counterCap, Arrows + d.Amount); return $"+{d.Amount} flechas ({Arrows})"; }
+            if (d.Type == loot.coinObject) { Coins = Mathf.Min(loot.counterCap, Coins + d.Amount); return $"+{d.Amount} monedas ({Coins})"; }
+            Keys = Mathf.Min(loot.counterCap, Keys + d.Amount);
+            return $"+{d.Amount} llaves ({Keys})";
         }
 
         // Recursos (docs/items_enemies.md): 0x2D +50 flechas, 0x2E +10 monedas, 0x2F +2 llaves.

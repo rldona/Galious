@@ -12,16 +12,16 @@ namespace MazeOfKnight.Tests
     {
         static readonly EnemyInfo[] Catalog =
         {
-            new EnemyInfo { type = 0x0E, hp = 1, damage = 1 },
-            new EnemyInfo { type = 0x25, hp = 8, damage = 3 },
+            new EnemyInfo { type = 0x0E, hp = 1, damage = 1, lootRule = 0, lootKills = new[] { 1, 3 } },
+            new EnemyInfo { type = 0x25, hp = 8, damage = 3, lootRule = 2, lootKills = new[] { 4, 6 }, lootLevel = 1 },
             new EnemyInfo { type = 0x31, hp = 0, damage = 2, invulnerable = true, immuneItem = 0x22 },
-            new EnemyInfo { type = 0x18, hp = 1, damage = 2 },
+            new EnemyInfo { type = 0x18, hp = 1, damage = 2, lootRule = 0, lootKills = new[] { 1, 3 } },
             new EnemyInfo { type = 0x34, hp = 4, damage = 6 },
             new EnemyInfo { type = 0x2E, hp = 2, damage = 2, immuneItem = 0x17 },
             new EnemyInfo { type = 0x0B, hp = 1, damage = 10 },
             new EnemyInfo { type = 0x11, hp = 2, damage = 2 },
             new EnemyInfo { type = 0x1D, invulnerable = true, damage = 1 },
-            new EnemyInfo { type = 0x19, hp = 1, damage = 1 },
+            new EnemyInfo { type = 0x19, hp = 1, damage = 1, lootRule = 3, lootWhenLastAlive = true },
             new EnemyInfo { type = 0x2A, hp = 3, damage = 1 },
             new EnemyInfo { type = 0x2C, hp = 4, damage = 2 },
             new EnemyInfo { type = 0x64, hp = 4, damage = 2 },
@@ -30,6 +30,8 @@ namespace MazeOfKnight.Tests
             new EnemyInfo { type = 0x49, hp = 5, damage = 8 },
             new EnemyInfo { type = 0x52, hp = 3, damage = 2 },
             new EnemyInfo { type = 0x53, hp = 1, damage = 1 },
+            new EnemyInfo { type = 0x09, invulnerable = true, damage = 3 },
+            new EnemyInfo { type = 0x3E, hp = 2, damage = 3 },
         };
 
         // Suelo en la fila 11 (y = 120); techo opcional en la fila 'ceiling'.
@@ -356,6 +358,114 @@ namespace MazeOfKnight.Tests
             Assert.AreEqual(152 - 8, bomb.X, 4, "se paró en la x del jugador");
             for (int t = 0; t < 17; t++) sys.Tick();
             Assert.IsFalse(bomb.Alive);
+        }
+    
+        // ---------- botín (docs/items_enemies.md, "Muerte y botín") ----------
+
+        [Test]
+        public void LootRulesCountKillsPerTypeWithTwoTypesTracked()
+        {
+            var (sys, _, _) = Setup(Room());
+            // Regla 0: 1.ª y 3.ª muerte; regla 2: 4.ª y 6.ª.
+            CollectionAssert.AreEqual(new[] { true, false, true, false, false }, Enumerable.Range(0, 5).Select(_ => sys.LootRoll(0x0E)));
+            CollectionAssert.AreEqual(new[] { false, false, false, true, false, true }, Enumerable.Range(0, 6).Select(_ => sys.LootRoll(0x25)));
+            Assert.IsFalse(sys.LootRoll(0x18), "un tercer tipo no se sigue: nunca suelta nada");
+        }
+
+        [Test]
+        public void LastAliveRuleWaitsForTheLastOne()
+        {
+            var (sys, _, _) = Setup(Room(-1, new EntityJson { type = 0x19, x = 100, y = 80 }, new EntityJson { type = 0x19, x = 140, y = 80 }));
+            Assert.IsFalse(sys.LootRoll(0x19), "queda otro vivo");
+            sys.Enemies[0].Alive = false;
+            sys.Enemies[1].Alive = false;
+            Assert.IsTrue(sys.LootRoll(0x19));
+        }
+
+        [Test]
+        public void KilledBatLeavesCoinsAfterTheExplosion()
+        {
+            var room = Room(3, new EntityJson { type = 0x0E, x = 123, y = 105 });
+            var world = new RoomWorld(new[] { room });
+            var motor = new PlayerMotor(world, room, 200, 120);
+            var loot = new LootTable { coinBelow = new[] { 16, 16, 16, 16 } };   // siempre monedas
+            var sys = new EnemySystem(Catalog, 7, loot);
+            sys.EnterRoom(world, room, motor);
+            var bat = sys.Enemies[0];
+            Hit(sys, motor, bat);
+            Assert.IsFalse(bat.Alive);
+            Assert.IsTrue(sys.Enemies.Any(e => e.Type == EnemySystem.ExplosionType));
+            for (int t = 0; t < EnemySystem.ExplosionTicks - 1; t++) sys.Tick();
+            Assert.IsFalse(sys.Enemies.Any(e => e is LootDrop), "aún explotando");
+            sys.Tick();
+            var drop = sys.Enemies.OfType<LootDrop>().Single();
+            Assert.AreEqual(0x5E, drop.Type);
+            Assert.AreEqual(1, drop.Amount, "nivel 0: 1 moneda");
+            Assert.AreEqual(120, drop.X, "x alineada a 8");
+            Assert.AreEqual(104, drop.Y, "y alineada a 8");
+            for (int t = 0; t < 300; t++) sys.Tick();
+            Assert.IsTrue(drop.Alive, "no caduca");
+            motor.Place(sys.Room, 120 - 7, 120);
+            Assert.IsNull(sys.PickUp(motor), "x − 7: fuera");
+            motor.Place(sys.Room, 120 - 6, 120);
+            Assert.AreSame(drop, sys.PickUp(motor));
+        }
+    
+        // ---------- generadores periódicos (docs/entities.md) ----------
+
+        static List<int> SpawnTicks(RoomModel room, int ticks, int type, ICollection<int> items = null)
+        {
+            var (sys, _, _) = Setup(room);
+            if (items != null) sys.HasItem = items.Contains;
+            sys.EnterRoom(sys.Context.World, room, sys.Context.Player);
+            var seen = new HashSet<Enemy>();
+            var at = new List<int>();
+            for (int t = 1; t <= ticks; t++)
+            {
+                sys.Tick();
+                foreach (var e in sys.Enemies.Where(e => e.Type == type && seen.Add(e)))
+                    at.Add(t);
+            }
+            return at;
+        }
+
+        [Test]
+        public void BatchGeneratorThrowsThreeEveryHundredSeventySevenTicks()
+        {
+            // E650 (castillo, sala 58): intentos en 113, 145, 177, 290, 322, 354…, en x 0x60, 0xC0, 0x40.
+            var room = Room();
+            room.periodic = new[] { new PeriodicJson { gen = "E650", type = 0x09, firstDelay = 113, period = 32, batch = 3, batchGap = 113,
+                                                       y = 0, xRule = "sequence", xSequence = new[] { 0x60, 0xC0, 0x40 } } };
+            CollectionAssert.AreEqual(new[] { 113, 145, 177, 290, 322, 354 }, SpawnTicks(room, 360, 0x09));
+        }
+
+        [Test]
+        public void LimitedGeneratorStopsAndCarpetDisablesOne()
+        {
+            var room = Room();
+            room.periodic = new[] { new PeriodicJson { gen = "E668", type = 0x3E, firstDelay = 16, period = 16, maxTotal = 5,
+                                                       x = 0x40, y = 0x28, xRule = "sequence", xSequence = new[] { 0x40 } } };
+            Assert.AreEqual(5, SpawnTicks(room, 400, 0x3E).Count, "el E668 se para tras 5 intentos");
+            room.periodic[0].disabledByItem = 0x18;
+            Assert.AreEqual(0, SpawnTicks(room, 400, 0x3E, new List<int> { 0x18 }).Count, "con el Carpet no se arma");
+        }
+
+        [Test]
+        public void BouncingBallBouncesOnceThenFallsThrough()
+        {
+            // Suelo en y = 120; nace arriba y rebota en él una vez (vy −4) y luego lo atraviesa.
+            var (sys, _, _) = Setup(Room(-1, new EntityJson { type = 0x09, x = 64, y = 40 }));
+            var ball = sys.Enemies[0];
+            float lowest = 0;
+            bool bounced = false;
+            for (int t = 0; t < 120 && ball.Alive; t++)
+            {
+                sys.Tick();
+                if (ball.Vy == -4) { bounced = true; Assert.AreEqual(104, ball.Y, "rebota sobre el suelo"); }
+                lowest = System.Math.Max(lowest, ball.Y);
+            }
+            Assert.IsTrue(bounced);
+            Assert.IsFalse(ball.Alive, "después cae y se borra al llegar a y = 0xB8");
         }
     }
 }

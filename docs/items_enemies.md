@@ -92,20 +92,99 @@ Las inmunidades salen de b03:B1F7–B22D, la colisión entre jugador y enemigo: 
 |---|---|---|
 | d0 | IX+9 | flags (bit 7: tiene sprite) [I] |
 | d1 | IX+0A | atributos o patrón de sprite [I] |
-| d2 | IX+0B | ¿tamaño o caja de colisión? [I] |
+| d2 | IX+0B | ¿tamaño? En los objetos de tiles (d0 bit 6) elige cómo se dibujan (tabla de b01:6F2C; 7 = bloque 2×2 de tiles d1…d1+3) [C] |
 | d3 | IX+10 | **vida**; FE/FF = no se puede dañar [C][O] |
-| d4 | IX+11 | clase de recompensa: 647B[d4] da la categoría (4 = nada) y 64E5[d4] el nivel de botín [C]; en algunos tipos cambia durante la partida [O] |
+| d4 | IX+11 | **caja de colisión**: índice en la tabla b14:9006 + 4·IX+11 (dy, dx, alto, ancho), que usa el contacto con el jugador (b03:B954). La IA la cambia con cada fotograma [C][O]. No es la recompensa: el botín se decide por tipo (ver «Botín») [C] |
 
-Estructura en RAM [O]: +0 tipo, +5 Y, +7 X, +9..+0B descriptor, +10 vida, +11 recompensa. Comprobado con esqueletos (vida 8), murciélagos (1), 0x18 (1) y estatuas (254).
+Estructura en RAM [O]: +0 tipo, +5 Y, +7 X, +9..+0B descriptor, +10 vida, +11 caja de colisión. Comprobado con esqueletos (vida 8), murciélagos (1), 0x18 (1) y estatuas (254).
 
 Después, una tabla de saltos por tipo (b04:66B4) lleva a la rutina de inicialización de cada enemigo, y de ahí sale su comportamiento.
 
 **Daño y muerte** [C]:
 - Cada golpe resta 1 a IX+10 (o 2, según el ataque), +1 con el objeto 0x25 (b03:B57A–B5E0).
-- En 0, b03:B604 lo mata. b04:6A3B y 6A77 deciden el botín: un objeto 0x5D, 0x5E o 0x5F según un número aleatorio (`LD A,R`) y el nivel, en cantidades de 10/20/30/40, 1/4/7/10 o 1/1/2/2 (tabla 6A6B). Al tocar ese objeto se suma al contador correspondiente (b03:B2CB).
+- En 0, b03:B604 lo mata (ver «Muerte y botín»).
 - Con los jefes manda además la tabla de vulnerabilidades por arma (ver `state_machine.md`, «Jefes»).
 
-**Objetos especiales que se tratan como enemigos** [C]: 0x3F restaura algo (E50F = 0x3C, ¿el hada?). Tocar 0x6B dibuja tiles 7A… y activa E024 → estado 17.
+**Objetos especiales que se tratan como enemigos** [C]: 0x3F es la bala del soldado 0x2D: al tocarla paraliza al jugador 60 ticks (E500 = 6, E50F = 0x3C; b03:B2E2). El hada es 0x4F. Tocar 0x6B dibuja tiles 7A… y activa E024 → estado 17.
+
+### Muerte y botín [C]
+
+Todo se decide por el **tipo** del enemigo (IX+0), no por IX+11: b03:B63C guarda el tipo en E6C7, la explosión 0x5B lo copia en su IX+11 al nacer (b04:6A0D) y lo devuelve a E6C7 al acabar (6A3B). Las tablas b04:647B y b04:64E5 se indexan con ese tipo.
+
+**Al morir** (b03:B604):
+1. Sonido 0x20.
+2. **Experiencia**: b03:BF27[tipo] (×2 con el Vase, E08A), sumada al byte alto de E05C/E05D (E501 = 0) o E05F/E060 (E501 ≠ 0) por b01:6158. El 0x19 usa {1, 2, 4, 4} según su tamaño (IX+1B). Valores por tipo en la tabla de abajo.
+3. Si estaba marcado (IX+2 bit 3), resta 1 a E622 y, al llegar a 0, lanza el evento de sala (ver `entities.md`, «matar a los marcados»). Se marca al nacer si la sala tiene E610 = 1 y su tipo está en b04:6584.
+4. Borra el hueco (E620 − 1).
+5. Según el tipo:
+   - **Normal:** crea la explosión 0x5B en su (y, x).
+   - **0x15, 0x16, 0x40, 0x42, 0x4C** (los grandes): no crea explosión. Pone E63F = 0x41 y E6C0 = (y, x). Después b04:69D2 crea cuatro 0x5B, una cada 16 llamadas, en (y+8, x+8), (y, x+16), (y+16, x) e (y+16, x+16). Cada una hace su propia tirada de botín.
+   - **0x43:** antes borra todos sus rayos 0x62.
+   - **0x5C:** crea 0x39 o 0x6B (según IX+1F), sin explosión ni botín.
+
+**Explosión 0x5B**: 8 fotogramas de 3 ticks (24 ticks de IA, ≈ 0,8 s). No se mueve y se anima también con el libro (E0D5). Al acabar se borra y decide el botín (6A3B):
+
+1. **Regla** = 647B[tipo]. b06:B57A anota hasta **2 tipos distintos por sala** en E6C2/E6C3, con un contador de muertes en E6C4/E6C5. Si el tipo no está anotado y ya hay dos, no hay botín. La regla 4 no anota nada. La zona E600–F03F se pone a 0 al entrar en cada sala (b00:525E, desde los estados 4, 8, 10 y 13, y al salir del menú de objetos), así que todo cuenta **por visita a la sala**.
+
+   | Regla | Hay tirada cuando… |
+   |---|---|
+   | 0 | es la 1.ª o la 3.ª muerte de ese tipo |
+   | 1 | es la 2.ª o la 5.ª |
+   | 2 | es la 4.ª o la 6.ª |
+   | 3 | no queda ningún otro enemigo vivo de ese tipo en los 16 huecos (cada vez que ocurre) |
+   | 4 | nunca |
+
+   Más allá de la 6.ª muerte, las reglas 0–2 no vuelven a dar nada (el contador es de un byte).
+2. **Nivel** según 64E5[tipo], que es también el daño por contacto: 0–2 → 0, 3–5 → 1, 6–8 → 2, ≥ 9 → 3 (b06:B562).
+3. **Tirada** (6A77): v = (R + E604) AND 15. R es el registro de refresco del Z80, así que v sale prácticamente uniforme en 0–15 [I]. Umbrales en 6A9E + 3·nivel:
+
+   | Nivel | Umbrales | Monedas (0x5E) | Flechas (0x5D) | Llaves (0x5F) | Nada |
+   |---|---|---|---|---|---|
+   | 0 | 08 0A 0B | v < 8: 8/16 | 8–9: 2/16 | 10: 1/16 | 11–15: 5/16 |
+   | 1 | 09 0B 0C | v < 9: 9/16 | 9–10: 2/16 | 11: 1/16 | 12–15: 4/16 |
+   | 2 | 0A 0D 0F | v < 10: 10/16 | 10–12: 3/16 | 13–14: 2/16 | 15: 1/16 |
+   | 3 | 0A 0D 0F | igual que el nivel 2 | | | |
+
+4. **Cantidad** (tabla 6A6B + 4·(objeto − 0x5D) + nivel, BCD):
+
+   | Objeto | Nivel 0 | 1 | 2 | 3 | Contador |
+   |---|---|---|---|---|---|
+   | 0x5D flechas | 10 | 20 | 30 | 40 | E046 |
+   | 0x5E monedas | 1 | 4 | 7 | 10 | E048 |
+   | 0x5F llaves | 1 | 1 | 2 | 2 | E04A |
+
+5. Lo crea con b04:6551 en **(y AND 0xF8, x AND 0xF8)** de la explosión, es decir, en la celda de 8 px de la esquina superior izquierda del enemigo. La cantidad va en IX+18. Como cualquier enemigo, no nace si la sala está llena (E620 ≥ E635), y en ese caso el botín se pierde.
+
+**El objeto 0x5D/0x5E/0x5F** (descriptor `40 60|64|68 07 00 00`):
+- Se dibuja con **tiles de fondo, no con un sprite**: un bloque de 2×2 tiles (d1…d1+3: 60–63 flechas, 64–67 monedas y 68–6B llaves, los mismos que los recursos 0x2D–0x2F) en el mapa ED00, en la dirección que guarda en IX+12/13 (b01:6F73). Monedas y flechas se pintan en una pasada y llaves y el resto en la otra, alternando con E630.
+- **Quieto**: su actualización es un `RET` y no tiene el bit 4 de IX+2 (C0), así que no cae, no rebota, no parpadea y **no caduca**. Si el enemigo muere en el aire o sobre un foso, el objeto se queda flotando ahí. Desaparece al recogerlo o al salir de la sala, y mientras tanto ocupa un hueco (cuenta en E620).
+- **Recogerlo** (b03:B1ED → B2CB): caja del jugador de 12×12 desde (y − 14, x − 6) (b03:B8A0), contra la caja 0 del objeto: dy 0, dx 0, 16×16. Se toca si −12 ≤ (y_j − 14) − y_o ≤ 16 y −12 ≤ (x_j − 6) − x_o ≤ 16, es decir, y_j ∈ [y_o + 2, y_o + 30] y x_j ∈ [x_o − 6, x_o + 22]. Funciona aunque el jugador esté parpadeando (no mira E518). Se coge uno por frame (E61F).
+- Al cogerlo: se borra, suena 0x2D y suma la cantidad en BCD con b00:4D5A/4D7B/4D82 al contador E046/E048/E04A. El **tope es 999**: si el byte alto llega a 0x10, queda en 09 99. Después se redibuja la fila del marcador.
+
+**Hijos y proyectiles**: casi todos tienen la regla 4. Mueren por la misma vía (B604) y sí tienen botín 0x0D (regla 1, nivel 0), 0x1C (2, 0), 0x21 (1, 0), 0x30 (2, 1), 0x38 (2, 0), 0x39 (3, 3), 0x3E (3, 1) y 0x53 (3, 0). Lo que desaparece por otro camino (fuera de la pantalla, al chocar, por `4257` directo) no pasa por la explosión y no da nada.
+
+**Botín por tipo de las salas** (regla, nivel; * = no se puede matar, así que nunca da nada). También en `extracted/unity/enemies.json`:
+
+| Regla | Nivel | Tipos |
+|---|---|---|
+| 0 (1.ª y 3.ª) | 0 | 03 0E 18 28 2E |
+| 0 | 1 | 02 07 |
+| 0 | 2 | 01 05 0C 13 27 |
+| 1 (2.ª y 5.ª) | 0 | 10 11 |
+| 1 | 1 | 0A 0F 12 1F 2D (20*) |
+| 1 | 2 | 14 34 |
+| 1 | 3 | 0B |
+| 2 (4.ª y 6.ª) | 0 | 04 2F |
+| 2 | 1 | 17 24 25 |
+| 3 (última viva) | 0 | 19 2A |
+| 3 | 1 | 26 3C |
+| 3 | 2 | 16 22 4C (16 y 4C: cuatro tiradas) |
+| 3 | 3 | 15 2B 40 42 43 (15, 40 y 42: cuatro tiradas) |
+| 4 (nunca) | — | 23 2C 49 64 (29* 31* 32* 36* 3A* 4E* 50* 51* 69*) |
+
+Experiencia (BF27) de los tipos de las salas: 01:6 02:3 03:1 04:1 05:5 07:2 0A:4 0B:4 0C:4 0E:1 0F:4 10:1 11:2 12:3 13:3 14:4 15:8 16:6 17:3 18:1 19:1–4 1F:4 22:6 23:4 24:2 25:4 26:3 27:5 28:2 2A:1 2B:4 2C:2 2D:2 2E:1 2F:1 34:1 3C:4 40:8 42:4 43:8 49:3 4C:5 64:2; el resto, 0.
+
+**Dudas**: la cadencia de b04:69D2, las cuatro explosiones de los grandes (llamadas o frames). Si el jugador mata a otro enemigo mientras explotan los grandes, E6C7 cambia y las explosiones siguientes tiran con ese otro tipo [C, caso raro]. Falta confirmarlo todo en openMSX [O].
 
 **Resumen** (`enemies.json`):
 - 53 tipos con generador.

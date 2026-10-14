@@ -4,7 +4,8 @@
 Enemigos: descriptor de 5 bytes en b04:67B6 + 5*tipo, copiado al crear el enemigo (b04:65DA)
 en su hueco de RAM (E800 + 0x20*n):
   d0 -> IX+9, d1 -> IX+0A, d2 -> IX+0B, d3 -> IX+10 (vida; FE/FF = no se puede danar),
-  d4 -> IX+11 (clase de recompensa: 647B[d4] categoria, 4 = nada; 64E5[d4] -> nivel de botin)
+  d4 -> IX+11 (caja de colision inicial: b14:9006 + 4*d4 = dy, dx, alto, ancho; b03:B954)
+Botin (b04:6A3B, b06:B548), indexado por TIPO: regla 647B[tipo] (4 = nunca), nivel por 64E5[tipo] (dano).
 Objetos: icono 16x16 (b00:58E1: patrones 6E34[tipo], colores 6E80[tipo], banco 10), efecto al
 recogerlo (b03:B701) y comprobaciones conocidas de su flag E06F + tipo.
 
@@ -14,7 +15,7 @@ import json
 from collections import defaultdict
 from galious_rom import Rom, ROOT
 
-ENEMY_DESC, REWARD_CAT, REWARD_TIER = 0x67B6, 0x647B, 0x64E5
+ENEMY_DESC, LOOT_RULE, DAMAGE = 0x67B6, 0x647B, 0x64E5
 OUT = ROOT / 'extracted' / 'entities'
 
 # Objeto -> enemigo contra el que protege (b03:B1F7..B22D: sin dano al tocarlo)
@@ -93,9 +94,9 @@ def main():
             'descriptor': d.hex(' '),
             'hp': None if hp >= 0xFE else hp,
             'invulnerable': hp >= 0xFE,
-            'reward_class': d[4],
-            'reward_category': rom.byte(REWARD_CAT + d[4], 1),
-            'reward_tier_value': rom.byte(REWARD_TIER + d[4], 1),
+            'hitbox': d[4],
+            'loot_rule': rom.byte(LOOT_RULE + t, 1),
+            'damage': rom.byte(DAMAGE + t, 1),
             'sprite_sheet': f'sprites_{t:02x}.png' if (OUT / f'sprites_{t:02x}.png').exists() else None,
             'immune_with_item': next((f'{i:#04x}' for i, e in IMMUNITY.items() if e == t), None),
             'spawns': len(spawn_where[t]),
@@ -121,7 +122,7 @@ def main():
     (OUT / 'items.json').write_text(json.dumps(items, indent=1))
     print(f'{len(enemies)} tipos de enemigo, {len(items)} tipos de objeto')
     for k, v in enemies.items():
-        print(k, 'vida', v['hp'] if not v['invulnerable'] else 'invulnerable', 'recompensa', v['reward_class'],
+        print(k, 'vida', v['hp'] if not v['invulnerable'] else 'invulnerable', 'regla de botin', v['loot_rule'],
               'generadores', v['spawns'], 'mundos', len(v['worlds']), 'inmune con', v['immune_with_item'])
 
 

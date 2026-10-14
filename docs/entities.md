@@ -93,10 +93,28 @@ En el mundo 1, sala 12, el muro de arriba a la izquierda (filas 0–2, columnas 
 
 **Puente** [C][O*]: en el mundo 2, sala 11, si tienes el objeto 0x12 (E081), aparece una fila de 16 tiles C4 sobre el agua (EAC8).
 
-**Generadores periódicos por sala** [C] (b04:61A8–62B9, que se ejecuta al cargar y en cada frame en b04:62F9–647B): no tocan los muros.
-- Según el mundo y la sala activan E650, E653, E659, E65C, E65F, E662, E665 o E668.
-- Cada uno es un temporizador que, al llegar a 0, crea un enemigo con la rutina de creación b04:65DA: los tipos 09, 08, 0D, 21, 30, 38, 35 y 3E, en una posición fija o algo aleatoria (R).
-- Ejemplos: en las salas 58, 71, 113 y 114 del castillo (E650); en el mundo 6, salas 2, 3, 4, 7, 8, 17 y 18, el tipo 3E cada 16 ticks (E668).
+**Generadores periódicos por sala** [C]: no tocan los muros. Datos exportados en `extracted/unity/<mapa>.json`, `rooms[].periodic` (campos en `tools/extract/periodic.py`). Las fichas de los tipos creados están en `enemy_ai.md`, "IA de enemigos — generados periódicamente".
+- **Al cargar la sala** (b00:516F → b04:6186): pone a 0 E650–E66F y llama a 61E4, 6200, 6239, 6249, 6291, 62A4, 62B9 y 61A8. Cada una arma su generador (bit 0 = 1) si coinciden el mundo (E041: 1 = castillo, n + 1 = mundo n) y la sala (E042).
+- **En cada tick** (bucle principal b00:53CF → b04:62DB, la misma pasada que la IA de enemigos): avanzan 634A (E653), 6374 (E659), 639D (E65C), 63C3 (E65F), 63E9 (E662), 643A (E665), 6460 (E668) y 62F9 (E650). **Los temporizadores cuentan ticks** (1 tick = 2 frames). No avanzan mientras el libro congela (E0D5 ≠ 0).
+- **Creación** (b04:65DA): A = tipo, E = x, D = y, B → E624, velocidad 0. Falla, sin reintento, si E620 ≥ E635 (16 enemigos) o si no caben sus sprites (E621 + n > E636). El temporizador sigue su curso y el intento se pierde. Los enemigos propios de la sala comparten ese límite. Es el único tope: no hay máximo por generador, salvo E668.
+- **Ciclo de espera de los generadores simples** (E653, E659, E65C, E65F, E665): un tick para rearmarse (pone la espera) y la espera completa. Con espera 144 sale un intento cada **145 ticks**, el primero en el tick 145.
+- **Tandas** (E650 y E662): contador = 3 (tabla 633A[E045]), primera espera 112 = 0x70 − 2·E045 y luego 32 entre intentos. Al vaciarse se rearma (1 tick). Los intentos caen en los ticks 113, 145 y 177, después en 290, 322 y 354, y así sucesivamente: 3 cada 177 ticks. La x sale de la tabla 6336[contador & 3] y el contador baja antes de leerla: **0x60, 0xC0, 0x40**, en ese orden.
+
+| Gen. | Mundo: salas | Tipo | Primer intento / periodo (ticks) | Nace en (x, y) | Condiciones | ¿Se acaba? |
+|---|---|---|---|---|---|---|
+| E650 | castillo: 58, 71, 113, 114 | 0x09 bola que rebota | tandas de 3: 113, +32, +32; la siguiente, 113 después | x = 0x60, 0xC0, 0x40; y = 0 | — | no |
+| E653 | castillo: 144–147; mundo 8: 15–19; mundo 9: 3–5; mundo 10: 2–3 | 0x08 bola de fuego | espera al azar: 1 + (R & 0x3F) + 0x30 = **49..112**, también la primera | y = 0xA0 (0xB0 en el mundo 8); la x la decide el tipo: 64..191 | **no se arma si se tiene el Carpet** (E087, objeto 0x18) al entrar en la sala (b04:6200) | no |
+| E659 | castillo: 137–140 | 0x0D pez saltador | 145 / 145 | y = 0x90; x según el jugador (ver ficha); B = sala − 136 (1..4) | el temporizador no avanza mientras el jugador está en agua o lava (E511 ≠ 0) | no |
+| E65C | castillo: 10, 17, 28, 56, 73, 80, 122, 131, 132; mundo 4: 10, 12; mundo 6: 8 | 0x21 caminante | 145 / 145 | y = 0; x al azar en 16–47, 80–111, 144–175 o 208–239 | — | no |
+| E65F | mundo 5: 7–10 | 0x30 saltador de lava | 145 / 145 | y = 0x90; x al azar en 32–95 o 160–223 | — | no |
+| E662 | castillo: 94, 95, 102 | 0x38 bola que sube | tandas, igual que E650 | x = 0x60, 0xC0, 0x40; y = 0xB0 | — | no |
+| E665 | castillo: 47, 59; mundo 8: 2, 14 | 0x35 bola rodante | 145 / 145 | y = 0; x al azar, igual que 0x21 | — | no |
+| E668 | mundo 6: 2, 3, 4, 7, 8, 17, 18 | 0x3E volador en zigzag | 16 / 16 | y = 0x28 (lo pone el tipo). Con 10, los 5 primeros en x = 0xB0 y los 5 últimos en x = 0x40; con 5, todos en x = 0x40 | — | **sí**: 5 intentos (salas 2, 4 y 18) o 10 (salas 3, 7, 8 y 17) |
+
+- **Posición.** El generador pasa una x en E, pero solo la usan 0x09 y 0x38. En E653, E659, E65C, E65F y E665 la E ni siquiera se carga (es basura), y la rutina de inicio del tipo la sobrescribe. 0x3E sobrescribe x e y. Ninguno mira la posición del jugador, salvo el 0x0D.
+- **Aleatorio.** R es el registro de refresco del Z80; en la remasterización basta un aleatorio uniforme. La x de 0x21, 0x35 y 0x30 se calcula como (R/8) XOR E003. La de 0x08 sale de (E604 & 0x7F) + 0x40, con E604 el contador de ticks.
+- **E045** vale 0 en la práctica. Con otro valor cambia el tamaño de tanda (633A: 3,3,3,4,4,5,5,6,6,6,7,7,7,8,8,8), la primera espera de E650/E662 (0x70 − 2·E045) y la espera de los simples (0x90 − 2·E045).
+- El mundo 6, sala 8, tiene dos generadores: E65C y E668.
 
 ## Objetos de sala: puertas, muros que se cierran y paredes que se rompen [C]
 

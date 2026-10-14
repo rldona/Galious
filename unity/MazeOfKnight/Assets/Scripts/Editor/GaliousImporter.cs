@@ -141,6 +141,7 @@ namespace MazeOfKnight.EditorTools
             var data = JsonUtility.FromJson<EnemyCatalogJson>(File.ReadAllText(json));
             var catalog = LoadOrCreate<EnemyCatalog>($"{GeneratedRoot}/Resources/Enemies.asset");
             catalog.enemies = data.enemies.ToList();
+            catalog.loot = data.loot ?? new LootTable();
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
         }

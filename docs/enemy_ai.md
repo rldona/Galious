@@ -59,9 +59,13 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
   `+0C/0D += +16/17`, así que +16/+17 es una **aceleración (gravedad)**, no la velocidad [C]. Para los tipos 0x0A, 0x0D,
   0x24, 0x25 y 0x2D, B0ED solo suma el byte alto +0D a y (la parte fraccionaria se ignora, así que la velocidad y
   es entera) [C].
-- **+11 no es (solo) la recompensa.** El valor inicial de +11 es el 5.º byte del descriptor (= reward_class de enemies.json),
-  pero la IA lo reescribe con cada fotograma de sprite (B0DD hace XOR con B; B08F/B067/B07B/B080 lo leen de tablas
-  indexadas por (+0A−0xA0)/4) [C]. Parece un atributo/color del sprite asociado a +0A [I]. Abajo se le llama "attr".
+- **+11 es la caja de colisión, no la recompensa.** El valor inicial de +11 es el 5.º byte del descriptor, y la IA
+  lo reescribe con cada fotograma de sprite (B0DD hace XOR con B; B08F/B067/B07B/B080 lo leen de tablas indexadas por
+  (+0A−0xA0)/4) [C]. b03:B954 lo usa como índice en la tabla b14:9006 + 4·(+11) = (dy, dx, alto, ancho) para el
+  contacto con el jugador [C]. Por ejemplo, la entrada 0x4E del esqueleto 0x25 es (1, 0, 15, 24), que cuadra con lo
+  medido en `player.md` [O]. Abajo se le llama "attr". El botín se decide **por tipo** (647B[tipo], 64E5[tipo]; ver
+  `items_enemies.md`, «Muerte y botín»). Las «clase / categoría / tier / valor» de las fichas de abajo se calcularon
+  indexando con +11 y son erróneas; cada ficha lleva la corrección «botín real».
 - Sólidos: 4DA1 convierte (H=x, L=y) en una dirección del mapa de tiles ED00+(y/8)*32+x/8; 4DC8 y 6D49 devuelven
   carry si el tile es > 0xB9, y 7C5E/9D2D comparan con ≥ 0xBA. Es decir, **tile ≥ 0xBA = sólido** [C].
 - Auxiliares comunes [C]:
@@ -82,7 +86,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
 ---
 
 #### 0x01 — "bicho embestidor" (camina, se para al ver al jugador y embiste)
-- **Vida / recompensa:** hp 4; reward_class 0, categoría 101, tier 4. Descriptor a2 a0 08 04 00.
+- **Vida / recompensa:** hp 4; reward_class 0, categoría 101, tier 4. Descriptor a2 a0 08 04 00. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 2 [C].
 - **Inicio:**
   - vx = ±1.5 px/f (0x180), con signo aleatorio según el bit 0 de R [C].
   - Invierte los bits 0-1 de +9 [C].
@@ -113,7 +117,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
   - El significado de +9 (XOR 3) y de +12/+13 no está claro.
 
 #### 0x02 — "chispa que recorre superficies" (se pega a suelos, paredes y techos)
-- **Vida / recompensa:** hp 1; reward_class 0x75, categoría 10, tier 18.
+- **Vida / recompensa:** hp 1; reward_class 0x75, categoría 10, tier 18. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 1 [C].
 - **Inicio:**
   - La dirección inicial viene en +1 (fase 0-7) desde la creación (no se ve) [C].
   - 6D7F copia 7 tablas indexadas por fase en +14..+1A (tablas en 6DC6..6DF6, 8 bytes cada una) [C].
@@ -143,7 +147,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
   - Rutina 4083 (read_byte_table) [C, leída].
 
 #### 0x03 — "gota/babosa de techo" (anda colgada del techo a tirones)
-- **Vida / recompensa:** hp 1; reward_class 5, categoría 0, tier 7.
+- **Vida / recompensa:** hp 1; reward_class 5, categoría 0, tier 7. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 0 [C].
 - **Inicio:**
   - Elige al azar entre fase 0 (activa) y fase 0xFF (dormida). En la fase 0xFF desactiva el movimiento [C].
   - +8=0x18, attr=0x66, +14=0 [C].
@@ -167,7 +171,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
   - No está claro el significado de la condición y = jugador_y−24.
 
 #### 0x04 — "columna/pistón de tiles" (sin sprite; baja y sube del techo)
-- **Vida / recompensa:** hp 1; reward_class 0x22, categoría 3, tier 8. Descriptor 40 00 00, sin sprite.
+- **Vida / recompensa:** hp 1; reward_class 0x22, categoría 3, tier 8. Descriptor 40 00 00, sin sprite. **Botín real:** regla 2 (4.ª y 6.ª), nivel 0 [C].
 - **Inicio:**
   - +0A=0x12, +14=0 (longitud) y movimiento desactivado [C].
   - +12/+13 = dirección del tile en (x, y) [C].
@@ -188,7 +192,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
   - Aquí +0C se usa como recarga y no como vy. No afecta porque el movimiento está desactivado [C].
 
 #### 0x05 — "serpiente que escupe"
-- **Vida / recompensa:** hp 3; reward_class 0x2A, categoría 3, tier 1.
+- **Vida / recompensa:** hp 3; reward_class 0x2A, categoría 3, tier 1. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 2 [C].
 - **Inicio:** +15=120. vx=±1 px/f aleatorio. Sprite A0 (derecha) o B0 (izquierda) [C].
 - **Comportamiento:** tiene B080 como retorno, que recalcula attr [C].
   - Fase 0 (patrulla) [C]:
@@ -207,7 +211,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
 - **Dudas:** no se ha verificado cómo usa el hijo F014 (65E3 y siguientes no se han seguido).
 
 #### 0x07 — "oruga saltarina" (salta huecos en su mismo piso)
-- **Vida / recompensa:** hp 2; reward_class 0x26, categoría 3, tier 3.
+- **Vida / recompensa:** hp 2; reward_class 0x26, categoría 3, tier 3. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 1 [C].
 - **Inicio:** vx=±0.5 px/f (0x80) con signo aleatorio. +16 = y inicial (altura de "casa"). +8=10 [C].
 - **Comportamiento:**
   - Fase 0 (camina) [C]:
@@ -227,7 +231,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
 - **Dudas:** ninguna importante.
 
 #### 0x0A — "caballero" (castillo; camina, salta huecos, sube y baja pisos, usa escaleras)
-- **Vida / recompensa:** hp 6; reward_class 0x4E, categoría 4, tier 0.
+- **Vida / recompensa:** hp 6; reward_class 0x4E, categoría 4, tier 0. **Botín real:** regla 1 (2.ª y 5.ª), nivel 1 [C].
 - **Inicio:**
   - Pone el global E62E=1 y +2 bit 1 [C].
   - +8 = rnd&0x7F (0-127) [C].
@@ -271,7 +275,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
   - Los tiles 0x9A/0x9B como escalera es una suposición.
 
 #### 0x0B — "pez/dardo rápido" (corre a 4 px/f a ráfagas)
-- **Vida / recompensa:** hp 1; reward_class 0x3E, categoría 3, tier 3.
+- **Vida / recompensa:** hp 1; reward_class 0x3E, categoría 3, tier 3. **Botín real:** regla 1 (2.ª y 5.ª), nivel 3 [C].
 - **Inicio:**
   - +8=8 [C].
   - Dirección aleatoria [C]:
@@ -290,7 +294,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
 
 #### 0x0C — "hombre-llama" (crece, camina disparando, se convierte en fuego volador y vuelve a posarse)
 La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro caso) [C].
-- **Vida / recompensa:** hp 3; reward_class 0x51, categoría 4, tier 0.
+- **Vida / recompensa:** hp 3; reward_class 0x51, categoría 4, tier 0. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 2 [C].
 - **Inicio:**
   - +17=10, +8=8, +18=8, +15=1, +16=10, +13=4, +12=0 [C].
   - +1B = rnd&0x4F + 0x30 (48..127) como temporizador de disparo [C].
@@ -319,7 +323,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   - 9EC6 hace XOR de +0B con +12=0, lo que no tiene efecto para 0x0C.
 
 #### 0x0E — "murciélago" (cuelga del techo, se descuelga y revolotea)
-- **Vida / recompensa:** hp 1; reward_class 0x69, categoría 4, tier 7.
+- **Vida / recompensa:** hp 1; reward_class 0x69, categoría 4, tier 7. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 0 [C].
 - **Inicio:**
   - +8=4, +18=4, +16=11 [C].
   - +17 = 96..127 y +15 = 16..31 [C].
@@ -339,7 +343,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** significado del global E63E (A103 lo pone a 1 en el inicio).
 
 #### 0x0F — "bola que crece" (camina; crece por etapas)
-- **Vida / recompensa:** hp 6; reward_class 0x32, categoría 4, tier 0.
+- **Vida / recompensa:** hp 6; reward_class 0x32, categoría 4, tier 0. **Botín real:** regla 1 (2.ª y 5.ª), nivel 1 [C].
 - **Inicio:** vx=±1 px/f aleatorio [C]. Sprite y attr desde la tabla 73AA (derecha) o 73B2 (izquierda), indexada por la etapa +1E [C]:
   - etapas 0-3 a la derecha: C0, C8, D0, D8;
   - etapas 0-3 a la izquierda: A0, A8, B0, B8.
@@ -355,7 +359,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** quién escribe +1C (buscar escrituras a IX+1C fuera de la IA).
 
 #### 0x10 — "acechador que embiste y vuelve" (oculto hasta que el jugador entra en su piso)
-- **Vida / recompensa:** hp 1; reward_class 0x0B, categoría 1, tier 10.
+- **Vida / recompensa:** hp 1; reward_class 0x0B, categoría 1, tier 10. **Botín real:** regla 1 (2.ª y 5.ª), nivel 0 [C].
 - **Inicio:** se para y guarda la x de casa en +8 [C].
 - **Comportamiento:**
   - Fase 0: quieto hasta que el jugador está en su piso (6C25). Entonces se mueve, pone el sprite A0 y vx = ±2 px/f hacia el jugador, y pasa a fase 1 [C].
@@ -371,7 +375,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** ninguna importante.
 
 #### 0x11 — "erizo que dispara púas"
-- **Vida / recompensa:** hp 2; reward_class 0x58, categoría 4, tier 4.
+- **Vida / recompensa:** hp 2; reward_class 0x58, categoría 4, tier 4. **Botín real:** regla 1 (2.ª y 5.ª), nivel 0 [C].
 - **Inicio:** +15=120. vx=±2 px/f aleatorio. attr 0x58. Sprite A4 (derecha) o B4 (izquierda) [C].
 - **Comportamiento:**
   - Fase 0 (camina a 2 px/f) [C]:
@@ -395,7 +399,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** ninguna importante. 7973 solo pone attr=0.
 
 #### 0x12 — "armadillo / bola enrollada" (oculto, emerge, rueda disparando y se vuelve a esconder)
-- **Vida / recompensa:** hp 5; reward_class 0x13, categoría 0, tier 6.
+- **Vida / recompensa:** hp 5; reward_class 0x13, categoría 0, tier 6. **Botín real:** regla 1 (2.ª y 5.ª), nivel 1 [C].
 - **Inicio:** +8 = 96..159 aleatorio. Se para. Pone +2 bit 2 [C] [I: oculto/intangible].
 - **Comportamiento:** retorno B07B (attr según sprite) [C].
   - Fase 0 (oculto): espera +8 frames. Después +1F=0, +8=30 y fase 1 [C].
@@ -478,7 +482,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   con el arma [I].
 - `406E` (4DC8): mira el tile en (H=x, L=y) del mapa ED00 y da C si el tile es mayor que 0xB9 (sólido) [C]. `4071`: el tile
   siguiente (x+8) [C]. `4083`: A = (HL+A) [C]. `6551`/`65DA`: crear un enemigo con A = tipo, D = y, E = x y B pasado a
-  E624; 6551 guarda además HL en F014 [C]. No respetan el límite E620 < E635 [C].
+  E624; 6551 guarda además HL en F014 [C]. Los dos acaban en 65E3, que **sí** respeta el límite E620 < E635 y el de sprites E621/E636 [C] (corregido: antes decía que no).
 - Rutinas de borde que comparten varios tipos [C]:
   - `6BEE`: suelo delante. Mira el tile en (x+16 si va a la derecha o x si va a la izquierda, y+16) y da C si hay suelo.
   - `6C04`: pared delante. Mira el tile de encima (y+8) y da C si es sólido. Si no lo es, da C cuando x < 8 (yendo
@@ -495,7 +499,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 ---
 
 #### 0x13 — espectro caminante que se desvanece y vuela (comparte código con 0x0C)
-- **Vida / recompensa:** 4 / descriptor `81 a0 0f 04 2d` (clase 45).
+- **Vida / recompensa:** 4 / descriptor `81 a0 0f 04 2d` (clase 45). **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 2 [C].
 - **Inicio (A3E2):** +17 = 10 (temporizador), +08 = 8, +15 = 1, +13 = 3 (número de fotogramas de aparición),
   +12 = 5 (máscara XOR de IX+0B), +16 = 10, +18 = 4 (+16 y +18 no se leen en la actualización) [C].
   +1B = (aleatorio AND 4F) + 0x30, es decir 48..63 o 112..127 frames hasta el primer disparo [C].
@@ -528,7 +532,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   - En 6C04 las dos ramas cargan BC = FFE0 (C04/C0D); parece una rama muerta [C].
 
 #### 0x14 — criatura que emerge del suelo, pasea y se hunde
-- **Vida / recompensa:** 4 / `81 a0 0e 04 38`.
+- **Vida / recompensa:** 4 / `81 a0 0e 04 38`. **Botín real:** regla 1 (2.ª y 5.ª), nivel 2 [C].
 - **Inicio (7249):** borra los bits 4-7 de IX+2 (invisible, sin colisión, quieto) [C][I]. +08 = 128..191 aleatorio [C].
 - **Comportamiento** (7255; al volver ejecuta B076, que pone IX+11 según el sprite) [C]:
   - **Fase 0:** espera +08 frames. Luego se hace visible (bit 7), sprite A0, **sonido 8** y +08 = 6 [C].
@@ -547,7 +551,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** el significado exacto de los bits 5 y 6 de IX+2. La causa de la discrepancia con lo observado.
 
 #### 0x15 — guardián volador que orbita alrededor de un centro móvil (jefe menor)
-- **Vida / recompensa:** 40 / `c4 08 05 28 42`.
+- **Vida / recompensa:** 40 / `c4 08 05 28 42`. **Botín real:** regla 3 (última viva), nivel 3 [C].
 - **Inicio (8E05):** sin aplicar velocidad (RES 4) [C]. Centro inicial (+17, +19) = (y 0x60, x 0x80) [C].
   Ángulo +1A = 0, velocidad angular +1B = 1, +1C = 60, +1D = 0 [C]. +08 = 128..255, +1E = 60 ("enfado") [C].
   Primer disparo +15 = 32..95 [C]. Coloca el sprite directamente en la órbita [C].
@@ -571,7 +575,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** qué es E045 (un factor global de velocidad [I]).
 
 #### 0x16 — aparición que embiste en línea recta y se teletransporta
-- **Vida / recompensa:** 24 / `c4 00 02 18 01`.
+- **Vida / recompensa:** 24 / `c4 00 02 18 01`. **Botín real:** regla 3 (última viva), nivel 2 [C].
 - **Inicio (8C1F):** +08 = 30, sin aplicar velocidad, sprite 0 si el jugador está a la derecha y 2 si está a la
   izquierda [C].
 - **Comportamiento** [C]:
@@ -590,7 +594,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** si mientras es invisible o parpadea sigue haciendo daño (no toca los bits 5 y 6) [I].
 
 #### 0x17 — centinela que patrulla y dispara al ver al jugador en su nivel
-- **Vida / recompensa:** 5 / `81 c8 0a 05 13`.
+- **Vida / recompensa:** 5 / `81 c8 0a 05 13`. **Botín real:** regla 2 (4.ª y 6.ª), nivel 1 [C].
 - **Inicio (951C):** vx = ±**2 px/frame** al azar [C]. Sprite C8 a la derecha o D0 a la izquierda; +14 = 0 a la
   derecha y 1 a la izquierda [C]. IX+11 = 0x13 [C].
 - **Comportamiento** [C]:
@@ -605,7 +609,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** ninguna importante.
 
 #### 0x18 — rodador lento que solo gira en ciertos fotogramas
-- **Vida / recompensa:** 1 / `81 a0 09 01 1e`.
+- **Vida / recompensa:** 1 / `81 a0 09 01 1e`. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 0 [C].
 - **Inicio (6C50):** +14 = dirección al azar (1 = izquierda), vx = ±**0,5 px/frame** [C].
 - **Comportamiento** (6C5D) [C]:
   - Siempre, cada 4 frames: avanza el fotograma +1F en un ciclo de 7 (0..6). Va hacia delante si +14 = 0 y hacia atrás si
@@ -619,7 +623,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** ninguna.
 
 #### 0x19 — murciélagos que se fusionan por parejas (pequeño → mediano → grande → 0x37)
-- **Vida / recompensa:** 1 (nivel 0); 2 (nivel 1); 4 (nivel 2) / `81 d0 0b 01 4a`.
+- **Vida / recompensa:** 1 (nivel 0); 2 (nivel 1); 4 (nivel 2) / `81 d0 0b 01 4a`. **Botín real:** regla 3 (última viva), nivel 0 [C].
 - **Inicio (863D):** +19 = 128 (tiempo hasta intentar fusionarse), +08 = 4, +1C = 80 (primer disparo) [C].
   +1B = nivel = E62F (global) [C].
   - Si el nivel es 0: identificador de pareja +18 = (E62C++) >> 1, así que cada dos creados comparten pareja [C].
@@ -655,7 +659,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   - 9F3F (otro tipo, probablemente 0x37) también incrementa E62F.
 
 #### 0x1F — corredor saltarín (salta huecos y sube o baja de plataforma)
-- **Vida / recompensa:** 3 / `81 a0 02 03 00`.
+- **Vida / recompensa:** 3 / `81 a0 02 03 00`. **Botín real:** regla 1 (2.ª y 5.ª), nivel 1 [C].
 - **Inicio (942F):** +08 = 0..127, +1D = dirección al azar, gravedad +16/17 = 0x0100 (**1 px/frame²**) [C].
   Sprite A0 con vx = **+3,625 px/frame**, o sprite AC con vx = −3,625 e IX+11 = 0x13 [C].
 - **Comportamiento** [C]:
@@ -681,7 +685,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   - En la fase 2 se comprueba el aterrizaje incluso mientras sube (94D0 ignora el resultado de 9B1D) [C].
 
 #### 0x20 — embestidor invulnerable lento
-- **Vida / recompensa:** invulnerable (FE) / `81 a0 01 fe 19`.
+- **Vida / recompensa:** invulnerable (FE) / `81 a0 01 fe 19`. **Botín real:** regla 1 (2.ª y 5.ª), nivel 1 [C].
 - **Inicio (93D4):** vx = ±**0,25 px/frame** al azar [C].
 - **Comportamiento (93E2)** [C]:
   - Ante falta de suelo, pared o borde: da la vuelta y **vuelve a 0,25 px/frame** [C].
@@ -694,7 +698,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** ninguna.
 
 #### 0x22 — escupefuego volador errante
-- **Vida / recompensa:** 24 / `81 c8 03 18 09`.
+- **Vida / recompensa:** 24 / `81 c8 03 18 09`. **Botín real:** regla 3 (última viva), nivel 2 [C].
 - **Inicio (80C0):** +08 = 64, +15 = 4 [C].
 - **Comportamiento (80C9)** [C]:
   - Cada 64 frames alterna el sprite entre C4 y C8 (XOR 0C). Al pasar a C8 lanza el **sonido 15** (una vez cada 128 frames) [C].
@@ -708,7 +712,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** como en 0x19, no hay límites izquierdo ni superior.
 
 #### 0x23 — estatua o bloque dormido que se activa al rodearlo
-- **Vida / recompensa:** 64 / `9a a0 0e 40 6c`.
+- **Vida / recompensa:** 64 / `9a a0 0e 40 6c`. **Botín real:** regla 4 (nunca) [C].
 - **Inicio (A198):** +16 = y+8 (nivel de referencia), +14 = x−13 y +15 = x+23 (zonas de disparo) [C].
   +12 = A4 y +13 = 0E: segundo sprite o color [I]. Borra los bits 4-7 de IX+2: invisible e inactivo [C][I].
 - **Comportamiento (A1B8)** [C]:
@@ -726,7 +730,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** para qué sirven +12 y +13 (probablemente el dibujo de dos sprites). Por qué hace falta pasar por los dos lados [I].
 
 #### 0x24 — saltador entre niveles que persigue al jugador
-- **Vida / recompensa:** 3 / `81 a0 09 03 00`.
+- **Vida / recompensa:** 3 / `81 a0 09 03 00`. **Botín real:** regla 2 (4.ª y 6.ª), nivel 1 [C].
 - **Inicio (9B30):** +08 = byte aleatorio, nivel +19 = ((y AND E0) >> 5) − 1 [C]. Los niveles 0..4 corresponden a las
   alturas de suelo 56, 88, 120, 152 y 184 [I]. +1D al azar, vx = ±**2 px/frame**, sprite A0 o AC [C].
   En vuelo solo se aplica a y el byte alto de vy [C].
@@ -762,7 +766,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 
 #### 0x25 — armadillo o caracol que se enrosca al recibir golpes (dos sprites, cae entre plataformas)
 - **Medido en openMSX** [O]: el segundo sprite va **hacia donde mira** (castillo, sala 9, mirando a la derecha: sprites en x y x + 16; sala 83, mirando a la izquierda: en x y x − 16). Se dibuja aunque quede sobre un muro: en la sala 9 nace medio metido en la pared. El contacto con el jugador abarca los dos sprites.
-- **Vida / recompensa:** 8 (se restaura) / `82 ac 0f 08 4e`.
+- **Vida / recompensa:** 8 (se restaura) / `82 ac 0f 08 4e`. **Botín real:** regla 2 (4.ª y 6.ª), nivel 1 [C].
 - **Inicio (98C0):** activa el bit 1 de IX+2 (objeto de dos sprites [I]) [C]. +08 = 0..127 y **mira al jugador** (7CA9) [C].
   Gravedad 0x50 (0,3125 px/frame²), +1A = 32..159 [C]. vx = ±**1,125 px/frame** hacia el jugador [C].
   Sprites: a la derecha AC con segundo B4, IX+9 = AA e IX+11 = 4E; a la izquierda B8 con segundo C0, IX+9 = B2,
@@ -866,7 +870,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 ---
 
 #### 0x26 — fantasma orbitante que dispara (castillo)
-- **Vida / recompensa:** 10 / clase 18 (0x12), cat. 1, valor 4.
+- **Vida / recompensa:** 10 / clase 18 (0x12), cat. 1, valor 4. **Botín real:** regla 3 (última viva), nivel 1 [C].
 - **Inicio:** RES 4 IX+2 → el bucle común **no** aplica la velocidad; la posición la calcula la IA [C].
   IX+0A = CC (sprite); centro de la órbita IX+14 = x, IX+15 = y; IX+18 = 6 (paso angular); IX+1A = 0x30;
   IX+1F = 8; IX+12 = (rand & 0x2F) + 0x10 → 16..63 frames hasta el primer disparo; IX+1B = 0x10 (no se usa en
@@ -893,7 +897,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   original; IX+1B = 0x10 sin uso aquí.
 
 #### 0x27 — ave/murciélago errante que se lanza en picado (world07)
-- **Vida / recompensa:** 12 / clase 17 (0x11), cat. 1, valor 2.
+- **Vida / recompensa:** 12 / clase 17 (0x11), cat. 1, valor 2. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 2 [C].
 - **Inicio:** IX+8 = 4 (temporizador de animación); IX+1F = rand & 15 [C]. Fase IX+1 = 0, IX+1A = 0 [C].
 - **Comportamiento:**
   - Cada 64 frames (E003 & 0x3F = 0) pide el sonido 6 [C].
@@ -925,7 +929,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   necesita?); E045 (¿dificultad/vuelta?).
 
 #### 0x28 — insecto rebotador de 16 direcciones (world01, world07)
-- **Vida / recompensa:** 1 / clase 98 (0x62), cat. 4, valor 8. Inmune con objeto 0x0F.
+- **Vida / recompensa:** 1 / clase 98 (0x62), cat. 4, valor 8. Inmune con objeto 0x0F. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 0 [C].
 - **Inicio:** IX+15 = (rand & 0x3F) + 7 → 7..70 frames; IX+18 = dirección rand & 15; velocidad 7E25 con
   multiplicador 3 → 3 px/frame en la dirección elegida [C]. Sprite IX+0A = 939C[dir] (8 orientaciones:
   CC D0 D0 D0 C4 DC DC DC D8 E0 E0 E0 C8 D4 D4 D4) e IX+11 = 93CC[(IX+0A−C4)/4] [C].
@@ -942,7 +946,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   tiene componente en ese eje) [I].
 
 #### 0x29 — burbuja invulnerable que rebota en línea recta (world04)
-- **Vida / recompensa:** invulnerable (FF) / clase 14 (0x0E), cat. 0, valor 1.
+- **Vida / recompensa:** invulnerable (FF) / clase 14 (0x0E), cat. 0, valor 1. **Botín real:** regla 4 (nunca) [C].
 - **Inicio:** E627 = 1 (bandera global) [C]; **recoloca el enemigo al azar**: x = (rand & 0x7F) + 0x40
   (64..191), y = (rand & 0x3F) + 0x40 (64..127) [C]; IX+1F = dirección rand & 15; IX+1E = 1; IX+8 = 1 [C].
 - **Comportamiento:**
@@ -959,7 +963,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   (p. ej. al recibir un golpe, ya que es invulnerable).
 
 #### 0x2A — aparición que se teletransporta entre plataformas (world02)
-- **Vida / recompensa:** 3 / clase 0, cat. 101, valor 4. Inmune con objeto 0x0E.
+- **Vida / recompensa:** 3 / clase 0, cat. 101, valor 4. Inmune con objeto 0x0E. **Botín real:** regla 3 (última viva), nivel 0 [C].
 - **Inicio:** es la misma rutina que el tick de actualización (entra en 969A) [C].
 - **Comportamiento** (cada 16 frames, IX+8):
   - Si IX+2 bit 7 = 1 → IX+2 &= 0x0F (se apaga: [I] invisible e intangible) [C].
@@ -976,7 +980,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** semántica exacta de IX+2 bits 4-7; si el trazado de enemies.json filtra teletransportes.
 
 #### 0x2B — trepamuros que recorre el contorno de las superficies (world08)
-- **Vida / recompensa:** 3 / clase 19 (0x13), cat. 0, valor 6.
+- **Vida / recompensa:** 3 / clase 19 (0x13), cat. 0, valor 6. **Botín real:** regla 3 (última viva), nivel 3 [C].
 - **Inicio:** IX+1 = 0 (dirección: derecha con suelo debajo); IX+1C = 0x11; IX+1D = 0; IX+1F = 1;
   IX+0A = IX+8 = C4; IX+1E = C8; carga las sondas de la dirección (6D7F) y velocidad 1 px/frame [C].
 - **Comportamiento:**
@@ -997,7 +1001,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** IX+1A = 0x0F (copiado de la tabla) no se usa aquí.
 
 #### 0x2C — caminante que se para hasta que desaparece su compañero (world02)
-- **Vida / recompensa:** 4 / clase 11 (0x0B), cat. 1, valor 10.
+- **Vida / recompensa:** 4 / clase 11 (0x0B), cat. 1, valor 10. **Botín real:** regla 4 (nunca) [C].
 - **Inicio:** IX+14 = E637 (índice de instancia; E637++) → estado compartido en E638[IX+14] [C].
   IX+15 = 16..31 frames de espera inicial; RES 4 IX+2 (quieto); IX+1D = 0x1A, IX+1E = 8, IX+1F = 0x20;
   vx = +1 px/frame; sprites IX+16..19 = A0 A4 A8 AC (derecha) o B0 B4 B8 BC (izquierda); IX+0A = IX+16 [C].
@@ -1019,7 +1023,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   0x2C usa esta rutina) [C]; quién ocupa el hueco siguiente en las salas; si E637 se reinicia por sala.
 
 #### 0x2D — soldado que patrulla, salta huecos y dispara al jugador en su fila (world02)
-- **Vida / recompensa:** 2 / clase 12 (0x0C), cat. 0, valor 7.
+- **Vida / recompensa:** 2 / clase 12 (0x0C), cat. 0, valor 7. **Botín real:** regla 1 (2.ª y 5.ª), nivel 1 [C].
 - **Inicio:** IX+8 = R & 0x7F (tiempo hasta buscar salto); IX+1D = R & 1 (1 = izquierda); vx = ±1.5 px/frame;
   aceleración y IX+16/17 = 0.25 px/frame²; sprite A0 / IX+11 = 0x0C (derecha) o AC / 0x0D (izquierda) [C].
 - **Comportamiento** (IX+1 vía tabla de saltos) [C]:
@@ -1048,7 +1052,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   sin seguir a fondo; IX+11 cambia con la animación.
 
 #### 0x2E — brote/llama intermitente que crece y se esconde (castillo)
-- **Vida / recompensa:** 2 / clase 38 (0x26), cat. 3, valor 3. Inmune con objeto 0x17.
+- **Vida / recompensa:** 2 / clase 38 (0x26), cat. 3, valor 3. Inmune con objeto 0x17. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 0 [C].
 - **Inicio:** IX+8 = rand (1..256 frames de espera); IX+1 = 0; IX+1E = FF; IX+2 &= 0x0F (oculto) [C].
 - **Comportamiento:**
   - Fase 0: espera IX+8 → fase 1 y primer paso [C].
@@ -1063,7 +1067,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** semántica exacta de los bits de IX+2.
 
 #### 0x2F — bloque que imita los saltos del jugador (world01, world03)
-- **Vida / recompensa:** 5 / clase 0, cat. 101, valor 4.
+- **Vida / recompensa:** 5 / clase 0, cat. 101, valor 4. **Botín real:** regla 2 (4.ª y 6.ª), nivel 0 [C].
 - **Inicio:** IX+1 = 0 si E515 = 0 o E513 bit 7 = 1; si no, IX+1 = E515+1. IX+1F = y (altura de reposo);
   vx = 0 [C].
 - **Comportamiento** (E512/E513, E515 y E50A son variables del jugador; [I] E512/13 = vy del jugador, E515 = 1
@@ -1083,7 +1087,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   del todo.
 
 #### 0x31 — pinchos/estalagmita que emergen del suelo o del techo (castillo)
-- **Vida / recompensa:** invulnerable (FF) / clase 27 (0x1B), cat. 4, valor 1. Inmune con objeto 0x22.
+- **Vida / recompensa:** invulnerable (FF) / clase 27 (0x1B), cat. 4, valor 1. Inmune con objeto 0x22. **Botín real:** regla 4 (nunca) [C].
 - **Inicio:** IX+2 &= 0x0F (oculto); IX+18 = 3; IX+8 = rand (1..256 frames) [C].
 - **Comportamiento:**
   - Fase 0: espera IX+8; mira el tile (x, y+16): si es sólido IX+17 = 1 → tabla 8C05 (00 C4 C8 CC D0 CC C8 C4 00);
@@ -1099,7 +1103,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** semántica de los bits de IX+2.
 
 #### 0x32 — estatua/torreta que dispara proyectiles (castillo; compartida con 0x51)
-- **Vida / recompensa:** invulnerable (FE) / clase 121 (0x79), cat. 5, valor 101.
+- **Vida / recompensa:** invulnerable (FE) / clase 121 (0x79), cat. 5, valor 101. **Botín real:** regla 4 (nunca) [C].
 - **Inicio:** IX+8 = 30; IX+15 = 30; RES 6 IX+2 ([I] no hace daño por contacto) [C].
 - **Comportamiento:**
   - Fase 0: cada 30 frames comprueba la zona; si el jugador está dentro → fase 1 [C].
@@ -1117,7 +1121,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   de E507? Merece comprobarlo en el emulador.
 
 #### 0x34 — bloque/cabeza que sube y baja más rápido cuanto más cerca está el jugador (castillo)
-- **Vida / recompensa:** 4 / clase 34 (0x22), cat. 3, valor 8.
+- **Vida / recompensa:** 4 / clase 34 (0x22), cat. 3, valor 8. **Botín real:** regla 1 (2.ª y 5.ª), nivel 2 [C].
 - **Inicio:** vy = +1 px/frame y ejecuta ya una actualización (entra en AAFA) [C].
 - **Comportamiento** (solo eje y; vx no se toca) [C]:
   - Velocidad = término x + término y. Término x por |jx − x|: ≥ 64 → 1.0; 40..63 → 1.5; 24..39 → 2.0;
@@ -1190,7 +1194,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 ---
 
 #### 0x36 — orbes en cadena que saltan de un sitio a otro
-- **Vida / recompensa:** invulnerable (FE); clase 18 (cat. 1, nivel 4). Mundo 5, 16 generadores.
+- **Vida / recompensa:** invulnerable (FE); clase 18 (cat. 1, nivel 4). Mundo 5, 16 generadores. **Botín real:** regla 4 (nunca) [C].
 - **Inicio (8A39):** IX+2 bit 2 = 1; IX+8 = 1..4 (desfase aleatorio de la animación); IX+18/19 =
   posición inicial y/x («casa») [C]. vx = 0, vy = +2,0 px/f (B133 con DE = 0, HL = 0x200) [C].
   IX+14 = índice de la instancia (contador global E633, que se incrementa); IX+0B = índice+2 [C].
@@ -1219,7 +1223,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 
 #### 0x3A — boca/cañón de pared que dispara ráfagas a la derecha
 (rutinas compartidas con 0x50; inicio 9159, update 9160)
-- **Vida / recompensa:** invulnerable (FE); clase 0 (cat. 101). Castillo, 3 generadores.
+- **Vida / recompensa:** invulnerable (FE); clase 0 (cat. 101). Castillo, 3 generadores. **Botín real:** regla 4 (nunca) [C].
 - **Inicio:** IX+8 = 60; IX+2 bit 6 = 0 [C].
 - **Comportamiento:**
   - Estado 0 (cerrado): DEC IX+8; sólo comprueba cuando llega a 0. Si falla, IX+8 da la vuelta y la
@@ -1237,7 +1241,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** E604 no confirmado como contador de frames. Significado de IX+2 bit 6.
 
 #### 0x3C — hechicero que se teletransporta y dispara
-- **Vida / recompensa:** 7; clase 19 (cat. 0, nivel 6). Castillo.
+- **Vida / recompensa:** 7; clase 19 (cat. 0, nivel 6). Castillo. **Botín real:** regla 3 (última viva), nivel 1 [C].
 - **Inicio (AE4C):** IX+16 = 32 (cadencia de disparo), IX+17 = 6 (animación), IX+8 = 64 [C].
 - **Comportamiento** (AE59, tabla de saltos con 3 casos):
   - Estado 0 (visible, 64 frames): cada 6 frames IX+0A ^= 4. Cada 32 frames (IX+16) dispara. Al
@@ -1257,7 +1261,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** qué hace exactamente cada bit del nibble alto de IX+2 (visible, colisión, movimiento).
 
 #### 0x40 — espíritu grande que persigue lentamente y lanza proyectiles
-- **Vida / recompensa:** 35; clase 57 (cat. 3, nivel 14). Mundo 8, 1 generador.
+- **Vida / recompensa:** 35; clase 57 (cat. 3, nivel 14). Mundo 8, 1 generador. **Botín real:** regla 3 (última viva), nivel 3 [C].
 - **Inicio (8D04):** IX+15 = 120; 8D61; IX+8 = 60; apunta al jugador a rapidez 0x10 (≈ 0,5 px/f) [C].
 - **Comportamiento** (8D0D). Cada frame, 8D61: IX+0A = 4 ó 5 según E604 bit 3 (animación de 8 frames);
   IX+12 = y+10, IX+13 = x+13 [C].
@@ -1276,7 +1280,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** para qué sirven IX+12/13 (y+10, x+13); ¿punto de colisión o de origen de disparo? B1DB.
 
 #### 0x42 — monstruo del agua que emerge y dispara
-- **Vida / recompensa:** 10; clase 60 (cat. 3, nivel 5). Castillo.
+- **Vida / recompensa:** 10; clase 60 (cat. 3, nivel 5). Castillo. **Botín real:** regla 3 (última viva), nivel 3 [C].
 - **Inicio (838D, también se reusa al reiniciar):** E603 = 1; vx = vy = 0; IX+16 = 0xA0; E628 = 0;
   x = tabla 83BE[r&3] = {0x30, 0x60, 0x80, 0x90}; vy = −0,5 px/f; nibble alto de IX+2 = 0
   (oculto e inmóvil [I]); IX+14 = 32 [C].
@@ -1297,7 +1301,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** E603 (lo ponen 0x42 y 0x43). IX+16 = 0xA0 no se usa en esta rutina. ¿Alguien llama a B14C?
 
 #### 0x43 — criatura ancha que patrulla y suelta un rayo vertical
-- **Vida / recompensa:** 10; clase 65 (cat. 4, nivel 4). Mundo 9.
+- **Vida / recompensa:** 10; clase 65 (cat. 4, nivel 4). Mundo 9. **Botín real:** regla 3 (última viva), nivel 3 [C].
 - **Inicio (84D5):** E603 = 1; IX+14 = 1; IX+12 = 0xD8, IX+13 = 3 (¿segundo sprite?) [I]; 8623 [C].
 - **8623 (empezar a andar):** `LD DE,0x200 / CALL 81F1 / AND 1 / LD D,0xFE`: el aleatorio no se usa y
   vx = **−2 px/f siempre** (izquierda) [C]. Luego comprueba el borde (8630).
@@ -1320,7 +1324,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   para siempre [I].
 
 #### 0x49 — insecto/mosca que se divide al ser golpeado
-- **Vida / recompensa:** 5; clase 106 (cat. 4, nivel 0). Mundo 3.
+- **Vida / recompensa:** 5; clase 106 (cat. 4, nivel 0). Mundo 3. **Botín real:** regla 4 (nunca) [C].
 - **Inicio (A0E3):** IX+12 = 0xBC, IX+13 = 1 (segundo sprite [I]), IX+14 = 1, IX+2 bit 5 = 0, IX+15 = 1,
   vx = vy = 0, E63E = 1 [C].
 - **Comportamiento** (A109, compartido con 0x52/0x53):
@@ -1338,7 +1342,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   eso.
 
 #### 0x4C — nube/criatura errante que suelta esporas cada 16 frames
-- **Vida / recompensa:** 20; clase 61 (cat. 4, nivel 2). Mundo 5.
+- **Vida / recompensa:** 20; clase 61 (cat. 4, nivel 2). Mundo 5. **Botín real:** regla 3 (última viva), nivel 2 [C].
 - **Inicio (8FCA):** IX+15 = 16, IX+8 = 8 [C].
 - **Comportamiento** (8FD3): cada 8 frames IX+0A ^= 1. Cada 16 frames (IX+15) crea **0x4D** en
   (y+16, x+16) y no ejecuta el movimiento ese frame [C]. Si no, el deambulador común 8145
@@ -1358,7 +1362,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Dudas:** la caja no tiene límite izquierdo ni superior efectivos (dependen del desbordamiento) [C].
 
 #### 0x4E — almas/fuegos fatuos que se reúnen en el centro
-- **Vida / recompensa:** vida 0 (descriptor); IX+2 &= 0x9F (bits 5 y 6 a 0 → ¿no golpeable?) [C/I].
+- **Vida / recompensa:** vida 0 (descriptor); IX+2 &= 0x9F (bits 5 y 6 a 0 → ¿no golpeable?) [C/I]. **Botín real:** regla 4 (nunca) [C].
   Castillo, 36 generadores.
 - **Inicio (822A):** IX+1A = 2, IX+0A = 0xA0, IX+18 = 112, IX+19 = r&15 [C].
 - **Comportamiento** (8247): cada 2 frames, IX+0B = tabla 82E4[IX+19] (ciclo de colores de 21 pasos)
@@ -1378,7 +1382,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 
 #### 0x50 — boca/cañón de pared que dispara ráfagas a la izquierda
 (misma rutina que 0x3A: 9159/9160)
-- **Vida / recompensa:** invulnerable (FE); clase 0 (cat. 101). Castillo. Sin hoja de sprites
+- **Vida / recompensa:** invulnerable (FE); clase 0 (cat. 101). Castillo. Sin hoja de sprites **Botín real:** regla 4 (nunca) [C].
   (descriptor 00 02 00 → sin bit 7 en d0, sin sprite [I]).
 - **Inicio / comportamiento:** como 0x3A, salvo dos cosas: la condición en x se invierte (CCF): el
   jugador debe estar a la izquierda o en la misma x (x ≥ jugador_x); y el 0x3B sale en (y+4, x+0) en
@@ -1390,7 +1394,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 
 #### 0x51 — trampa de flechas en la pared, dispara a la izquierda
 (rutinas compartidas con 0x32: inicio 9078, update 9084)
-- **Vida / recompensa:** invulnerable (FE); clase 121. Castillo. Sin sprite (descriptor 00 05 00) [I].
+- **Vida / recompensa:** invulnerable (FE); clase 121. Castillo. Sin sprite (descriptor 00 05 00) [I]. **Botín real:** regla 4 (nunca) [C].
 - **Inicio:** IX+8 = 30, IX+15 = 30, IX+2 bit 6 = 0 [C].
 - **Comportamiento:**
   - Estado 0: DEC IX+8; comprueba sólo al llegar a 0 (si falla, la siguiente vez es 256 frames
@@ -1407,7 +1411,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   sala [I]. No he mirado el update de 0x33.
 
 #### 0x64 — segmento trasero de oruga (pareja de 0x2C)
-- **Vida / recompensa:** 4; clase 0 (cat. 101). Mundo 2.
+- **Vida / recompensa:** 4; clase 0 (cat. 101). Mundo 2. **Botín real:** regla 4 (nunca) [C].
 - **Inicio (AAA3):** IX+2 bit 4 = 0. Copia IX+14 (índice de grupo) e IX+15 (retardo inicial) del
   **hueco anterior** (IX−0x0C, IX−0x0B), que es la cabeza 0x2C. Esta tomó el índice de E637 (que
   incrementa) y un retardo de 16..31 [C]. Después, A97F: IX+1D = 26, IX+1E = 8, IX+1F = 32 (umbrales
@@ -1434,7 +1438,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   generador no deja la cabeza justo en el hueco anterior, la herencia de IX−0x0C falla [I].
 
 #### 0x69 — cabezas flotantes en formación que disparan por turnos
-- **Vida / recompensa:** invulnerable (FF); clase 14 (cat. 0, nivel 1). Mundo 9, 21 generadores.
+- **Vida / recompensa:** invulnerable (FF); clase 14 (cat. 0, nivel 1). Mundo 9, 21 generadores. **Botín real:** regla 4 (nunca) [C].
 - **Inicio (74BB):** si E041 = 10 y E042 = 0x19 (mundo 9, sala 0x19), IX+1D = 1 (fuerza el modo
   apuntado) [C]. IX+2 bit 2 = 1; IX+15 = índice (contador E62A, que se incrementa). Si es la primera
   (líder, índice 0): E62B = 0, IX+18 = 0 (modo), IX+16 = 40, IX+19 = número de turnos (1..7) [C].
@@ -1766,3 +1770,247 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 4. 0x3F: el significado exacto de E500 = 6 y E50F (parálisis o aturdimiento) está por comprobar en el emulador.
 5. 0x06 dir 9 lee bytes de código más allá de 77FB+0x50 a partir del 9.º segmento.
 6. 0x41: la correspondencia entre el índice 0..7 y el ángulo de B1DB se ha deducido de la tabla, no se ha medido.
+
+## IA de enemigos — generados periódicamente
+
+(0x08 0x09 0x0D 0x21 0x30 0x35 0x38 0x3E, y sus hijos 0x1B y 0x6A). Generadores, salas y tiempos de aparición: `entities.md`, "Generadores periódicos por sala".
+
+### Notas previas
+
+- Unidades **por tick de IA** (1 tick = 2 frames). Velocidades en 8.8; px/tick = valor/256.
+- Orden de cada tick (b06:B3C5) [C]:
+  1. update del tipo;
+  2. si IX+2 bit 4 = 1, el integrador B0ED suma vy a y y vx a x;
+  3. se borra el enemigo si y ≥ 0xB8 o x ≥ 0xF9. Salir por arriba o por la izquierda también cuenta, porque la coordenada da la vuelta.
+
+  Cuando una ficha dice «se para», es que pone IX+2 bit 4 = 0.
+- **Gravedad** = IX+16/17, que B14C suma a vy, pero solo cuando la IA lo llama. El 0x3E usa IX+16/17 como variables propias, no como gravedad [C].
+- **Suelo, pared y techo:** un tile ≥ 0xBA es sólido [C].
+- **Animaciones:**
+  - E604 es el contador de ticks del bucle (b00:52F5) [I];
+  - 7062 anima con el sprite entre C0 y D0 cada 4 ticks;
+  - B17F anima cada 8 ticks.
+- **Inicio y update** en b04:66B4[t−1] y b06:B472[t−1]. Vida = byte 3 del descriptor b04:67B6 + 5·t (FE/FF = invulnerable). Contacto = b04:64E5 + t [C].
+- **Hijos** (6551): están sujetos al mismo límite E620 < E635 que los generados.
+
+| Tipo | Descriptor | Vida | Contacto | Inicio / update |
+|---|---|---|---|---|
+| 0x08 | 82 cc 09 ff 4d (2 sprites) | inv. (FF) | 4 | 6DFE / 6E32 |
+| 0x09 | 81 c4 0e fe 13 | inv. (FE) | 3 | 700D / 7020 |
+| 0x0D | 81 c8 09 01 00 | 1 | 1 | 784B / 78CD |
+| 0x21 | 81 a0 0b 02 58 | 2 | 2 | 7E89 / 7EB5 |
+| 0x30 | 8a c4 09 05 41 (2 sprites, 32 px de ancho) | 5 | 5 | 7F2E / 7F72 |
+| 0x35 | 81 c4 0e fe 13 (el mismo aspecto que 0x09) | inv. (FE) | 3 | AB88 / ABA7 |
+| 0x38 | 81 c4 08 01 66 | 1 | 1 | A7A8 / A7C3 |
+| 0x3E | 81 c4 0a 02 0f | 2 | 3 | A283 / A2A4 |
+| 0x1B (hijo de 0x08) | 81 c8 0a 01 05 | 1 | 1 | 6EC2 / 6E7D |
+| 0x6A (salpicadura) | 81 c4 0f ff 0b | inv. (FF) | 0 | 7937 / 6C47 |
+
+---
+
+#### 0x09 — bola que rebota (E650: castillo 58, 71, 113, 114)
+- **Nace** en (x de la tanda, y = 0) [C]:
+  - gravedad +0,5 px/tick² (IX+16 = 0x0080);
+  - vx = ±1 px/tick, con el signo al azar (R bit 0);
+  - vy = 0.
+- **Cada tick** [C]:
+  - Anima (7062).
+  - Solo si **y ≥ IX+8** (que empieza en 0), mira el suelo con 7087: el tile en (x, y+16) o en (x+8, y+16) es sólido y el de encima, (·, y+8), está libre. Si se cumple, rebota: IX+8 = y + 16, vy = **−4**, vx = ±1 con un signo nuevo al azar, y **sonido 0x09**.
+  - Si no rebota: vy += 0,5, con tope en **6 px/tick** (la parte alta de vy no pasa de 6).
+- **Consecuencia** [C/I]: tras un rebote sube unos 18 px en 8 ticks y vuelve a caer. No vuelve a mirar el suelo hasta bajar 16 px por debajo del punto del rebote. Así que **rebota una vez en cada piso y lo atraviesa** al caer de nuevo.
+  - No mira paredes: las atraviesa.
+  - Muere al salir por abajo o por un lado.
+  - No se puede matar.
+
+#### 0x38 — bola que sube al techo (E662: castillo 94, 95, 102)
+- **Nace** en (x de la tanda, y = 0xB0). Inicio [C]:
+  - estado 1;
+  - IX+1E = 0xA1 (altura a partir de la que mira el techo);
+  - gravedad **−0,5** (hacia arriba);
+  - vx = ±1 al azar.
+- **Estado 1, subir** [C]:
+  - Solo si y < IX+1E, mira el techo con 7087: tile sólido en (x, y) o en (x+8, y), con el de debajo libre. Al tocarlo:
+    - y = (y & F8) + 8, IX+1E = y − 0x20;
+    - vx = ±1 con un signo nuevo;
+    - **se para** (bit 4 = 0), con sprite C4 y attr 0x66;
+    - pasa al estado 0 con IX+8 = 60;
+    - **sonido 0x0B**.
+  - Velocidad: si vy ≥ 0, vy −= 0,5. Si vy es negativa, la parte alta se fija en −6, así que vy vale **−5,5 px/tick** desde el 2.º tick. Es la versión invertida del tope de 0x09, pero mal hecha: el tope actúa en cuanto la velocidad es negativa [C].
+- **Estado 0, colgado** [C]: quieto durante **60 ticks** pegado al techo.
+  - Luego vuelve a moverse, con sprite C8, attr 0x67 y **vy = +4**, y pasa al estado 1.
+  - Con la gravedad −0,5 cae unos 18 px en 8 ticks y vuelve a subir a 5,5 px/tick.
+  - No mira el techo hasta estar 32 px por encima del anterior, así que **atraviesa ese techo** y se pega al siguiente.
+  - Acaba saliendo por arriba (y da la vuelta a ≥ 0xB8) y se borra.
+
+#### 0x08 — bola de fuego (E653: lava; castillo 144–147, mundo 8: 15–19, mundo 9: 3–5, mundo 10: 2–3)
+- Es la que no daña con el **Pitcher** (`items_enemies.md`, objeto 0x24).
+- **Inicio (6DFE)** [C]:
+  - x = (E604 & 0x7F) + 0x40, es decir **64..191**: ignora la x del generador. La y es la del generador: 0xA0, o 0xB0 en el mundo 8.
+  - Altura objetivo IX+8 = (R & 0x3F) + 0x30 = **48..111**.
+  - vy = **−4**.
+  - Crea una salpicadura 0x6A en (x, y) con B = 1, con **sonido 0x0D**.
+  - Sprite: par CC/D4 o D0/D8 según E604 bit 3. Es un dibujo de 2 sprites (IX+0A e IX+12).
+- **Estado 0, subir:** sube a 4 px/tick (recto, sin gravedad) hasta y < IX+8. Entonces **se para**, pone IX+15 = 60 y pasa al estado 1 [C].
+- **Estado 1, flotar 60 ticks:** y += 1 o y −= 1 según E604 bit 2, así que oscila ±1 px con un periodo de 8 ticks [C].
+- **Al acabar, estalla** [C]:
+  - crea **8 fragmentos 0x1B** en su (y, x), con B = 7..0 (una dirección cada uno);
+  - se borra;
+  - sonido 0x0E.
+- Cada fragmento es un intento de creación aparte: con muchos enemigos en pantalla pueden faltar algunos [C].
+
+#### 0x1B — fragmento de la bola de fuego (hijo de 0x08)
+- **Inicio (6EC2)** [C]:
+  - (vx, vy, gravedad) salen de la tabla 6F13 + 6·dir;
+  - IX+3 bit 6 = 1: desaparece al tocar al jugador.
+
+  | dir | vx | vy | gravedad (px/tick²) | muere en y ≥ (mundos ≤ 8 y castillo) | ídem (mundos 9 y 10, E041 ≥ 10) |
+  |---|---|---|---|---|---|
+  | 0 | +0,25 | −4 | 0,125 | 0xA8 | 0xB0 |
+  | 1 | +0,75 | −3,5 | 0,133 | 0xA0 | 0xA8 |
+  | 2 | +1,25 | −3 | 0,141 | 0x90 | 0xA4 |
+  | 3 | +2 | −2 | 0,125 | 0x78 | 0xA0 |
+  | 4 | −2 | −2 | 0,125 | 0x78 | 0xA0 |
+  | 5 | −1,25 | −3 | 0,141 | 0x90 | 0xA4 |
+  | 6 | −0,75 | −3,5 | 0,133 | 0xA0 | 0xA8 |
+  | 7 | −0,25 | −4 | 0,125 | 0xA8 | 0xB0 |
+
+- **Cada tick (6E7D)** [C]:
+  - Primero, solo en cuatro salas, se borra al llegar a un borde, sin salpicadura (6E98):
+    - castillo 147 y mundo 9, sala 5: x ≥ 0xD8;
+    - castillo 144 y mundo 8, sala 15: x < 0x20.
+  - Después aplica la gravedad.
+  - Al llegar a la y límite se borra y crea una **salpicadura 0x6A** con B = 1 en su posición, con sonido 0x0D.
+  - No mira tiles. Abanico parabólico de 8 trozos.
+
+#### 0x6A — salpicadura (efecto)
+- Contacto 0, invulnerable. **Quieta** (bit 4 = 0) **10 ticks** y se borra [C].
+- Aspecto según B (E624) [C]:
+  - 0: el del descriptor (sprite C4, color F);
+  - 1: color 9;
+  - 2: sprite C0.
+- La crean el 0x08 (B = 1), el 0x1B (B = 1), el 0x0D (B = 0, en y = 0x90) y el 0x30 (B = 2, en (0x90, x+4)).
+- La rutina común 78B7 que la crea pide el sonido 0x24 si el padre es 0x30 y el 0x0D en los demás casos [C].
+
+#### 0x0D — pez saltador (E659: castillo 137–140)
+- **Inicio (784B)** [C]:
+  - **Lado:** IX+14 = R & 1. Con 0 salta hacia la derecha (vx > 0, sprite C8); con 1, hacia la izquierda (sprite D0).
+  - **50 % (R bit 2 = 0), junto al jugador:**
+    - x = jugador_x − 16 si salta a la derecha, o jugador_x + 16 si salta a la izquierda: nace detrás del jugador y salta hacia él;
+    - fuerza k según la altura del jugador: jugador_y < 0x3D → 0; < 0x5D → 1; < 0x7D → 2; si no, 3.
+  - **50 %, al azar:** x = R y k = R & 3.
+  - **Límite de x según la sala** (78F2, con B del generador = sala − 136): 137: [0x20, 0xE0] · 138 y 139: [0, 0xE0] · 140: [0, 0xD0]. Después:
+    - si x < mín + 0x30, salta a la derecha;
+    - si x ≥ máx − 0x18, a la izquierda;
+    - si no, se queda el lado sorteado.
+  - y = **0x90**. vx = ±tabla 7927[k], vy = tabla 792F[k], gravedad **+0,5**.
+  - Salpicadura 0x6A (B = 0) en (0x90, x) y **sonido 0x0D**.
+
+  | k | vx (px/tick) | vy inicial | altura del salto | ticks en el aire | avance en x |
+  |---|---|---|---|---|---|
+  | 0 | 0,664 | −6,5 | 42 px (cima en y = 0x66) | 27 | ≈ 17 px |
+  | 1 | 0,762 | −8,5 | 72 px (0x48) | 35 | ≈ 26 px |
+  | 2 | 0,887 | −10 | 100 px (0x2C) | 41 | ≈ 35 px |
+  | 3 | 1,141 | −11,5 | 132 px (0x0C) | 47 | ≈ 52 px |
+
+- **Cada tick (78CD)** [C]:
+  - vy += 0,5.
+  - Para la y, el integrador solo suma la **parte entera** de vy (tipo 0x0D en B0ED). Con eso, la bajada termina exactamente en y = 0x90 (simulado).
+  - Si vy ≥ 0 e y = 0x90: salpicadura (B = 0), sonido 0x0D y se borra.
+  - Cuando vy = 0 exacto (en la cima), sprite + 4.
+  - No mira tiles.
+- [I] Con el jugador arriba (y pequeña), el salto es el **más bajo**. Es lo que dice el código, aunque parezca al revés.
+
+#### 0x21 — caminante que cae (E65C)
+- **Inicio (7E89)** [C]:
+  - x = ((r − 16) & 0xDF) + 16, con r = (R/8) XOR E003. Sale en las bandas **16–47, 80–111, 144–175 o 208–239**.
+  - y = 0, la del generador.
+  - IX+14 = 0 si x < 0x80 (va a la derecha, vx = +1, sprite A0); si no, IX+14 = 1 (vx = −1, sprite A8). Es decir, **anda hacia el centro**.
+- **Estado 0, andar a 1 px/tick** [C]:
+  - Anima cada 8 ticks.
+  - **Suelo:** mira (x+2, y+16) y (x+13, y+16) (7F0E; con y ≥ 0xB0 no hay suelo). Si los dos están libres: vx = 0, vy = **+2**, estado 1.
+  - **Pared:** si el tile en (x+14, y+8) yendo a la derecha, o en (x+1, y+8) yendo a la izquierda, es sólido, da la vuelta (vx = −vx, attr 0x58).
+  - No da la vuelta en los bordes de pantalla: sale y se borra.
+- **Estado 1, caer a 2 px/tick constantes** (sin gravedad) [C]: al encontrar suelo, y &= F8, vy = 0, vx = ±1 según IX+14, y vuelve al estado 0.
+- Desde y = 0 cae hasta el primer suelo bajo su x. Muere al caer por abajo o salir por un lado. Vida 2.
+
+#### 0x35 — bola rodante (E665: castillo 47, 59; mundo 8: 2, 14)
+- **Inicio (AB88)** [C]:
+  - x como 0x21 (las mismas cuatro bandas); y = 0.
+  - **vx = +1,5 si x < 0x80, −1,5 si no** (hacia el centro).
+  - vy = 0, gravedad **+0,25**.
+- **Cada tick** [C]:
+  - Anima (7062).
+  - **Pared:** si el tile en (x+16, y+8) yendo a la derecha, o en (x, y+8) yendo a la izquierda, es sólido, vx = −vx. Pasa también en el aire. En el borde de pantalla (x < 8 a la izquierda, x ≥ 0xF0 a la derecha) **no** rebota y se sale.
+  - **Estado par, cayendo:** si el tile en (x+8, y+16) es sólido: y &= F8, vy = 0 (salvo si y ≥ 0xB0), **sonido 0x09**, estado 1. Si no, vy += 0,25, **sin tope**.
+  - **Estado impar, rodando a 1,5 px/tick:** si falta el suelo bajo su centro (x+8, y+16), vuelve a caer con gravedad 0,25.
+- Invulnerable; muere al salir de la pantalla.
+
+#### 0x30 — saltador de lava (E65F: mundo 5, salas 7–10)
+- **Inicio (7F2E)** [C]:
+  - Altura objetivo k = R & 3 → y = tabla 80BC[k] = **0x24, 0x44, 0x64 o 0x84**.
+  - x = (r & 0xBF) + 0x20, con r = (R/8) XOR E003: bandas **32–95 o 160–223**. y = 0x90.
+  - IX+14 = 0 si x < 0x80 (mira a la derecha); si no, 1.
+  - vy = **−4**, gravedad +0,5 (solo se aplica en los estados 1 y 4).
+  - Contador de vueltas IX+18 = 2.
+  - Salpicadura 0x6A (B = 2) en (0x90, x+4) y **sonido 0x24**.
+  - Mide 32 px de ancho (2 sprites).
+- **Estados** [C]:
+  - **0:** sube a 4 px/tick hasta y = objetivo (exacto). Tarda 3, 11, 19 o 27 ticks.
+  - **1:** arco de 16 ticks con gravedad 0,5: vy de −4 a +4. Sube unos 14 px más y acaba 4 px por debajo.
+  - **2, caer a +4 constantes:**
+    - Si y ≥ 0x90 → salpicadura y se borra.
+    - Busca suelo en 5 columnas (x, x+8, …, x+32): algún tile sólido en la fila y+16 y ninguno en la fila y+8 (8087).
+    - Al encontrarlo: y &= F8, vy = 0, IX+1A = x (punto de aterrizaje), vx = **±2** según IX+14, y pasa al estado 3.
+  - **3, andar a 2 px/tick.** Da la vuelta (vx = −vx, IX+14 ^= 1, IX+18 −= 1) si pasa una de estas cosas:
+    - no hay suelo delante: (x+32, y+16) a la derecha o (x, y+16) a la izquierda;
+    - hay pared en (x+24, y+8) a la derecha o en (x−8, y+8) a la izquierda;
+    - llega al borde: x ≥ 0xE0 a la derecha o x < 0x10 a la izquierda.
+
+    Con IX+18 = 0 (ya dio 2 vueltas), al volver a pasar por IX+1A salta. También salta si da una tercera vuelta (IX+18 = FF). El salto es vy = −4, vx = 0 y estado 4.
+  - **4:** el mismo arco de 16 ticks que el estado 1.
+  - **5:** cae a +4 constantes **atravesando todo** hasta y ≥ 0x90; ahí hace la salpicadura y se borra.
+
+#### 0x3E — volador en zigzag (E668: mundo 6, salas 2, 3, 4, 7, 8, 17, 18)
+- **Inicio (A283)** [C]:
+  - Ignora la posición del generador. **x = 0xB0 si E669 ≥ 5** (los 5 primeros de 10); si no, **x = 0x40**. y = **0x28**.
+  - vy = +2. Anima cada 6 ticks (sprite ^ IX+1B, con IX+1B = 12, y attr ^ 1).
+- **Movimiento** [C]: es determinista, sin aleatorio y sin mirar tiles.
+  - **Estado 0:**
+    - k = IX+18 & 7 (sube 1 en cada paso);
+    - doble = A3D2[k] = {0,0,1,0,0,0,0,1};
+    - fila = A3DA[k] = {3,1,2,3,1,3,0,1};
+    - objetivo y = A3CE[fila] = {0x3C, 0x5C, 0x7C, 0x9C} si va hacia abajo, o A3CA[fila] = {0x2C, 0x4C, 0x6C, 0x8C} si va hacia arriba (IX+15).
+    - Si x ≥ 0xC8 yendo a la derecha, o x < 0x28 yendo a la izquierda, cambia de sentido: sprite C4 o CC, IX+1B = 12 o 0x1C, attr 0x0F.
+  - **Estado 1:** se mueve en vertical a ±2 px/tick hasta y = objetivo (exacto). Entonces vy = 0 y vx = ±1.
+  - **Estado 2, ondulación de 14 ticks** a 1 px/tick en x:
+    - en cada tick, y += d[i] con i = 0..13 y d = A3BA = {3,3,2,1,1,0,0,0, 0,0,0,−1,−1,−2}, es decir, baja 10 px y sube 4;
+    - todo invertido si va hacia arriba;
+    - con «doble» = 1, al llegar a i = 13 invierte el sentido vertical y repite desde i = 2.
+
+    Al acabar invierte el sentido vertical (IX+15 ^= 1), vx = 0, vy = ±2 y vuelve al estado 0.
+- **Trayectoria simulada desde x = 0x40** (tick: x, y):
+  - 59: (0x40, 0x9C), 74: (0x4F, 0xA2), 117: (0x4F, 0x4C), 132: (0x5E, 0x46), 159: (0x5E, 0x7C), 186: (0x79, 0x82)…;
+  - llega a x = 0xD0 hacia el tick 458 y vuelve.
+- **Lo que se ve:** barre la pantalla de lado a lado entre x ≈ 0x22 y 0xD0, con subidas y bajadas en vertical a 2 px/tick entre las filas 0x26 y 0xA2, y una ondulación en cada parada.
+- **No sale de pantalla** (simulado más de 2000 ticks): vive hasta que lo matan (vida 2). El generador pone un máximo de 5 o 10 en total.
+
+### Tabla resumen
+
+| Tipo | Gen. | Vida | Contacto | Movimiento | Muere | Hijos / sonido |
+|---|---|---|---|---|---|---|
+| 0x09 | E650 | inv. | 3 | cae (g 0,5, tope 6) y rebota con vy −4 una vez por piso; vx ±1 | sale de pantalla | sonido 0x09 al rebotar |
+| 0x38 | E662 | 1 | 1 | sube a 5,5; se pega al techo 60 ticks; cae con vy +4 y sigue subiendo | sale por arriba | 0x0B al pegarse |
+| 0x08 | E653 | inv. | 4 | sube a 4 hasta y = 48..111; flota 60 ticks (±1 px) | estalla | 8 × 0x1B; 0x6A al nacer (0x0D); 0x0E al estallar |
+| 0x1B | (0x08) | 1 | 1 | parábola (tabla de 8 direcciones) | y límite (0x6A) o al tocar al jugador | 0x6A; 0x0D |
+| 0x6A | — | inv. | 0 | quieta | 10 ticks | — |
+| 0x0D | E659 | 1 | 1 | salto parabólico desde y = 0x90 (g 0,5; 4 fuerzas) | al volver a y = 0x90 | 0x6A; 0x0D |
+| 0x21 | E65C | 2 | 2 | cae a 2 y anda a 1; gira en paredes | sale de pantalla | — |
+| 0x35 | E665 | inv. | 3 | cae (g 0,25) y rueda a 1,5; rebota en paredes | sale de pantalla | 0x09 al aterrizar |
+| 0x30 | E65F | 5 | 5 | sube a 4, arco, cae a 4 a una plataforma, anda a 2 (2 vueltas), salta y cae a la lava | y ≥ 0x90 | 0x6A; 0x24 |
+| 0x3E | E668 | 2 | 3 | zigzag determinista: vertical a 2, ondulación a 1 en x, cambia de sentido en 0x28/0xC8 | solo por vida | — |
+
+### Dudas
+1. 0x38: el tope de velocidad deja vy fija en −5,5 en cuanto se vuelve negativa. Parece un descuido (el 0x09 lo hace bien), pero es lo que hace el código.
+2. 0x0D: la fuerza más baja corresponde al jugador más arriba. Habría que comprobar en openMSX (castillo 137–140) si es así.
+3. 0x09 y 0x38 atraviesan el piso o el techo en el que acaban de rebotar o colgarse (IX+8 / IX+1E). Comprobar en el emulador si es lo que se ve.
+4. E604 se trata como contador de ticks (se incrementa en b00:52F5, dentro del bucle) [I].

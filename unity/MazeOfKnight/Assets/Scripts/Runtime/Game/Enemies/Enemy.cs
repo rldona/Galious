@@ -12,6 +12,7 @@ namespace MazeOfKnight.Game.Enemies
         public PlayerMotor Player;
         public Random Random;
         public int Tick;                 // contador global de ticks (E604 en el original)
+        public int E041 = 1;             // 1 castillo, n + 1 mundo n
         public int PlayerDy;             // lo que se ha movido el jugador en y este tick (0x2F copia su vy)
         public IReadOnlyList<Enemy> Enemies;
         public Func<int, float, float, Enemy> SpawnChild;   // tipo, x, y → el hijo (o null si no hay hueco)
@@ -67,6 +68,7 @@ namespace MazeOfKnight.Game.Enemies
         public bool FacingLeft;
         public float Grow = 1f;          // parte visible de la caja (pinchos y brotes que crecen), de abajo arriba
         public int Param;                // B del creador (E624): dirección, pareja…
+        public PeriodicJson Generator;   // generador periódico que lo creó (null si no)
         public bool DiesOnTouch;         // los proyectiles desaparecen al dar al jugador [I]
 
         // Atraviesa suelos ahora mismo (escaleras del caballero, saltos entre pisos): las pruebas no lo cuentan como
@@ -85,7 +87,9 @@ namespace MazeOfKnight.Game.Enemies
         // Al morir por la espada (p. ej. la mosca 0x49 se divide).
         public virtual void Die(EnemyContext ctx) { }
 
-        protected bool Solid(EnemyContext ctx, float px, float py) => ctx.World.Solid(Room, (int)Math.Floor(px), (int)Math.Floor(py));
+        // Por encima de la sala (el marcador) no hay sólidos para los enemigos: los generados en y = 0 caen por ahí.
+        protected bool Solid(EnemyContext ctx, float px, float py) =>
+            py >= P.RoomTopPx && ctx.World.Solid(Room, (int)Math.Floor(px), (int)Math.Floor(py));
         protected bool Ladder(EnemyContext ctx, float px, float py) => ctx.World.Ladder(Room, (int)Math.Floor(px), (int)Math.Floor(py));
 
         protected void Move() { X += Vx; Y += Vy; }

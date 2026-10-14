@@ -155,18 +155,21 @@ namespace MazeOfKnight.Tests
             var catalog = Resources.Load<EnemyCatalog>("Enemies");
             if (catalog == null)
                 Assert.Ignore("Sin catálogo de enemigos importado");
-            int rooms = 0, enemies = 0;
+            int rooms = 0, enemies = 0, periodicRooms = 0;
             var problems = new System.Collections.Generic.List<string>();
             foreach (var name in new[] { "castle" }.Concat(Enumerable.Range(1, 10).Select(OriginalWorlds.MapName)))
             {
                 var world = World(Load(name));
-                foreach (var room in world.Rooms.Where(r => r.spawns.Any(s => EnemySystem.Implemented(s.type))))
+                foreach (var room in world.Rooms.Where(r => r.spawns.Any(s => EnemySystem.Implemented(s.type)) || r.periodic.Length > 0))
                 {
                     rooms++;
                     var motor = new PlayerMotor(world, room, 128, 120);
                     var sys = new EnemySystem(catalog.enemies, room.id);
                     sys.EnterRoom(world, room, motor);
                     if (sys.Missing > 0) problems.Add($"{name} {room.id}: {sys.Missing} sin implementar");
+                    foreach (var p in room.periodic)
+                        if (!EnemySystem.Implemented(p.type)) problems.Add($"{name} {room.id}: generador de 0x{p.type:X2} sin implementar");
+                    periodicRooms += room.periodic.Length > 0 ? 1 : 0;
                     enemies += sys.Enemies.Count;
                     int before = problems.Count;
                     for (int t = 0; t < 600; t++)
@@ -186,6 +189,7 @@ namespace MazeOfKnight.Tests
                 }
             }
             Assert.Greater(enemies, 400);
+            Assert.AreEqual(51, periodicRooms, "salas con generador periódico");
             Assert.IsEmpty(problems, string.Join("; ", problems.Take(15)));
             TestContext.WriteLine($"{rooms} salas, {enemies} enemigos simulados 600 ticks");
         }

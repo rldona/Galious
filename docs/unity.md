@@ -89,7 +89,10 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
   - Simplificaciones [I], todas marcadas en el código: sondeos de salto entre pisos (9A67/9CA3) reducidos a "suelo bajo los pies y cuerpo libre"; los que caen chocan con paredes y techos y se posan en cualquier sólido bajo su caja (para no quedar metidos en un muro); el rayo 0x06 reparte su desviación por igual entre segmentos; el pistón 0x04 hace daño pero no es sólido; los tamaños de 32 px (0x40, 0x37, murciélagos de nivel 2) están deducidos de los sprites; la fase latente del pistón y el modo forzado de las cabezas 0x69 (mundo 9, sala 0x19) no se usan.
 
 ## Pendiente
-- El botín al matar enemigos y los generadores periódicos; armas secundarias, objetos de mundo e inventario.
+- Muerte y botín (`Loot.cs`): explosión de 24 ticks (4 en los grandes, una cada 16 [I]) y sorteo según el tipo: regla (qué muertes de ese tipo sortean en la visita a la sala, con 2 tipos seguidos como mucho, o "el último vivo") y nivel (por el daño). El objeto (flechas, monedas o llaves) se queda quieto en la rejilla de 8 px hasta recogerlo o salir de la sala; tope 999. La experiencia (BF27) está en el catálogo pero aún no se usa.
+- Generadores periódicos (`Periodic.cs`, `EnemyGenerated.cs`): los 8 generadores de 51 salas con sus tiempos en ticks (tandas de 3 del E650/E662, espera aleatoria del E653, que el Carpet apaga, pausa del E659 con el jugador en el agua, fin del E668 a los 5 o 10) y sus tipos 0x08, 0x09, 0x0D, 0x1B, 0x21, 0x30, 0x35, 0x38, 0x3E y 0x6A.
+- Cajas de contacto exactas: el descriptor d4 (IX+11) es el índice de la caja de colisión (b14:9006: dy, dx, alto, ancho) y cambia con cada fotograma; ahora se usan cajas de 16 px (o 32) aproximadas.
+- Armas secundarias, objetos de mundo e inventario.
 - Salas de dios de los mundos y puerta del mundo 10.
 - Piedras que aparecen (clase 6, mundo 5) y muros que abren los eventos de sala (dependen de los enemigos).
 - Pipeline URP con renderer 2D (luces) y el estilo visual del remake.

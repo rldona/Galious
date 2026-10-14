@@ -66,6 +66,22 @@ namespace MazeOfKnight.Game.Enemies
             { 0x51, () => new ArrowTrap() },
             { 0x64, () => new InchWorm() },
             { 0x69, () => new FloatingHead() },
+            // muerte y botín
+            { 0x5B, () => new DeathExplosion() },
+            { 0x5D, () => new LootDrop() },
+            { 0x5E, () => new LootDrop() },
+            { 0x5F, () => new LootDrop() },
+            // generados periódicamente (docs/enemy_ai.md, "generados periódicamente")
+            { 0x08, () => new Geyser() },
+            { 0x09, () => new BouncingBall() },
+            { 0x0D, () => new LeapFish() },
+            { 0x1B, () => new Droplet() },
+            { 0x21, () => new FallingWalker() },
+            { 0x30, () => new Wader() },
+            { 0x35, () => new RollingStone() },
+            { 0x38, () => new CeilingClimber() },
+            { 0x3E, () => new Weaver() },
+            { 0x6A, () => new Splash() },
             // hijos (los crea otro enemigo)
             { 0x37, () => new FusingBat() },
             { 0x52, () => new SplitFly() },
@@ -90,8 +106,9 @@ namespace MazeOfKnight.Game.Enemies
         public event Action<Enemy> Killed;
         public event Action<Enemy> Hit;
 
-        public EnemySystem(IEnumerable<EnemyInfo> infos, int seed = 1)
+        public EnemySystem(IEnumerable<EnemyInfo> infos, int seed = 1, LootTable loot = null)
         {
+            if (loot != null) Loot = loot;
             catalog = infos.ToDictionary(e => e.type);
             Context.Random = new Random(seed);
         }
@@ -103,6 +120,8 @@ namespace MazeOfKnight.Game.Enemies
             Context.Enemies = enemies;
             Context.SpawnChild = SpawnChild;
             Context.ResetRoom();
+            ResetLoot();
+            StartGenerators(room);
             lastPlayerY = player.Y;
             enemies.Clear();
             Room = room;
@@ -114,7 +133,7 @@ namespace MazeOfKnight.Game.Enemies
             }
         }
 
-        Enemy Create(int type, float x, float y, int param)
+        Enemy Create(int type, float x, float y, int param, PeriodicJson generator = null)
         {
             if (!Factories.TryGetValue(type, out var make) && !Projectiles.TryGetValue(type, out make))
                 return null;
@@ -126,6 +145,7 @@ namespace MazeOfKnight.Game.Enemies
             e.X = x;
             e.Y = y;
             e.Param = param;
+            e.Generator = generator;
             if (catalog.TryGetValue(type, out var info))
             {
                 e.Hp = info.hp;
@@ -133,6 +153,8 @@ namespace MazeOfKnight.Game.Enemies
                 e.Invulnerable = info.invulnerable;
             }
             e.Init(Context);
+            if (e is DeathExplosion boom)
+                boom.Finished = b => DropLoot(b.DeadType, b.X, b.Y);
             enemies.Add(e);
             Spawned?.Invoke(e);
             return e;
@@ -146,6 +168,8 @@ namespace MazeOfKnight.Game.Enemies
         public void Tick()
         {
             Context.Tick++;
+            TickDeaths();
+            TickGenerators();
             Context.PlayerDy = Context.Player.Y - lastPlayerY;
             lastPlayerY = Context.Player.Y;
             int n = enemies.Count;
@@ -204,6 +228,7 @@ namespace MazeOfKnight.Game.Enemies
                     e.Alive = false;
                     e.Die(Context);
                     Killed?.Invoke(e);
+                    StartDeath(e);
                 }
                 else
                     e.Hurt(Context);

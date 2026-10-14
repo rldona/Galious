@@ -31,6 +31,31 @@ namespace MazeOfKnight.Data
         public int mode;        // se retira al subirla (1), al bajarla (2) o en los dos casos (3)
     }
 
+    // Generador periódico de la sala (docs/entities.md, "Generadores periódicos por sala"; tools/extract/periodic.py).
+    // Tiempos en ticks. Con periodRandom cada espera, la primera incluida, es aleatoria en [min, max]. Con batch,
+    // tandas de 'batch' intentos separados 'period' y 'batchGap' entre tandas. x = -1: la decide el tipo.
+    [Serializable]
+    public class PeriodicJson
+    {
+        public string gen;
+        public int type;
+        public int firstDelay;
+        public int period;
+        public int[] periodRandom = Array.Empty<int>();
+        public int batch;
+        public int batchGap;
+        public int maxTotal;           // 0 = sin fin
+        public int x = -1;
+        public int y;
+        public int[] xSequence = Array.Empty<int>();
+        public int[] randomX = Array.Empty<int>();   // pares [desde, hasta]
+        public string xRule;           // sequence, random o leap
+        public int[] xClamp = Array.Empty<int>();
+        public int param;
+        public bool pauseInLiquid;
+        public int disabledByItem;     // no se arma si al entrar se tiene este objeto (0x18, Carpet)
+    }
+
     [Serializable]
     public class RoomModel
     {
@@ -52,6 +77,7 @@ namespace MazeOfKnight.Data
         public EntityJson item;
         public PointJson[] rocks = Array.Empty<PointJson>();
         public LadderJson[] ladders = Array.Empty<LadderJson>();
+        public PeriodicJson[] periodic = Array.Empty<PeriodicJson>();
         public int doorWorld;   // castillo: puerta al mundo n (0 = ninguna)
         public PointJson door;
         public int godType;     // castillo: sala de dios (E690), 0 = ninguna
