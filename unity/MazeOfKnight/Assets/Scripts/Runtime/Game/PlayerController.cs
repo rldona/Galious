@@ -100,7 +100,9 @@ namespace MazeOfKnight.Game
             transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y);
             if (body != null)
             {
-                body.color = Motor.Character == Character.Popolon ? popolonColor : aphroditeColor;
+                var color = Motor.Character == Character.Popolon ? popolonColor : aphroditeColor;
+                // El original cambia de sprite en la escalera; aquí, provisionalmente, se oscurece.
+                body.color = Motor.State == MotorState.Ladder ? Color.Lerp(color, Color.black, 0.45f) : color;
                 body.flipX = Motor.FacingLeft;
             }
             if (sword != null)

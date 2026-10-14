@@ -80,7 +80,9 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 | Caer por un borde (E500 = 2) | la caída empieza en la entrada "3" de la tabla de bajada (3 4 4 5 5 6…) y **no hay control horizontal** |
 | Aterrizar | el último paso puede meter los pies en el suelo; se corrige al borde superior de la fila |
 | Apoyo en el suelo | solo cuenta el centro de los pies, **x − 4 … x + 4** (las paredes sí usan la caja de 16 px, x − 8 … x + 7). Mundo 1, sala 2, hueco de 2 tiles en x = 120–135: se cae en x = 124/125 viniendo por la izquierda y en 130/131 por la derecha |
-| Escalera (E500 = 3) | 1 px/tick. A media escalera ← y → no hacen nada, ni con ↑ (medido en el castillo, sala 1); a la altura de un suelo sí se sale andando |
+| Escalera (E500 = 3) | 1 px/tick. A media escalera ← y → no hacen nada, ni con ↑ (medido en el castillo, sala 1) |
+| Escalera que atraviesa un suelo | bajando, al llegar al suelo **queda de pie** (E500 = 0) aunque se mantenga ↓; con una pulsación nueva de ↓ se engancha a la de abajo **cruzando la fila del suelo de golpe** (y 120 → 128). Subiendo, al entrar 1 px en la fila del suelo (y = 127) salta encima (y = 120) y queda de pie; para seguir por la de arriba hay que volver a pulsar ↑ |
+| Pulsaciones | saltar y engancharse a una escalera piden **una pulsación nueva**: con ↑ mantenido solo hay un salto (300 frames medidos) |
 
 **Espada** [O] (`tools/openmsx/sword_measure.py`, datos en `logs/omsx/sword_measure*.json`):
 

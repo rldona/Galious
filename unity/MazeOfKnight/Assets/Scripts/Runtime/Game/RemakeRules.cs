@@ -6,6 +6,6 @@ namespace MazeOfKnight.Game
     {
         // Original: a media escalera, ← y → no hacen nada (medido en el castillo, sala 1). Remake: si hay sitio a
         // ese lado, el jugador se suelta y cae con control en el aire.
-        public static bool LeaveLadderSideways = true;
+        public static bool LeaveLadderSideways = false;   // desactivado: se juega como el original
     }
 }

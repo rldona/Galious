@@ -48,6 +48,7 @@ namespace MazeOfKnight.Game
         public int AttackTicks { get; private set; }
         public bool AttackStartedThisTick { get; private set; }
         bool attackHeld;
+        bool upHeld, downHeld;   // saltar, engancharse a una escalera y entrar por una puerta piden pulsar de nuevo
 
         public event System.Action<RoomModel, RoomModel> RoomChanged;
         public event System.Action<int> DoorEntered;        // mundo
@@ -90,6 +91,9 @@ namespace MazeOfKnight.Game
 
         public void Tick(MotorInput input)
         {
+            bool upPressed = input.Up && !upHeld, downPressed = input.Down && !downHeld;
+            upHeld = input.Up;
+            downHeld = input.Down;
             LastInput = input;
             var liquidBefore = Liquid;
             Liquid = LiquidAt();
@@ -110,7 +114,7 @@ namespace MazeOfKnight.Game
 
             switch (State)
             {
-                case MotorState.Ground: TickGround(input); break;
+                case MotorState.Ground: TickGround(input, upPressed, downPressed); break;
                 case MotorState.JumpPrep: TickJumpPrep(input); break;
                 case MotorState.Jump: TickJump(input); break;
                 case MotorState.Fall: TickFall(input); break;
@@ -122,7 +126,9 @@ namespace MazeOfKnight.Game
 
         // ---------- estados ----------
 
-        void TickGround(MotorInput input)
+        // Medido en openMSX: con ↑ o ↓ mantenidos no se repite nada al llegar al suelo (ni otro salto ni la
+        // escalera siguiente); hace falta una pulsación nueva.
+        void TickGround(MotorInput input, bool upPressed, bool downPressed)
         {
             if (AttackTicks > 0)
             {
@@ -131,18 +137,24 @@ namespace MazeOfKnight.Game
                     StartFall(P.LedgeFallStart, false);
                 return;
             }
-            if (input.Down && AtDoor())
+            if (downPressed && AtDoor())
             {
                 DoorEntered?.Invoke(Room.doorWorld);
                 return;
             }
-            if (input.Up && TryGrabLadder(Y - 1))
+            if (upPressed && TryGrabLadder(Y - 1))
                 return;
-            // La escalera puede atravesar el suelo: la fila de los pies es sólida y sigue debajo.
-            if (input.Down && (TryGrabLadder(Y) || TryGrabLadder(Y + 8, Y)))
+            // La escalera puede atravesar el suelo: la fila de los pies es sólida y sigue debajo. Al engancharse
+            // el jugador cruza esa fila de golpe (y + 8), como en el original.
+            if (downPressed && TryGrabLadder(Y))
                 return;
+            if (downPressed && TryGrabLadder(Y + 8, Y))
+            {
+                Y += 8;
+                return;
+            }
             MoveHorizontal(input, P.WalkSpeed);
-            if (input.Up)
+            if (upPressed)
             {
                 State = MotorState.JumpPrep;
                 prepTicks = 1;               // este tick ya cuenta como preparación
@@ -235,7 +247,7 @@ namespace MazeOfKnight.Game
                 ((Y - P.RoomTopPx) & 7) == 0 && SolidUnderFeet())
             {
                 State = MotorState.Ground;
-                TickGround(input);
+                TickGround(input, false, false);
                 return;
             }
             // Remake: soltarse de la escalera hacia un lado con sitio libre (RemakeRules).
@@ -249,8 +261,14 @@ namespace MazeOfKnight.Game
             if (input.Up)
             {
                 Y -= P.LadderSpeed;
-                // Arriba del todo: sin escalera por encima de los pies, queda de pie.
-                if (((Y - P.RoomTopPx) & 7) == 0 && !LadderContinues(Y - 1, -1))
+                // Al entrar en una fila de suelo, el original salta arriba de ella y queda de pie (y = 127 -> 120).
+                if (SolidPairAt(X, Y))
+                {
+                    Y = ((Y - P.RoomTopPx) & ~7) + P.RoomTopPx;
+                    State = MotorState.Ground;
+                }
+                // Arriba del todo: sin escalera ni suelo por encima de los pies, queda de pie.
+                else if (((Y - P.RoomTopPx) & 7) == 0 && !LadderContinues(Y - 1, -1))
                     State = MotorState.Ground;
             }
             else if (input.Down)
@@ -333,17 +351,18 @@ namespace MazeOfKnight.Game
         // En los mapas del original la escalera atraviesa los suelos: las columnas de la escalera son sólidas en
         // la fila del suelo y la escalera sigue al otro lado (castillo, sala 1: suelo en la fila 11 y escalera
         // en las filas 0-10 y 12-19). Se puede trepar a través de una fila así.
-        // Al subir también se atraviesa un suelo sin escalera encima, para salir de pie sobre él.
+        // Bajando, la escalera sigue solo si hay escalera bajo los pies: al llegar a un suelo se queda de pie
+        // aunque la escalera siga al otro lado. Subiendo se entra en una fila de suelo (y se sale encima de ella).
         bool LadderContinues(int py, int dir)
         {
             if (LadderPairAt(X, py))
                 return true;
-            // Por el borde de arriba se sigue trepando (salida al castillo o escalera en la sala de arriba).
-            if (dir < 0 && py < P.RoomTopPx && !SolidPairAt(X, py))
-                return true;
-            if (!SolidPairAt(X, py))
+            if (dir > 0)
                 return false;
-            return dir > 0 ? LadderPairAt(X, py + 8) : !SolidPairAt(X, py - 8);
+            // Por el borde de arriba se sigue trepando (salida al castillo o escalera en la sala de arriba).
+            if (py < P.RoomTopPx)
+                return !SolidPairAt(X, py);
+            return SolidPairAt(X, py);
         }
 
         bool SolidPairAt(int x, int py) => world.Solid(Room, x - 1, py) && world.Solid(Room, x, py);

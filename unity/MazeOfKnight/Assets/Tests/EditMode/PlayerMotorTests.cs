@@ -102,6 +102,34 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void HoldingUpJumpsOnlyOnce()
+        {
+            // Medido: con ↑ mantenido 300 frames solo hay un salto.
+            var (_, dy, _) = Run(FlatRoom(), Character.Popolon, 64, 120, 100, t => new MotorInput { Up = true });
+            int jumps = 0;
+            for (int t = 1; t < dy.Count; t++)
+                if (dy[t] < 0 && dy[t - 1] >= 0) jumps++;
+            Assert.AreEqual(1, jumps);
+        }
+
+        [Test]
+        public void DescendingStopsOnTheFloorUntilPressedAgain()
+        {
+            // Medido: bajando con ↓ mantenido se queda de pie en el suelo (y = 120) aunque la escalera siga debajo.
+            var room = LadderThroughFloor();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 100);
+            motor.Tick(new MotorInput { Down = true });
+            for (int t = 0; t < 60; t++)
+                motor.Tick(new MotorInput { Down = true });
+            Assert.AreEqual(MotorState.Ground, motor.State);
+            Assert.AreEqual(120, motor.Y);
+            motor.Tick(new MotorInput());
+            motor.Tick(new MotorInput { Down = true });
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            Assert.AreEqual(128, motor.Y);
+        }
+
+        [Test]
         public void WalkIsTwoPixelsPerTick()
         {
             var (_, _, dx) = Run(FlatRoom(), Character.Popolon, 64, 120, 10, t => new MotorInput { Right = true });
@@ -162,21 +190,30 @@ namespace MazeOfKnight.Tests
         [Test]
         public void LadderGoesDownThroughTheFloor()
         {
+            // Medido: al engancharse cruza la fila del suelo de golpe (y = 120 -> 128) y luego baja 1 px/tick.
             var (motor, dy, _) = Run(LadderThroughFloor(), Character.Popolon, 121, 120, 20, t => new MotorInput { Down = true });
             Assert.AreEqual(120, motor.X);
             Assert.AreEqual(MotorState.Ladder, motor.State);
-            Assert.AreEqual(120 + 19, motor.Y);
+            Assert.AreEqual(8, dy[0]);
+            Assert.AreEqual(128 + 19, motor.Y);
         }
 
         [Test]
         public void LadderClimbsBackUpThroughTheFloor()
         {
+            // Medido: subiendo, al entrar 1 px en la fila del suelo (y = 127) salta a y = 120 y queda de pie;
+            // con ↑ mantenido no sigue por la escalera de arriba hasta volver a pulsar.
             var room = LadderThroughFloor();
             var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 150);
             for (int t = 0; t < 40; t++)
                 motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(MotorState.Ground, motor.State);
+            Assert.AreEqual(120, motor.Y);
+            motor.Tick(new MotorInput());
+            motor.Tick(new MotorInput { Up = true });
             Assert.AreEqual(MotorState.Ladder, motor.State);
-            Assert.AreEqual(150 - 39, motor.Y);   // el primer tick solo se engancha
+            motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(119, motor.Y);
         }
 
         [Test]
@@ -186,9 +223,10 @@ namespace MazeOfKnight.Tests
             var room = LadderThroughFloor();
             var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 150);
             motor.Tick(new MotorInput { Up = true });
-            while (motor.Y > 120)
+            while (motor.State == MotorState.Ladder)
                 motor.Tick(new MotorInput { Up = true });
-            Assert.AreEqual(MotorState.Ladder, motor.State);
+            Assert.AreEqual(MotorState.Ground, motor.State, "llega al suelo de pie");
+            Assert.AreEqual(120, motor.Y);
             for (int t = 0; t < 5; t++)
                 motor.Tick(new MotorInput { Right = true });
             Assert.AreEqual(MotorState.Ground, motor.State);
@@ -213,30 +251,31 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
-        public void RemakeLetsYouLeaveTheLadderSidewaysIntoFreeSpace()
+        public void LadderSidewaysOnlyWithTheRemakeRule()
         {
             var room = LadderThroughFloor();
-            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 120);
-            motor.Tick(new MotorInput { Up = true });      // se engancha a la escalera de arriba
-            for (int t = 0; t < 20; t++)
-                motor.Tick(new MotorInput { Up = true });
-            Assert.AreEqual(MotorState.Ladder, motor.State);
-            motor.Tick(new MotorInput { Right = true });
-            Assert.AreEqual(MotorState.Fall, motor.State);
-            Assert.AreEqual(123, motor.X);
+            PlayerMotor OnUpperLadder()
+            {
+                var m = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 120);
+                m.Tick(new MotorInput { Up = true });      // se engancha a la escalera de arriba
+                for (int t = 0; t < 20; t++)
+                    m.Tick(new MotorInput { Up = true });
+                return m;
+            }
+            var original = OnUpperLadder();
+            original.Tick(new MotorInput { Right = true });
+            Assert.AreEqual(MotorState.Ladder, original.State, "original: a media escalera, ← → no hacen nada");
             try
             {
-                RemakeRules.LeaveLadderSideways = false;     // comportamiento original
-                var m2 = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 120);
-                m2.Tick(new MotorInput { Up = true });
-                for (int t = 0; t < 20; t++)
-                    m2.Tick(new MotorInput { Up = true });
-                m2.Tick(new MotorInput { Right = true });
-                Assert.AreEqual(MotorState.Ladder, m2.State);
+                RemakeRules.LeaveLadderSideways = true;
+                var remake = OnUpperLadder();
+                remake.Tick(new MotorInput { Right = true });
+                Assert.AreEqual(MotorState.Fall, remake.State);
+                Assert.AreEqual(123, remake.X);
             }
             finally
             {
-                RemakeRules.LeaveLadderSideways = true;
+                RemakeRules.LeaveLadderSideways = false;
             }
         }
 
