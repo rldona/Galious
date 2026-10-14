@@ -88,5 +88,22 @@ namespace MazeOfKnight.Game
             }
             return false;
         }
+
+        // Arpa: rompe todas las piedras de la sala. Devuelve cuántas.
+        public int BreakAll(RoomModel room, RoomWorld world)
+        {
+            int n = 0;
+            foreach (var rock in rocks)
+            {
+                if (rock.broken || rock.room != room) continue;
+                rock.hp = 0;
+                rock.broken = true;
+                brokenForever.Add((mapName, rock.room.id, rock.x, rock.y));
+                world.Clear(rock.room, rock.x >> 3, (rock.y - P.RoomTopPx) >> 3, 2, 2);
+                Broken?.Invoke(rock);
+                n++;
+            }
+            return n;
+        }
     }
 }

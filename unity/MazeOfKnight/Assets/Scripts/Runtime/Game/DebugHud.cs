@@ -16,8 +16,9 @@ namespace MazeOfKnight.Game
             style ??= new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(12, Screen.height / 45) };
             var m = player.Motor;
             string text =
-                "← → andar   ↑ saltar / subir   ↓ bajar / entrar   Espacio espada   M arma   1-6 elegir arma   Tab personaje   K +1 llave   G armas   Esc salir\n" +
+                "← → andar   ↑ saltar / subir   ↓ bajar / entrar   Espacio espada   M arma   F1 (o I) objetos   K +1 llave   G armas   Esc salir\n" +
                 $"VIT Popolon {Bar(bootstrap.Vitality[1], bootstrap.MaxVitality[1])}   Aphrodite {Bar(bootstrap.Vitality[0], bootstrap.MaxVitality[0])}" +
+                (bootstrap.Inventory != null ? $"   EXP {bootstrap.Inventory.Experience[(int)m.Character]}/48" : "") +
                 $"   flechas {bootstrap.Arrows:000}   monedas {bootstrap.Coins:000}   llaves {bootstrap.Keys:000}   arma: {bootstrap.WeaponName(bootstrap.SelectedWeapon)}\n" +
                 $"{bootstrap.mapName}  sala {m.Room.id}   x {m.X}  y {m.Y}   {m.State}   {m.Character}" +
                 (m.InLiquid ? $"   en {(m.Liquid == MazeOfKnight.Data.TileClass.Lava ? "lava" : "agua")}" : "") +

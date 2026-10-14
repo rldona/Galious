@@ -109,6 +109,11 @@ namespace MazeOfKnight.Game
         // Paralizado (E500 = 6, E50F ticks [I]): lo deja así el disparo 0x3F del soldado; no responde a los mandos.
         public int Stunned;
 
+        // Zapatos (0x11): andar 2,5 px/tick (2 y 3 alternos) y escaleras 1,25 (un paso más cada 4 ticks) [C][O].
+        public bool Shoes;
+        bool shoeWalk;
+        int shoeLadder;
+
         public void Tick(MotorInput input)
         {
             if (Stunned > 0)
@@ -143,7 +148,11 @@ namespace MazeOfKnight.Game
                 case MotorState.JumpPrep: TickJumpPrep(input); break;
                 case MotorState.Jump: TickJump(input); break;
                 case MotorState.Fall: TickFall(input); break;
-                case MotorState.Ladder: TickLadder(input); break;
+                case MotorState.Ladder:
+                    TickLadder(input);
+                    if (Shoes && State == MotorState.Ladder && (input.Up || input.Down) && ++shoeLadder % 4 == 0)
+                        TickLadder(input);
+                    break;
                 case MotorState.Carried: TickCarried(); break;
                 case MotorState.Knockback: TickKnockback(); break;
             }
@@ -179,7 +188,7 @@ namespace MazeOfKnight.Game
                 Y += 8;
                 return;
             }
-            MoveHorizontal(input, P.WalkSpeed);
+            MoveHorizontal(input, P.WalkSpeed + (Shoes && (shoeWalk = !shoeWalk) ? 1 : 0));
             if (upPressed)
             {
                 State = MotorState.JumpPrep;

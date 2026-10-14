@@ -6,7 +6,7 @@ namespace MazeOfKnight.Game
 {
     // Une el motor con Unity: lee la entrada, ejecuta los ticks del original a 30 por segundo y coloca el
     // sprite. Controles del original: ← → andar, ↑ saltar o subir escalera, ↓ bajar escalera o entrar por
-    // una puerta, espacio espada (docs/player.md). Tab cambia de personaje (en el original, desde el menú).
+    // una puerta, espacio espada, M arma (docs/player.md). El personaje se cambia en el menú de objetos (F1).
     public class PlayerController : MonoBehaviour
     {
         public SpriteRenderer body;
@@ -15,14 +15,15 @@ namespace MazeOfKnight.Game
         public Color aphroditeColor = new Color(1f, 0.45f, 0.7f);
 
         public PlayerMotor Motor { get; private set; }
+        public bool Paused;              // menú de objetos abierto: no corren los ticks
+        public bool ReverseControls;     // mundo 8 sin Hoi: izquierda y derecha al revés
         public event System.Action Ticked;
 
-        InputAction move, jump, attack, switchCharacter, fire;
+        InputAction move, jump, attack, fire;
         bool fireLatch;
         // Arma secundaria (M): una pulsación nueva por disparo; el arranque la consume en su tick.
         public bool ConsumeFire() { bool f = fireLatch; fireLatch = false; return f; }
-        // Elegir arma con 1…6 (provisional, hasta el menú de objetos).
-        public event System.Action<int> WeaponKey;
+
         float accumulator;
         bool attackLatch;   // un toque más corto que un tick no se pierde
         // ↑ y ↓ igual: una pulsación entre dos ticks llega al siguiente tick como "pulsada" (al menos ese tick) y como
@@ -55,13 +56,9 @@ namespace MazeOfKnight.Game
             fire.AddBinding("<Keyboard>/m");
             fire.AddBinding("<Gamepad>/buttonNorth");
             fire.Enable();
-            switchCharacter = new InputAction("Cambiar personaje", InputActionType.Button);
-            switchCharacter.AddBinding("<Keyboard>/tab");
-            switchCharacter.AddBinding("<Gamepad>/select");
             move.Enable();
             jump.Enable();
             attack.Enable();
-            switchCharacter.Enable();
         }
 
         void OnDisable()
@@ -70,25 +67,23 @@ namespace MazeOfKnight.Game
             fire.Disable();
             jump.Disable();
             attack.Disable();
-            switchCharacter.Disable();
         }
 
         void Update()
         {
             if (Motor == null)
                 return;
-            if (switchCharacter.WasPressedThisFrame())
-                Motor.Character = Motor.Character == Character.Popolon ? Character.Aphrodite : Character.Popolon;
+            if (Paused)
+            {
+                accumulator = 0;
+                UpdateVisual();
+                return;
+            }
 
             if (attack.WasPressedThisFrame())
                 attackLatch = true;
             if (fire.WasPressedThisFrame())
                 fireLatch = true;
-            var kb = Keyboard.current;
-            if (kb != null)
-                for (int i = 1; i <= 6; i++)
-                    if (kb[(Key)((int)Key.Digit1 + i - 1)].wasPressedThisFrame)
-                        WeaponKey?.Invoke(i);
             var v = move.ReadValue<Vector2>();
             bool up = v.y > 0.5f || jump.IsPressed(), down = v.y < -0.5f;
             if (up && !upWasDown) upLatch = true;
@@ -97,8 +92,8 @@ namespace MazeOfKnight.Game
             downWasDown = down;
             var input = new MotorInput
             {
-                Left = v.x < -0.5f,
-                Right = v.x > 0.5f,
+                Left = ReverseControls ? v.x > 0.5f : v.x < -0.5f,
+                Right = ReverseControls ? v.x < -0.5f : v.x > 0.5f,
                 Up = up || upLatch,
                 Down = down || downLatch,
                 UpPressed = upLatch,

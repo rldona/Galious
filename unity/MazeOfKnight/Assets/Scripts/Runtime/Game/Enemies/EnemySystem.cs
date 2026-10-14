@@ -125,6 +125,7 @@ namespace MazeOfKnight.Game.Enemies
             Context.SpawnChild = SpawnChild;
             Context.ResetRoom();
             ResetLoot();
+            FreezeTicks = 0;
             StartGenerators(room);
             lastPlayerY = player.Y;
             enemies.Clear();
@@ -174,10 +175,18 @@ namespace MazeOfKnight.Game.Enemies
 
         int lastPlayerY;
 
+        // Biblia: enemigos, generadores (y el jefe) quietos; tocarlos sigue haciendo daño. Acaba al cambiar de sala.
+        public int FreezeTicks;
+
         public void Tick()
         {
             Context.Tick++;
             TickDeaths();
+            if (FreezeTicks > 0)
+            {
+                FreezeTicks--;
+                return;
+            }
             TickGenerators();
             Context.PlayerDy = Context.Player.Y - lastPlayerY;
             lastPlayerY = Context.Player.Y;

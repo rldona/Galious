@@ -48,6 +48,12 @@ namespace MazeOfKnight.Game
         public EnemySystem Enemies { get; private set; }
         public WeaponSystem Weapons { get; private set; }
         public int SelectedWeapon;   // E510: 1 flecha … 6 lupa (0 = ninguna)
+        public Inventory Inventory { get; private set; }
+        public PlayerMotor Motor => motor;
+        EnemyCatalog enemyCatalog;
+        InventoryMenu menu;
+        bool harpUsed;               // el arpa rompe las piedras con el primer espadazo de cada visita a la sala
+        string typed = "";           // letras tecleadas (la daga: UMBRELLA)
         readonly Dictionary<Projectile, SpriteRenderer> projectileViews = new Dictionary<Projectile, SpriteRenderer>();
         readonly Dictionary<Enemy, SpriteRenderer> enemyViews = new Dictionary<Enemy, SpriteRenderer>();
         public int HurtTicks { get; private set; }   // invulnerable tras un golpe (parpadea)
@@ -71,8 +77,15 @@ namespace MazeOfKnight.Game
             var weaponsJson = Resources.Load<TextAsset>("Weapons");
             Weapons = new WeaponSystem(weaponsJson != null ? JsonUtility.FromJson<WeaponsData>(weaponsJson.text) : null);
             Weapons.Spawned += ShowProjectile;
-            Weapons.PlayerHit += (damage, dir) => Hurt(damage, dir, $"-{damage} (mina)");
-            player.WeaponKey += SelectWeapon;
+            Weapons.PlayerHit += (damage, dir) => Hurt(Inventory.ReduceDamage(damage), dir, $"-{damage} (mina)");
+            var itemsJson = Resources.Load<TextAsset>("Items");
+            Inventory = new Inventory(itemsJson != null ? JsonUtility.FromJson<ItemsData>(itemsJson.text) : null, Collected);
+            enemyCatalog = catalog;
+            Enemies.Killed += GainExperience;
+            menu = gameObject.AddComponent<InventoryMenu>();
+            menu.game = this;
+            if (UnityEngine.InputSystem.Keyboard.current != null)
+                UnityEngine.InputSystem.Keyboard.current.onTextInput += OnTextInput;
             LoadMap(mapName);
             motor = new PlayerMotor(World, World.Room(startRoom), startX, startY) { Character = startCharacter };
             motor.DoorEntered += EnterWorld;
@@ -111,6 +124,7 @@ namespace MazeOfKnight.Game
                 if (room.hasItem && (room.item.x != 0 || room.item.y != 0) &&
                     !rocks.All.Any(r => !r.broken && r.room == room && r.x == room.item.x && r.y == room.item.y))
                     ShowItem(room);
+            ApplyCarpet();
         }
 
         void EnterWorld(int world)
@@ -120,6 +134,13 @@ namespace MazeOfKnight.Game
                 Say($"La puerta del mundo {world} no se abre (aún no implementado)");
                 return;
             }
+            string blocked = Inventory.WorldEntryBlocked(world, motor.Character);
+            if (blocked != null)
+            {
+                Say(blocked);
+                return;
+            }
+            Inventory.EnterWorld(world);
             LoadMap(OriginalWorlds.MapName(world));
             var (x, y) = OriginalWorlds.Entry[world];
             motor.Place(World, World.Room(1), x, y);
@@ -129,6 +150,7 @@ namespace MazeOfKnight.Game
         void ExitToCastle(int code)
         {
             int world = maps[mapName].e041 - 1;
+            Inventory.EnterWorld(0);
             LoadMap("castle");
             var doorRoom = World.Rooms.FirstOrDefault(r => r.doorWorld == world);
             if (doorRoom == null)
@@ -143,7 +165,17 @@ namespace MazeOfKnight.Game
         void AfterTick()
         {
             if (Enemies.Room != motor.Room)
+            {
                 EnterEnemyRoom();
+                harpUsed = false;
+            }
+            motor.Shoes = Inventory.Has(Inventory.Shoes);
+            player.ReverseControls = Inventory.ReversedControls;
+            if (motor.AttackStartedThisTick && !harpUsed && Inventory.Has(Inventory.Harp))
+            {
+                harpUsed = true;
+                if (rocks.BreakAll(motor.Room, World) > 0) Say("El arpa rompe las piedras");
+            }
             Enemies.Tick();
             var drop = Enemies.PickUp(motor);
             if (drop != null)
@@ -183,9 +215,13 @@ namespace MazeOfKnight.Game
                     motor.Y - OriginalPhysics.HeadHeight > iy + 15 || motor.Y <= iy)
                     continue;
                 takenItems.Add((mapName, room.id));
-                Collected.Add(room.item.type);
+                Inventory.Add(room.item.type);
                 if (SelectedWeapon == 0 && room.item.type >= 1 && room.item.type <= 6)
                     SelectedWeapon = room.item.type;
+                if (room.item.type == Inventory.GreatKey && Inventory.GreatKeyBoost(Vitality, MaxVitality, motor.Character))
+                    Say($"Vitalidad máxima {MaxVitality[(int)motor.Character]}");
+                if (room.item.type == Inventory.Carpet)
+                    ApplyCarpet();
                 Destroy(go);
                 visibleItems.RemoveAt(i);
                 Say(PickUp(room.item.type));
@@ -212,9 +248,20 @@ namespace MazeOfKnight.Game
                 Say("Paralizado");
                 return;
             }
+            if (Inventory.ImmuneTo(enemy.Type))
+                return;
+            int dir = enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1;
+            // Escudo: para el proyectil si el jugador lo mira y no está dando un espadazo.
+            if (enemy.DiesOnTouch && Inventory.ShieldBlocks(enemy.Type) && motor.AttackTicks == 0 && (dir < 0) != motor.FacingLeft)
+            {
+                enemy.Alive = false;
+                Say("Escudo");
+                return;
+            }
             if (enemy.DiesOnTouch)
                 enemy.Alive = false;
-            Hurt(enemy.Damage, enemy.X + enemy.Width / 2f >= motor.X ? -1 : 1, $"-{enemy.Damage} (0x{enemy.Type:X2})");
+            int damage = Inventory.ReduceDamage(enemy.Damage);
+            Hurt(damage, dir, $"-{damage} (0x{enemy.Type:X2})");
         }
 
         // Daño al jugador: vitalidad, retroceso y 42 ticks de invulnerabilidad.
@@ -233,13 +280,6 @@ namespace MazeOfKnight.Game
 
         // ---------- armas secundarias ----------
 
-        void SelectWeapon(int id)
-        {
-            if (!Collected.Contains(id)) { Say($"No tienes {WeaponName(id)}"); return; }
-            SelectedWeapon = id;
-            Say($"Arma: {WeaponName(id)}");
-        }
-
         public string WeaponName(int id) => Weapons?.Data.Get(id)?.name ?? (id == 0 ? "ninguna" : $"arma {id}");
 
         void FireWeapon()
@@ -257,6 +297,104 @@ namespace MazeOfKnight.Game
             if (Weapons.CanFire(w, motor, Collected, Arrows) != null) return;
             if (Weapons.Fire(w, motor, World, Enemies, rocks, Collected) != null)
                 Arrows -= w.cost;
+        }
+
+        // ---------- inventario ----------
+
+        public bool CanOpenMenu => motor != null && motor.State != MotorState.Knockback && motor.State != MotorState.Carried && motor.Stunned == 0;
+
+        public void SetPaused(bool paused) => player.Paused = paused;
+
+        // Al cerrar el menú: el personaje elegido pasa a ser el activo y el arma elegida, la de M.
+        public void ApplyMenu(Character character, int weapon)
+        {
+            motor.Character = character;
+            if (weapon > 0) SelectedWeapon = weapon;
+        }
+
+        // Angel Ring: a la sala 72 del castillo (el santuario de Demeter). Desde un mundo se pierden sus objetos.
+        public void UseAngelRing()
+        {
+            int world = Inventory.CurrentWorld;
+            if (world > 0)
+            {
+                Inventory.ForgetWorldItems(world);
+                Inventory.EnterWorld(0);
+                LoadMap("castle");
+            }
+            var room = World.Room(72);
+            var (x, y) = StandSpot(room);
+            motor.Place(World, room, x, y);
+            Say("Angel Ring: santuario de Demeter");
+        }
+
+        // Ala: en el castillo, a la puerta de un mundo ya abierto.
+        public bool UseWing(int world)
+        {
+            if (Inventory.CurrentWorld != 0) { Say("El ala solo funciona en el castillo"); return false; }
+            if (!Inventory.OpenedDoors.Contains(world)) { Say($"La puerta del mundo {world} aún no se ha abierto"); return false; }
+            var room = World.Room(Inventory.WingRoom(world));
+            if (room == null || room.doorWorld == 0) return false;
+            motor.Place(World, room, room.door.x + OriginalWorlds.DoorExitDx, room.door.y + OriginalWorlds.DoorExitDy);
+            Say($"Ala: puerta del mundo {world}");
+            return true;
+        }
+
+        // Primer sitio donde se puede estar de pie, empezando por el centro de la sala.
+        (int, int) StandSpot(RoomModel room)
+        {
+            foreach (int x in new[] { 128, 96, 160, 64, 192, 40, 216 })
+                for (int y = OriginalPhysics.RoomTopPx + 16; y < OriginalPhysics.RoomBottomPx; y += 8)
+                    if (World.Solid(room, x, y) && !World.Solid(room, x, y - 1) && !World.Solid(room, x, y - 14))
+                        return (x, y);
+            return (startX, startY);
+        }
+
+        // Experiencia por muerte (BF27[tipo], ×2 con el Vase); a 48, se rellena la vitalidad.
+        void GainExperience(Enemy e)
+        {
+            int exp = enemyCatalog?.Find(e.Type)?.experience ?? 0;
+            if (exp <= 0) return;
+            int c = (int)motor.Character;
+            if (Inventory.AddExperience(motor.Character, exp) && Vitality[c] < MaxVitality[c])
+            {
+                Vitality[c] = MaxVitality[c];
+                Say("Experiencia: vitalidad llena");
+            }
+        }
+
+        // Carpet: en el mundo 8, las salas con lava se rellenan de piedra de la fila 12 a la 19.
+        void ApplyCarpet()
+        {
+            if (Inventory.CurrentWorld != 8 || !Inventory.Has(Inventory.Carpet)) return;
+            foreach (var room in World.Rooms.Where(r => r.collision.Any(row => row.Contains('L'))))
+            {
+                World.SetSolid(room, 0, 12, 32, 8);
+                mapView.RedrawCells(World, room, 0, 12, 32, 8);
+            }
+        }
+
+        // Daga: tecleando UMBRELLA mueren los murciélagos de la sala (con su experiencia y botín).
+        void OnTextInput(char ch)
+        {
+            if (!char.IsLetter(ch)) return;
+            typed = (typed + char.ToUpperInvariant(ch));
+            if (typed.Length > 8) typed = typed.Substring(typed.Length - 8);
+            if (typed != "UMBRELLA" || !Inventory.Has(Inventory.Dagger)) return;
+            typed = "";
+            int n = 0;
+            foreach (var e in Enemies.Enemies.Where(e => e.Alive && e.Type == 0x0E).ToList())
+            {
+                Enemies.Damage(e, e.Hp);
+                n++;
+            }
+            Say($"UMBRELLA: {n} murciélagos");
+        }
+
+        void OnDestroy()
+        {
+            if (UnityEngine.InputSystem.Keyboard.current != null)
+                UnityEngine.InputSystem.Keyboard.current.onTextInput -= OnTextInput;
         }
 
         void ShowProjectile(Projectile p)
@@ -392,6 +530,7 @@ namespace MazeOfKnight.Game
         {
             int c = (int)motor.Character;
             Vitality[c] = MaxVitality[c];
+            Inventory.Experience[c] = 0;
             liquidTicks = 0;
             int world = maps[mapName].e041 - 1;
             if (world >= 1 && OriginalWorlds.HasEntry(world))
@@ -426,7 +565,7 @@ namespace MazeOfKnight.Game
             visibleItems.Add((room, go));
         }
 
-        void Say(string text)
+        public void Say(string text)
         {
             Message = text;
             messageUntil = Time.time + 2.5f;
@@ -442,11 +581,19 @@ namespace MazeOfKnight.Game
                 Keys = Mathf.Min(999, Keys + 1);
                 Say($"[depuración] +1 llave ({Keys})");
             }
+            // Biblia: CTRL congela a los enemigos 150 ticks (16 veces en la partida).
+            var kbd = UnityEngine.InputSystem.Keyboard.current;
+            if (kbd != null && (kbd.leftCtrlKey.wasPressedThisFrame || kbd.rightCtrlKey.wasPressedThisFrame) && !player.Paused
+                && Enemies.FreezeTicks == 0 && Inventory.UseBible())
+            {
+                Enemies.FreezeTicks = Inventory.BibleTicks;
+                Say($"Biblia: enemigos congelados ({16 - Inventory.BibleUses} usos)");
+            }
             // Depuración: G da las seis armas y 50 flechas para probarlas.
             if (UnityEngine.InputSystem.Keyboard.current?.gKey.wasPressedThisFrame == true)
             {
                 for (int id = 1; id <= 6; id++)
-                    if (!Collected.Contains(id)) Collected.Add(id);
+                    Inventory.Add(id);
                 Arrows = Mathf.Min(999, Arrows + 50);
                 if (SelectedWeapon == 0) SelectedWeapon = 1;
                 Say($"[depuración] las 6 armas y +50 flechas ({Arrows})");
