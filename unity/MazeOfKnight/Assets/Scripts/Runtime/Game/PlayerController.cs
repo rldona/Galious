@@ -20,6 +20,9 @@ namespace MazeOfKnight.Game
         InputAction move, jump, attack, switchCharacter;
         float accumulator;
         bool attackLatch;   // un toque más corto que un tick no se pierde
+        // ↑ y ↓ igual: una pulsación entre dos ticks llega al siguiente tick como "pulsada" (al menos ese tick) y como
+        // pulsación nueva aunque ya se haya soltado o se soltara y volviera a pulsar entre medias.
+        bool upLatch, downLatch, upWasDown, downWasDown;
 
         public void Init(PlayerMotor motor)
         {
@@ -70,12 +73,19 @@ namespace MazeOfKnight.Game
             if (attack.WasPressedThisFrame())
                 attackLatch = true;
             var v = move.ReadValue<Vector2>();
+            bool up = v.y > 0.5f || jump.IsPressed(), down = v.y < -0.5f;
+            if (up && !upWasDown) upLatch = true;
+            if (down && !downWasDown) downLatch = true;
+            upWasDown = up;
+            downWasDown = down;
             var input = new MotorInput
             {
                 Left = v.x < -0.5f,
                 Right = v.x > 0.5f,
-                Up = v.y > 0.5f || jump.IsPressed(),
-                Down = v.y < -0.5f,
+                Up = up || upLatch,
+                Down = down || downLatch,
+                UpPressed = upLatch,
+                DownPressed = downLatch,
                 Attack = attack.IsPressed() || attackLatch,
             };
             accumulator += Time.deltaTime;
@@ -85,8 +95,11 @@ namespace MazeOfKnight.Game
             {
                 accumulator -= tick;
                 Motor.Tick(input);
-                attackLatch = false;
+                attackLatch = upLatch = downLatch = false;
                 input.Attack = attack.IsPressed();
+                input.Up = up;
+                input.Down = down;
+                input.UpPressed = input.DownPressed = false;
                 Ticked?.Invoke();
             }
             if (guard >= 4)
@@ -104,6 +117,8 @@ namespace MazeOfKnight.Game
                 // El original cambia de sprite en la escalera; aquí, provisionalmente, se oscurece.
                 body.color = Motor.State == MotorState.Ladder ? Color.Lerp(color, Color.black, 0.45f) : color;
                 body.flipX = Motor.FacingLeft;
+                // Preparando el salto el original cambia de sprite (mueve los pies): aquí, provisionalmente, se agacha.
+                body.transform.localScale = new Vector3(1, Motor.State == MotorState.JumpPrep ? 0.85f : 1, 1);
             }
             if (sword != null)
             {

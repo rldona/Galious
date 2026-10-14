@@ -70,7 +70,7 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 | Movimiento | Valor |
 |---|---|
 | Andar | **2 px/tick** (60 px/s), sin aceleración ni frenada. El "52 px/s" de antes salía de una medida más basta |
-| Despegue | ↑ se lee en el tick siguiente (E500 = 1). **2 ticks de preparación**: el de la pulsación (aún anda 2 px) y uno quieto; sube en el tercero. Si se suelta ↑ en ellos, Popolon no salta |
+| Despegue | ↑ se lee en el tick siguiente (E500 = 1). **2 ticks de preparación**: el de la pulsación (aún anda 2 px) y uno quieto; sube en el tercero. Si se suelta ↑ en ellos, Popolon no salta: un toque de 4 frames solo mueve los pies (cambia de sprite) y uno de 10 ya da un salto corto de 19 px [O]. En el remake la entrada se lee en cada fotograma y se guarda hasta el tick siguiente, así que ni un toque corto ni soltar y volver a pulsar entre dos ticks se pierden |
 | Subida | tabla **6 6 6 6 6 5 5 4 4 3 2 1**. Popolon la empieza en la entrada 0 (**54 px**). Aphrodite en la entrada 2 (**42 px**): las dos tablas de b03:A951/A953 son la misma, desplazada |
 | Punto más alto | 4 ticks quieto |
 | Bajada | tabla **1 2 3 4 4 5 5 6**, y luego 6 hasta tocar suelo (velocidad máxima de caída: 6 px/tick) |

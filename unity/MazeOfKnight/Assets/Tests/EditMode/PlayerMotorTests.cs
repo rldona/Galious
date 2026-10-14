@@ -113,6 +113,19 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void ReleaseAndPressBetweenTicksStillJumpsAgain()
+        {
+            // El mando lee la entrada en cada fotograma: si ↑ se suelta y se vuelve a pulsar entre dos ticks, el motor
+            // la ve mantenida, pero llega marcada como pulsación nueva (UpPressed) y vuelve a saltar.
+            var (_, dy, _) = Run(FlatRoom(), Character.Popolon, 64, 120, 100,
+                t => new MotorInput { Up = true, UpPressed = t == 0 || t == 50 });
+            int jumps = 0;
+            for (int t = 1; t < dy.Count; t++)
+                if (dy[t] < 0 && dy[t - 1] >= 0) jumps++;
+            Assert.AreEqual(2, jumps);
+        }
+
+        [Test]
         public void DescendingStopsOnTheFloorUntilPressedAgain()
         {
             // Medido: bajando con ↓ mantenido se queda de pie en el suelo (y = 120) aunque la escalera siga debajo.

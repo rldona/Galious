@@ -10,6 +10,10 @@ namespace MazeOfKnight.Game
     public struct MotorInput
     {
         public bool Left, Right, Up, Down, Attack;
+        // Pulsaciones nuevas ocurridas desde el tick anterior, aunque entre medias se soltara la tecla (la entrada se lee
+        // en cada fotograma de Unity y el motor va a 30 ticks/s: sin esto se pierde el que suelta y vuelve a pulsar
+        // entre dos ticks).
+        public bool UpPressed, DownPressed;
     }
 
     // Movimiento del jugador tick a tick, con los números del original (docs/player.md). Clase sin
@@ -112,7 +116,7 @@ namespace MazeOfKnight.Game
                 Stunned--;
                 input = default;
             }
-            bool upPressed = input.Up && !upHeld, downPressed = input.Down && !downHeld;
+            bool upPressed = input.Up && (!upHeld || input.UpPressed), downPressed = input.Down && (!downHeld || input.DownPressed);
             upHeld = input.Up;
             downHeld = input.Down;
             LastInput = input;
