@@ -1,0 +1,22 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+*.csproj
+*.sln
+*.slnx
+*.pidb
+*.userprefs
+.vs/
+.idea/
+
+# Generado en local desde la ROM del usuario (no se distribuye)
+/Assets/Generated/
+/Assets/Generated.meta
+
+# IDE
+.vscode/

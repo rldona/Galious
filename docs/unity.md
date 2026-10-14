@@ -1,0 +1,61 @@
+# Fase 5: proyecto Unity e importador
+
+Proyecto: `unity/MazeOfHollow`, con Unity **6000.6.5f1**. Paquetes:
+- URP 17.6 (luces 2D más adelante);
+- 2D Tilemap y Tilemap Extras;
+- Pixel Perfect;
+- Input System;
+- Newtonsoft JSON;
+- Test Framework.
+
+## Qué se versiona y qué no
+
+| Se versiona | No se versiona (sale de la ROM del usuario) |
+|---|---|
+| `Assets/Scripts` (código), `Assets/Art` (arte propio; por ahora tiles provisionales), `Packages`, `ProjectSettings` | `Assets/Generated/` (salas, mapas y escenas importados), `extracted/unity/` (paquete de datos), `Library/` |
+
+## Cómo importar
+
+1. Exportar el paquete de salas (necesita los datos de las fases 1–3 en `extracted/`):
+   ```bash
+   python3 tools/extract/collision.py
+   python3 tools/extract/unity_bundle.py
+   ```
+   Genera `extracted/unity/<mapa>.json`: 11 mapas, 320 salas.
+2. En Unity, menú **Maze of Hollow → Importar salas**. O en batch:
+   ```bash
+   /Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity -batchmode -projectPath unity/MazeOfHollow -executeMethod MazeOfHollow.EditorTools.GaliousImporter.ImportAndRenderBatch -quit -logFile logs/unity/import.log
+   ```
+   El modo batch también renderiza cada vista general a `logs/unity/<mapa>_overview.png`. No usar `-nographics`: hace falta GPU para renderizar.
+
+## Qué crea el importador
+
+- `Assets/Generated/Maps/<mapa>.asset` (**MapData**): número de mapa (E041), sala y palabra del jefe, y la lista de salas.
+- `Assets/Generated/Rooms/<mapa>/room_NNN.asset` (**RoomData**), con su **RoomModel**:
+  - posición en la rejilla y enlaces (−1 sin salida; 0xF5–0xFE salida al castillo);
+  - colisión 32 × 20, más la de combate en la sala del jefe;
+  - enemigos, objetos de sala, objeto, piedras, escaleras extra, puerta de mundo y sala de dios.
+- `Assets/Generated/Scenes/<mapa>_overview.unity`: todas las salas en su rejilla. Una capa de Tilemap por clase de colisión, sobre un fondo en damero por sala.
+  - Las salas a las que no se llega por enlaces (`placed = false`) van en una columna aparte.
+  - El santuario de cada mundo (`shrine = true`, la última sala, sin disposición propia) sale en morado.
+
+## Convenciones
+
+| | Valor |
+|---|---|
+| Unidad | 1 u = 16 px del original; un tile de 8 px = 0,5 u; una sala = 16 × 10 u |
+| Celdas | `RoomCoords.Cell(room, col, fila)`: la fila 0 es la de arriba; el eje y de Unity crece hacia arriba |
+| Coordenadas del original | x, y de pantalla; la sala empieza en y = 32. `RoomCoords.PixelToWorld` las convierte |
+| Clases de tile | `TileClass`: Empty, Solid, Ladder, Water, Lava, BossPassable (letras `.`, `#`, `H`, `~`, `L`, `j` de collision.py) |
+
+## Validación
+
+Las vistas generadas se compararon a ojo con los mapas montados desde capturas del emulador (`extracted/maps/<mapa>_visual.png`):
+- **castillo:** misma forma y posición de las 146 salas, agua en 137–143 y lava en 96 y 144–147;
+- **mundo 8:** coincide sala a sala, con la lava en 15–20 y el santuario (21) en su sitio.
+
+La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](world_maps.md)).
+
+## Pendiente
+- Pipeline URP con renderer 2D (para las luces).
+- Escena de juego: cargar una sala, transiciones entre salas y jugador con los números de la Design Bible (cap. 2).

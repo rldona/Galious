@@ -1,0 +1,6 @@
+{
+    "name": "MazeOfHollow.Runtime",
+    "rootNamespace": "MazeOfHollow",
+    "references": [],
+    "autoReferenced": true
+}
