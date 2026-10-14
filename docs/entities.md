@@ -98,6 +98,22 @@ En el mundo 1, sala 12, el muro de arriba a la izquierda (filas 0–2, columnas 
 - Cada uno es un temporizador que, al llegar a 0, crea un enemigo con la rutina de creación b04:65DA: los tipos 09, 08, 0D, 21, 30, 38, 35 y 3E, en una posición fija o algo aleatoria (R).
 - Ejemplos: en las salas 58, 71, 113 y 114 del castillo (E650); en el mundo 6, salas 2, 3, 4, 7, 8, 17 y 18, el tipo 3E cada 16 ticks (E668).
 
+## Objetos de sala: puertas, muros que se cierran y paredes que se rompen [C]
+
+Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibble bajo de su tipo. Cada clase tiene su estado en RAM y su rutina por frame (b00:5376 las llama):
+
+| Clase | Estado | Qué es | Dónde |
+|---|---|---|---|
+| 1 (tipo 0x01) | EA00, 2 huecos, columna C5 | **puerta con llave del castillo**: empujando contra ella unos 30 frames, a su altura exacta, gasta 1 llave (b09:A1F2, BCD en E04A) y suena 0x22 [C] | 15 salas del castillo |
+| 2 (0x02) | EA30, 2 huecos, C6 C7 C8 | **puerta con llave de los mundos**: lo mismo, con sonido 0x21; no actúa si no tienes llaves [C] | 34 en los mundos |
+| 3 (0x03, 0x13) | EA50, 1 hueco, CF; el bit 4 del tipo da el sentido | sin descifrar | 15 en los mundos |
+| 4 (0x04) | EA60, 4 huecos, D0 D1 D2 | **puertas giratorias**: su rutina consulta E098, la flag del Bread & Water [C]. Según la guía [G], Popolon las cruza siempre y Aphrodite solo con ese objeto | 23 en los mundos |
+| 5 (0x05) | EAA0 | **muro que se cierra a tu espalda** (b09:A415–A4EC) [C][O]. Al pasar por su columna anota tu dirección; cuando avanzas 16 px más, crece un tile cada 15 frames hasta 3 y marca la sala (bit 1 persistente), así que al volver ya está cerrado | 16 salas del castillo |
+| 6 (0x06) | EAB0 | espera a que el jugador esté en y = 0x78. Por la guía, son las **piedras que aparecen si esperas en el borde** (mundo 5) [C][G] | mundo 5, sala 11 |
+| 7 (0x07–0x37) | EAC0 | **pared que se rompe a espadazos**: bloque 4×3 de ladrillo [C][G] | castillo 97 (camino de la cruz), mundo 2 sala 4, mundo 4 sala 16, mundo 5 sala 7, mundo 6 sala 6, mundo 9 sala 26 |
+
+**Contraste con el mapa de mars2000you** (marcas N, "muro temporal que aparece después de pasar"): 14 de sus 16 marcas N caen en salas con objeto de clase 5. Sus marcas T, "escalera que puede desaparecer", caen en 12 de las 13 salas de la tabla de escaleras extra. Sus marcas FY, puntos donde aparece un hada, están en las salas 25, 91 y 110 del castillo; esa mecánica está sin localizar en la ROM.
+
 ## Escaleras que se retiran [C][O]
 
 Las 13 escaleras extra del castillo (tabla b09:A6EB/A705, 5 bytes: y, x, alto, largo en píxeles, **modo**) se retiran después de usarlas.

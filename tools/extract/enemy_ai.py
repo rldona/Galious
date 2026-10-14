@@ -22,7 +22,8 @@ VECTORS = {0x4050: 'jump_table_a', 0x4053: 'read_word_table', 0x4056: 'vec_4da1'
            0x4068: 'neg_de', 0x406B: 'vec_4dcf', 0x406E: 'vec_4dc8'}
 # campos del hueco de enemigo (E800 + 0x20 n), lo que se sabe hasta ahora
 SLOT = {0: 'tipo', 1: 'estado', 2: 'flags', 3: 'flags2', 5: 'y', 7: 'x', 9: 'd0', 0x0A: 'd1', 0x0B: 'd2',
-        0x10: 'vida', 0x11: 'recompensa'}
+        0x0C: 'vy_lo', 0x0D: 'vy', 0x0E: 'vx_lo', 0x0F: 'vx', 0x10: 'vida', 0x11: 'atributo_sprite',
+        0x16: 'ay_lo', 0x17: 'ay'}   # b06:B0ED suma vy/vx a y/x; B14C suma ay a vy
 NAMES = {**GAME, **VECTORS, **RAM, 0xE505: 'jugador_y', 0xE507: 'jugador_x', 0xE0D5: 'libro_congela'}
 
 
@@ -62,10 +63,10 @@ def disasm_routine(rom, entry):
                     break
                 if 0x6000 <= t < 0xC000:
                     todo.append(t)
-                if op == 'JP' and ',' not in text or op == 'JR' and ',' not in text:
+                if op in ('JP', 'JR') and ',' not in text:      # salto incondicional
                     break
-            if op in ('RET', 'RETI') and ',' not in text or op == 'JP' and '(' in text:
-                break
+            if op in ('RET', 'RETI') and len(text.split()) == 1 or op == 'JP' and '(' in text:
+                break                                     # 'RET nz' (condicional) sigue
             pc += size
     return '\n'.join(lines[a] for a in sorted(lines))
 
