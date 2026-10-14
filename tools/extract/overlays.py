@@ -5,7 +5,8 @@ Fuentes en la ROM (coordenadas de pantalla en pixeles; fila de tile = y/8, con e
   - piedras (solo castillo): B8A2 (banco 9), 1 byte por piedra: y = (b & E0) | 8,
     x = (b & 1F) * 8; sello 2x2 BA BB / BC BD. Cada una tiene un bit persistente (rota o no).
   - escaleras extra: A6EB (banco 9), pares (mundo, sala); datos de 5 bytes en A705 + 5*k:
-    y, x, alto, ?, ?; columna de alto filas con 9A 9B.
+    y, x, alto, largo en pixeles, modo (1 se retira al subir, 2 al bajar, 3 siempre; b03:A608);
+    columna de alto filas con 9A 9B.
   - puertas de mundo (castillo): ver world_maps.py; sello 4x3.
   - estatuas: generadores 0x50/0x51 (entities.py); sello 2x3.
   - objetos de sala A7BC (entities.py): columna 1x3 o hueco, segun tipo.

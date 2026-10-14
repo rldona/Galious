@@ -93,13 +93,29 @@ En el mundo 1, sala 12, el muro de arriba a la izquierda (filas 0–2, columnas 
 
 **Puente** [C][O*]: en el mundo 2, sala 11, si tienes el objeto 0x12 (E081), aparece una fila de 16 tiles C4 sobre el agua (EAC8).
 
-**Otro código parecido sin descifrar**: b04:61A8–62B9 compara también (mundo, sala) y activa E650, E653, E659, E65C, E65F, E662 y E668–E66A. No toca los muros; puede ser agua, corrientes o zonas de daño.
+**Generadores periódicos por sala** [C] (b04:61A8–62B9, que se ejecuta al cargar y en cada frame en b04:62F9–647B): no tocan los muros.
+- Según el mundo y la sala activan E650, E653, E659, E65C, E65F, E662, E665 o E668.
+- Cada uno es un temporizador que, al llegar a 0, crea un enemigo con la rutina de creación b04:65DA: los tipos 09, 08, 0D, 21, 30, 38, 35 y 3E, en una posición fija o algo aleatoria (R).
+- Ejemplos: en las salas 58, 71, 113 y 114 del castillo (E650); en el mundo 6, salas 2, 3, 4, 7, 8, 17 y 18, el tipo 3E cada 16 ticks (E668).
 
-## Catálogo de sprites
+## Escaleras que se retiran [C][O]
+
+Las 13 escaleras extra del castillo (tabla b09:A6EB/A705, 5 bytes: y, x, alto, largo en píxeles, **modo**) se retiran después de usarlas.
+- **Cuándo:** al terminar de recorrerla, b03:A608 compara el modo (EC0F) con la dirección en que la has usado (E50C: 1 subiendo, 2 bajando).
+  - Modo 1: se retira al subirla.
+  - Modo 2: se retira al bajarla.
+  - Modo 3: se retira en los dos casos.
+  - Se activa EC07 y suena 0x2E.
+- **Cuánto tiempo:** b09:A7A4 pone el temporizador de esa escalera, E0AE + 2·n (n = EC00, el número de la escalera), a 60. Baja 1 por segundo aunque estés en otra sala. Mientras no llegue a 0, la escalera no se dibuja al entrar.
+- **Comprobado** [O] en el castillo, sala 13 (modo 3): al bajarla desaparece entera en cuanto llegas abajo. El temporizador baja de 60 a 49 en 12 s y sigue contando desde la sala 12. Al volver con el temporizador a 0, la escalera está otra vez.
+- Las salas 19 y 102 (modo 1) solo la retiran al subirla [O en la 19].
+- Efecto de diseño [I]: no puedes volver por donde has venido hasta pasado un minuto.
+
+## Catálogo de sprites## Catálogo de sprites
 
 `extracted/entities/sprites_<tipo>.png` pinta los sprites de 16×16 que carga cada tipo, en blanco. Algunos reconocibles: 0x25 esqueleto, 0x0E y 0x49 murciélagos, 0x05 serpiente, 0x0A caballero, 0x08 y 0x31 fuego, 0x32 flecha, 0x54 huesos (el proyectil del jefe del mundo 1, que se dibuja con tiles). El tipo de generador no siempre es un tipo de sprite: algunos (0x50, 0x51, 0x04, 0x3A) se dibujan con tiles.
 
 ## Pendiente
 - La semántica de cada tipo de enemigo: IA, vida, daño y qué arma le afecta.
 - Los gráficos especiales de la sala del jefe y la animación del agua y la lava.
-- El evento del castillo (E61C → b03:A003, secuencia de direcciones) y las flags de b04:61A8.
+- El evento del castillo (E61C → b03:A003, secuencia de direcciones).

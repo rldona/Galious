@@ -12,3 +12,6 @@ logs/
 __pycache__/
 *.pyc
 .venv/
+
+# Estado local de Claude Code
+.claude/
