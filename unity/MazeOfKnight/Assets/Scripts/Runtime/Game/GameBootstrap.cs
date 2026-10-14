@@ -116,6 +116,48 @@ namespace MazeOfKnight.Game
             motor.CastleExitReached += ExitToCastle;
             player.Init(motor);
             player.Ticked += AfterTick;
+            StartMode();
+        }
+
+        // ---------- presentación, demo o partida (docs/attract.md) ----------
+
+        AttractScreen attract;
+        public bool AttractRunning => attract != null && attract.Running;
+        // Presentación, demo o final: ni menú ni teclas de depuración.
+        public bool Busy => AttractRunning || player != null && player.Demo != null || EndingRunning;
+        public bool skipAttract;     // para probar en el editor: empieza directamente la partida
+
+        void StartMode()
+        {
+            var json = Resources.Load<TextAsset>("Attract");
+            var data = json != null ? JsonUtility.FromJson<AttractData>(json.text) : new AttractData();
+            if (skipAttract && AttractMode.Current == AttractMode.Mode.Attract)
+                AttractMode.Current = AttractMode.Mode.Game;
+            switch (AttractMode.Current)
+            {
+                case AttractMode.Mode.Attract:
+                    SetPaused(true);
+                    attract = gameObject.AddComponent<AttractScreen>();
+                    attract.Begin(data);
+                    break;
+                case AttractMode.Mode.Demo:
+                {
+                    // Como una partida nueva, con el Arrow elegido y 100 flechas (b01:7DA1), y las teclas de la grabación.
+                    var demo = data.demos[AttractMode.Demo % data.demos.Length];
+                    if (demo.map != mapName) LoadMap(demo.map);
+                    motor.Place(World, World.Room(demo.room), demo.x, demo.y);
+                    Inventory.Add(1);
+                    SelectedWeapon = 1;
+                    Arrows = 100;
+                    player.Demo = new DemoPlayer(demo);
+                    player.DemoInterrupted += () => { player.Demo = null; AttractMode.TripDone(true, true); };
+                    player.Ticked += () =>
+                    {
+                        if (player.Demo != null && player.Demo.Finished) { player.Demo = null; AttractMode.TripDone(true, false); }
+                    };
+                    break;
+                }
+            }
         }
 
         void LoadMap(string name)
@@ -215,7 +257,7 @@ namespace MazeOfKnight.Game
                 Say(TakeLoot(drop));
             if (motor.AttackStartedThisTick)
                 Enemies.Strike(motor, Collected);
-            if (player.ConsumeFire())
+            if (player.ConsumeFire() && !AttractRunning)
                 FireWeapon();
             Weapons.Tick(motor, World, Enemies, rocks, Collected);
             if (HurtTicks > 0)
@@ -469,7 +511,7 @@ namespace MazeOfKnight.Game
 
         // ---------- inventario ----------
 
-        public bool CanOpenMenu => motor != null && !shrineScreen.Open && motor.State != MotorState.Knockback && motor.State != MotorState.Carried && motor.Stunned == 0;
+        public bool CanOpenMenu => motor != null && !Busy && !shrineScreen.Open && motor.State != MotorState.Knockback && motor.State != MotorState.Carried && motor.Stunned == 0;
 
         public void SetPaused(bool paused) => player.Paused = paused;
 
@@ -758,6 +800,8 @@ namespace MazeOfKnight.Game
         {
             if (Message != "" && Time.time > messageUntil)
                 Message = "";
+            if (Busy)
+                return;
             // Depuración: K da una llave (en el original salen de piedras, enemigos y tiendas).
             if (!TypingWord && UnityEngine.InputSystem.Keyboard.current?.kKey.wasPressedThisFrame == true)
             {

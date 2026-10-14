@@ -83,6 +83,9 @@ namespace MazeOfKnight.Game
             X = x;
             Y = y;
             State = MotorState.Ground;
+            landY = -1;
+            jumpDir = 0;
+            hoverTicks = 0;
         }
 
         // La puerta arrastra al jugador: wait ticks quieto y luego ticks a speed px/tick en dir.
@@ -149,6 +152,17 @@ namespace MazeOfKnight.Game
                 AttackStartedThisTick = true;
             }
 
+            if (landY >= 0)
+            {
+                // Tick de aterrizaje: si llegó justo al suelo, aún se mueve como en el aire; si se hundió, solo se corrige
+                // (demo 1: 117 → 123 → 120 sin moverse; 190 → 193 → 196 en la sala 143) [O].
+                if (airControl && Y == landY) AirMove(input, false);
+                Y = landY;
+                landY = -1;
+                State = MotorState.Ground;
+                CrossRoomEdges();
+                return;
+            }
             switch (State)
             {
                 case MotorState.Ground: TickGround(input, upPressed, downPressed); break;
@@ -176,7 +190,7 @@ namespace MazeOfKnight.Game
             {
                 // En el suelo se para mientras golpea.
                 if (!Supported())
-                    StartFall(P.LedgeFallStart, false);
+                    StartLedgeFall();
                 return;
             }
             if (downPressed && AtDoor())
@@ -195,15 +209,17 @@ namespace MazeOfKnight.Game
                 Y += 8;
                 return;
             }
-            MoveHorizontal(input, P.WalkSpeed + (Shoes && (shoeWalk = !shoeWalk) ? 1 : 0));
+            // El tick en que se procesa ↑ ya no anda (trazas de las demos: el original lee las teclas con un tick de
+            // retraso, y lo que parecía "aún anda 2 px" era ese retraso; el retraso lo pone PlayerController).
             if (upPressed)
             {
                 State = MotorState.JumpPrep;
                 prepTicks = 1;               // este tick ya cuenta como preparación
                 return;
             }
+            MoveHorizontal(input, P.WalkSpeed + (Shoes && (shoeWalk = !shoeWalk) ? 1 : 0));
             if (!Supported())
-                StartFall(P.LedgeFallStart, false);
+                StartLedgeFall();
         }
 
         void TickJumpPrep(MotorInput input)
@@ -218,6 +234,7 @@ namespace MazeOfKnight.Game
             if (++prepTicks <= P.JumpPrepTicks)
                 return;                      // tick quieto antes de despegar
             State = MotorState.Jump;
+            jumpDir = InputDir(input);
             riseIndex = Character == Character.Popolon ? P.RiseStartPopolon : P.RiseStartAphrodite;
             apexTicks = 0;
             cutDone = false;
@@ -228,7 +245,7 @@ namespace MazeOfKnight.Game
         {
             if (riseIndex < P.RiseTable.Length)
             {
-                MoveHorizontal(input, P.AirSpeedRising);
+                AirMove(input, true);
                 int dy = P.RiseTable[riseIndex];
                 bool released = !input.Up && Character == Character.Popolon;
                 if (!cutDone && (released || HeadBlocked(Y - dy)))
@@ -248,9 +265,41 @@ namespace MazeOfKnight.Game
             }
 
             // Punto más alto
-            MoveHorizontal(input, apexTicks < P.ApexTicksAtRiseSpeed ? P.AirSpeedRising : P.AirSpeedFalling);
+            AirMove(input, apexTicks < P.ApexTicksAtRiseSpeed);
             if (LiquidStep() && ++apexTicks >= P.ApexTicks)
                 StartFall(0, true);
+        }
+
+        // Movimiento horizontal en un salto (trazas de las demos en openMSX): el salto conserva la dirección con la que
+        // despegó (o la última pulsada) aunque se suelte: 2 px/tick. Subiendo y en el primer tick arriba, 2; después, 3
+        // solo con ↑ y la dirección pulsadas, y 2 con la dirección sola o sin nada.
+        int jumpDir;
+        int landY = -1;            // aterrizaje pendiente (se ha hundido en el suelo este tick)
+
+        // Con ← y → a la vez, gana ← (trazas de la demo 1: el jugador va a la izquierda).
+        static int InputDir(MotorInput input) => input.Left ? -1 : input.Right ? 1 : 0;
+
+        void AirMove(MotorInput input, bool rising)
+        {
+            int dir = InputDir(input);
+            if (dir != 0) jumpDir = dir;
+            if (jumpDir == 0) return;
+            int speed = !rising && dir != 0 && input.Up ? P.AirSpeedFalling : P.AirSpeedRising;
+            var held = input;
+            held.Left = jumpDir < 0;
+            held.Right = jumpDir > 0;
+            // Al chocar con una pared se pierde la inercia del salto (demo 1, castillo 121 → 132) [O].
+            if (!MoveHorizontal(held, speed) && dir == 0)
+                jumpDir = 0;
+        }
+
+        // Al salir andando de una plataforma (o quedarse sin suelo): 4 ticks quieto en el aire y luego la tabla de caída
+        // desde el principio (1, 2, 3, 4…), sin control (trazas de las demos en openMSX).
+        int hoverTicks;
+        void StartLedgeFall()
+        {
+            StartFall(0, false);
+            hoverTicks = P.LedgeHoverTicks;
         }
 
         void StartFall(int index, bool control)
@@ -262,23 +311,32 @@ namespace MazeOfKnight.Game
 
         void TickFall(MotorInput input)
         {
+            if (hoverTicks > 0)
+            {
+                hoverTicks--;
+                return;
+            }
             if (airControl)
-                MoveHorizontal(input, P.AirSpeedFalling);
+                AirMove(input, false);
             int dy = ScaleVertical(P.FallTable[System.Math.Min(fallIndex, P.FallTable.Length - 1)]);
             if (LiquidStep())
                 fallIndex++;
-            // Baja píxel a píxel hasta tocar suelo (el original se hunde y corrige: aquí se para en el borde).
+            // Baja píxel a píxel hasta tocar suelo. Si le sobra caída, el original se hunde lo que le sobra ese tick y al
+            // siguiente se corrige encima del suelo sin hacer nada más (demo 1: 117 → 123 → 120) [O].
             for (int i = 0; i < dy; i++)
             {
                 if (Supported())
                 {
+                    if (i > 0) { landY = Y; Y += dy - i; return; }
                     State = MotorState.Ground;
                     return;
                 }
                 Y++;
             }
+            // Llega justo al suelo: ese tick aún es aire y el siguiente también se mueve como en el aire (demo 1,
+            // castillo 143: aterriza en 193 y avanza a 196 antes de andar) [O].
             if (Supported())
-                State = MotorState.Ground;
+                landY = Y;
         }
 
         void TickLadder(MotorInput input)
@@ -293,7 +351,7 @@ namespace MazeOfKnight.Game
                 return;
             }
             // Remake: soltarse de la escalera hacia un lado con sitio libre (RemakeRules).
-            int side = input.Left == input.Right ? 0 : input.Left ? -1 : 1;
+            int side = input.Left ? -1 : input.Right ? 1 : 0;
             if (RemakeRules.LeaveLadderSideways && side != 0 && !input.Up && !input.Down && !BodyBlockedAt(X + side, side))
             {
                 StartFall(0, true);
@@ -506,28 +564,41 @@ namespace MazeOfKnight.Game
             return false;
         }
 
-        void MoveHorizontal(MotorInput input, int speed)
+        // Devuelve false si una pared lo ha parado (o lo ha sacado de ella).
+        bool MoveHorizontal(MotorInput input, int speed)
         {
-            int dir = input.Left == input.Right ? 0 : input.Left ? -1 : 1;
+            int dir = input.Left ? -1 : input.Right ? 1 : 0;
             if (dir == 0)
-                return;
+                return true;
             FacingLeft = dir < 0;
+            // Metido en una pared por ese lado (al caer pegado a ella): el original lo saca hasta el borde del tile en
+            // vez de moverlo (demo 1, castillo 120: x 196 → 200 pulsando ← junto a una piedra) [O].
+            if (BodyBlockedAt(X, dir))
+            {
+                X = dir < 0 ? ((X + P.FootLeft) & ~7) + 8 - P.FootLeft : ((X + P.FootRight) & ~7) - 1 - P.FootRight;
+                return false;
+            }
             speed = ScaleHorizontal(speed);
             for (int i = 0; i < speed; i++)
             {
                 if (BodyBlockedAt(X + dir, dir))
-                    break;
+                    return false;
                 X += dir;
             }
+            return true;
         }
 
         // ---------- cambio de sala ----------
 
+        // Cambio de sala (medido en openMSX, trazas de las demos, docs/attract.md): a la derecha al llegar a x = 248 y
+        // se aparece en x = 16; a la izquierda al bajar de x = 16 y se aparece en x = 247; abajo al pasar de y = 192 y
+        // se aparece en y = 40; arriba (por una escalera o una plataforma, no saltando) al bajar de y = 40 y se aparece
+        // en y = 185.
         void CrossRoomEdges()
         {
-            int dx = X < 0 ? -1 : X >= P.RoomWidthPx ? 1 : 0;
-            // Arriba: en cuanto los pies pasan del borde (y < 32); de pie justo en el borde (y = 32) no se cambia.
-            int dy = Y < P.RoomTopPx ? -1 : Y > P.RoomBottomPx ? 1 : 0;
+            int dx = X < P.ExitLeftX ? -1 : X >= P.ExitRightX ? 1 : 0;
+            bool climbing = State == MotorState.Ladder;   // [I] también en las plataformas que suben (aún no están)
+            int dy = climbing && Y < P.ExitUpY ? -1 : Y > P.RoomBottomPx ? 1 : 0;
             if (dx == 0 && dy == 0)
                 return;
             var next = world.Neighbour(Room, dx, dy);
@@ -537,17 +608,19 @@ namespace MazeOfKnight.Game
                 CastleExitReached?.Invoke(exit);
                 return;
             }
-            if (next == null)
+            if (next == null || next.shrine)
             {
-                // Sin vecino (o salida al castillo, aún sin implementar): se queda en el borde.
-                if (dx < 0) X = 0;
-                if (dx > 0) X = P.RoomWidthPx - 1;
+                // Sin vecino o hacia la sala de un santuario de mundo (se entra por su pantalla): se queda donde está.
+                if (dx < 0) X = System.Math.Max(X, 0);
+                if (dx > 0) X = System.Math.Min(X, P.RoomWidthPx - 1);
                 return;
             }
             var previous = Room;
             Room = next;
-            X -= dx * P.RoomWidthPx;
-            Y -= dy * 160;
+            if (dx > 0) X = P.EnterFromLeftX;
+            if (dx < 0) X = P.EnterFromRightX;
+            if (dy > 0) Y = P.EnterFromTopY;
+            if (dy < 0) Y = P.EnterFromBottomY;
             RoomChanged?.Invoke(previous, next);
         }
     }

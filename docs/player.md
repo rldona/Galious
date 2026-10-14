@@ -207,3 +207,17 @@ Código en b03 (grupo 0): entrada A72B, creación y movimiento A9CF–AE97, cont
 - Qué hacen F5 y CTRL.
 - Contrastar en el código lo que dice la guía [G] sobre el salto variable de Popolon (los límites de flechas y minas ya están comprobados).
 - Armas secundarias: dónde se filtra M para que haga falta una pulsación nueva (A71E lee E008); qué hacen con IX+1C = 1 los tipos 0x0F, 0x25, 0x27, 0x49, 0x52 y 0x54 al recibir un proyectil (b03:B592); qué es E52A, que impide el fuego rodante y la mina; cajas propias de los tipos 0x06, 0x57, 0x60 y 0x62 (b03:B4DF).
+
+### Comprobado tick a tick con la demo 1 [O]
+
+La demo 1 del ciclo de presentación (`docs/attract.md`) son pulsaciones grabadas que el original reproduce con su motor. Reproducidas con el motor del remake y comparadas tick a tick con la traza de openMSX (`logs/omsx/attract/frames_E023=1_700.tsv.gz`: sala, x, y, E500 y E009 por tick), coinciden en los 1226 ticks (castillo 1 → 107 → 120 → 121 → 132 → 133 → 143 → 133). Para conseguirlo hizo falta corregir:
+
+- **Retraso de un tick en las teclas:** el jugador responde a lo pulsado en el tick anterior. Lo que antes se midió como "el tick de la pulsación aún anda 2 px" era ese retraso: el tick en que se procesa ↑ ya no anda (2 ticks de preparación y despega en el tercero, como antes).
+- **Inercia del salto:** el salto conserva la dirección con la que despegó (o la última pulsada) aunque se suelte, a 2 px/tick. Subiendo y en el primer tick arriba, 2 px/tick; después, 3 solo con ↑ y la dirección pulsadas, 2 con la dirección sola o sin nada. Al chocar con una pared se pierde.
+- **← y → a la vez:** gana ←.
+- **Aterrizaje:** si la caída llega justo al suelo, ese tick aún es aire y el siguiente todavía se mueve como en el aire antes de quedar de pie. Si sobra caída, se hunde ese tick (117 → 123) y al siguiente se corrige sin moverse.
+- **Caer por un borde:** al salir andando de una plataforma, 4 ticks quieto en el aire y luego la tabla de caída desde el principio (1, 2, 3, 4, 4, 5…), sin control. La caída que empieza en el "3" era la del jugador colocado a mano en el aire.
+- **Metido en una pared:** al pulsar hacia ella, el original saca al jugador hasta el borde del tile (x 196 → 200) en vez de moverlo.
+- **Cabeza:** entre 9 y 11 px por encima de los pies (antes 13).
+- **Cambio de sala:** a la derecha al llegar a x = 248 (aparece en x = 16); a la izquierda al bajar de x = 16 (aparece en 247); abajo al pasar de y = 192 (aparece en y = 40); arriba, por una escalera, al bajar de y = 40 (aparece en y = 185). Hay unos 20 frames de pausa en los que el juego no avanza.
+- **Piedras y armas:** una flecha que choca con una piedra la daña antes de desaparecer (3 flechas de Popolon rompen una piedra de 15).

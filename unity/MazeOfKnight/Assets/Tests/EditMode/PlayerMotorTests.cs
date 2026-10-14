@@ -79,10 +79,11 @@ namespace MazeOfKnight.Tests
         [Test]
         public void PopolonReleaseCutsTheRise()
         {
-            // Medido: 5 subidas de 6, un tick quieto, la entrada de 1, 4 ticks arriba y a bajar.
+            // Medido: 5 subidas de 6, un tick quieto, la entrada de 1, 4 ticks arriba y a bajar. Al llegar al suelo con
+            // caída de sobra se hunde ese tick y al siguiente se corrige (popolon_up_tap20: 117 → 123 → 120).
             var (_, dy, _) = Run(FlatRoom(), Character.Popolon, 64, 120, 30, t => new MotorInput { Up = t < 7 });
-            CollectionAssert.AreEqual(new[] { 0, 0, -6, -6, -6, -6, -6, 0, -1, 0, 0, 0, 0, 1, 2, 3, 4, 4, 5, 5, 6, 1 },
-                dy.Take(22).ToArray());
+            CollectionAssert.AreEqual(new[] { 0, 0, -6, -6, -6, -6, -6, 0, -1, 0, 0, 0, 0, 1, 2, 3, 4, 4, 5, 5, 6, 6, -5 },
+                dy.Take(23).ToArray());
         }
 
         [Test]
@@ -166,8 +167,9 @@ namespace MazeOfKnight.Tests
         {
             var (_, _, dx) = Run(FlatRoom(), Character.Popolon, 64, 120, 30,
                 t => new MotorInput { Up = true, Right = true });
-            // pulsación (2), tick quieto (0), 12 de subida (2), 1.º arriba (2), resto arriba y bajada (3)
-            var expected = new List<int> { 2, 0 };
+            // pulsación (0: el tick en que se procesa ↑ ya no anda), tick quieto (0), 12 de subida (2), 1.º arriba (2),
+            // resto arriba y bajada (3, con ↑ y la dirección pulsadas)
+            var expected = new List<int> { 0, 0 };
             expected.AddRange(Enumerable.Repeat(2, 12));
             expected.Add(2);
             expected.AddRange(Enumerable.Repeat(3, 3 + 12));
@@ -175,20 +177,37 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
-        public void LedgeFallHasNoAirControlAndStartsAtThree()
+        public void JumpKeepsItsDirectionAndOnlyUpAndDirectionGiveThree()
         {
-            var room = FlatRoom(floorRow: 15);
-            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 64, 40);
-            motor.Tick(new MotorInput { Right = true });     // sin suelo: empieza a caer
+            // Trazas de las demos (openMSX): soltando todo en el aire sigue a 2 px/tick hacia donde iba; con la dirección
+            // sola, 2; con ↑ y la dirección, 3 (después del primer tick arriba).
+            var (_, _, released) = Run(FlatRoom(), Character.Popolon, 64, 120, 30,
+                t => new MotorInput { Up = t < 26, Right = t < 6 });
+            Assert.IsTrue(released.Skip(6).Take(20).All(v => v == 2), string.Join(",", released));
+            var (_, _, dirOnly) = Run(FlatRoom(), Character.Popolon, 64, 120, 30,
+                t => new MotorInput { Up = t < 26 && t < 14, Right = true });
+            Assert.IsTrue(dirOnly.Skip(16).Take(8).All(v => v == 2), string.Join(",", dirOnly));
+        }
+
+        [Test]
+        public void LedgeFallHoversFourTicksWithoutAirControl()
+        {
+            // Trazas de las demos (openMSX): al salir andando de una plataforma, 4 ticks quieto en el aire y luego
+            // 1, 2, 3, 4, 4, 5… sin poder moverse en horizontal.
+            var rows = Enumerable.Range(0, 20).Select(r => r == 11 ? new string('#', 10) + new string('.', 22) : r >= 15 ? new string('#', 32) : new string('.', 32)).ToArray();
+            var room = new RoomModel { id = 1, collision = rows };
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 120);
+            while (motor.State == MotorState.Ground) motor.Tick(new MotorInput { Right = true });
+            int x = motor.X;
             var dy = new List<int>();
-            for (int t = 0; t < 8; t++)
+            for (int t = 0; t < 10; t++)
             {
-                int y0 = motor.Y, x0 = motor.X;
+                int y0 = motor.Y;
                 motor.Tick(new MotorInput { Right = true });
                 dy.Add(motor.Y - y0);
-                Assert.AreEqual(x0, motor.X, "caer por un borde no deja mover en horizontal");
+                Assert.AreEqual(x, motor.X, "caer por un borde no deja mover en horizontal");
             }
-            CollectionAssert.AreEqual(new[] { 3, 4, 4, 5, 5, 6, 6, 6 }, dy);
+            CollectionAssert.AreEqual(new[] { 0, 0, 0, 0, 1, 2, 3, 4, 4, 5 }, dy);
         }
 
         [Test]
@@ -682,17 +701,22 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
-        public void WalkingOffTheRightEdgeEntersTheNeighbour()
+        public void RoomEdgesSwitchAtTheMeasuredPositions()
         {
             var a = FlatRoom(1);
             var b = FlatRoom(2);
             a.right = 2;
             b.left = 1;
-            var motor = new PlayerMotor(new RoomWorld(new[] { a, b }), a, 250, 120);
-            for (int t = 0; t < 5; t++)
-                motor.Tick(new MotorInput { Right = true });
+            // Medido (demos en openMSX): al llegar a x = 248 cambia de sala y aparece en x = 16; desde ahí sigue andando.
+            var motor = new PlayerMotor(new RoomWorld(new[] { a, b }), a, 244, 120);
+            motor.Tick(new MotorInput { Right = true });
+            Assert.AreEqual(1, motor.Room.id, "x = 246");
+            motor.Tick(new MotorInput { Right = true });
             Assert.AreEqual(2, motor.Room.id);
-            Assert.AreEqual(4, motor.X);
+            Assert.AreEqual(16, motor.X);
+            motor.Tick(new MotorInput { Left = true });   // 16 → 14: cruza
+            Assert.AreEqual(1, motor.Room.id, "y vuelve al bajar de x = 16");
+            Assert.AreEqual(247, motor.X);
         }
     }
 }

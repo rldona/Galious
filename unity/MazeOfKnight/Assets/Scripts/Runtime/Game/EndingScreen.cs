@@ -88,8 +88,8 @@ namespace MazeOfKnight.Game
                 if (stage > 4)
                 {
                     Running = false;
-                    // Vuelta al logo y al título en el original; aquí, partida nueva desde el castillo.
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                    // Vuelta al logo y al título (estado 0), como el original.
+                    AttractMode.Go(AttractMode.Mode.Attract);
                 }
             }
         }

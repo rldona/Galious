@@ -52,8 +52,8 @@ def font(b):
         return ' '
     if 0x0B <= b <= 0x3D and b % 2:
         return chr(ord('A') + (b - 0x0B) // 2)
-    # la fuente solo trae los digitos de '1987' (03 1, 05 7, 07 8, 09 9) y tres signos
-    return {0x03: '1', 0x05: '7', 0x07: '8', 0x09: '9', 0x3F: '.', 0x41: ',', 0x43: '©'}.get(b, f'{{{b:02X}}}')
+    # la fuente solo trae los digitos de '1987' (03 1, 05 7, 07 8, 09 9) y cuatro signos (45 = apostrofo, en la historia)
+    return {0x03: '1', 0x05: '7', 0x07: '8', 0x09: '9', 0x3F: '.', 0x41: ',', 0x43: '©', 0x45: "'"}.get(b, f'{{{b:02X}}}')
 
 
 def epilogue(rom, ptr):

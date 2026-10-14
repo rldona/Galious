@@ -119,7 +119,15 @@ namespace MazeOfKnight.Game
                 case "floorFall": StepFire(p, world); break;
                 case "mine": StepMine(p, m, enemies, items); return;
             }
-            if (!p.Alive) return;
+            if (!p.Alive)
+            {
+                // Las piedras también son tiles sólidos: el proyectil que choca con una la daña antes de morir (demo 1,
+                // castillo 120: tres flechas rompen la piedra de 15) [O].
+                var (bx0, by0, bx1, by1) = Box(p);
+                int rd = m.Character == Character.Popolon || items.Contains(ItemRing) ? p.Weapon.rockDamagePopolon : p.Weapon.rockDamageAphrodite;
+                rocks?.StrikeRect(Room, world, (int)bx0 - 8, (int)bx1 + 7, (int)by0, (int)by1 - 1, rd);
+                return;
+            }
             if (p.X < data.killMinX || p.X >= data.killMaxX || p.Y >= data.killMaxY) { p.Alive = false; return; }
             HitThings(p, m, world, enemies, rocks, items);
         }

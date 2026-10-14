@@ -23,7 +23,7 @@ Cada estado recibe `B = game_substate` (E001) y suele despachar con `DJNZ` por s
 | E002 | `game_flags` | bit 6 = partida en curso: vale 0x40 desde el estado 3 y vuelve a 0 al salir del game over [O]; con él, `sound_request` suena aunque el sonido de demo esté apagado [C] |
 | E019 | `player_alive` [O] | 1 mientras se juega; pasa a 0 al morir y el estado 5 salta al 6 [O] |
 | E01A | `room_exit_dir` [O] | lado por el que se sale de la pantalla: 1 = arriba, 2 = abajo, 3 = izquierda, 4 = derecha; dispara el estado 10 [O] |
-| E008 / E009 | `input_held` / `input_new` [O] | teclas mantenidas / recién pulsadas: bit 0 arriba, 1 abajo, 2 izquierda, 3 derecha, 4 espacio, 5 M |
+| E008 / E009 | teclas nuevas / mantenidas [C][O] | E008 = recién pulsadas (flanco), E009 = mantenidas (b00:4C68; ver `player.md`): bit 0 arriba, 1 abajo, 2 izquierda, 3 derecha, 4 espacio, 5 M |
 | E041 | `world` [O] | 1 = castillo, 2 = mundo 1, …; al entrar por una puerta, E041 = E688 + 1 [C][O*] |
 | E042 | `room` [O] | número de sala; la sala inicial del castillo es la 1 |
 | E052 / E056 | vitalidad de Aphrodite / Popolon [O] | escribir E056 llena la barra VIT de Popolon |
@@ -39,16 +39,19 @@ Cada estado recibe `B = game_substate` (E001) y suele despachar con `DJNZ` por s
 | 4442 / 4443 | `reset_substate` / `set_substate(A)` | |
 | 435B / 435E | `next_substate_timer(A)` / `next_substate` | E004=A; E001++ |
 | 4439 / 443B | `next_game_state` / `next_game_state_timer(A)` | E004=0x20 (o A); E000++; E001=0 |
-| 4BFA | `attract_check_start` | en estados 0 y 2, cualquier tecla → estado 1; en el estado 1, espacio/disparo (máscara 0x30) → E002=0x40, estado 3 [C][O] |
+| 4BFA | `attract_check_start` | en estados 0 y 2, cualquier tecla de juego → estado 1; en el estado 1, espacio/M (máscara 0x30) → E002=0x40, estado 3 [C][O]. Detalle en `attract.md` |
 
 ## Estados
 
+El bucle de atracción (estados 0–3: logo, título, demos, historia e inicio de partida) está en [`attract.md`](attract.md); los datos, en `extracted/unity/attract.json`.
+
+
 | # | Entrada | Transiciones observadas | Interpretación |
 |---|---|---|---|
-| 0 | 42B8 | → 1 a los ~6 s o al pulsar una tecla [O] | intro antes del título [O] |
-| 1 | 430C | → 2 a los ~4,5 s; → 3 al pulsar espacio [O]; → 18 con la tecla L pulsada (`98E5` = SNSMAT fila 4, bit 1) [C][O] | pantalla de título [O] |
-| 2 | 433C | 4 subestados (tabla 0x4340); → 0 al acabar (~27 s) o al pulsar una tecla, escribiendo FF y después ++ [O] | demo jugada [O] |
-| 3 | 43F0 | → 4 a los ~0,8 s [O] | inicio de partida; parpadeo de texto desde 7D71 vía WRTVRM [I] |
+| 0 | 42B8 | → 1 a los 366 frames o al pulsar una tecla [O] | **logo de Konami** que aparece línea a línea; ver `attract.md` [C][O] |
+| 1 | 430C | → 2 a los 264–279 frames; → 3 al pulsar espacio o M [O]; → 18 con la tecla L pulsada (`98E5` = SNSMAT fila 4, bit 1) [C][O] | pantalla de título (PUSH SPACE KEY fijo, destello en la espada, sin música); ver `attract.md` [C][O] |
+| 2 | 433C | 4 subestados (tabla 0x4340); → 0 al acabar o → 1 al pulsar una tecla [C][O] | alterna **demo jugada** (teclas grabadas en el motor real; dos demos, 2440 y 2743 frames) e **historia** que sube (1710 frames, música 0x86); ver `attract.md` [C][O] |
+| 3 | 43F0 | → 4 a los 49 frames [O] | inicio de partida: PLAY START parpadea 45 frames, música 0x87, y b00:4CB0 inicia la partida; ver `attract.md` [C][O] |
 | 4 | 4420 | → 5 a los ~0,9 s [O]; → 14 si E690≠0 [C] | entrar a la sala / reaparecer [I] |
 | 5 | 4462 | → 6 si E019=0 [C][O]; según flags → 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20 [C] | **bucle de juego**; se mantiene con el jugador quieto [O] |
 | 6 | 44F2 | → 4 a ~1 s si quedan vidas; → 7 a ~0,5 s si E058 y E059 están a 0 [O] | vida perdida [O]; ¿E501 = personaje activo (Popolon/Aphrodite)? [I] |

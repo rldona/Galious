@@ -148,7 +148,7 @@ namespace MazeOfKnight.EditorTools
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
             // Armas secundarias, inventario y santuarios: el JSON tal cual, como TextAsset (Resources/Weapons, Resources/Items).
-            foreach (var name in new[] { "weapons", "items", "shrines", "bosses", "ending" })
+            foreach (var name in new[] { "weapons", "items", "shrines", "bosses", "ending", "attract" })
             {
                 string src = Path.Combine(BundleDir, name + ".json");
                 if (!File.Exists(src))

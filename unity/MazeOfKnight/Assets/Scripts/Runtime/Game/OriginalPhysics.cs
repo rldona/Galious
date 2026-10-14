@@ -18,7 +18,8 @@ namespace MazeOfKnight.Game
         public const int ApexTicks = 4;
         public const int ApexTicksAtRiseSpeed = 1; // el primer tick arriba aún va a 2 px/tick
         public static readonly int[] FallTable = { 1, 2, 3, 4, 4, 5, 5, 6 };  // y luego 6
-        public const int LedgeFallStart = 2;       // caer por un borde empieza en el "3"
+        public const int LedgeFallStart = 2;       // tras un golpe (retroceso) la caída empieza en el "3"
+        public const int LedgeHoverTicks = 4;      // al salir de un borde: 4 ticks quieto antes de caer [O] (demos)
 
         // Caja del jugador: los pies en y (borde superior de la fila en la que está de pie),
         // de x - 8 a x + 7 en horizontal y hasta 13 px por encima de los pies.
@@ -28,7 +29,7 @@ namespace MazeOfKnight.Game
         // de 2 tiles en x = 120..135): se cae en x = 124/125 viniendo por la izquierda y en 130/131 por la derecha.
         public const int SupportLeft = -4;
         public const int SupportRight = 4;
-        public const int HeadHeight = 13;         // sala 97: choca en y = 110 y aún sube 1 px
+        public const int HeadHeight = 11;         // entre 9 y 11 [O]: sala 97 (choca en y = 110 y aún sube 1 px) y demo 1, sala 107 (sube a 76, choca, sube 1 a 75)
 
         // Espada (docs/player.md, "Espada"): 4 ticks, alcance hasta x + 18 delante del centro. La franja vertical
         // no se ha medido: se supone a la altura del cuerpo [I].
@@ -70,5 +71,11 @@ namespace MazeOfKnight.Game
         public const int RoomWidthPx = 256;
         public const int RoomTopPx = 32;           // la sala empieza bajo el marcador
         public const int RoomBottomPx = RoomTopPx + 160;
+
+        // Cambio de sala [O] (trazas de las demos en openMSX): umbrales y posición al entrar.
+        public const int ExitRightX = 248, EnterFromLeftX = 16;
+        public const int ExitLeftX = 16, EnterFromRightX = 247;
+        public const int ExitUpY = 40, EnterFromBottomY = 185;
+        public const int EnterFromTopY = 40;
     }
 }

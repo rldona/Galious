@@ -96,7 +96,7 @@ En total son unos 6490 frames (108 s) desde que se toca al bebé.
   - «PRESENTED BY KONAMI / © 1987 KONAMI»;
   - **pausa**;
   - la música se para, suben 13 filas vacías y acaba.
-- La misma rutina, con el texto de b15:AE28, cuenta la historia del principio en el título (b00:4369).
+- La misma rutina, con el texto de b15:AE28, cuenta la historia del principio en el bucle de atracción: estado 2, una vuelta de cada dos (b00:4369; ver `attract.md`).
 
 ## 4. Después [C][O]
 

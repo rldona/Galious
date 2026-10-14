@@ -11,7 +11,7 @@ namespace MazeOfKnight.Game
 
         void OnGUI()
         {
-            if (player == null || player.Motor == null || bootstrap.EndingRunning)
+            if (player == null || player.Motor == null || bootstrap.EndingRunning || bootstrap.AttractRunning)
                 return;
             style ??= new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(12, Screen.height / 45) };
             var m = player.Motor;

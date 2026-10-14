@@ -17,6 +17,8 @@ namespace MazeOfKnight.Game
         public PlayerMotor Motor { get; private set; }
         public bool Paused;              // menú de objetos abierto: no corren los ticks
         public bool ReverseControls;     // mundo 8 sin Hoi: izquierda y derecha al revés
+        public DemoPlayer Demo;          // demo en curso: las teclas salen de la grabación
+        public event System.Action DemoInterrupted;   // una tecla de juego durante la demo
         public event System.Action Ticked;
 
         InputAction move, jump, attack, fire;
@@ -25,6 +27,9 @@ namespace MazeOfKnight.Game
         public bool ConsumeFire() { bool f = fireLatch; fireLatch = false; return f; }
 
         float accumulator;
+        // El original lee las teclas con un tick de retraso (trazas de las demos en openMSX): el motor recibe en cada
+        // tick lo que se pulsó en el anterior.
+        MotorInput delayed;
         bool attackLatch;   // un toque más corto que un tick no se pierde
         // ↑ y ↓ igual: una pulsación entre dos ticks llega al siguiente tick como "pulsada" (al menos ese tick) y como
         // pulsación nueva aunque ya se haya soltado o se soltara y volviera a pulsar entre medias.
@@ -81,6 +86,30 @@ namespace MazeOfKnight.Game
                 attackLatch = true;
             if (fire.WasPressedThisFrame())
                 fireLatch = true;
+            if (Demo != null)
+            {
+                if (move.WasPressedThisFrame() || attack.WasPressedThisFrame() || fire.WasPressedThisFrame() || jump.WasPressedThisFrame())
+                {
+                    DemoInterrupted?.Invoke();
+                    return;
+                }
+                accumulator += Time.deltaTime;
+                float dt = 1f / OriginalPhysics.TicksPerSecond;
+                int g = 0;
+                while (accumulator >= dt && g++ < 4)
+                {
+                    accumulator -= dt;
+                    var di = Demo.Next();
+                    if (Demo.FirePressed) fireLatch = true;
+                    Motor.Tick(delayed);
+                    delayed = di;
+                    Ticked?.Invoke();
+                    if (Demo == null) break;
+                }
+                if (g >= 4) accumulator = 0;
+                UpdateVisual();
+                return;
+            }
             var v = move.ReadValue<Vector2>();
             bool up = v.y > 0.5f || jump.IsPressed(), down = v.y < -0.5f;
             if (up && !upWasDown) upLatch = true;
@@ -103,7 +132,8 @@ namespace MazeOfKnight.Game
             while (accumulator >= tick && guard++ < 4)
             {
                 accumulator -= tick;
-                Motor.Tick(input);
+                Motor.Tick(delayed);
+                delayed = input;
                 attackLatch = upLatch = downLatch = false;
                 input.Attack = attack.IsPressed();
                 input.Up = up;

@@ -17,6 +17,7 @@ JsonUtility, sin diccionarios):
                        y extracted/unity/shrines.json (santuarios: tiendas, contraseña, resurreccion, pistas; shrines.py)
                        y extracted/unity/bosses.json (jefes: invocacion, cajas, derrota, hijos; bosses.py)
                        y extracted/unity/ending.json (final: sala de las piedras, estado 17, epilogo; ending.py)
+                       y extracted/unity/attract.json (logo, titulo, demos, historia, inicio de partida; attract.py)
 
 Todo sale de la ROM del usuario y se queda en local: extracted/ no se versiona.
 
@@ -33,6 +34,7 @@ import items_export
 import shrines
 import bosses
 import ending
+import attract
 from enemy_boxes import boxes, player_boxes, enemy_box_info
 
 DAMAGE_TABLE = 0x64E5   # b04: dano por contacto segun el tipo (b03:B39A; el Hat Helmet lo reduce a la mitad)
@@ -207,6 +209,7 @@ def main():
     shrines.main()        # santuarios -> extracted/unity/shrines.json (campos en shrines.py; despues de los mapas)
     bosses.main()         # jefes, invocacion, derrota e hijos -> extracted/unity/bosses.json (campos en bosses.py)
     ending.main()         # final: piedras, estado 17, epilogo -> extracted/unity/ending.json (campos en ending.py)
+    attract.main()        # bucle de atraccion: estados 0-3 -> extracted/unity/attract.json (campos en attract.py)
 
 
 if __name__ == '__main__':

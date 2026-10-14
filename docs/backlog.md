@@ -43,3 +43,8 @@ El barrido de tiles (docs/entities.md, "Barrido de tiles en openMSX") no llegó 
 - **Animaciones del combate:** la invocación (borde parpadeando 60 frames, la decoración que se deshace en puntos 128), la disolución del jefe vencido y los 9 saltos de la celebración; ahora son esperas con un mensaje.
 - **Repetir una letra pide soltarla** (el original lee la tecla una vez por tick y solo si cambia); el remake acepta cada pulsación del sistema.
 - **Fondo negro durante el combate** (la decoración se apaga) y el dibujo del jefe con tiles (necesita gráficos).
+
+## Mundo
+
+- **Plataformas que suben (ascensores):** la demo 0 empieza en una, del castillo 146 hasta la 113 (EC12/EC22); las armas de fuego y la mina no se usan sobre ellas. Sin ellas la demo 0 se tuerce desde el principio.
+- **Pausa al cambiar de sala** (~20 frames en los que el juego no avanza mientras se dibuja la sala nueva).
