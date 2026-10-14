@@ -314,6 +314,155 @@ namespace MazeOfKnight.Tests
             Assert.AreEqual(0xFE, exit);
         }
 
+        // ---------- agua y lava (docs/player.md) ----------
+
+        // Castillo, sala 137: agua en las filas 12-18 y suelo en la 19 (y = 184).
+        static RoomModel WaterRoom(char liquid = '~')
+        {
+            var room = FlatRoom(floorRow: 19);
+            for (int r = 12; r <= 18; r++)
+                room.collision[r] = new string(liquid, 32);
+            return room;
+        }
+
+        [Test]
+        public void SinkingInWaterIsOneAndAHalfPixelsPerTick()
+        {
+            var room = WaterRoom();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 104);
+            int entered = -1;
+            var ys = new List<int>();
+            for (int t = 0; t < 60; t++)
+            {
+                motor.Tick(new MotorInput());
+                ys.Add(motor.Y);
+                if (entered < 0 && motor.InLiquid) entered = t;
+            }
+            Assert.GreaterOrEqual(entered, 0);
+            // Ya a velocidad máxima de caída (6): en el agua, 6/4 = 1,5 px/tick (1 y 2 alternos).
+            int a = ys[entered + 4], b = ys[entered + 12];
+            Assert.AreEqual(12, b - a);
+            Assert.AreEqual(184, ys.Last(), "se para en el fondo");
+            Assert.AreEqual(MotorState.Ground, motor.State);
+        }
+
+        [Test]
+        public void WalkingInWaterIsHalfSpeed()
+        {
+            var room = WaterRoom();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 184);
+            for (int t = 0; t < 20; t++)
+                motor.Tick(new MotorInput { Right = true });
+            Assert.AreEqual(80 + 20, motor.X);
+        }
+
+        [Test]
+        public void AphroditeJumpInWaterIsSlowButSameHeight()
+        {
+            var room = WaterRoom();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 184) { Character = Character.Aphrodite };
+            int top = 184, ticksToTop = 0;
+            for (int t = 0; t < 80; t++)
+            {
+                motor.Tick(new MotorInput { Up = t < 2 });
+                if (motor.Y < top) { top = motor.Y; ticksToTop = t; }
+            }
+            Assert.AreEqual(184 - 42, top, "42 px, como fuera del agua");
+            Assert.Greater(ticksToTop, 35, "medido: unos 40 ticks para subir");
+        }
+
+        [Test]
+        public void LavaFloorStopsAt184()
+        {
+            var room = FlatRoom(floorRow: 20);
+            for (int r = 12; r <= 19; r++)
+                room.collision[r] = new string('L', 32);
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 64, 96);
+            for (int t = 0; t < 120; t++)
+                motor.Tick(new MotorInput());
+            Assert.AreEqual(184, motor.Y);
+            Assert.AreEqual(TileClass.Lava, motor.Liquid);
+        }
+
+        // ---------- puertas con llave (docs/entities.md) ----------
+
+        // Castillo, sala 16: puerta de 1 x 3 tiles en (160, 96), entre el techo (fila 7) y el suelo (fila 11).
+        static RoomModel KeyDoorRoom(int cls)
+        {
+            var room = FlatRoom(floorRow: 11, ceilingRow: 7);
+            for (int r = 8; r <= 10; r++)
+                room.collision[r] = room.collision[r].Substring(0, 20) + "#" + room.collision[r].Substring(21);
+            room.objects = new[] { new EntityJson { x = 160, y = 96, type = cls } };
+            return room;
+        }
+
+        static (PlayerMotor motor, KeyDoors doors, RoomWorld world) DoorSetup(int cls, int x)
+        {
+            var room = KeyDoorRoom(cls);
+            var world = new RoomWorld(new[] { room });
+            var doors = new KeyDoors("test", world, new HashSet<(string, int, int, int)>());
+            return (new PlayerMotor(world, room, x, 120), doors, world);
+        }
+
+        [Test]
+        public void KeyDoorNeedsThirtyTicksAndAKey()
+        {
+            var (motor, doors, _) = DoorSetup(1, 140);
+            int keys = 1, ticks = 0;
+            while (motor.State != MotorState.Carried && ticks < 100)
+            {
+                motor.Tick(new MotorInput { Right = true });
+                keys = doors.Tick(motor, keys);
+                ticks++;
+            }
+            Assert.AreEqual(0, keys);
+            Assert.AreEqual(152, motor.X, "pegado a la puerta: x = 160 - 8");
+            // 6 ticks andando hasta la puerta (140 -> 152); el tick en que llega ya empuja: 5 + 30.
+            Assert.AreEqual(5 + 30, ticks);
+        }
+
+        [Test]
+        public void KeyDoorWithoutKeysDoesNothing()
+        {
+            var (motor, doors, _) = DoorSetup(1, 152);
+            for (int t = 0; t < 60; t++)
+            {
+                motor.Tick(new MotorInput { Right = true });
+                doors.Tick(motor, 0);
+            }
+            Assert.AreEqual(152, motor.X);
+            Assert.AreNotEqual(MotorState.Carried, motor.State);
+        }
+
+        [Test]
+        public void CastleKeyDoorCarriesThroughAndClosesBehind()
+        {
+            var (motor, doors, world) = DoorSetup(1, 152);
+            int keys = 2;
+            for (int t = 0; t < 30 + 24 + 2; t++)
+            {
+                motor.Tick(new MotorInput { Right = t < 30 });
+                keys = doors.Tick(motor, keys);
+            }
+            Assert.AreEqual(176, motor.X, "al otro lado: x = 160 + 16");
+            Assert.AreEqual(1, keys);
+            Assert.IsTrue(world.Solid(motor.Room, 160, 100), "se vuelve a cerrar");
+        }
+
+        [Test]
+        public void WorldKeyDoorStaysOpen()
+        {
+            var (motor, doors, world) = DoorSetup(2, 152);
+            int keys = 1;
+            for (int t = 0; t < 30 + 24 + 2; t++)
+            {
+                motor.Tick(new MotorInput { Right = t < 30 });
+                keys = doors.Tick(motor, keys);
+            }
+            Assert.AreEqual(176, motor.X);
+            Assert.IsFalse(world.Solid(motor.Room, 160, 100), "queda abierta");
+        }
+
         [Test]
         public void WalkingOffTheRightEdgeEntersTheNeighbour()
         {

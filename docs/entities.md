@@ -112,6 +112,15 @@ Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibbl
 | 6 (0x06) | EAB0 | espera a que el jugador esté en y = 0x78. Por la guía, son las **piedras que aparecen si esperas en el borde** (mundo 5) [C][G] | mundo 5, sala 11 |
 | 7 (0x07–0x37) | EA20 (se dibuja como bloque 4×3 de F0) | **pared que se rompe a espadazos**, ver abajo [C][O] | castillo 97 (camino de la cruz), mundo 2 sala 4, mundo 4 sala 16, mundo 5 sala 7, mundo 6 sala 6, mundo 9 sala 26 |
 
+### Puertas con llave, medidas en openMSX [O]
+
+`tools/openmsx/keydoor_measure.py`, con 2 llaves. Castillo, sala 16 (clase 1); mundo 1, sala 4 (clase 2).
+- **Geometría:** columna de 1 × 3 tiles en (x, y), entre techo y suelo; el jugador la empuja desde x − 8 o x + 16, a y + 0x18.
+- **Empujar:** 30 ticks seguidos (el temporizador +7 baja de 30 a 1 y se reinicia si dejas de empujar). Al acabar gasta una llave (E04A, BCD) y el jugador pasa a E500 = 7.
+- **Apertura:** la puerta encoge de 3 a 1 tile en 2 pasos de 6 ticks (+4). Luego arrastra al jugador 12 ticks a 2 px/tick (24 px) hasta el otro lado.
+- **Castillo (clase 1):** se vuelve a cerrar en cuanto pasas (vuelve a 3 tiles y a la fase 0), así que **cada paso cuesta una llave**. Funciona en los dos sentidos.
+- **Mundos (clase 2):** tras pasar, su entrada en EA30 queda a 0. La tomo como **abierta para siempre** [I]: la vuelta desde el otro lado no se pudo medir, porque el arrastre sacó al jugador de la sala.
+
 **Contraste con el mapa de mars2000you** (marcas N, "muro temporal que aparece después de pasar"): 14 de sus 16 marcas N caen en salas con objeto de clase 5. Sus marcas T, "escalera que puede desaparecer", caen en 12 de las 13 salas de la tabla de escaleras extra. Sus marcas FY, puntos donde aparece un hada, están en las salas 25, 91 y 110 del castillo (ver "Hadas").
 
 ## Objetos que aparecen con una condición [C][O]

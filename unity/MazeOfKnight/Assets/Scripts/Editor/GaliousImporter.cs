@@ -153,6 +153,7 @@ namespace MazeOfKnight.EditorTools
             EnsureTile("shrine", new Color(0.45f, 0.20f, 0.55f));
             EnsureTile("rock", new Color(0.55f, 0.38f, 0.22f));
             EnsureTile("door", new Color(0.30f, 0.75f, 0.45f));
+            EnsureTile("key_door", new Color(0.95f, 0.75f, 0.20f));
             return result;
         }
 

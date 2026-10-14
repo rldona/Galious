@@ -80,13 +80,19 @@ namespace MazeOfKnight.Game
         public bool Ladder(RoomModel room, int px, int py) => TileAt(room, px, py) == TileClass.Ladder;
 
         // Vacía un rectángulo de tiles de una sala (por ejemplo, una piedra rota).
-        public void Clear(RoomModel room, int col, int row, int width, int height)
+        public void Clear(RoomModel room, int col, int row, int width, int height) =>
+            Fill(room, col, row, width, height, '.');
+
+        public void SetSolid(RoomModel room, int col, int row, int width, int height) =>
+            Fill(room, col, row, width, height, '#');
+
+        void Fill(RoomModel room, int col, int row, int width, int height, char value)
         {
             var grid = grids[room.id];
             for (int r = row; r < row + height && r < grid.Length; r++)
                 for (int c = col; c < col + width && c < 32; c++)
                     if (r >= 0 && c >= 0)
-                        grid[r][c] = '.';
+                        grid[r][c] = value;
         }
     }
 }

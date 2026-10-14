@@ -26,9 +26,18 @@ namespace MazeOfKnight.Game
         public string Message { get; private set; } = "";
         public readonly List<int> Collected = new List<int>();
 
+        // Recursos del marcador (E046 flechas, E048 monedas, E04A llaves), hasta 999.
+        public int Arrows, Coins, Keys;
+        // Vitalidad por personaje (Aphrodite = 0, Popolon = 1), en unidades del original.
+        public readonly int[] Vitality = { OriginalPhysics.StartVitality, OriginalPhysics.StartVitality };
+        public readonly int[] MaxVitality = { OriginalPhysics.StartVitality, OriginalPhysics.StartVitality };
+        int liquidTicks;
+
         readonly Dictionary<string, MapData> maps = new Dictionary<string, MapData>();
         readonly HashSet<(string, int, int, int)> brokenRocks = new HashSet<(string, int, int, int)>();
         readonly HashSet<(string, int)> takenItems = new HashSet<(string, int)>();
+        readonly HashSet<(string, int, int, int)> openedDoors = new HashSet<(string, int, int, int)>();
+        KeyDoors keyDoors;
         readonly List<(RoomModel room, GameObject go)> visibleItems = new List<(RoomModel, GameObject)>();
         Rocks rocks;
         PlayerMotor motor;
@@ -60,9 +69,14 @@ namespace MazeOfKnight.Game
             rocks = new Rocks(name, World, brokenRocks);
             rocks.Broken += OnRockBroken;
             rocks.Hit += r => Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}");
+            keyDoors = new KeyDoors(name, World, openedDoors);
+            keyDoors.Changed += d => mapView.ShowKeyDoor(d.room, d.x, d.y, d.height);
+            keyDoors.Opened += d => Say(d.cls == 1 ? "Puerta abierta (se cerrará detrás)" : "Puerta abierta");
             mapView.Build(map, World);
             foreach (var r in rocks.All)
                 mapView.ShowRock(r.room, r.x, r.y, !r.broken);
+            foreach (var d in keyDoors.All)
+                mapView.ShowKeyDoor(d.room, d.x, d.y, d.height);
             foreach (var (_, go) in visibleItems)
                 Destroy(go);
             visibleItems.Clear();
@@ -104,6 +118,11 @@ namespace MazeOfKnight.Game
         {
             if (motor.AttackStartedThisTick)
                 rocks.Strike(motor, World);
+            int keysBefore = Keys;
+            Keys = keyDoors.Tick(motor, Keys);
+            if (Keys != keysBefore)
+                Say($"Llave usada ({Keys})");
+            LiquidDamage();
             // Recoger un objeto a la vista al tocarlo.
             for (int i = visibleItems.Count - 1; i >= 0; i--)
             {
@@ -118,8 +137,56 @@ namespace MazeOfKnight.Game
                 Collected.Add(room.item.type);
                 Destroy(go);
                 visibleItems.RemoveAt(i);
-                Say($"Objeto 0x{room.item.type:X2}");
+                Say(PickUp(room.item.type));
             }
+        }
+
+        // Recursos (docs/items_enemies.md): 0x2D +50 flechas, 0x2E +10 monedas, 0x2F +2 llaves.
+        string PickUp(int type)
+        {
+            switch (type)
+            {
+                case 0x2D: Arrows = Mathf.Min(999, Arrows + 50); return $"+50 flechas ({Arrows})";
+                case 0x2E: Coins = Mathf.Min(999, Coins + 10); return $"+10 monedas ({Coins})";
+                case 0x2F: Keys = Mathf.Min(999, Keys + 2); return $"+2 llaves ({Keys})";
+                default: return $"Objeto 0x{type:X2}";
+            }
+        }
+
+        // Agua y lava (docs/player.md): 1 de vitalidad cada 4 ticks; Aphrodite en el agua, cada 255.
+        void LiquidDamage()
+        {
+            if (!motor.InLiquid)
+            {
+                liquidTicks = 0;
+                return;
+            }
+            bool aphroditeInWater = motor.Character == Character.Aphrodite && motor.Liquid == TileClass.Water;
+            int every = aphroditeInWater ? OriginalPhysics.AphroditeWaterDamageTicks : OriginalPhysics.LiquidDamageTicks;
+            if (++liquidTicks < every)
+                return;
+            liquidTicks = 0;
+            int c = (int)motor.Character;
+            Vitality[c]--;
+            if (Vitality[c] <= 0)
+                LoseLife();
+        }
+
+        // Sin vidas ni fin de partida todavía: vuelve a la entrada del mapa con la vitalidad llena.
+        void LoseLife()
+        {
+            int c = (int)motor.Character;
+            Vitality[c] = MaxVitality[c];
+            liquidTicks = 0;
+            int world = maps[mapName].e041 - 1;
+            if (world >= 1 && OriginalWorlds.HasEntry(world))
+            {
+                var (x, y) = OriginalWorlds.Entry[world];
+                motor.Place(World, World.Room(1), x, y);
+            }
+            else
+                motor.Place(World, World.Room(startRoom), startX, startY);
+            Say("Vida perdida");
         }
 
         void OnRockBroken(Rocks.Rock rock)
@@ -154,6 +221,12 @@ namespace MazeOfKnight.Game
         {
             if (Message != "" && Time.time > messageUntil)
                 Message = "";
+            // Depuración: K da una llave (en el original salen de piedras, enemigos y tiendas).
+            if (UnityEngine.InputSystem.Keyboard.current?.kKey.wasPressedThisFrame == true)
+            {
+                Keys = Mathf.Min(999, Keys + 1);
+                Say($"[depuración] +1 llave ({Keys})");
+            }
         }
     }
 }

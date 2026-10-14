@@ -19,9 +19,10 @@ namespace MazeOfKnight.Game
         public TileBase bossPassable;
         public TileBase rock;
         public TileBase door;
+        public TileBase keyDoor;
 
         Grid grid;
-        Tilemap front, rocks;
+        Tilemap front, rocks, keyDoors;
 
         public void Build(MapData map, RoomWorld world)
         {
@@ -34,6 +35,7 @@ namespace MazeOfKnight.Game
             var doors = Layer("Puertas", -8);
             front = Layer("Colisión", -5);
             rocks = Layer("Piedras", -4);
+            keyDoors = Layer("Puertas con llave", -3);
 
             foreach (var data in map.rooms)
             {
@@ -51,6 +53,14 @@ namespace MazeOfKnight.Game
                 if (room.doorWorld > 0)
                     Fill(doors, room, room.door.x, room.door.y, 4, 3, door);
             }
+        }
+
+        // Puerta con llave: columna de 1 x 3 tiles, cerrada hasta la altura dada (desde arriba).
+        public void ShowKeyDoor(RoomModel room, int x, int y, int height)
+        {
+            Fill(front, room, x, y, 1, 3, null);
+            Fill(keyDoors, room, x, y, 1, 3, null);
+            Fill(keyDoors, room, x, y, 1, height, keyDoor);
         }
 
         public void ShowRock(RoomModel room, int x, int y, bool visible) =>

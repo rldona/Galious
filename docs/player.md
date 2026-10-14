@@ -92,6 +92,17 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 | Alcance | una piedra recibe el golpe si su borde está a **18 px o menos** del centro del jugador (x + 18); a 20 ya no. Probado desde la misma altura |
 | Daño a las piedras | un golpe por ataque: Popolon quita 5 de 15 (3 golpes); Aphrodite, 1 (15 golpes) |
 
+**Agua y lava** [O] (`tools/openmsx/liquid_measure.py`; agua: castillo, sala 137; lava: mundo 8, sala 16):
+
+| | Valor |
+|---|---|
+| Vitalidad | se cuenta en **unidades**: al empezar, 8 de 8 (E052/E053 Aphrodite, E056/E057 Popolon). La barra mide 4 px por unidad (de ahí el "32" de la guía) |
+| Movimiento vertical | a **1/4**: las tablas de salto y caída avanzan una entrada cada 4 ticks y cada paso se reparte en 4. Hundirse a velocidad máxima: 6/4 = 1,5 px/tick (1 y 2 alternos). Aphrodite salta los mismos 42 px desde el fondo, pero en unos 40 ticks |
+| Movimiento horizontal | a la mitad: andar, 1 px/tick |
+| Fondo | no se baja de y = 184 (en la lava del mundo 8, aunque la fila 19 también sea lava) |
+| Daño | 1 unidad cada **4 ticks**: Popolon en el agua y los dos en la lava. Aphrodite en el agua, 1 cada **255 ticks** (contador E524). Con 8 unidades, Popolon se ahoga en ~1,1 s |
+| Muerte | al llegar a 0: E500 = 5 y estado 6 (vida perdida) |
+
 Estados de E500 vistos: 0 de pie o andando, 1 salto, 2 caída, 3 escalera, 4 retroceso, 7 arrastrado por una puerta giratoria.
 
 ## Pendiente

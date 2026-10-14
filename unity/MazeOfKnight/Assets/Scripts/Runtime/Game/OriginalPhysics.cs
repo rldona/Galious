@@ -37,6 +37,22 @@ namespace MazeOfKnight.Game
         public const int RockDamagePopolon = 5;
         public const int RockDamageAphrodite = 1;
 
+        // Agua y lava (docs/player.md, "Agua y lava"): dentro del líquido el movimiento vertical va a 1/4 (las
+        // tablas de salto y caída avanzan una entrada cada 4 ticks), el horizontal a la mitad, y no se baja de
+        // y = 184. Daño: 1 cada 4 ticks (Popolon en el agua; los dos en la lava), Aphrodite en el agua 1 cada 255.
+        public const int LiquidTimeScale = 4;
+        public const int LiquidFloorY = 184;
+        public const int LiquidDamageTicks = 4;
+        public const int AphroditeWaterDamageTicks = 255;
+        public const int StartVitality = 8;          // unidades (la barra mide 4 px por unidad)
+
+        // Puertas con llave (clases 1 y 2): empujar 30 ticks, 2 pasos de 6 ticks abriendo y 12 ticks de arrastre
+        // a 2 px/tick hasta el otro lado.
+        public const int KeyDoorPushTicks = 30;
+        public const int KeyDoorOpenTicks = 12;
+        public const int KeyDoorCarryTicks = 12;
+        public const int KeyDoorCarrySpeed = 2;
+
         public const int RoomWidthPx = 256;
         public const int RoomTopPx = 32;           // la sala empieza bajo el marcador
         public const int RoomBottomPx = RoomTopPx + 160;

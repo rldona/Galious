@@ -5,7 +5,7 @@ namespace MazeOfKnight.Game
 {
     public enum Character { Aphrodite = 0, Popolon = 1 }
 
-    public enum MotorState { Ground, JumpPrep, Jump, Fall, Ladder }
+    public enum MotorState { Ground, JumpPrep, Jump, Fall, Ladder, Carried }
 
     public struct MotorInput
     {
@@ -34,6 +34,16 @@ namespace MazeOfKnight.Game
         int fallIndex;
         bool airControl;        // false al caer por un borde
 
+        // Líquidos: 1/4 de velocidad vertical y 1/2 horizontal, con fracciones en 1/256 de píxel.
+        public TileClass Liquid { get; private set; }
+        public bool InLiquid => Liquid == TileClass.Water || Liquid == TileClass.Lava;
+        int vAcc, hAcc, liquidSub;
+
+        // Arrastrado por una puerta: espera y luego avanza sin colisión.
+        int carryWait, carryTicks, carryDir, carrySpeed;
+
+        public MotorInput LastInput { get; private set; }
+
         // Espada
         public int AttackTicks { get; private set; }
         public bool AttackStartedThisTick { get; private set; }
@@ -59,14 +69,33 @@ namespace MazeOfKnight.Game
         public void Place(RoomModel room, int x, int y)
         {
             AttackTicks = 0;
+            vAcc = hAcc = liquidSub = 0;
+            carryTicks = carryWait = 0;
             Room = room;
             X = x;
             Y = y;
             State = MotorState.Ground;
         }
 
+        // La puerta arrastra al jugador: wait ticks quieto y luego ticks a speed px/tick en dir.
+        public void Carry(int dir, int wait, int ticks, int speed)
+        {
+            State = MotorState.Carried;
+            carryDir = dir;
+            carryWait = wait;
+            carryTicks = ticks;
+            carrySpeed = speed;
+            AttackTicks = 0;
+        }
+
         public void Tick(MotorInput input)
         {
+            LastInput = input;
+            var liquidBefore = Liquid;
+            Liquid = LiquidAt();
+            if (!InLiquid || liquidBefore != Liquid)
+                vAcc = hAcc = liquidSub = 0;
+
             // Espada: una pulsación nueva fuera de un golpe y fuera de la escalera; dura 4 ticks.
             bool pressed = input.Attack && !attackHeld;
             attackHeld = input.Attack;
@@ -86,6 +115,7 @@ namespace MazeOfKnight.Game
                 case MotorState.Jump: TickJump(input); break;
                 case MotorState.Fall: TickFall(input); break;
                 case MotorState.Ladder: TickLadder(input); break;
+                case MotorState.Carried: TickCarried(); break;
             }
             CrossRoomEdges();
         }
@@ -129,6 +159,8 @@ namespace MazeOfKnight.Game
                 State = MotorState.Ground;   // Popolon no salta si suelta ↑ antes de despegar
                 return;
             }
+            if (!LiquidStep())
+                return;
             if (++prepTicks <= P.JumpPrepTicks)
                 return;                      // tick quieto antes de despegar
             State = MotorState.Jump;
@@ -152,15 +184,18 @@ namespace MazeOfKnight.Game
                     riseIndex = P.RiseTable.Length - 1;
                     return;
                 }
-                if (!HeadBlocked(Y - dy))
-                    Y -= dy;
-                riseIndex++;
+                bool step = LiquidStep();
+                int move = ScaleVertical(dy);
+                if (!HeadBlocked(Y - move))
+                    Y -= move;
+                if (step)
+                    riseIndex++;
                 return;
             }
 
             // Punto más alto
             MoveHorizontal(input, apexTicks < P.ApexTicksAtRiseSpeed ? P.AirSpeedRising : P.AirSpeedFalling);
-            if (++apexTicks >= P.ApexTicks)
+            if (LiquidStep() && ++apexTicks >= P.ApexTicks)
                 StartFall(0, true);
         }
 
@@ -175,8 +210,9 @@ namespace MazeOfKnight.Game
         {
             if (airControl)
                 MoveHorizontal(input, P.AirSpeedFalling);
-            int dy = P.FallTable[System.Math.Min(fallIndex, P.FallTable.Length - 1)];
-            fallIndex++;
+            int dy = ScaleVertical(P.FallTable[System.Math.Min(fallIndex, P.FallTable.Length - 1)]);
+            if (LiquidStep())
+                fallIndex++;
             // Baja píxel a píxel hasta tocar suelo (el original se hunde y corrige: aquí se para en el borde).
             for (int i = 0; i < dy; i++)
             {
@@ -222,6 +258,54 @@ namespace MazeOfKnight.Game
             FacingLeft
                 ? (X - 1 - P.SwordReach, X - 1 - P.SwordFrom, Y - P.SwordTop, Y - P.SwordBottom)
                 : (X + P.SwordFrom, X + P.SwordReach, Y - P.SwordTop, Y - P.SwordBottom);
+
+        void TickCarried()
+        {
+            if (carryWait > 0)
+            {
+                carryWait--;
+                return;
+            }
+            X += carryDir * carrySpeed;
+            if (--carryTicks <= 0)
+                State = Supported() ? MotorState.Ground : MotorState.Fall;
+        }
+
+        // ---------- líquidos ----------
+
+        TileClass LiquidAt()
+        {
+            foreach (int py in new[] { Y - 1, Y })
+            {
+                var t = world.TileAt(Room, X, py);
+                if (t == TileClass.Water || t == TileClass.Lava)
+                    return t;
+            }
+            return TileClass.Empty;
+        }
+
+        // En el líquido, las tablas avanzan una entrada cada 4 ticks.
+        bool LiquidStep() => !InLiquid || (++liquidSub % P.LiquidTimeScale) == 0;
+
+        int ScaleVertical(int dy)
+        {
+            if (!InLiquid)
+                return dy;
+            vAcc += dy * 256 / P.LiquidTimeScale;
+            int move = vAcc / 256;
+            vAcc -= move * 256;
+            return move;
+        }
+
+        int ScaleHorizontal(int speed)
+        {
+            if (!InLiquid)
+                return speed;
+            hAcc += speed * 128;
+            int move = hAcc / 256;
+            hAcc -= move * 256;
+            return move;
+        }
 
         // ---------- escaleras ----------
 
@@ -279,6 +363,8 @@ namespace MazeOfKnight.Game
         // De pie si hay sólido bajo los pies o la parte de arriba de una escalera que baja.
         bool Supported()
         {
+            if (InLiquid && Y >= P.LiquidFloorY)
+                return true;                 // en el líquido no se baja de y = 184
             if (((Y - P.RoomTopPx) & 7) != 0)
                 return false;
             return SolidUnderFeet() || (LadderPairAt(X, Y) && !LadderPairAt(X, Y - 1));
@@ -305,6 +391,7 @@ namespace MazeOfKnight.Game
             if (dir == 0)
                 return;
             FacingLeft = dir < 0;
+            speed = ScaleHorizontal(speed);
             for (int i = 0; i < speed; i++)
             {
                 if (BodyBlockedAt(X + dir))

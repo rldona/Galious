@@ -59,6 +59,24 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void KeyDoorsAreSolidColumns()
+        {
+            int n = 0;
+            foreach (var name in new[] { "castle" }.Concat(Enumerable.Range(1, 10).Select(OriginalWorlds.MapName)))
+            {
+                var world = World(Load(name));
+                foreach (var room in world.Rooms)
+                    foreach (var o in room.objects.Where(o => (o.type & 0x0F) == 1 || (o.type & 0x0F) == 2))
+                    {
+                        n++;
+                        for (int dy = 0; dy < 24; dy += 8)
+                            Assert.IsTrue(world.Solid(room, o.x, o.y + dy), $"{name} sala {room.id} puerta ({o.x},{o.y})");
+                    }
+            }
+            Assert.AreEqual(15 + 34, n);
+        }
+
+        [Test]
         public void RocksSitOnSolidCells()
         {
             var castle = World(Load("castle"));

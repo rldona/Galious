@@ -56,6 +56,7 @@ namespace MazeOfKnight.EditorTools
             mapView.bossPassable = GaliousImporter.LoadPlaceholder("boss_passable");
             mapView.rock = GaliousImporter.LoadPlaceholder("rock");
             mapView.door = GaliousImporter.LoadPlaceholder("door");
+            mapView.keyDoor = GaliousImporter.LoadPlaceholder("key_door");
             var bootstrap = game.AddComponent<GameBootstrap>();
 
             var playerGo = new GameObject("Jugador");
