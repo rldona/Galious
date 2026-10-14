@@ -11,6 +11,8 @@ namespace MazeOfKnight.Tests
     // importado nada, se saltan.
     public class ImportedDataTests
     {
+        internal static RoomWorld WorldFor(string name) => World(Load(name));
+
         static MapData Load(string name)
         {
             var map = Resources.Load<MapData>($"Maps/{name}");
@@ -121,6 +123,21 @@ namespace MazeOfKnight.Tests
                         return true;
                 }
             return false;
+        }
+
+        [Test]
+        public void JumpAlongTheTopEdgeKeepsMovingSideways()
+        {
+            // Castillo, sala 73: plataformas en y = 56 pegadas al marcador, hueco de x 64 a 95. Al saltar la cabeza
+            // choca arriba (y = 37) pero el salto sigue avanzando y llega a la plataforma de la derecha.
+            var world = WorldFor("castle");
+            var room = world.Room(73);
+            var m = new PlayerMotor(world, room, 60, 56);
+            for (int t = 0; t < 30 && !(t > 3 && m.State == MotorState.Ground); t++)
+                m.Tick(new MotorInput { Right = true, Up = true });
+            Assert.AreEqual(MotorState.Ground, m.State);
+            Assert.AreEqual(56, m.Y, "en la plataforma de la derecha, no en el piso de abajo");
+            Assert.GreaterOrEqual(m.X, 92);
         }
 
         // Los que andan por las plataformas: nunca deben meterse en un muro ni salir de la sala.

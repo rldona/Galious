@@ -472,8 +472,14 @@ namespace MazeOfKnight.Game
         {
             int edge = dir < 0 ? x + P.FootLeft : x + P.FootRight;
             foreach (int py in new[] { Y - P.HeadHeight, Y - 8, Y - 1 })
+            {
+                // Por encima de la sala está el marcador: no es pared (la cabeza llega a y = 24 al saltar pegado al
+                // borde de arriba y se sigue avanzando; castillo, sala 73).
+                if (py < P.RoomTopPx)
+                    continue;
                 if (world.Solid(Room, edge, py))
                     return true;
+            }
             return false;
         }
 
