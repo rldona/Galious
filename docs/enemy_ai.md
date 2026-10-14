@@ -188,7 +188,8 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
 - **Ataques / hijos:** ninguno.
 - **Comparación con lo observado:** encaja con "quieto", con speed_y 0.13 y y_range 16: 8 px cada 15 frames ≈ 0.53 px/f mientras se mueve [I].
 - **Dudas:**
-  - No se sabe quién elige la fase inicial (0 o 2), ni quién pinta los tiles.
+  - No se sabe quién elige la fase inicial (0 o 2).
+  - **Tiles** [O] (barrido de tiles, castillo 117 y 128): la columna se dibuja con 99 (base) y 9C 9D B4 B5, todos por debajo de 0xBA, así que **no es sólida**: solo hace daño.
   - Aquí +0C se usa como recarga y no como vy. No afecta porque el movimiento está desactivado [C].
 
 #### 0x05 — "serpiente que escupe"

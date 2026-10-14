@@ -252,6 +252,32 @@ Las 13 escaleras extra del castillo (tabla b09:A6EB/A705, 5 bytes: y, x, alto, l
 - Las salas 19 y 102 (modo 1) solo la retiran al subirla [O en la 19].
 - Efecto de diseño [I]: no puedes volver por donde has venido hasta pasado un minuto.
 
+## Barrido de tiles en openMSX [O]
+
+`tools/openmsx/explore_tiles.py` recorre cada sala con el jugador invencible: en cada altura de suelo (y = 56, 88, 120, 152, 184) anda de un borde al otro saltando a ratos, vuelve, hace una tercera pasada pulsando abajo, y sube y baja cada escalera (pasadas `L<x>u` / `L<x>d`). `tile_watch.tcl` anota cada tile que cambia en plena partida. `tools/openmsx/analyze_tiles.py` quita el ruido (el redibujado al cambiar de sala y los objetos recogidos) y agrupa lo demás; resultado en `logs/omsx/analyze_tiles.txt`.
+
+**Cobertura:** las 147 salas del castillo (1–19 en una primera pasada; 20–83 y 84–147 en `explore_a` y `explore_c`) y las 164 de los 10 mundos (`explore_b`). Sin el filtro de "tile anterior 00" solo aparecen redibujados completos de sala, así que no se pierde ningún muro que salga sobre un fondo vacío.
+
+**Resultado:** ninguna mecánica nueva. Cada cambio corresponde a algo ya leído en el código, y ahora queda comprobado:
+
+| Qué | Dónde | Tiles | Ya documentado en |
+|---|---|---|---|
+| **Muro que se cierra a tu espalda** (clase 5): una columna de 1 × 3 tiles se vuelve ladrillo F0, de arriba abajo | castillo 32, 44, 45, 61, 67, 70, 79, 90, 99 y 132, siempre en la columna del objeto (x / 8) y desde su fila (y − 32) / 8. En algunas pasadas solo se ven 1 o 2 tiles porque la pasada acaba antes | fondo (A2…B5, 9C…9E) → F0 | "Objetos de sala", clase 5 |
+| **Escalera que se retira**: las 2 columnas × 7 filas pasan a fondo de golpe, al terminar de bajarla | castillo 13, 70, 86, 106, 116 y 133, en la posición de su escalera extra (modo 2 o 3) | 9A 9B → el ladrillo del fondo (A2…B5 o 9C…9F según la sala) | "Escaleras que se retiran" |
+| **Bocas de pared** 0x3A y 0x50: al abrirse cambian 2 tiles de la estatua | castillo 3 y 16, con el jugador por debajo | F8 FB → FA FC (0x3A) y F2 F5 → F4 F6 (0x50) | `enemy_ai.md`, 0x3A / 0x50 |
+| **Pistones** 0x04: su columna se dibuja con tiles que suben y bajan | castillo 117 y 128 | 99 (base), 9C 9D B4 B5 | `enemy_ai.md`, 0x04 |
+| **Puertas giratorias** (clases 3 y 4): giran como un bloque de 3 × 3 tiles al empujarlas | mundo 6, sala 10; mundo 7, salas 6 y 8 | los tiles de la puerta (84…E0) entre sí | "Objetos de sala", clases 3 y 4 |
+
+Detalles nuevos que deja el barrido:
+- **Los pistones no son sólidos:** sus tiles (99, 9C, 9D, B4, B5) están por debajo de 0xBA, el primer tile sólido. Solo hacen daño al tocarlos. El remake ya los trata así.
+- **La escalera desaparece entera de una vez**, sin animación: los 14 tiles cambian en el mismo momento.
+- **En los mundos no aparece ningún muro al pasar.** Los únicos cambios de tiles son las puertas giratorias; los bloques de muro y las escaleras de los eventos de sala dependen de matar a los enemigos marcados y el barrido no mata a nadie.
+
+**Lo que el barrido no llegó a activar** (no quiere decir que no funcione):
+- Muros que se cierran de las salas 15, 17, 29, 41, 48 y 76 (el de la 48 está medido aparte, con `room_object_measure.py`).
+- Escaleras que se retiran de las salas 19 y 102 (modo 1, al subir; la de la 19 está medida aparte), 21, 60, 73, 124 y 136.
+- Los eventos de sala (enemigos marcados) y los objetos con condición.
+
 ## Catálogo de sprites
 
 `extracted/entities/sprites_<tipo>.png` pinta los sprites de 16×16 que carga cada tipo, en blanco. Algunos reconocibles: 0x25 esqueleto, 0x0E y 0x49 murciélagos, 0x05 serpiente, 0x0A caballero, 0x08 y 0x31 fuego, 0x32 flecha, 0x54 huesos (el proyectil del jefe del mundo 1, que se dibuja con tiles). El tipo de generador no siempre es un tipo de sprite: algunos (0x50, 0x51, 0x04, 0x3A) se dibujan con tiles.

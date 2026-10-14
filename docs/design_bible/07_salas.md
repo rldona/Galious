@@ -32,7 +32,7 @@ Objeto de clase 5 [C][O]:
 2. Si sigues 16 px más en esa dirección, **crece un muro**: un tile cada 15 ticks hasta 3 tiles de alto.
 3. La sala queda marcada (bit 1) y al volver ya está cerrado.
 
-Son los "callejones sin salida que se cierran detrás de ti" de la guía. Obligan a seguir hacia delante. El barrido del emulador los vio aparecer en 10 salas.
+Son los "callejones sin salida que se cierran detrás de ti" de la guía. Obligan a seguir hacia delante. El barrido del emulador los vio aparecer en 10 de las 16 salas (32, 44, 45, 61, 67, 70, 79, 90, 99 y 132); el de la 48 está medido aparte. Ver [entities.md](../entities.md), "Barrido de tiles en openMSX".
 
 ## Escaleras que se retiran (13, en el castillo)
 
@@ -41,7 +41,7 @@ Cada escalera extra tiene un modo [C][O]:
 - **modo 2:** se retira al bajarla;
 - **modo 3:** se retira en los dos sentidos.
 
-Al terminar de recorrerla desaparece entera. **Vuelve a los 60 segundos**: el temporizador corre aunque salgas de la sala. Impide deshacer el camino durante un minuto.
+Al terminar de recorrerla desaparece entera, de golpe, sin animación (barrido del emulador: salas 13, 70, 86, 106, 116 y 133). **Vuelve a los 60 segundos**: el temporizador corre aunque salgas de la sala. Impide deshacer el camino durante un minuto.
 
 ## Eventos al limpiar una sala
 

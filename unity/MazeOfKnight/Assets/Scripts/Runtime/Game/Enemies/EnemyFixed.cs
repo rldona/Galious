@@ -33,9 +33,9 @@ namespace MazeOfKnight.Game.Enemies
         }
     }
 
-    // 0x04: pistón (sin sprite). Baja 8 px cada 15 ticks hasta un sólido o y = 0xB0 y vuelve a subir. [I] El original
-    // lo dibuja con tiles; aquí la columna entera hace daño. La fase latente (seguir la y del jugador) no se usa
-    // porque no se sabe quién la elige.
+    // 0x04: pistón (sin sprite). Baja 8 px cada 15 ticks hasta un sólido o y = 0xB0 y vuelve a subir. El original lo
+    // dibuja con tiles (99, 9C, 9D, B4, B5), que no son sólidos [O]: la columna entera hace daño pero no tapa el paso.
+    // La fase latente (seguir la y del jugador) no se usa porque no se sabe quién la elige.
     public class Piston : Enemy
     {
         int length, timer = 15;
