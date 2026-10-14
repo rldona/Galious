@@ -26,6 +26,17 @@ namespace MazeOfKnight.Game
         public const int FootRight = 7;
         public const int HeadHeight = 13;         // sala 97: choca en y = 110 y aún sube 1 px
 
+        // Espada (docs/player.md, "Espada"): 4 ticks, alcance hasta x + 18 delante del centro. La franja vertical
+        // no se ha medido: se supone a la altura del cuerpo [I].
+        public const int SwordTicks = 4;
+        public const int SwordFrom = 8;
+        public const int SwordReach = 18;
+        public const int SwordTop = 12;
+        public const int SwordBottom = 3;
+        public const int RockHp = 15;
+        public const int RockDamagePopolon = 5;
+        public const int RockDamageAphrodite = 1;
+
         public const int RoomWidthPx = 256;
         public const int RoomTopPx = 32;           // la sala empieza bajo el marcador
         public const int RoomBottomPx = RoomTopPx + 160;

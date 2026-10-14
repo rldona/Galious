@@ -191,6 +191,129 @@ namespace MazeOfKnight.Tests
             Assert.AreEqual(120, motor.Y);
         }
 
+        // ---------- espada (docs/player.md, "Espada") ----------
+
+        [Test]
+        public void SwordLastsFourTicksAndStopsWalking()
+        {
+            var (motor, _, dx) = Run(FlatRoom(), Character.Popolon, 64, 120, 10,
+                t => new MotorInput { Right = true, Attack = t >= 2 });
+            CollectionAssert.AreEqual(new[] { 2, 2, 0, 0, 0, 0, 2, 2, 2, 2 }, dx.ToArray(), "se para 4 ticks y no repite");
+        }
+
+        [Test]
+        public void SwordNeedsANewPress()
+        {
+            var room = FlatRoom();
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 64, 120);
+            var started = new List<int>();
+            // Pulsado 0-5 (empieza en 0; pulsar durante el golpe no cuenta), suelta 6, pulsa 7.
+            for (int t = 0; t < 12; t++)
+            {
+                motor.Tick(new MotorInput { Attack = t <= 5 || t >= 7 });
+                if (motor.AttackStartedThisTick) started.Add(t);
+            }
+            CollectionAssert.AreEqual(new[] { 0, 7 }, started);
+        }
+
+        [Test]
+        public void SwordInTheAirKeepsAirControl()
+        {
+            var (_, _, dx) = Run(FlatRoom(), Character.Popolon, 64, 120, 12,
+                t => new MotorInput { Up = true, Right = true, Attack = t == 5 });
+            Assert.IsTrue(dx.Skip(2).Take(10).All(v => v == 2));
+        }
+
+        [Test]
+        public void NoSwordOnTheLadder()
+        {
+            var room = FlatRoom(ladderCol: 14);
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 120);
+            motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(MotorState.Ladder, motor.State);
+            motor.Tick(new MotorInput { Up = true, Attack = true });
+            Assert.AreEqual(0, motor.AttackTicks);
+        }
+
+        [Test]
+        public void PopolonBreaksARockInThreeHitsAphroditeInFifteen()
+        {
+            foreach (var (character, hits) in new[] { (Character.Popolon, 3), (Character.Aphrodite, 15) })
+            {
+                // Piedra de 2 x 2 tiles sobre el suelo (fila 11), con el borde a 18 px del jugador.
+                var room = FlatRoom();
+                room.rocks = new[] { new PointJson { x = 64 + 18, y = 104 } };
+                for (int r = 9; r <= 10; r++)
+                    room.collision[r] = room.collision[r].Substring(0, 10) + "##" + room.collision[r].Substring(12);
+                var world = new RoomWorld(new[] { room });
+                var rocks = new Rocks("test", world, new HashSet<(string, int, int, int)>());
+                var motor = new PlayerMotor(world, room, 64, 120) { Character = character };
+                int presses = 0;
+                for (int i = 0; i < 40 && !rocks.All.First().broken; i++)
+                {
+                    motor.Tick(new MotorInput { Attack = true });
+                    if (motor.AttackStartedThisTick) { presses++; rocks.Strike(motor, world); }
+                    for (int k = 0; k < 4; k++) motor.Tick(new MotorInput());
+                }
+                Assert.AreEqual(hits, presses, character.ToString());
+                Assert.IsFalse(world.Solid(room, 64 + 18, 110), "el hueco de la piedra queda libre");
+            }
+        }
+
+        [Test]
+        public void SwordDoesNotReachTwentyPixels()
+        {
+            var room = FlatRoom();
+            room.rocks = new[] { new PointJson { x = 64 + 20, y = 104 } };
+            var world = new RoomWorld(new[] { room });
+            var rocks = new Rocks("test", world, new HashSet<(string, int, int, int)>());
+            var motor = new PlayerMotor(world, room, 64, 120);
+            motor.Tick(new MotorInput { Attack = true });
+            rocks.Strike(motor, world);
+            Assert.AreEqual(OriginalPhysics.RockHp, rocks.All.First().hp);
+        }
+
+        // ---------- puertas y salidas ----------
+
+        [Test]
+        public void DownAtAWorldDoorEntersTheWorld()
+        {
+            var room = FlatRoom();
+            room.doorWorld = 3;
+            room.door = new PointJson { x = 64, y = 96 };   // jugador en y = 96 + 0x18 = 120
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 64 + 16, 120);
+            int entered = 0;
+            motor.DoorEntered += w => entered = w;
+            motor.Tick(new MotorInput { Down = true });
+            Assert.AreEqual(3, entered);
+        }
+
+        [Test]
+        public void WalkingThroughACastleExitRaisesTheEvent()
+        {
+            var room = FlatRoom();
+            room.left = 0xFB;
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 4, 120);
+            int exit = 0;
+            motor.CastleExitReached += code => exit = code;
+            for (int t = 0; t < 4; t++)
+                motor.Tick(new MotorInput { Left = true });
+            Assert.AreEqual(0xFB, exit);
+        }
+
+        [Test]
+        public void ClimbingOffTheTopThroughACastleExitRaisesTheEvent()
+        {
+            var room = FlatRoom(ladderCol: 14);
+            room.up = 0xFE;
+            var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, 48);
+            int exit = 0;
+            motor.CastleExitReached += code => exit = code;
+            for (int t = 0; t < 30 && exit == 0; t++)
+                motor.Tick(new MotorInput { Up = true });
+            Assert.AreEqual(0xFE, exit);
+        }
+
         [Test]
         public void WalkingOffTheRightEdgeEntersTheNeighbour()
         {

@@ -5,40 +5,70 @@ namespace MazeOfKnight.Game
 {
     // Consulta de tiles en coordenadas del original (píxeles de pantalla dentro de una sala), siguiendo los
     // enlaces a las salas vecinas cuando el punto cae fuera. Fuera de una sala sin vecino, todo es sólido.
+    // Guarda una copia de la colisión de cada sala para poder cambiarla en juego (piedras rotas) sin tocar
+    // los assets importados.
     public class RoomWorld
     {
         readonly Dictionary<int, RoomModel> rooms = new Dictionary<int, RoomModel>();
+        readonly Dictionary<int, char[][]> grids = new Dictionary<int, char[][]>();
         public bool BossFight;
 
         public RoomWorld(IEnumerable<RoomModel> models)
         {
             foreach (var m in models)
+            {
                 rooms[m.id] = m;
+                var grid = new char[m.collision.Length][];
+                for (int r = 0; r < grid.Length; r++)
+                    grid[r] = m.collision[r].ToCharArray();
+                grids[m.id] = grid;
+            }
         }
+
+        public IEnumerable<RoomModel> Rooms => rooms.Values;
 
         public RoomModel Room(int id) => rooms.TryGetValue(id, out var r) ? r : null;
 
-        // Enlace válido a otra sala de este mapa (las salidas al castillo, 0xF5-0xFE, no cuentan aquí).
-        public RoomModel Neighbour(RoomModel room, int dx, int dy)
+        // Salida al castillo (0xF5-0xFE) en una dirección de la sala, o 0.
+        public static int CastleExit(RoomModel room, int dx, int dy)
         {
-            int link = dx < 0 ? room.left : dx > 0 ? room.right : dy < 0 ? room.up : room.down;
-            return Room(link);
+            int link = Link(room, dx, dy);
+            return link >= 0xF5 && link <= 0xFE ? link : 0;
         }
+
+        static int Link(RoomModel room, int dx, int dy) =>
+            dx < 0 ? room.left : dx > 0 ? room.right : dy < 0 ? room.up : room.down;
+
+        // Enlace a otra sala de este mapa (las salidas al castillo no cuentan aquí).
+        public RoomModel Neighbour(RoomModel room, int dx, int dy) => Room(Link(room, dx, dy));
 
         public TileClass TileAt(RoomModel room, int px, int py)
         {
-            // Salta a la sala vecina si el punto está fuera (una sala de distancia como mucho).
-            if (px < 0) { room = Neighbour(room, -1, 0); px += OriginalPhysics.RoomWidthPx; }
-            else if (px >= OriginalPhysics.RoomWidthPx) { room = Neighbour(room, 1, 0); px -= OriginalPhysics.RoomWidthPx; }
-            if (room != null && py < OriginalPhysics.RoomTopPx) { room = Neighbour(room, 0, -1); py += 160; }
-            else if (room != null && py >= OriginalPhysics.RoomBottomPx) { room = Neighbour(room, 0, 1); py -= 160; }
+            // Salta a la sala vecina si el punto está fuera (una sala de distancia como mucho). Más allá de una
+            // salida al castillo el paso está libre.
+            int dx = px < 0 ? -1 : px >= OriginalPhysics.RoomWidthPx ? 1 : 0;
+            if (dx != 0)
+            {
+                if (CastleExit(room, dx, 0) != 0) return TileClass.Empty;
+                room = Neighbour(room, dx, 0);
+                px -= dx * OriginalPhysics.RoomWidthPx;
+            }
+            int dy = py < OriginalPhysics.RoomTopPx ? -1 : py >= OriginalPhysics.RoomBottomPx ? 1 : 0;
+            if (room != null && dy != 0)
+            {
+                if (CastleExit(room, 0, dy) != 0) return TileClass.Empty;
+                room = Neighbour(room, 0, dy);
+                py -= dy * 160;
+            }
+            // Sala de dios de un mundo: sin disposición propia; de momento no se entra (docs/world_maps.md).
             if (room == null || room.shrine)
                 return TileClass.Solid;
 
             int row = (py - OriginalPhysics.RoomTopPx) >> 3, col = px >> 3;
-            if (row < 0 || row >= room.collision.Length || col < 0 || col >= 32)
+            var grid = grids[room.id];
+            if (row < 0 || row >= grid.Length || col < 0 || col >= 32)
                 return TileClass.Solid;
-            return TileClasses.FromChar(room.collision[row][col]);
+            return TileClasses.FromChar(grid[row][col]);
         }
 
         public bool Solid(RoomModel room, int px, int py)
@@ -48,5 +78,15 @@ namespace MazeOfKnight.Game
         }
 
         public bool Ladder(RoomModel room, int px, int py) => TileAt(room, px, py) == TileClass.Ladder;
+
+        // Vacía un rectángulo de tiles de una sala (por ejemplo, una piedra rota).
+        public void Clear(RoomModel room, int col, int row, int width, int height)
+        {
+            var grid = grids[room.id];
+            for (int r = row; r < row + height && r < grid.Length; r++)
+                for (int c = col; c < col + width && c < 32; c++)
+                    if (r >= 0 && c >= 0)
+                        grid[r][c] = '.';
+        }
     }
 }

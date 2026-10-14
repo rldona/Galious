@@ -14,18 +14,25 @@ namespace MazeOfKnight.EditorTools
     {
         public const string ScenePath = "Assets/Scenes/Game.unity";
         const string PlayerSpritePath = "Assets/Art/Placeholder/player.png";
+        const string SwordSpritePath = "Assets/Art/Placeholder/sword.png";
+        const string ItemSpritePath = "Assets/Art/Placeholder/item.png";
 
         [MenuItem("Maze of Knight/Crear escena de juego", false, 20)]
         public static void Build()
         {
             GaliousImporter.EnsurePlaceholderTiles();
             var playerSprite = EnsurePlayerSprite();
+            EnsureSprite(SwordSpritePath, 11, 2, SpriteAlignment.Center, (x, y) => Color.white);
+            EnsureSprite(ItemSpritePath, 12, 12, SpriteAlignment.BottomCenter,
+                (x, y) => System.Math.Abs(x - 5.5f) + System.Math.Abs(y - 5.5f) <= 6 ? new Color(1f, 0.85f, 0.2f) : new Color(0, 0, 0, 0));
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
                 AssetDatabase.CreateFolder("Assets", "Scenes");
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             // NewScene descarga los assets sin referencias: los tiles se cargan después.
             playerSprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlayerSpritePath);
+            var swordSprite = AssetDatabase.LoadAssetAtPath<Sprite>(SwordSpritePath);
+            var itemSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ItemSpritePath);
 
             var camGo = new GameObject("Main Camera");
             camGo.tag = "MainCamera";
@@ -47,6 +54,8 @@ namespace MazeOfKnight.EditorTools
             mapView.water = GaliousImporter.LoadPlaceholder("water");
             mapView.lava = GaliousImporter.LoadPlaceholder("lava");
             mapView.bossPassable = GaliousImporter.LoadPlaceholder("boss_passable");
+            mapView.rock = GaliousImporter.LoadPlaceholder("rock");
+            mapView.door = GaliousImporter.LoadPlaceholder("door");
             var bootstrap = game.AddComponent<GameBootstrap>();
 
             var playerGo = new GameObject("Jugador");
@@ -54,11 +63,17 @@ namespace MazeOfKnight.EditorTools
             body.transform.SetParent(playerGo.transform, false);
             body.sprite = playerSprite;
             body.sortingOrder = 10;
+            var sword = new GameObject("Espada").AddComponent<SpriteRenderer>();
+            sword.sprite = swordSprite;
+            sword.sortingOrder = 11;
+            sword.enabled = false;
             var player = playerGo.AddComponent<PlayerController>();
             player.body = body;
+            player.sword = sword;
 
             bootstrap.mapView = mapView;
             bootstrap.player = player;
+            bootstrap.itemSprite = itemSprite;
             var hud = game.AddComponent<DebugHud>();
             hud.bootstrap = bootstrap;
             hud.player = player;
@@ -68,6 +83,32 @@ namespace MazeOfKnight.EditorTools
             var scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             EditorBuildSettings.scenes = scenes;
             Debug.Log($"[GameSceneBuilder] {ScenePath}");
+        }
+
+        static void EnsureSprite(string path, int w, int h, SpriteAlignment pivot, System.Func<int, int, Color> pixel)
+        {
+            if (!File.Exists(path))
+            {
+                var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+                for (int y = 0; y < h; y++)
+                    for (int x = 0; x < w; x++)
+                        tex.SetPixel(x, y, pixel(x, y));
+                File.WriteAllBytes(path, tex.EncodeToPNG());
+                Object.DestroyImmediate(tex);
+                AssetDatabase.ImportAsset(path);
+            }
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = RoomCoords.PixelsPerUnit;
+            importer.filterMode = FilterMode.Point;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.mipmapEnabled = false;
+            var settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            settings.spriteAlignment = (int)pivot;
+            importer.SetTextureSettings(settings);
+            importer.SaveAndReimport();
         }
 
         // Sprite provisional de 16 x 16 px con el pivote en los pies (abajo en el centro), blanco para
@@ -114,8 +155,11 @@ namespace MazeOfKnight.EditorTools
                 EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
                 var bootstrap = Object.FindFirstObjectByType<GameBootstrap>();
                 var map = AssetDatabase.LoadAssetAtPath<MapData>($"{GaliousImporter.MapsRoot}/{bootstrap.mapName}.asset");
-                bootstrap.mapView.Build(map);
                 var world = new RoomWorld(System.Linq.Enumerable.Select(map.rooms, r => r.room));
+                bootstrap.mapView.Build(map, world);
+                foreach (var room in world.Rooms)
+                    foreach (var r in room.rocks)
+                        bootstrap.mapView.ShowRock(room, r.x, r.y, true);
                 var motor = new PlayerMotor(world, world.Room(bootstrap.startRoom), bootstrap.startX, bootstrap.startY);
                 bootstrap.player.Init(motor);
                 var cam = Camera.main;

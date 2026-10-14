@@ -81,6 +81,17 @@ La lógica avanza un **tick cada 2 frames** (30 ticks/s a 60 Hz). Todos los valo
 | Aterrizar | el último paso puede meter los pies en el suelo; se corrige al borde superior de la fila |
 | Escalera (E500 = 3) | 1 px/tick |
 
+**Espada** [O] (`tools/openmsx/sword_measure.py`, datos en `logs/omsx/sword_measure*.json`):
+
+| | Valor |
+|---|---|
+| Duración del golpe | **4 ticks** (E508 = 2). Se activa con una pulsación nueva; mantener espacio no repite el golpe, y una pulsación hecha durante el golpe se ignora |
+| En el suelo | el jugador **se para** mientras golpea |
+| En el aire | se puede golpear y el movimiento en el aire sigue igual |
+| En la escalera | no se puede golpear |
+| Alcance | una piedra recibe el golpe si su borde está a **18 px o menos** del centro del jugador (x + 18); a 20 ya no. Probado desde la misma altura |
+| Daño a las piedras | un golpe por ataque: Popolon quita 5 de 15 (3 golpes); Aphrodite, 1 (15 golpes) |
+
 Estados de E500 vistos: 0 de pie o andando, 1 salto, 2 caída, 3 escalera, 4 retroceso, 7 arrastrado por una puerta giratoria.
 
 ## Pendiente

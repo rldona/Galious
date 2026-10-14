@@ -16,9 +16,12 @@ namespace MazeOfKnight.Game
             style ??= new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(12, Screen.height / 45) };
             var m = player.Motor;
             string text =
-                "← → andar   ↑ saltar / subir   ↓ bajar escalera   Tab cambiar de personaje   Esc salir\n" +
-                $"{bootstrap.mapName}  sala {m.Room.id}   x {m.X}  y {m.Y}   {m.State}   {m.Character}";
-            GUI.Label(new Rect(8, 4, Screen.width - 16, style.fontSize * 3f), text, style);
+                "← → andar   ↑ saltar / subir   ↓ bajar / entrar por puerta   Espacio espada   Tab personaje   Esc salir\n" +
+                $"{bootstrap.mapName}  sala {m.Room.id}   x {m.X}  y {m.Y}   {m.State}   {m.Character}" +
+                (bootstrap.Collected.Count > 0 ? $"   objetos: {bootstrap.Collected.Count}" : "") +
+                (m.Room.doorWorld > 0 ? $"   puerta al mundo {m.Room.doorWorld}" : "") +
+                (bootstrap.Message != "" ? $"\n{bootstrap.Message}" : "");
+            GUI.Label(new Rect(8, 4, Screen.width - 16, style.fontSize * 4.5f), text, style);
         }
 
         void Update()

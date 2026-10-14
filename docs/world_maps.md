@@ -111,6 +111,26 @@ El juego decide por el **número de tile** del mapa de nombres en RAM (ED00 + fi
   - los pinchos son enemigos (0x31).
 - **Recuento en las 320 salas:** fondo 109 735 tiles, sólido 76 671, escalera 6 796, agua 2 406, lava 3 432.
 
+## Entrar y salir de los mundos [O]
+
+`tools/openmsx/world_doors.py` abre cada puerta a mano (E689 = 1) y entra con ↓ desde y = Y_puerta + 0x18, x = X_puerta + 16. Datos en `logs/omsx/world_doors.json`.
+
+| Mundo | Puerta en el castillo (sala: x, y) | Aparece en la sala 1 en (x, y) | Salida al castillo desde la sala 1 |
+|---|---|---|---|
+| 1 | 104: 64, 64 | 128, 56 | arriba (0xFE) |
+| 2 | 98: 192, 64 | 128, 152 | abajo (0xFD) |
+| 3 | 63: 160, 64 | 128, 152 | abajo (0xFC) |
+| 4 | 57: 64, 96 | 32, 184 | izquierda (0xFB) |
+| 5 | 62: 64, 64 | 224, 120 | derecha (0xFA) |
+| 6 | 114: 160, 64 | 128, 56 | arriba (0xF9) |
+| 7 | 6: 32, 160 | 136, 184 (con Aphrodite: Popolon necesita el Necklace) | arriba (0xF8) |
+| 8 | 23: 96, 160 | 128, 56 | arriba (0xF7) |
+| 9 | 108: 96, 64 | 32, 56 | izquierda (0xF6) |
+| 10 | puerta móvil (una de 4 salas) | sin medir | izquierda (0xF5) |
+
+- **Al salir**, se vuelve al castillo delante de la puerta del mundo: y = Y_puerta + 0x18 (medido en los mundos 3, 4, 5 y 9) y x = X_puerta + 16 (exacto en el mundo 3; en los demás el script siguió andando).
+- **Pendiente:** cómo se pasa por la sala de dios de cada mundo (estado 14).
+
 ## Agua y lava [C][O]
 
 **Dónde.** La lava (`L`) está exactamente en las salas que b15:BD58 marca con E619 (tabla b15:BD72 por mundo):

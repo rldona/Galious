@@ -151,6 +151,8 @@ namespace MazeOfKnight.EditorTools
             result[TileClass.Empty] = EnsureTile("room_background", new Color(0.06f, 0.06f, 0.10f));
             EnsureTile("room_background_alt", new Color(0.10f, 0.10f, 0.16f));
             EnsureTile("shrine", new Color(0.45f, 0.20f, 0.55f));
+            EnsureTile("rock", new Color(0.55f, 0.38f, 0.22f));
+            EnsureTile("door", new Color(0.30f, 0.75f, 0.45f));
             return result;
         }
 

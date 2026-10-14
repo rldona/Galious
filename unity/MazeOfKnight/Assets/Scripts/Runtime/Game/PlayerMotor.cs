@@ -9,7 +9,7 @@ namespace MazeOfKnight.Game
 
     public struct MotorInput
     {
-        public bool Left, Right, Up, Down;
+        public bool Left, Right, Up, Down, Attack;
     }
 
     // Movimiento del jugador tick a tick, con los números del original (docs/player.md). Clase sin
@@ -17,7 +17,7 @@ namespace MazeOfKnight.Game
     // Posición en píxeles del original dentro de la sala: x = centro, y = pies (fila r: y = 8r + 32).
     public class PlayerMotor
     {
-        readonly RoomWorld world;
+        RoomWorld world;
 
         public RoomModel Room { get; private set; }
         public int X { get; private set; }
@@ -34,7 +34,14 @@ namespace MazeOfKnight.Game
         int fallIndex;
         bool airControl;        // false al caer por un borde
 
+        // Espada
+        public int AttackTicks { get; private set; }
+        public bool AttackStartedThisTick { get; private set; }
+        bool attackHeld;
+
         public event System.Action<RoomModel, RoomModel> RoomChanged;
+        public event System.Action<int> DoorEntered;        // mundo
+        public event System.Action<int> CastleExitReached;  // código de salida 0xF5-0xFE
 
         public PlayerMotor(RoomWorld world, RoomModel room, int x, int y)
         {
@@ -42,8 +49,16 @@ namespace MazeOfKnight.Game
             Place(room, x, y);
         }
 
+        // Cambia de mapa (entrar o salir de un mundo).
+        public void Place(RoomWorld newWorld, RoomModel room, int x, int y)
+        {
+            world = newWorld;
+            Place(room, x, y);
+        }
+
         public void Place(RoomModel room, int x, int y)
         {
+            AttackTicks = 0;
             Room = room;
             X = x;
             Y = y;
@@ -52,6 +67,18 @@ namespace MazeOfKnight.Game
 
         public void Tick(MotorInput input)
         {
+            // Espada: una pulsación nueva fuera de un golpe y fuera de la escalera; dura 4 ticks.
+            bool pressed = input.Attack && !attackHeld;
+            attackHeld = input.Attack;
+            AttackStartedThisTick = false;
+            if (AttackTicks > 0)
+                AttackTicks--;
+            else if (pressed && State != MotorState.Ladder)
+            {
+                AttackTicks = P.SwordTicks;
+                AttackStartedThisTick = true;
+            }
+
             switch (State)
             {
                 case MotorState.Ground: TickGround(input); break;
@@ -67,6 +94,18 @@ namespace MazeOfKnight.Game
 
         void TickGround(MotorInput input)
         {
+            if (AttackTicks > 0)
+            {
+                // En el suelo se para mientras golpea.
+                if (!Supported())
+                    StartFall(P.LedgeFallStart, false);
+                return;
+            }
+            if (input.Down && AtDoor())
+            {
+                DoorEntered?.Invoke(Room.doorWorld);
+                return;
+            }
             if (input.Up && TryGrabLadder(Y - 1))
                 return;
             // La escalera puede atravesar el suelo: la fila de los pies es sólida y sigue debajo.
@@ -174,6 +213,16 @@ namespace MazeOfKnight.Game
             }
         }
 
+        // Puerta de mundo del castillo: y = Y_puerta + 0x18, x entre X_puerta + 14 y + 18 (state_machine.md, estado 8).
+        bool AtDoor() =>
+            Room.doorWorld > 0 && Y == Room.door.y + 0x18 && X >= Room.door.x + 14 && X <= Room.door.x + 18;
+
+        // Zona de la espada en píxeles de la sala (incluidos los extremos).
+        public (int x0, int x1, int y0, int y1) SwordRect() =>
+            FacingLeft
+                ? (X - 1 - P.SwordReach, X - 1 - P.SwordFrom, Y - P.SwordTop, Y - P.SwordBottom)
+                : (X + P.SwordFrom, X + P.SwordReach, Y - P.SwordTop, Y - P.SwordBottom);
+
         // ---------- escaleras ----------
 
         // Escalera de dos tiles (9A 9B) bajo el centro del jugador.
@@ -187,6 +236,9 @@ namespace MazeOfKnight.Game
         bool LadderContinues(int py, int dir)
         {
             if (LadderPairAt(X, py))
+                return true;
+            // Por el borde de arriba se sigue trepando (salida al castillo o escalera en la sala de arriba).
+            if (dir < 0 && py < P.RoomTopPx && !SolidPairAt(X, py))
                 return true;
             if (!SolidPairAt(X, py))
                 return false;
@@ -270,6 +322,12 @@ namespace MazeOfKnight.Game
             if (dx == 0 && dy == 0)
                 return;
             var next = world.Neighbour(Room, dx, dy);
+            int exit = RoomWorld.CastleExit(Room, dx, dy);
+            if (next == null && exit != 0)
+            {
+                CastleExitReached?.Invoke(exit);
+                return;
+            }
             if (next == null)
             {
                 // Sin vecino (o salida al castillo, aún sin implementar): se queda en el borde.
