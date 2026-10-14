@@ -102,6 +102,43 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void PsgPlaysTheRightPitch()
+        {
+            // Periodo 254 en el canal A: 1789772,5 / (16 · 254) = 440 Hz (la nota A4 de la tabla del driver).
+            var psg = new Psg(44100);
+            psg.Write(0, 254); psg.Write(1, 0);
+            psg.Write(7, 0x3E);          // solo el tono del canal A
+            psg.Write(8, 15);
+            int crossings = 0;
+            float prev = 0;
+            for (int i = 0; i < 44100; i++)
+            {
+                float v = psg.Sample();
+                if (i > 2000 && prev < 0 && v >= 0) crossings++;
+                prev = v;
+            }
+            Assert.That(crossings, Is.InRange(415, 445));
+        }
+
+        [Test]
+        public void SteppingStonesAppearOneByOne()
+        {
+            var st = new SteppingStones();
+            var seen = new List<int>();
+            st.Appeared += seen.Add;
+            for (int t = 0; t < 299; t++) st.Tick(0x1C, 0x78);
+            Assert.IsNull(st.Current, "aún no");
+            st.Tick(0x1C, 0x78);
+            Assert.AreEqual(0x38, st.Current);
+            // Encima de cada piedra 128 pasos: sale la siguiente.
+            for (int k = 0; k < 3; k++)
+                for (int t = 0; t < 129; t++) st.Tick(st.Current.Value + 8, 0x78);
+            CollectionAssert.AreEqual(new[] { 0x38, 0x60, 0x90, 0xB8 }, seen);
+            for (int t = 0; t < 129; t++) st.Tick(0xB8 + 8, 0x78);
+            Assert.IsNull(st.Current, "la última también se va");
+        }
+
+        [Test]
         public void VaseNeedsTheWorld4Boss()
         {
             var (m, _) = Castle(40, 128, 120);

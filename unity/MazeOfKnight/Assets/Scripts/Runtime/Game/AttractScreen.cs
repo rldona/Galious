@@ -52,6 +52,8 @@ namespace MazeOfKnight.Game
         public void Begin(AttractData d)
         {
             data = d ?? new AttractData();
+            Sound.Ensure();
+            Sound.StopMusic();
             story = new ScrollingText(data.storyLines, data.story.stepFramesMeasured, 2);
             Running = true;
             stage = AttractMode.StartAtTitle ? Stage.Title : Stage.Logo;
@@ -103,7 +105,14 @@ namespace MazeOfKnight.Game
             }
         }
 
-        void Next(Stage s) { stage = s; frame = 0; }
+        void Next(Stage s)
+        {
+            stage = s;
+            frame = 0;
+            if (s == Stage.Story) Sound.PlayMusic(0x86);        // Story (b00:4371)
+            else if (s == Stage.PlayStart) Sound.PlayMusic(0x87);  // castillo, con su entrada (estado 3)
+            else Sound.StopMusic();
+        }
 
         void OnGUI()
         {

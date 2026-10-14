@@ -165,6 +165,10 @@ Hay 48 efectos (0x01–0x30). La columna "qué es" sale del código que los pide
   - el vibrato y los portamentos salen como notas sueltas;
   - los efectos de sonido del juego, si suenan a la vez, se mezclan. Las grabaciones se hicieron en una sala vacía, la 1 del castillo.
 
+## En el remake
+
+`tools/extract/audio_export.py` deja en `extracted/unity/audio/` los registros del PSG de cada canción, recortados a una vuelta. El bucle se busca en la propia grabación: de los periodos con los que se repite el final, el de vuelta más corta. Coinciden con la tabla de arriba. La 0x8F y la 0x93 salen con un bucle de dos vueltas, porque las vueltas no son idénticas byte a byte. También deja los efectos expandidos a un paso por frame. `Psg.cs` emula el AY-3-8910: tonos, ruido de 17 bits, envolvente y volumen logarítmico. `Sound.cs` aplica los registros a 60 Hz y pone el efecto en el canal C, con su prioridad. Es el audio de Konami: solo va en las compilaciones locales.
+
 ## Pendiente
 
 - Identificar los efectos que solo tienen dirección (sobre todo los de b02 y los de enemigos sin ficha).

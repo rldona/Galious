@@ -20,6 +20,11 @@ namespace MazeOfKnight.Game
         public DemoPlayer Demo;          // demo en curso: las teclas salen de la grabación
         public event System.Action DemoInterrupted;   // una tecla de juego durante la demo
         public event System.Action Ticked;
+        // Celebración tras coger la Gran Llave (BossEffects): saltitos en el sitio, girándose en cada aterrizaje.
+        public float HopPx;
+        // Cambio de sala: el original deja de jugar mientras dibuja la sala nueva (estado 10).
+        int roomPause;
+        public bool HopFlip;
 
         InputAction move, jump, attack, fire;
         bool fireLatch;
@@ -38,6 +43,7 @@ namespace MazeOfKnight.Game
         public void Init(PlayerMotor motor)
         {
             Motor = motor;
+            Motor.RoomChanged += (_, __) => roomPause = OriginalPhysics.RoomChangePauseTicks;
             UpdateVisual();
         }
 
@@ -99,6 +105,7 @@ namespace MazeOfKnight.Game
                 while (accumulator >= dt && g++ < 4)
                 {
                     accumulator -= dt;
+                    if (roomPause > 0) { roomPause--; continue; }   // la demo tampoco avanza mientras se carga la sala
                     var di = Demo.Next();
                     if (Demo.FirePressed) fireLatch = true;
                     Motor.Tick(delayed);
@@ -132,6 +139,7 @@ namespace MazeOfKnight.Game
             while (accumulator >= tick && guard++ < 4)
             {
                 accumulator -= tick;
+                if (roomPause > 0) { roomPause--; continue; }
                 Motor.Tick(delayed);
                 delayed = input;
                 attackLatch = upLatch = downLatch = false;
@@ -149,13 +157,13 @@ namespace MazeOfKnight.Game
         void UpdateVisual()
         {
             // El sprite de 16 x 16 px tiene el pivote abajo en el centro: coincide con los pies del original.
-            transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y);
+            transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y) + new Vector2(0, HopPx / RoomCoords.PixelsPerUnit);
             if (body != null)
             {
                 var color = Motor.Character == Character.Popolon ? popolonColor : aphroditeColor;
                 // El original cambia de sprite en la escalera; aquí, provisionalmente, se oscurece.
                 body.color = Motor.State == MotorState.Ladder ? Color.Lerp(color, Color.black, 0.45f) : color;
-                body.flipX = Motor.FacingLeft;
+                body.flipX = Motor.FacingLeft ^ HopFlip;
                 // Preparando el salto el original cambia de sprite (mueve los pies): aquí, provisionalmente, se agacha.
                 body.transform.localScale = new Vector3(1, Motor.State == MotorState.JumpPrep ? 0.85f : 1, 1);
             }

@@ -147,10 +147,11 @@ namespace MazeOfKnight.Tests
             int hits = 0;
             for (int k = 0; k < 20 && skel.Alive; k++)
             {
-                // El jugador lo sigue: a 18 px de su borde, mirando hacia él.
-                motor.Place(sys.Room, (int)skel.X - 18, 120);
-                motor.Tick(new MotorInput { Right = true });
-                motor.Place(sys.Room, (int)skel.X - 18, 120);
+                // El jugador lo sigue por la espalda (lleva escudo por delante, IX+2 bit 1), mirando hacia él.
+                int px = skel.FacingLeft ? (int)skel.X + 33 : (int)skel.X - 18;
+                motor.Place(sys.Room, px, 120);
+                motor.Tick(new MotorInput { Right = !skel.FacingLeft, Left = skel.FacingLeft });
+                motor.Place(sys.Room, px, 120);
                 motor.Tick(new MotorInput { Attack = true });
                 if (motor.AttackStartedThisTick) { sys.Strike(motor, new List<int>()); hits++; }
                 if (hits == 1) Assert.IsFalse(skel.Harmful, "enroscado no hace daño");

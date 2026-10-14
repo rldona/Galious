@@ -127,7 +127,7 @@ Al cargar la sala, b08:9D4C reparte cada objeto de la tabla A7BC según el nibbl
 | 3 (0x03, 0x13) | EA50, 1 hueco, CF; el bit 4 del tipo da el sentido | **puerta giratoria de un solo sentido** (b09:A20A, por frame A22D) [C]. Gira si el jugador está en estado normal (E500 = 0), a la altura exacta (y = y_obj + 0x18), pegado a ella y empujando 30 frames en el único sentido que admite: tipo 0x03 → **hacia la izquierda** (desde x = x_obj + 0x10, mirando a la izquierda); tipo 0x13 → **hacia la derecha** (desde x = x_obj − 8). Entonces el jugador pasa a E500 = 7 (lo arrastra la puerta), la puerta da 4 pasos de 6 frames y suena 0x23. No consulta el Bread & Water: la cruzan los dos personajes, pero solo en un sentido | 15 en los mundos |
 | 4 (0x04) | EA60, 4 huecos, D0 D1 D2 | **puertas giratorias**: su rutina consulta E098, la flag del Bread & Water [C]. Según la guía [G], Popolon las cruza siempre y Aphrodite solo con ese objeto | 23 en los mundos |
 | 5 (0x05) | EAA0 | **muro que se cierra a tu espalda** (b09:A415–A4EC) [C][O]. Al pasar por su columna anota tu dirección; cuando avanzas 16 px más, crece un tile cada 15 frames hasta 3 y marca la sala (bit 1 persistente), así que al volver ya está cerrado | 16 salas del castillo |
-| 6 (0x06) | EAB0 | espera a que el jugador esté en y = 0x78. Por la guía, son las **piedras que aparecen si esperas en el borde** (mundo 5) [C][G] | mundo 5, sala 11 |
+| 6 (0x06) | EAB0 | **piedras que aparecen para cruzar el agua** (b09:A52E–A62F) [C]: esperando en el borde de una orilla (y = 0x78, x en 0x18…0x1F o 0xE0…0xE7) 300 pasos sale la primera; tras 128 pasos encima de cada una sale la siguiente y se va la anterior (x = 0x38, 0x60, 0x90, 0xB8; sonido 0x04); tras la cuarta se va la última, y al llegar a la otra orilla se vuelve a armar | mundo 5, sala 11 |
 | 7 (0x07–0x37) | EA20 (se dibuja como bloque 4×3 de F0) | **pared que se rompe a espadazos**, ver abajo [C][O] | castillo 97 (camino de la cruz), mundo 2 sala 4, mundo 4 sala 16, mundo 5 sala 7, mundo 6 sala 6, mundo 9 sala 26 |
 
 ### Puertas con llave, medidas en openMSX [O]
@@ -312,6 +312,10 @@ Detalles nuevos que deja el barrido:
 - **Los pistones no son sólidos:** sus tiles (99, 9C, 9D, B4, B5) están por debajo de 0xBA, el primer tile sólido. Solo hacen daño al tocarlos. El remake ya los trata así.
 - **La escalera desaparece entera de una vez**, sin animación: los 14 tiles cambian en el mismo momento.
 - **En los mundos no aparece ningún muro al pasar.** Los únicos cambios de tiles son las puertas giratorias; los bloques de muro y las escaleras de los eventos de sala dependen de matar a los enemigos marcados y el barrido no mata a nadie.
+
+**Comprobado después** [O] (`tools/openmsx/wall5_check.py`, `ladder_check.py`):
+- **Muros que se cierran** de las salas 15, 17, 29 y 41: el objeto pasa por las mismas fases que el de la 48 (anota el sentido, cuenta 3 tiles cada 15 ticks). Los tiles nuevos se escriben en la VRAM, no en la copia del mapa de nombres de la RAM. En la 76 hay piedras a los dos lados de la columna: se anota el sentido, pero no se llega al punto de cierre sin romperlas.
+- **Escaleras que se retiran** de las salas 21, 60, 73, 102, 124 y 136: todas activan EC07 al recorrerlas en su modo. Las de modo 3 (21 y 124) ya al subirlas.
 
 **Lo que el barrido no llegó a activar** (no quiere decir que no funcione):
 - Muros que se cierran de las salas 15, 17, 29, 41, 48 y 76 (el de la 48 está medido aparte, con `room_object_measure.py`).

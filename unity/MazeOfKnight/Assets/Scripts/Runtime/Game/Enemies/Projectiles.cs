@@ -87,7 +87,8 @@ namespace MazeOfKnight.Game.Enemies
     }
 
     // 0x41 (del espíritu 0x40): rumbo al jugador redondeado a 8 direcciones, a 4 px/tick, con el desplazamiento de
-    // salida de la tabla 8DC5 [I: qué índice es qué ángulo está deducido de la tabla].
+    // salida de la tabla 8DC5 [I: qué índice es qué ángulo está deducido de la tabla]. Caja según el sprite: horizontal
+    // A4 → 3A (17 × 4), vertical A8 → 3B (4 × 17), diagonal C8/BC → 75.
     public class EightWayShot : Enemy
     {
         static readonly (int vx, int vy, int dy, int dx)[] Table =
@@ -103,6 +104,7 @@ namespace MazeOfKnight.Game.Enemies
             int i = ((int)Math.Round(a / (Math.PI / 4)) + 8) & 7;
             var t = Table[i];
             Vx = t.vx; Vy = t.vy; X += t.dx; Y += t.dy;
+            SetBox(ctx, t.vy == 0 ? 0x3A : t.vx == 0 ? 0x3B : 0x75);
         }
 
         public override void Tick(EnemyContext ctx) => Move();
@@ -110,12 +112,14 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x47 (del centinela 0x17): bomba que rueda hacia la x del jugador al lanzarla, más despacio cuanto más cerca
     // (3,5 → 1 px/tick); se para al pasarla, sin suelo o ante una pared, espera 32..63 ticks y explota 16 (32×32).
+    // Cajas: rodando 5C ↔ 5D con el sprite (cada 3, 6, 9, 12, 15 o 18 ticks según la velocidad); al explotar 3D
+    // (patrón 0A) y a los 8 ticks 5B (32 × 32, patrón 0B).
     public class RollingBomb : Enemy
     {
         float target;
-        int phase, timer;
+        int phase, timer, anim;
 
-        public override void Init(EnemyContext ctx) { target = ctx.Px - 8; FacingLeft = (Param & 1) == 1; }
+        public override void Init(EnemyContext ctx) { target = ctx.Px - 8; FacingLeft = (Param & 1) == 1; SetBox(ctx, 0x5C); }
 
         public override void Tick(EnemyContext ctx)
         {
@@ -126,6 +130,12 @@ namespace MazeOfKnight.Game.Enemies
                     float d = Math.Abs(target - X);
                     float speed = d >= 132 ? 3.5f : d >= 116 ? 3f : d >= 96 ? 2.5f : d >= 72 ? 2f : d >= 40 ? 1.5f : 1f;
                     Walk(speed);
+                    // Periodo de la animación: 3 a 3,5 px/tick, 6 a 3, … 18 a 1.
+                    if (++anim >= (int)Math.Round(3 + (3.5f - speed) * 6))
+                    {
+                        anim = 0;
+                        SetBox(ctx, BoxIndex == 0x5C ? 0x5D : 0x5C);
+                    }
                     bool passed = FacingLeft ? X + Vx <= target : X + Vx >= target;
                     if (passed || Blocked(ctx)) { phase = 1; timer = ctx.Rand(32, 63); Vx = 0; break; }
                     X += Vx;
@@ -135,9 +145,11 @@ namespace MazeOfKnight.Game.Enemies
                     if (--timer > 0) break;
                     phase = 2; timer = 16;
                     X -= 8; Y -= 8; Width = Height = 32;
+                    SetBox(ctx, 0x3D);
                     break;
                 case 2:
-                    if (--timer <= 0) Alive = false;
+                    if (--timer == 8) SetBox(ctx, 0x5B);
+                    if (timer <= 0) Alive = false;
                     break;
             }
         }
@@ -222,11 +234,13 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x60 (del monstruo del agua 0x42): chorro que sube desde y = 0xA0 a 4 px/tick hasta 0x40 (24 ticks) y vuelve a
     // bajar; al pasar por 0x90 bajando avisa al padre (E628) y se borra en 0xA0. Toda la columna hace daño.
+    // Caja calculada (`columnDown`, b03:B916): 8 de ancho (w 7) desde y hacia abajo. [I] El alto del original es
+    // 8·((IX+9 & 7) − 1) y la ficha no dice cómo cambia IX+9; se usa la columna hasta 0xB0.
     public class WaterJet : Enemy
     {
         bool down;
 
-        public override void Init(EnemyContext ctx) { Y = 0xA0; Height = 16; }
+        public override void Init(EnemyContext ctx) { Y = 0xA0; Height = 16; SetBox(0, 0, Height - 1, 7); }
 
         public override void Tick(EnemyContext ctx)
         {
@@ -243,11 +257,14 @@ namespace MazeOfKnight.Game.Enemies
                 if (Y >= 0xA0) { Alive = false; return; }
             }
             Height = (int)(0xB0 - Y);
+            SetBox(0, 0, Height - 1, 7);
         }
     }
 
     // 0x62 (de la criatura ancha 0x43): rayo vertical que crece a 4 px/tick (hasta 6 segmentos de 16 px), hacia abajo
     // si y < 0x30 o el jugador está más abajo, y si no hacia arriba; se queda 16 ticks y se recoge a 4 px/tick.
+    // Caja calculada (`columnUpDown`, b03:B933): 8 de ancho (w 7) y el largo del rayo; aquí (X, Y) ya es el extremo
+    // de arriba, así que el dy de los rayos hacia arriba (−8·n) está incluido en Y.
     public class Beam : Enemy
     {
         float origin, length;
@@ -259,6 +276,7 @@ namespace MazeOfKnight.Game.Enemies
             origin = Y;
             downwards = Y < 0x30 || Y < 0xA0 && ctx.Py - 16 >= Y;
             Height = 1;
+            SetBox(0, 0, 0, 7);
         }
 
         public override void Tick(EnemyContext ctx)
@@ -280,6 +298,7 @@ namespace MazeOfKnight.Game.Enemies
             }
             Y = downwards ? origin + 16 : origin - length;
             Height = Math.Max(1, (int)length);
+            SetBox(0, 0, Height - 1, 7);
         }
     }
 
@@ -295,6 +314,7 @@ namespace MazeOfKnight.Game.Enemies
 
         public override void Init(EnemyContext ctx)
         {
+            ShieldAll = true;   // IX+2 bit 2: la espada hace «clinc» y las armas rebotan (AE68)
             int dir = Param;
             if (X < 0x27 && dir < 5) dir += 5;
             else if (X >= 0xD5 && dir >= 5) dir -= 5;

@@ -38,13 +38,14 @@ namespace MazeOfKnight.Game.Enemies
         float limit = 0xA1;
         int hang;
 
-        public override void Init(EnemyContext ctx) => Vx = ctx.Coin() ? -1 : 1;
+        // Cajas: colgado C4 → 66; tras soltarse C8 → 67 (attr 0x67).
+        public override void Init(EnemyContext ctx) { Vx = ctx.Coin() ? -1 : 1; SetBox(ctx, 0x66); }
 
         public override void Tick(EnemyContext ctx)
         {
             if (hang > 0)
             {
-                if (--hang == 0) { Vy = 4; limit = Y - 32; }
+                if (--hang == 0) { Vy = 4; limit = Y - 32; SetBox(ctx, 0x67); }
                 return;
             }
             Vy -= 0.5f;
@@ -55,6 +56,7 @@ namespace MazeOfKnight.Game.Enemies
                 Y = ((int)Y & ~7) + 8;
                 Vx = Vy = 0;
                 hang = 60;
+                SetBox(ctx, 0x66);
             }
         }
     }

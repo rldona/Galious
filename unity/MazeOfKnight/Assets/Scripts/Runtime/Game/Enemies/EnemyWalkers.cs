@@ -8,8 +8,12 @@ namespace MazeOfKnight.Game.Enemies
     // 0x01: embestidor. Patrulla a 1,5 px/tick; si el jugador está en su piso (o uno más abajo) se para 30 ticks,
     // embiste hasta la x donde estaba el jugador y, si estaba en su piso y hay techo sólido encima, ataca y se para
     // 15 ticks. [I] El golpe directo (b03:B389) se deja en el daño por contacto.
+    // Cajas: andando 00 ↔ 13 cada 8 ticks (E604, con el sprite ^ 4); aviso A8 → 00; ataque AC/C0 → 01 (29 de alto,
+    // sube 13 px). [I] Al volver a patrullar tras el ataque se toma otra vez la 00.
     public class Charger : Enemy
     {
+        void WalkBox(EnemyContext ctx) => SetBox(ctx, (ctx.Tick & 8) == 0 ? 0x00 : 0x13);
+
         const float Speed = 1.5f;
         int phase, timer, level;
         float targetX;
@@ -22,8 +26,9 @@ namespace MazeOfKnight.Game.Enemies
             {
                 case 0:
                     level = Math.Abs(ctx.Py - 16 - Y) < 1 ? 1 : Math.Abs(ctx.Py - 32 - Y) < 1 ? 2 : 0;
-                    if (level != 0) { phase = 1; timer = 30; break; }
+                    if (level != 0) { phase = 1; timer = 30; SetBox(ctx, 0x00); break; }
                     Patrol(ctx, Speed);
+                    WalkBox(ctx);
                     break;
                 case 1:
                     if (--timer > 0) break;
@@ -34,9 +39,10 @@ namespace MazeOfKnight.Game.Enemies
                 case 2:
                 {
                     bool turned = Patrol(ctx, Speed);
+                    WalkBox(ctx);
                     bool passed = FacingLeft ? X <= targetX : X >= targetX;
                     if (!passed && !turned) break;
-                    if (level == 1 && Solid(ctx, FacingLeft ? X + 4 : X + 12, Y - 16)) { phase = 3; timer = 15; }
+                    if (level == 1 && Solid(ctx, FacingLeft ? X + 4 : X + 12, Y - 16)) { phase = 3; timer = 15; SetBox(ctx, 0x01); }
                     else phase = 0;
                     break;
                 }
@@ -126,9 +132,9 @@ namespace MazeOfKnight.Game.Enemies
     }
 
     // Base de los que saltan entre plataformas (0x0A caballero, 0x1F corredor, 0x2D soldado): saltan huecos a su
-    // altura y, al cabo de un rato, buscan subir o bajar un piso (32 px) comprobando antes dónde caen.
-    // [I] Sondeos simplificados (9A67, 9CA3, 9C68 sin seguir del todo): un sitio vale si hay suelo bajo los pies y el
-    // cuerpo cabe.
+    // altura (solo con +1E = 0) y, al cabo de un rato, buscan subir o bajar un piso (32 px) con el sondeo de 9A67
+    // (Enemy.ProbeLevelJump). [I] Para el 0x2D la ficha no da la x de la plataforma de destino (9CA3): se usa la de
+    // 9C68, como el 0x0A y el 0x1F.
     public abstract class PlatformJumper : Enemy
     {
         protected int phase, timer, turns, jumpKind;
@@ -155,7 +161,7 @@ namespace MazeOfKnight.Game.Enemies
         protected void Obstacle(EnemyContext ctx, float gapDx, float gapDxLeft)
         {
             bool headFree = !Solid(ctx, FacingLeft ? X - 1 : X + Width, Y);
-            if (FloorAheadMissing(ctx) && headFree && CanLand(ctx, FacingLeft ? gapDxLeft : gapDx, 0)) { Jump(0); return; }
+            if (jumpKind == 0 && FloorAheadMissing(ctx) && headFree && CanLand(ctx, FacingLeft ? gapDxLeft : gapDx, 0)) { Jump(0); return; }
             FacingLeft = !FacingLeft;
             Walk(walkSpeed);
             turns--;
@@ -164,11 +170,11 @@ namespace MazeOfKnight.Game.Enemies
         bool FloorAheadMissing(EnemyContext ctx) => !FloorAhead(ctx) && !WallAhead(ctx);
 
         // Probar subir (1) o bajar (2) un piso.
-        protected bool TryLevelJump(EnemyContext ctx, int kind, float upDx, float upDxLeft, float downDx, float downDxLeft)
+        protected bool TryLevelJump(EnemyContext ctx, int kind)
         {
-            if (kind == 1 && CanLand(ctx, FacingLeft ? upDxLeft : upDx, -32)) { Jump(1); return true; }
-            if (kind == 2 && CanLand(ctx, FacingLeft ? downDxLeft : downDx, 32)) { Jump(2); return true; }
-            return false;
+            if (!ProbeLevelJump(ctx, kind)) return false;
+            Jump(kind);
+            return true;
         }
 
         protected bool Air(EnemyContext ctx)
@@ -192,7 +198,9 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x0A: caballero del castillo. Anda a 0,4375 px/tick; salta huecos (vy −2, vx ±2, gravedad 0,3125, caída
     // máx. 6); cada 0..127 ticks busca el piso del jugador: salta arriba (vy −5) o abajo, o usa una escalera a
-    // 1 px/tick. Empieza alejándose del jugador.
+    // 1 px/tick. Empieza alejándose del jugador. Lleva escudo por delante (IX+2 bit 1, con el lado en el bit 0): solo
+    // se le hace daño por la espalda. Cajas: andando B0 → 4E a la derecha y C0 → 4F a la izquierda (24 de ancho);
+    // en la escalera A0/A8 → 55.
     public class Knight : PlatformJumper
     {
         bool ladderUp;
@@ -203,8 +211,10 @@ namespace MazeOfKnight.Game.Enemies
         {
             walkSpeed = 0.4375f; gravity = 0.3125f;
             timer = ctx.Rand(0, 127); turns = 5;
+            ShieldSide = true;
             FacingLeft = !PlayerLeft(ctx);
             Walk(walkSpeed);
+            SetBox(ctx, 0x4E, 0x4F);
         }
 
         protected override (float, float) JumpSpeed(int kind) => (kind == 1 ? -5f : -2f, 2f);
@@ -217,7 +227,7 @@ namespace MazeOfKnight.Game.Enemies
                 case 1:
                     if (phase == 1 && ctx.Coin())
                     {
-                        if (TryLevelJump(ctx, jumpKind, 32, 16, 40, 24) || TryLadder(ctx)) break;
+                        if (TryLevelJump(ctx, jumpKind) || TryLadder(ctx)) { if (phase == 3) SetBox(ctx, 0x55); break; }
                     }
                     if (Step(ctx)) Obstacle(ctx, 48, 32);
                     if (phase == 0 && (--timer <= 0 || turns <= 0))
@@ -274,18 +284,25 @@ namespace MazeOfKnight.Game.Enemies
                 Vy = 0; phase = 0; timer = ctx.Rand(0, 127); turns = 5;
                 FacePlayer(ctx);
                 Walk(walkSpeed);
+                SetBox(ctx, 0x4E, 0x4F);
             }
         }
     }
 
     // 0x0B: dardo. Va a ±4 px/tick sin mirar el suelo (solo paredes y bordes) durante 80..127 ticks y se para
-    // 0..47 (0 = 256).
+    // 0..47 (0 = 256). Cajas (IX+11): empieza en 3F a la derecha o 05 a la izquierda; corriendo, cada 8 ticks
+    // IX+11 ^= 3A (3F ↔ 05) con el sprite; al girar, IX+11 ^= 1 (3E ↔ 04).
     public class Dart : Enemy
     {
-        int run, rest;
+        int run, rest, anim = 8, box;
         bool resting;
 
-        public override void Init(EnemyContext ctx) { FacingLeft = ctx.Coin(); Walk(4); Timers(ctx); }
+        public override void Init(EnemyContext ctx)
+        {
+            FacingLeft = ctx.Coin(); Walk(4); Timers(ctx);
+            box = FacingLeft ? 0x05 : 0x3F;
+            SetBox(ctx, box);
+        }
 
         void Timers(EnemyContext ctx) { rest = ctx.Rand(0, 47); run = rest + 80; if (rest == 0) rest = 256; }
 
@@ -296,8 +313,10 @@ namespace MazeOfKnight.Game.Enemies
                 if (--rest <= 0) { resting = false; Timers(ctx); }
                 return;
             }
-            if (WallAhead(ctx)) Turn();
+            if (WallAhead(ctx)) { Turn(); box ^= 1; }
             else X += Vx;
+            if (--anim <= 0) { anim = 8; box ^= 0x3A; }
+            SetBox(ctx, box);
             if (--run <= 0) resting = true;
         }
     }
@@ -305,14 +324,39 @@ namespace MazeOfKnight.Game.Enemies
     // 0x0C hombre-llama y 0x13 espectro (misma rutina): aparece en 4 pasos de 10 ticks, anda a 1 px/tick 256 ticks
     // disparando (0x56; el 0x13, 0x44) cada 48..127 ticks si mira al jugador, se desvanece, vuela al azar a 2 px/tick
     // (16 rumbos, cambia cada 16..31) y, pasados 48 ticks, se posa en el primer suelo libre que encuentra.
+    // Caja según el sprite (ganchos B067 para 0x0C y B071 para 0x13): crece con los sprites B0 AC A8 A4 (tabla 9F37),
+    // anda con B8 ↔ B4 a la derecha y C0 ↔ BC a la izquierda (cada 8 ticks), encoge con A4 A8 AC B0 (9F3B) y vuela
+    // con B0 ↔ AC. [I] La fase de la animación (cada 8 ticks de E604) no está medida.
     public class FlameMan : Enemy
     {
         int phase, timer, shot, turn, step;
         bool flying;
+        static readonly int[] GrowSprites = { 0xB0, 0xAC, 0xA8, 0xA4 }, ShrinkSprites = { 0xA4, 0xA8, 0xAC, 0xB0 };
+        static readonly System.Collections.Generic.Dictionary<int, int> Boxes0C = new System.Collections.Generic.Dictionary<int, int>
+            { { 0xA0, 0x51 }, { 0xA4, 0x52 }, { 0xA8, 0x52 }, { 0xAC, 0x53 }, { 0xB0, 0x54 }, { 0xB4, 0x2A }, { 0xB8, 0x2A }, { 0xBC, 0x16 }, { 0xC0, 0x16 } };
+        static readonly System.Collections.Generic.Dictionary<int, int> Boxes13 = new System.Collections.Generic.Dictionary<int, int>
+            { { 0xA0, 0x2D }, { 0xA4, 0x2E }, { 0xA8, 0x1A }, { 0xAC, 0x2F }, { 0xB0, 0x2F }, { 0xB4, 0x30 }, { 0xB8, 0x1A }, { 0xBC, 0x15 }, { 0xC0, 0x31 } };
+
+        void Sprite(EnemyContext ctx, int sprite) => SetBox(ctx, (Type == 0x13 ? Boxes13 : Boxes0C)[sprite]);
+
+        void UpdateBox(EnemyContext ctx)
+        {
+            bool alt = (ctx.Tick & 8) != 0;
+            if (flying) Sprite(ctx, alt ? 0xAC : 0xB0);
+            else if (phase == 0) Sprite(ctx, GrowSprites[Math.Min(step, 3)]);
+            else if (phase == 2) Sprite(ctx, ShrinkSprites[Math.Min(step, 3)]);
+            else Sprite(ctx, FacingLeft ? (alt ? 0xBC : 0xC0) : (alt ? 0xB4 : 0xB8));
+        }
 
         public override void Init(EnemyContext ctx) { timer = 10; shot = ctx.Rand(0, 0x4F) + 0x30; Harmful = true; }
 
         public override void Tick(EnemyContext ctx)
+        {
+            Behave(ctx);
+            UpdateBox(ctx);
+        }
+
+        void Behave(EnemyContext ctx)
         {
             if (flying) { Fly(ctx); return; }
             switch (phase)
@@ -359,17 +403,21 @@ namespace MazeOfKnight.Game.Enemies
         }
     }
 
-    // 0x0F: bola que crece. Anda a 1 px/tick; cada golpe que recibe sin morir la hace crecer una etapa (hasta 3).
-    // [I] Quién activa el crecimiento (IX+1C) no está localizado; se supone el golpe.
+    // 0x0F: bola que crece. Anda a 1 px/tick; cada golpe que recibe sin morir la hace crecer una etapa (hasta 3): el
+    // código de impacto b03:B54D pone IX+1C para el 0x0F (docs/enemy_ai.md, «Quién escribe IX+1C»). Caja por etapa y
+    // lado (tablas 73AA/73B2): a la derecha 33, 35, 36, 00; a la izquierda 32, 34, 36, 00.
     public class GrowingBall : Enemy
     {
         public int Stage;
+        static readonly int[] RightBoxes = { 0x33, 0x35, 0x36, 0x00 }, LeftBoxes = { 0x32, 0x34, 0x36, 0x00 };
 
-        public override void Init(EnemyContext ctx) { FacingLeft = ctx.Coin(); Walk(1); }
+        public override void Init(EnemyContext ctx) { FacingLeft = ctx.Coin(); Walk(1); UpdateBox(ctx); }
 
-        public override void Tick(EnemyContext ctx) => Patrol(ctx, 1);
+        void UpdateBox(EnemyContext ctx) => SetBox(ctx, (FacingLeft ? LeftBoxes : RightBoxes)[Stage]);
 
-        public override void Hurt(EnemyContext ctx) => Stage = Math.Min(3, Stage + 1);
+        public override void Tick(EnemyContext ctx) { Patrol(ctx, 1); UpdateBox(ctx); }
+
+        public override void Hurt(EnemyContext ctx) { Stage = Math.Min(3, Stage + 1); UpdateBox(ctx); }
     }
 
     // 0x10: acechador. Quieto hasta que el jugador está en su piso; embiste a 2 px/tick hasta un borde o una pared
@@ -404,11 +452,16 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x11: erizo. Anda a 2 px/tick 120 ticks y descansa 90 + 30. Si el jugador está a menos de 65 px en x se para
     // 60 ticks y, a los 28, le dispara un 0x1D a ±4 px/tick (después 40 ticks sin disparar).
+    // Cajas: andando 58; descansando 59 ↔ 5A cada 8 ticks (E604 bit 3, sprites B0/C0); disparando 00 (sprite AC/BC,
+    // attr 0). [I] Al volver a andar se toma otra vez la 58 (la ficha no dice si la restaura).
     public class Hedgehog : Enemy
     {
         int phase, timer = 120, cooldown;
 
-        public override void Init(EnemyContext ctx) { FacingLeft = ctx.Coin(); Walk(2); }
+        public override void Init(EnemyContext ctx) { FacingLeft = ctx.Coin(); Walk(2); SetBox(ctx, 0x58); }
+
+        void UpdateBox(EnemyContext ctx) =>
+            SetBox(ctx, phase == 3 ? 0x00 : phase == 1 ? ((ctx.Tick & 8) == 0 ? 0x59 : 0x5A) : 0x58);
 
         public override void Tick(EnemyContext ctx)
         {
@@ -436,19 +489,22 @@ namespace MazeOfKnight.Game.Enemies
                     if (timer <= 0) { phase = 0; timer = 120; }
                     break;
             }
+            UpdateBox(ctx);
         }
     }
 
     // 0x12: armadillo. Oculto 96..159 ticks, emerge en 3 pasos de 30, rueda a 1 px/tick (paradas de 30 cada
     // 128..191 con un 0x1E a ±2 px/tick) durante 160..640 ticks y se vuelve a esconder. Para el sentido, el original
-    // compara la y del jugador con la x del enemigo (b04:7102) [C].
+    // compara la y del jugador con la x del enemigo (b04:7102) [C]. Oculto, emergiendo y escondiéndose lleva IX+2
+    // bit 2 (b04: lo pone el inicio y la fase 4, lo borra al empezar a rodar) [C]: la espada hace «clinc» y los
+    // proyectiles rebotan. [I] Mientras emerge o se esconde se puede tocar con la espada (bit 5 de la creación).
     public class Armadillo : Enemy
     {
         int phase, timer, step, life, roll;
 
         public override void Init(EnemyContext ctx) => Hide(ctx);
 
-        void Hide(EnemyContext ctx) { phase = 0; timer = ctx.Rand(96, 159); Visible = Harmful = Hittable = false; Vx = 0; }
+        void Hide(EnemyContext ctx) { phase = 0; timer = ctx.Rand(96, 159); Visible = Harmful = Hittable = false; Vx = 0; ShieldAll = true; }
 
         public override void Tick(EnemyContext ctx)
         {
@@ -456,7 +512,7 @@ namespace MazeOfKnight.Game.Enemies
             {
                 case 0:
                     if (--timer > 0) break;
-                    phase = 1; timer = 30; step = 0; Visible = true; Grow = 0.33f;
+                    phase = 1; timer = 30; step = 0; Visible = Hittable = true; Grow = 0.33f;
                     break;
                 case 1:
                     if (--timer > 0) break;
@@ -465,11 +521,11 @@ namespace MazeOfKnight.Game.Enemies
                     if (step < 3) break;
                     FacingLeft = ctx.Py < X;
                     Walk(1); life = ctx.Rand(5, 20); roll = ctx.Rand(128, 191);
-                    Harmful = Hittable = true; Grow = 1; phase = 2;
+                    Harmful = Hittable = true; Grow = 1; phase = 2; ShieldAll = false;
                     break;
                 case 2:
                     Patrol(ctx, 1);
-                    if ((ctx.Tick & 0x1F) == 0 && --life <= 0) { phase = 4; step = 3; timer = 30; Harmful = Hittable = false; break; }
+                    if ((ctx.Tick & 0x1F) == 0 && --life <= 0) { phase = 4; step = 3; timer = 30; Harmful = false; ShieldAll = true; break; }
                     if (--roll <= 0) { phase = 3; timer = 30; }
                     break;
                 case 3:
@@ -490,9 +546,26 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x14: criatura que emerge del suelo. Oculta 128..191 ticks, emerge en 3 pasos de 6, espera 10, pasea a
     // 1 px/tick 128..191 ticks, espera 10 y se hunde en 3 pasos de 6.
+    // Caja según el sprite (gancho B076): emerge A0 → 38, A4 → 1E, A8 → 19; pasea con AC/B0 a la derecha (16/13) y
+    // B4/B8 a la izquierda (2A/13), cambiando cada 10 ticks; se hunde A8, A4, A0.
     public class Emerger : Enemy
     {
-        int phase, timer, step;
+        int phase, timer, step, anim;
+        static readonly int[] RiseBoxes = { 0x38, 0x1E, 0x19 };
+
+        void UpdateBox(EnemyContext ctx)
+        {
+            switch (phase)
+            {
+                case 1: SetBoxOrGrow(ctx, RiseBoxes[Math.Min(step, 2)], Grow); break;
+                case 4: SetBox(ctx, 0x19); break;
+                case 5: if (step > 0) SetBoxOrGrow(ctx, RiseBoxes[Math.Min(step, 3) - 1], Grow); break;
+                case 2: case 3:
+                    bool alt = anim / 10 % 2 == 1;
+                    SetBox(ctx, FacingLeft ? (alt ? 0x13 : 0x2A) : (alt ? 0x13 : 0x16));
+                    break;
+            }
+        }
 
         public override void Init(EnemyContext ctx) => Hide(ctx);
 
@@ -518,6 +591,7 @@ namespace MazeOfKnight.Game.Enemies
                     break;
                 case 3:
                     Patrol(ctx, 1);
+                    anim++;
                     if (--timer <= 0) { phase = 4; timer = 10; }
                     break;
                 case 4:
@@ -530,6 +604,7 @@ namespace MazeOfKnight.Game.Enemies
                     if (step <= 0) Hide(ctx);
                     break;
             }
+            UpdateBox(ctx);
         }
     }
 
@@ -583,7 +658,7 @@ namespace MazeOfKnight.Game.Enemies
                 if (Air(ctx)) timer = ctx.Rand(0, 127);
                 return;
             }
-            if (phase == 1 && TryLevelJump(ctx, jumpKind, 64, 48, 40, 24)) return;
+            if (phase == 1 && TryLevelJump(ctx, jumpKind)) return;
             if (Step(ctx)) { Obstacle(ctx, 44, 30); if (phase == 1 && (turns == 4 || turns == 2)) jumpKind = (jumpKind + 1) % 3; }
             if (phase == 0 && --timer <= 0) { phase = 1; jumpKind = ctx.Rand(0, 2); turns = 6; }
             else if (phase == 1 && turns < 0) { phase = 0; timer = ctx.Rand(0, 127); }
@@ -834,7 +909,7 @@ namespace MazeOfKnight.Game.Enemies
                     X += Vx;
                     return;
             }
-            if (phase == 1 && TryLevelJump(ctx, jumpKind, 32, 16, 40, 24)) return;
+            if (phase == 1 && TryLevelJump(ctx, jumpKind)) return;
             if (Step(ctx)) { Obstacle(ctx, 36, 36); if (phase == 1 && turns % 2 == 0) jumpKind = jumpKind == 1 ? 2 : jumpKind == 2 ? 0 : 1; }
             else if (phase == 0 && Math.Abs(ctx.Py - 16 - Y) < 1) { phase = 5; aim = 30; Vx = 0; return; }
             if (phase == 0 && --timer <= 0) { phase = 1; jumpKind = ctx.Rand(0, 3) % 3; turns = 6; }

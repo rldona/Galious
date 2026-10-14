@@ -113,6 +113,8 @@ namespace MazeOfKnight.Game.Enemies
         public event Action<Enemy> Spawned;
         public event Action<Enemy> Killed;
         public event Action<Enemy> Hit;
+        // Espadazo contra un enemigo con IX+2 bit 2: «clinc» (b03:AE88) y sin daño.
+        public event Action<Enemy> Clinked;
 
         // Tabla de cajas de colisión (b14:9006); vacía = cajas físicas.
         public IReadOnlyList<BoxRect> Boxes = new BoxRect[0];
@@ -121,6 +123,7 @@ namespace MazeOfKnight.Game.Enemies
         {
             if (loot != null) Loot = loot;
             if (boxes != null) Boxes = boxes;
+            Context.Boxes = Boxes;
             catalog = infos.ToDictionary(e => e.type);
             Context.Random = new Random(seed);
         }
@@ -133,6 +136,7 @@ namespace MazeOfKnight.Game.Enemies
             Context.Player = player;
             Context.Enemies = enemies;
             Context.SpawnChild = SpawnChild;
+            Context.Boxes = Boxes;
             Context.ResetRoom();
             ResetLoot();
             FreezeTicks = 0;
@@ -178,6 +182,7 @@ namespace MazeOfKnight.Game.Enemies
                 if (info.box >= 0 && info.box < Boxes.Count)
                 {
                     e.HitBox = Boxes[info.box];
+                    e.BoxIndex = info.box;
                     if (info.box == 0x4E && Boxes.Count > 0x4F) e.LeftBox = Boxes[0x4F];
                 }
             }
@@ -327,7 +332,9 @@ namespace MazeOfKnight.Game.Enemies
             return list;
         }
 
-        // Un espadazo recién empezado: 1 de daño (2 con el Saber) a cada enemigo que alcance.
+        // Un espadazo recién empezado: 1 de daño (2 con el Saber) a cada enemigo que alcance. Escudos (b03:B6C1): con
+        // IX+2 bit 2 suena el «clinc» sin daño; con el bit 1, el golpe solo vale si el enemigo mira hacia el mismo lado
+        // que el jugador (bit 0 = E503) y si no se pierde sin daño.
         public void Strike(PlayerMotor m, ICollection<int> collected)
         {
             var (sx0, sx1, sy0, sy1) = m.SwordRect();
@@ -342,6 +349,11 @@ namespace MazeOfKnight.Game.Enemies
                 {
                     // Jefes: la espada vale con todos (bit 0), si su prueba de choque lo deja; el Saber no suma.
                     if (boss.CanBeHitNow && boss.Vulnerable(0)) HitBoss(boss, 1);
+                    continue;
+                }
+                if (e.Hittable && e.Deflects(m.FacingLeft))
+                {
+                    if (e.ShieldAll) Clinked?.Invoke(e);
                     continue;
                 }
                 if (!e.OnHit(Context))

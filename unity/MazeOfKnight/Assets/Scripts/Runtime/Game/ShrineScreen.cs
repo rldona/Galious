@@ -44,11 +44,13 @@ namespace MazeOfKnight.Game
                 return;
             }
             downHeld = down;
-            if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame) Visit.Move(-1);
-            if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame) Visit.Move(1);
+            if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame) { Visit.Move(-1); Sound.Effect(0x2C); }
+            if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame) { Visit.Move(1); Sound.Effect(0x2C); }
             if (kb.spaceKey.wasPressedThisFrame)
             {
-                if (Visit.Confirm()) game.Say("Comprado");
+                if (Visit.Confirm()) { Sound.Effect(0x2D); game.Say("Comprado"); }
+                else if (Visit.Refused) Sound.Effect(0x2F);
+                if (Visit.Revived) Sound.Effect(0x30);
                 if (Visit.SaveRequested) game.SaveGameNow(Visit);
             }
         }

@@ -80,5 +80,8 @@ namespace MazeOfKnight.Game
         public const int ExitLeftX = 16, EnterFromRightX = 247;
         public const int ExitUpY = 40, EnterFromBottomY = 185;
         public const int EnterFromTopY = 40;
+        // Pausa al cambiar de sala [O] (demo 1): del último tick en una sala al primero en la siguiente pasan 23–27
+        // frames (unos 2,2 entre ticks normales): ~11 ticks en los que no se mueve nada.
+        public const int RoomChangePauseTicks = 11;
     }
 }

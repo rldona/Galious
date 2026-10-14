@@ -191,6 +191,7 @@ Tabla **b04:64E5 + tipo**, leída en b03:B39A (el 0x19 usa b03:B3AE según su ta
   - No se sabe quién elige la fase inicial (0 o 2).
   - **Tiles** [O] (barrido de tiles, castillo 117 y 128): la columna se dibuja con 99 (base) y 9C 9D B4 B5, todos por debajo de 0xBA, así que **no es sólida**: solo hace daño.
   - Aquí +0C se usa como recarga y no como vy. No afecta porque el movimiento está desactivado [C].
+- **Remake:** la y del enemigo es la cabeza, así que la caja 22 (b14:9006) solo cubre la cabeza; la columna de encima solo se dibuja. La fase latente (2/3) no se usa hasta saber quién la elige.
 
 #### 0x05 — "serpiente que escupe"
 - **Vida / recompensa:** hp 3; reward_class 0x2A, categoría 3, tier 1. **Botín real:** regla 0 (1.ª y 3.ª muerte), nivel 2 [C].
@@ -354,7 +355,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   - Camina a 1 px/f y gira en bordes, paredes y pantalla [C].
   - Anima cada 4 frames (XOR 4) [C].
   - Si +1C≠0, lo pone a 0 y sube la etapa +1E (máximo 3) [C].
-  - Nada en la IA pone +1C [C]. Lo pondrá probablemente el código de impacto, que haría crecer la bola al recibir un golpe [I].
+  - Nada en la IA pone +1C [C]. Lo pone el código de impacto b03:B54D (ver «Quién escribe IX+1C»): la bola crece con cada golpe que no la mata [C].
 - **Ataques / hijos:** ninguno.
 - **Comparación con lo observado:** encaja (camina a 1 px/f, moving 0.5, turns_per_s alto) [I]. moving 0.5 puede deberse a que la x se integra a medias [I].
 - **Dudas:** quién escribe +1C (buscar escrituras a IX+1C fuera de la IA).
@@ -683,6 +684,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Comparación con lo observado:** encaja. Paso de 3,64 px ✓ (3,625) y moving 0,5 ✓.
 - **Dudas:**
   - No seguí 9D1C ni 9D2D por completo (comprobaciones extra de tiles en la zona de aterrizaje) [I].
+  - **Remake:** el sondeo (para 0x0A, 0x1F, 0x25 y 0x2D) mira el hueco de 9ADF y la plataforma de 9C68 como arriba. Sin datos: la x de la plataforma al bajar (se usa la del hueco) y 9D1C/9D2D (se pide que el cuerpo quepa) [I].
   - En la fase 2 se comprueba el aterrizaje incluso mientras sube (94D0 ignora el resultado de 9B1D) [C].
 
 #### 0x20 — embestidor invulnerable lento
@@ -926,7 +928,8 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Ataques / hijos:** ninguno; el daño es por contacto en el picado [I]. Sonido 6 periódico [C].
 - **Comparación con lo observado:** 'vuela', 0.35/0.33 px/frame de media (≈ 1 px/frame a media frecuencia y con
   pausas), y_range 51 [I]. toward_player 0.35: el picado es poco frecuente [I]. Encaja.
-- **Dudas:** quién pone IX+1C bit 0; 81B2 no comprueba los bordes izquierdo/superior (¿bug o la sala no lo
+- **Resuelto:** IX+1C lo pone el código de impacto b03:B54D (el 0x27 está en su lista): despierta con el primer golpe [C].
+- **Dudas:** 81B2 no comprueba los bordes izquierdo/superior (¿bug o la sala no lo
   necesita?); E045 (¿dificultad/vuelta?).
 
 #### 0x28 — insecto rebotador de 16 direcciones (world01, world07)
@@ -1338,7 +1341,8 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
 - **Ataques / hijos:** 0x52 ×2, después 0x53 ×2. Sonido 0x0A periódico [C].
 - **Comparación con lo observado:** «vuela», step 1,41, 1 giro/s, y_range 120: encaja con 2 px/f y
   cambios de rumbo cada 0,3–0,5 s [I].
-- **Dudas:** quién escribe IX+1C. No hay ningún `LD (IX+1C)` fuera de la IA, así que será el código
+- **Resuelto:** IX+1C lo escribe b03:B54D (ver «Quién escribe IX+1C»), así que se divide al recibir un golpe [C].
+- **Dudas (antiguas):** quién escribe IX+1C. No hay ningún `LD (IX+1C)` fuera de la IA, así que será el código
   de daño con otro direccionamiento [I]. La interpretación «se divide al recibir un golpe» depende de
   eso.
 
@@ -1462,6 +1466,7 @@ La rutina se comparte con 0x13 (en 9F0B dispara 0x44 si es 0x13 y 0x56 en otro c
   bordes (x < 0x27 o ≥ 0xD5) cambia la dirección ±5; sonido 0x07 [C].
 - **Comparación con lo observado:** «vuela», y_range 7, speed 0,06/0,16, hijos 0x06 ×4: encaja con
   la deriva lenta y el muelle [C/I].
+- **Remake:** el modo forzado de la sala 0x19 del mundo 9 está implementado (al cambiar de modo, siempre el apuntado). Falta la tabla de umbrales 7626: el reparto 0..4 / 5..9 según la distancia es una aproximación [I].
 - **Dudas:** 75AD con el jugador a la derecha da índices 0..4 y luego sigue leyendo más allá de la
   tabla (bytes de código en 7630), así que el reparto 0..4 / 5..9 por lado no está claro [C]. Sólo
   pueden disparar los índices 0..3. E629, E62A y E62B no se reinician aquí.

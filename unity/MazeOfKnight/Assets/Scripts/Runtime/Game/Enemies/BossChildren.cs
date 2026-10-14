@@ -15,10 +15,13 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x54 hueso (Bony Dragon) y 0x55 medio hueso: parábola siempre hacia la izquierda, gravedad 0,1875, atraviesan
     // paredes. Un golpe parte el hueso en dos 0x55 (variantes 1 y 2); el medio hueso no se puede golpear 8 ticks.
+    // Gira cambiando de sprite cada 2 ticks con la caja de la tabla 6CC4 (como el 0x18): 1E, 0B, 0B, 1F, 25, 0B, 1E.
+    // [I] El orden del giro se toma como el del 0x18 hacia delante.
     public class Bone : Enemy
     {
         static readonly (float vx, float vy)[] Variants = { (-2.25f, -4f), (-1.1875f, -3.75f), (-0.125f, -3.5f) };
-        int shield;
+        static readonly int[] FrameBoxes = { 0x1E, 0x0B, 0x0B, 0x1F, 0x25, 0x0B, 0x1E };
+        int shield, frame, anim;
 
         public override void Init(EnemyContext ctx)
         {
@@ -31,6 +34,8 @@ namespace MazeOfKnight.Game.Enemies
         public override void Tick(EnemyContext ctx)
         {
             if (shield > 0 && --shield == 0) Hittable = true;
+            if (++anim >= 2) { anim = 0; frame = (frame + 1) % FrameBoxes.Length; }
+            SetBox(ctx, FrameBoxes[frame]);
             Vy += 0.1875f;
             Move();
         }
@@ -56,6 +61,7 @@ namespace MazeOfKnight.Game.Enemies
             life = Param == 2 ? 8 : 12;
             rightEnd = X + 8;
             Height = 8; Width = 8; n = 1;
+            SetBox(0, 0, 8, 8 * n);   // caja calculada (`row`, b03:B926): alto 8, ancho 8·n
         }
 
         public override void Tick(EnemyContext ctx)
@@ -64,13 +70,16 @@ namespace MazeOfKnight.Game.Enemies
             n++;
             Width = 8 * n;
             if (Param != 0) X = rightEnd - Width;
+            SetBox(0, 0, 8, 8 * n);
         }
     }
 
     // 0x58: tiro en abanico (Arlyane): rumbo al jugador + (B − 3)·8 + (−8…7) unidades de ángulo (256 por vuelta), a
-    // 3,5 px/tick en línea recta, atravesando paredes.
+    // 3,5 px/tick en línea recta, atravesando paredes. Anima cada 4 ticks con la caja 6F ↔ 0D (IX+11 ^ 62).
     public class FanShot : Enemy
     {
+        int anim;
+
         public override void Init(EnemyContext ctx)
         {
             DiesOnTouch = true;
@@ -78,9 +87,14 @@ namespace MazeOfKnight.Game.Enemies
             a += ((Param - 3) * 8 + ctx.Rand(-8, 7)) * Math.PI * 2 / 256;
             Vx = (float)Math.Cos(a) * 3.5f;
             Vy = (float)Math.Sin(a) * 3.5f;
+            SetBox(ctx, 0x6F);
         }
 
-        public override void Tick(EnemyContext ctx) => Move();
+        public override void Tick(EnemyContext ctx)
+        {
+            if (++anim >= 4) { anim = 0; if (BoxIndex >= 0) SetBox(ctx, BoxIndex ^ 0x62); }
+            Move();
+        }
     }
 
     // 0x59: espora (Sea Anemone): vy y |vx| de tablas por i = B >> 1, vx negativa con B impar; gravedad 0,5.

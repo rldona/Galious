@@ -37,6 +37,9 @@ import bosses
 import ending
 import attract
 import lifts
+import audio_export
+import ending_gfx
+import boss_gfx
 from enemy_boxes import boxes, player_boxes, enemy_box_info
 
 DAMAGE_TABLE = 0x64E5   # b04: dano por contacto segun el tipo (b03:B39A; el Hat Helmet lo reduce a la mitad)
@@ -213,6 +216,9 @@ def main():
     ending.main()         # final: piedras, estado 17, epilogo -> extracted/unity/ending.json (campos en ending.py)
     attract.main()        # bucle de atraccion: estados 0-3 -> extracted/unity/attract.json (campos en attract.py)
     lifts.main()          # ascensores del castillo -> extracted/unity/lifts.json (campos en lifts.py)
+    audio_export.main()   # PSG de la musica y los efectos -> extracted/unity/audio/*.bytes (audio_export.py)
+    ending_gfx.main()     # castillo y fuente del final, de la VRAM -> extracted/unity/gfx/*.png (ending_gfx.py)
+    boss_gfx.main()       # dibujo de los jefes, de la VRAM -> extracted/unity/gfx/boss_w*.png (boss_gfx.py)
 
 
 if __name__ == '__main__':

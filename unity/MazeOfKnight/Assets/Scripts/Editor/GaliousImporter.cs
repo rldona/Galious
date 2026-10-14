@@ -157,6 +157,46 @@ namespace MazeOfKnight.EditorTools
                 File.Copy(src, Path.GetFullPath(Path.Combine(Application.dataPath, "..", dst)), true);
                 AssetDatabase.ImportAsset(dst);
             }
+            // Gráficos del final sacados de la VRAM (tools/extract/ending_gfx.py), como texturas en Resources/Gfx.
+            string gfxSrc = Path.Combine(BundleDir, "gfx");
+            if (Directory.Exists(gfxSrc))
+            {
+                string gfxDst = $"{GeneratedRoot}/Resources/Gfx";
+                Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Application.dataPath, "..", gfxDst)));
+                foreach (var f in Directory.GetFiles(gfxSrc, "*.png"))
+                {
+                    string dst = $"{gfxDst}/{Path.GetFileName(f)}";
+                    File.Copy(f, Path.GetFullPath(Path.Combine(Application.dataPath, "..", dst)), true);
+                    AssetDatabase.ImportAsset(dst);
+                    var ti = (TextureImporter)AssetImporter.GetAtPath(dst);
+                    ti.textureType = TextureImporterType.Default;
+                    ti.filterMode = FilterMode.Point;
+                    ti.mipmapEnabled = false;
+                    ti.npotScale = TextureImporterNPOTScale.None;
+                    ti.alphaIsTransparency = true;
+                    ti.textureCompression = TextureImporterCompression.Uncompressed;
+                    ti.SaveAndReimport();
+                }
+                foreach (var f in Directory.GetFiles(gfxSrc, "*.json"))
+                {
+                    string dst = $"{gfxDst}/{Path.GetFileName(f)}";
+                    File.Copy(f, Path.GetFullPath(Path.Combine(Application.dataPath, "..", dst)), true);
+                    AssetDatabase.ImportAsset(dst);
+                }
+            }
+            // Sonido: registros del PSG (tools/extract/audio_export.py), como TextAsset .bytes en Resources/Audio.
+            string audioSrc = Path.Combine(BundleDir, "audio");
+            if (Directory.Exists(audioSrc))
+            {
+                string audioDst = $"{GeneratedRoot}/Resources/Audio";
+                Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Application.dataPath, "..", audioDst)));
+                foreach (var f in Directory.GetFiles(audioSrc, "*.bytes"))
+                {
+                    string dst = $"{audioDst}/{Path.GetFileName(f)}";
+                    File.Copy(f, Path.GetFullPath(Path.Combine(Application.dataPath, "..", dst)), true);
+                    AssetDatabase.ImportAsset(dst);
+                }
+            }
         }
 
         static T LoadOrCreate<T>(string path) where T : ScriptableObject

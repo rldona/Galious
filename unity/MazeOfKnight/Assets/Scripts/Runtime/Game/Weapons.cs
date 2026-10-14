@@ -20,6 +20,8 @@ namespace MazeOfKnight.Game
         public float SpawnX;
         // Fuego: el primer tick solo se asienta. Mina: armada, estallando, ya dañó al jugador.
         public bool Settled, Armed, Exploding, HurtPlayer;
+        // Rebotado en un escudo: sale hacia atrás y hacia arriba y ya no toca nada.
+        public bool Deflected;
         public int ExplosionTicks;
         public readonly HashSet<Enemy> Touched = new HashSet<Enemy>();
 
@@ -39,6 +41,11 @@ namespace MazeOfKnight.Game
 
         public event Action<Projectile> Spawned;
         public event Action<Projectile> Exploded;
+        // Un escudo rebota el proyectil (sonido 0x1D).
+        public event Action<Projectile, Enemy> Deflected;
+
+        // Rebote en un escudo (docs/player.md, "Escudos"; weapons.json, "deflect") [C]: invierte vx y sube a 8 px/tick.
+        public const int DeflectVy = -8;
         // La mina alcanza al jugador: daño y dirección del retroceso.
         public event Action<int, int> PlayerHit;
 
@@ -113,6 +120,15 @@ namespace MazeOfKnight.Game
         void Step(Projectile p, PlayerMotor m, RoomWorld world, EnemySystem enemies, Rocks rocks, ICollection<int> items)
         {
             p.Age++;
+            if (p.Deflected)
+            {
+                // [I] Simplificado: sigue recto (vx invertida, vy −8) sin mirar paredes ni enemigos hasta salir de la
+                // pantalla, así que no vuelve a dar al mismo enemigo.
+                p.X += p.Weapon.speedX * p.Dir;
+                p.Y += DeflectVy;
+                if (p.Y < -16 || p.X < data.killMinX || p.X >= data.killMaxX) p.Alive = false;
+                return;
+            }
             switch (p.Weapon.motion)
             {
                 case "straight": StepStraight(p, world); break;
@@ -206,7 +222,8 @@ namespace MazeOfKnight.Game
                             // b03:BC33, la explosión daña a Galious sin la Cross.
                             if (boss.Vulnerable(5) && (boss.CanBeHitNow || boss is Galious && boss.Visible)) enemies.HitBoss(boss, 2);
                         }
-                        else if (e.Hittable && !e.Invulnerable)
+                        // La mina no rebota, pero IX+2 bit 2 tampoco deja quitar vida (b03:B54D → AE68).
+                        else if (e.Hittable && !e.Invulnerable && !e.ShieldAll)
                             enemies.Damage(e, p.Weapon.damage + (items.Contains(ItemSaber) ? p.Weapon.saberBonus : 0));
                     }
                 if (!p.HurtPlayer && TouchesPlayer(mi.playerBox, m, x0, y0, x1, y1))
@@ -267,6 +284,12 @@ namespace MazeOfKnight.Game
                     continue;
                 }
                 if (!e.Hittable) continue;            // sin el bit 5: no se le puede dar
+                // Escudo (IX+2 bit 2, o bit 1 por delante): rebota sin daño. Las minas no rebotan (no pasan por aquí).
+                if (e.Deflects(DirectionLeft(p)))
+                {
+                    Deflect(p, e);
+                    return;
+                }
                 if (w.piercing)
                 {
                     bool first = p.Touched.Add(e);
@@ -278,6 +301,16 @@ namespace MazeOfKnight.Game
                 p.Alive = false;                       // la flecha y los fuegos desaparecen al primer enemigo
                 return;
             }
+        }
+
+        // Orientación del proyectil (como E503: true = izquierda). El fuego rodante va según su avance.
+        static bool DirectionLeft(Projectile p) => (p.Weapon.motion == "wrapPlatform" && p.Mx != 0 ? p.Mx : p.Dir) < 0;
+
+        void Deflect(Projectile p, Enemy e)
+        {
+            p.Dir = DirectionLeft(p) ? 1 : -1;
+            p.Deflected = true;
+            Deflected?.Invoke(p, e);
         }
 
         // Lupa (arma 6): M delante de la lápida del mundo (y − 16 − y_lápida y x − 8 − x_lápida en −16 … 16).

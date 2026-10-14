@@ -85,6 +85,8 @@ namespace MazeOfKnight.Game
             {
                 stage++;
                 stageStart = frame;
+                if (stage == 3) Sound.PlayMusic(0x92);        // el castillo
+                else if (stage == 4) Sound.PlayMusic(0x93);   // epílogo y créditos
                 if (stage > 4)
                 {
                     Running = false;
@@ -140,11 +142,17 @@ namespace MazeOfKnight.Game
         {
             Box(R(0, 0, 256, 192), Color.black);
             if (f < 0) return;
-            // Marco de hojas y castillo (20 × 14 tiles).
-            Frame(R(24, 24, 208, 144), new Color(0.2f, 0.6f, 0.2f), 4);
-            Box(R(48, 56, 160, 96), new Color(0.35f, 0.35f, 0.4f));
-            Box(R(112, 40, 32, 24), new Color(0.4f, 0.4f, 0.45f));
-            Box(R(126, 24, 2, 40), Color.white);                                   // mástil
+            castleTex ??= Resources.Load<Texture2D>("Gfx/ending_castle");
+            if (castleTex != null)
+                GUI.DrawTexture(R(0, 0, 256, 192), castleTex);   // capa de tiles del original (sacada de la VRAM)
+            else
+            {
+                // Sin los gráficos importados: marco de hojas y castillo (20 × 14 tiles) en cuadros.
+                Frame(R(24, 24, 208, 144), new Color(0.2f, 0.6f, 0.2f), 4);
+                Box(R(48, 56, 160, 96), new Color(0.35f, 0.35f, 0.4f));
+                Box(R(112, 40, 32, 24), new Color(0.4f, 0.4f, 0.45f));
+                Box(R(126, 24, 2, 40), Color.white);                               // mástil
+            }
             var ph = data.castleScene.phases;
             float p0 = ph.Length > 0 ? ph[0].frames : 191, p1 = ph.Length > 1 ? ph[1].frames : 137, p2 = ph.Length > 2 ? ph[2].frames : 52;
             // Bandera: roja (Galious) hasta que baja; luego la azul con la cruz sube (1 px cada 4 frames, y 0x2E…0x3F).
@@ -160,9 +168,12 @@ namespace MazeOfKnight.Game
             Box(R(128, flagY - 0x10, 14, 9), blue ? new Color(0.2f, 0.4f, 1f) : new Color(0.9f, 0.1f, 0.1f));
             if (blue) Box(R(133, flagY - 0x0F, 2, 7), Color.white);
             if (!blue && ((int)f / 16) % 2 == 0) Box(R(144, 0x20, 3, 3), Color.white);  // destello junto a la bandera
-            // Popolon, Aphrodite y el bebé, que sube 12 px entre ellos.
-            Box(R(96, 0x68, 16, 24), new Color(0.35f, 0.55f, 1f));
-            Box(R(144, 0x68, 16, 24), new Color(1f, 0.45f, 0.7f));
+            // Popolon, Aphrodite (en la imagen, si está) y el bebé, que sube 12 px entre ellos.
+            if (castleTex == null)
+            {
+                Box(R(96, 0x68, 16, 24), new Color(0.35f, 0.55f, 1f));
+                Box(R(144, 0x68, 16, 24), new Color(1f, 0.45f, 0.7f));
+            }
             float babyY = 0x6B;
             if (f >= p0 + p1) babyY = Mathf.Max(0x5F, 0x6B - (f - p0 - p1) / 4f);
             if (f >= p0 + p1) Box(R(120, babyY, 16, 16), new Color(1f, 0.9f, 0.5f));
@@ -178,8 +189,23 @@ namespace MazeOfKnight.Game
             }
         }
 
+        Texture2D castleTex, fontTex;
+
+        // Texto con la fuente del epílogo (8 × 16, de la VRAM): un glifo por carácter ASCII de 32 a 127.
+        void DrawText(System.Func<float, float, float, float, Rect> R, float x, float y, string t)
+        {
+            foreach (char ch in t.ToUpperInvariant())
+            {
+                int i = ch - 32;
+                if (i > 0 && i < 96)
+                    GUI.DrawTextureWithTexCoords(R(x, y, 8, 16), fontTex, new Rect(i / 96f, 0, 1 / 96f, 1));
+                x += 8;
+            }
+        }
+
         void Epilogue(System.Func<float, float, float, float, Rect> R, float f)
         {
+            fontTex ??= Resources.Load<Texture2D>("Gfx/ending_font");
             Box(R(0, 0, 256, 192), Color.black);
             if (f < 0) return;
             float scrolled = Scrolled(f);
@@ -188,7 +214,8 @@ namespace MazeOfKnight.Game
                 if (l.kind != "text") continue;
                 float sy = 192 - (scrolled - y);
                 if (sy > 192 || sy < -16) continue;
-                GUI.Label(R(8 * l.col, sy, 256, 16), l.text, text);
+                if (fontTex != null) DrawText(R, 8 * l.col, sy, l.text);
+                else GUI.Label(R(8 * l.col, sy, 256, 16), l.text, text);
             }
         }
 

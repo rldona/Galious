@@ -160,4 +160,4 @@ Comprobado [O] en el mundo 8, sala 16: los dos personajes se hunden en la lava y
 - Dibujar lo que el juego superpone a la sala: puertas, carteles de dioses y el emblema del jefe.
 - La última sala de cada mundo (sala de dios) y la sala 94 del castillo, que no se alcanza por enlaces.
 - Los enemigos de cada sala, los objetos que se recogen y los muros que se rompen.
-- La salida 0xF5 del mundo 10 y la condición de la puerta 10 (E06C/E06D/E06E).
+- La salida 0xF5 del mundo 10. La puerta 10 ya está: E06E = R & 3 al empezar, sala b02:99C4[E06E] (9, 30, 39 o 1) y posición (Y, X) en b02:99AB ((A0, 40), (20, A0), (A0, 60), (60, A0)); aparece cuando E06C & 3 ≠ 0, tras coger la llave del mundo 9 [C]. Al entrar se aparece en la sala 1 del mundo 10 en x = 24, y = 56 [O*].

@@ -210,9 +210,23 @@ namespace MazeOfKnight.Game.Enemies
     // 0x19: murciélagos que se fusionan (y 0x37, el grande). Deambulan a 1 px/tick; cada dos forman pareja y a los
     // 128 ticks se lanzan uno contra otro a 4 px/tick; al tocarse (a menos de 18 px) se funden en uno del nivel
     // siguiente (vida 1 → 2 → 4; el cuarto nivel es el 0x37). Tras la primera fusión de la sala disparan un 0x48 cada
-    // 64 ticks. El daño depende del tamaño: 1, 2, 4, 8 (b03:B3AE).
+    // 64 ticks. El daño depende del tamaño: 1, 2, 4, 8 (b03:B3AE; con el Hat Helmet se divide entre 2 al recibirlo) y
+    // la experiencia también: 1, 2, 4, 4 (IX+1B, docs/items_enemies.md). Cajas por nivel, alternando con la animación
+    // (cada 4 ticks, IX+11 ^ 1): 4A/4B, 48/49, 46/47; el 0x37, 3D/3C cada 8 ticks. Los de nivel 2 y el 0x37 usan la
+    // franja de 32 px del deambulador (IX+9 bit 2) [C]; su caja es la de la tabla, no de 32 × 32.
     public class FusingBat : Wanderer
     {
+        static readonly int[] LevelBoxes = { 0x4A, 0x48, 0x46 };
+        static readonly int[] LevelExperience = { 1, 2, 4, 4 };
+
+        public override int? ExperienceOverride => Type == 0x19 ? LevelExperience[Math.Min(Level, 3)] : (int?)null;
+
+        void UpdateBox(EnemyContext ctx)
+        {
+            if (Type == 0x37) SetBox(ctx, (ctx.Tick & 8) == 0 ? 0x3D : 0x3C);
+            else SetBox(ctx, LevelBoxes[Math.Min(Level, 2)] ^ ((ctx.Tick >> 2) & 1));
+        }
+
         public int Level, Pair;
         bool hasPair = true, merge;
         int phase, fuse = 128, shot = 80;
@@ -224,7 +238,8 @@ namespace MazeOfKnight.Game.Enemies
             {
                 // El grande: no se empareja, vida 8, daño por contacto 0 (la tabla por tamaño solo vale para 0x19) [C].
                 Level = 3; hasPair = false; shot = 48;
-                Width = Height = 32; BigBox = true;
+                Width = Height = 32; BigBox = true;   // [I] sin la tabla de cajas: 32 × 32, el tamaño del sprite
+                UpdateBox(ctx);
                 return;
             }
             Level = ctx.FusionLevel;
@@ -232,12 +247,14 @@ namespace MazeOfKnight.Game.Enemies
             else { Pair = Param; phase = 6; }
             Hp = 1 << Level;
             Damage = 1 << Level;   // b03:B3AE: 1, 2, 4 según el tamaño
-            if (Level >= 2) { Width = Height = 32; BigBox = true; }   // [I] tamaño de los sprites por nivel
+            if (Level >= 2) BigBox = true;
+            UpdateBox(ctx);
         }
 
         public override void Tick(EnemyContext ctx)
         {
             if (ctx.FusionLevel != 0 && --shot <= 0) { shot = 64; ctx.SpawnChild(0x48, X + 16, Y + 16); }
+            UpdateBox(ctx);
             switch (phase)
             {
                 case 0:
@@ -321,14 +338,17 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x27: ave que se lanza en picado. Deambula a 1 px/tick; en los ratos de ataque (alterna cada 1..256 ticks), si
     // el jugador está cerca y por debajo, se queda 32 ticks rebotando arriba y abajo y luego se lanza hacia donde
-    // estaba a 4 px/tick.
+    // estaba a 4 px/tick. Caja: con el sprite del descriptor (C4) la 11 (4 × 10) hasta que recibe el primer golpe
+    // (IX+1C, que pone b03:B54D para el 0x27); después C8/CC con la 00 (16 × 16).
     public class DiveBird : Wanderer
     {
         int phase, toggle, timer;
         bool calm;
         float homeY, tx, ty;
 
-        public override void Init(EnemyContext ctx) => toggle = ctx.Rand(0, 15);
+        public override void Init(EnemyContext ctx) { toggle = ctx.Rand(0, 15); SetBox(ctx, 0x11); }
+
+        public override void Hurt(EnemyContext ctx) => SetBox(ctx, 0x00);
 
         public override void Tick(EnemyContext ctx)
         {
@@ -418,16 +438,21 @@ namespace MazeOfKnight.Game.Enemies
     }
 
     // 0x36: orbes en cadena (invulnerables). Cada una oscila sobre su casa (muelle de 0,5 px/tick²); la 9.ª vuela a
-    // 6 px/tick a la casa de otra al azar, que al llegar sale a su vez hacia otra: un relevo sin fin.
+    // 6 px/tick a la casa de otra al azar, que al llegar sale a su vez hacia otra: un relevo sin fin. IX+2 bit 2: la
+    // espada hace «clinc» y las armas rebotan. Caja 12 ↔ 11 cada 12 ticks (B0D6, IX+11 ^ 3), con un desfase de 1..4.
     public class ChainOrb : Enemy
     {
         public int Index;
         public float HomeX, HomeY;
         public int State;
         float tx, ty;
+        int anim;
 
         public override void Init(EnemyContext ctx)
         {
+            ShieldAll = true;
+            anim = ctx.Rand(1, 4);
+            SetBox(ctx, 0x12);
             HomeX = X; HomeY = Y;
             Vy = 2;
             Index = ctx.OrbCounter++;
@@ -437,6 +462,7 @@ namespace MazeOfKnight.Game.Enemies
 
         public override void Tick(EnemyContext ctx)
         {
+            if (--anim <= 0) { anim = 12; if (BoxIndex >= 0) SetBox(ctx, BoxIndex ^ 3); }
             switch (State)
             {
                 case 0:
@@ -494,7 +520,7 @@ namespace MazeOfKnight.Game.Enemies
         }
     }
 
-    // 0x40: espíritu grande (35 de vida, 32 px [I]). Va hacia el jugador a 0,5 px/tick (vuelve a apuntar cada 60
+    // 0x40: espíritu grande (35 de vida; su caja, la 39, cubre 32 × 27 px, b14:9006). Va hacia el jugador a 0,5 px/tick (vuelve a apuntar cada 60
     // ticks), atraviesa paredes y rebota en x 0x10..0xE0 / y 0x20..0xA0. Cada 120 ticks se para 30 y suelta un 0x41.
     public class BigSpirit : Enemy
     {
@@ -523,14 +549,21 @@ namespace MazeOfKnight.Game.Enemies
     // 0x49 mosca (vida 5), 0x52 (3) y 0x53 (1): rumbo al azar de 16 a 2 px/tick cada 16..31 ticks, rebotando en
     // x 8..0xE0 / y 0x20..0xB0. Un golpe que no la mata (IX+1C, b03:B54D) divide la 0x49 en dos 0x52 y cada 0x52 en
     // dos 0x53, que ya solo mueren. Las nuevas no se pueden golpear durante 8 ticks (la 0x49, 1).
+    // Cada 8 ticks aletea y cambia la caja con IX+11: 0x49 6A ↔ 6B (^1), 0x52 69 ↔ 0F (^66), 0x53 56 ↔ 48 (^1E).
     public class SplitFly : Enemy
     {
-        int timer = 1, shield;
+        int timer = 1, shield, flap = 8;
 
         public override void Init(EnemyContext ctx) { shield = Type == 0x49 ? 1 : 8; Hittable = false; }
 
         public override void Tick(EnemyContext ctx)
         {
+            if (--flap <= 0)
+            {
+                flap = 8;
+                int xor = Type == 0x49 ? 0x01 : Type == 0x52 ? 0x66 : 0x1E;
+                if (BoxIndex >= 0) SetBox(ctx, BoxIndex ^ xor);
+            }
             if (shield > 0 && --shield == 0) Hittable = true;
             if (--timer <= 0) { timer = 16 + ctx.Rand(0, 15); Heading(ctx.Rand(0, 15), 2); }
             Move();
@@ -606,14 +639,19 @@ namespace MazeOfKnight.Game.Enemies
 
     // 0x69: cabezas flotantes en formación (invulnerables). Derivan a 0,125 px/tick y oscilan ±2 px sobre su altura.
     // La primera dirige los turnos: cada 16 ticks (40 al principio) una cabeza (de las 4 primeras) destella 24 ticks
-    // y lanza un 0x06, al azar o la más cercana al jugador apuntando hacia él.
+    // y lanza un 0x06, al azar o la más cercana al jugador apuntando hacia él. IX+2 bit 2: la espada hace «clinc» y
+    // las armas rebotan. En el mundo 9, sala 0x19 (E041 = 10, E042 = 0x19), IX+1D = 1: cada cambio de modo fuerza el
+    // apuntado en vez de alternar (b04:74BB) [C].
     public class FloatingHead : Enemy
     {
         int index, timer = 40, turns, mode, flash, dir;
         float homeY;
+        bool forceAimed;
 
         public override void Init(EnemyContext ctx)
         {
+            ShieldAll = true;
+            forceAimed = ctx.E041 == 10 && Room != null && Room.id == 0x19;
             index = ctx.HeadCounter++;
             if (index == 0) { ctx.HeadPhase = 0; turns = ctx.Rand(1, 7); }
             homeY = Y;
@@ -642,7 +680,7 @@ namespace MazeOfKnight.Game.Enemies
         {
             int count = ctx.Enemies.OfType<FloatingHead>().Count(h => h.Alive);
             ctx.HeadPhase = 1;
-            if (--turns <= 0) { mode ^= 1; turns = mode == 0 ? ctx.Rand(1, 7) : ctx.Rand(1, 3); }
+            if (--turns <= 0) { mode = forceAimed ? 1 : mode ^ 1; turns = mode == 0 ? ctx.Rand(1, 7) : ctx.Rand(1, 3); }
             FloatingHead shooter;
             if (mode == 0)
             {
@@ -669,5 +707,6 @@ namespace MazeOfKnight.Game.Enemies
         }
 
         public bool Flashing => flash > 0;
+        public int Mode => mode;   // 0 al azar, 1 apuntado (el que vale es el de la primera)
     }
 }

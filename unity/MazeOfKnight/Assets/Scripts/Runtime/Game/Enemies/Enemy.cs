@@ -16,6 +16,7 @@ namespace MazeOfKnight.Game.Enemies
         public int PlayerDy;             // lo que se ha movido el jugador en y este tick (0x2F copia su vy)
         public IReadOnlyList<Enemy> Enemies;
         public Func<int, float, float, Enemy> SpawnChild;   // tipo, x, y → el hijo (o null si no hay hueco)
+        public IReadOnlyList<BoxRect> Boxes = Array.Empty<BoxRect>();   // tabla de cajas b14:9006 (vacía = cajas físicas)
 
         // Variables de sala compartidas entre enemigos (en el original, globales que se reinician al entrar).
         public int FusionLevel;          // E62F: nivel de los murciélagos 0x19 tras fusionarse
@@ -71,6 +72,19 @@ namespace MazeOfKnight.Game.Enemies
         public bool Marked;              // IX+2 bit 3: cuenta para el evento de la sala
         public PeriodicJson Generator;   // generador periódico que lo creó (null si no)
         public bool DiesOnTouch;         // los proyectiles desaparecen al dar al jugador [I]
+
+        // Escudos (b03:B6C1 espada, b03:B54D armas; docs/items_enemies.md, "Espada", y docs/player.md, "Escudos") [C]:
+        // IX+2 bit 2: la espada hace «clinc» sin daño y los proyectiles rebotan. IX+2 bit 1: lo mismo solo si el lado
+        // del enemigo (bit 0 = FacingLeft) no coincide con la orientación del ataque (E503 o la del proyectil); es
+        // decir, solo se le da por la espalda.
+        public bool ShieldAll;           // IX+2 bit 2 (0x06, 0x36, 0x69; 0x12 mientras está oculto o emergiendo)
+        public bool ShieldSide;          // IX+2 bit 1 (0x0A, 0x25)
+
+        // ¿Para el escudo un ataque que mira a la izquierda (attackerLeft) o a la derecha?
+        public bool Deflects(bool attackerLeft) => ShieldAll || ShieldSide && FacingLeft != attackerLeft;
+
+        // Experiencia al morir si no es la del catálogo (b03:BF27): el 0x19 da 1, 2, 4, 4 según su tamaño (IX+1B).
+        public virtual int? ExperienceOverride => null;
 
         // Atraviesa suelos ahora mismo (escaleras del caballero, saltos entre pisos): las pruebas no lo cuentan como
         // metido en un muro.
@@ -253,6 +267,58 @@ namespace MazeOfKnight.Game.Enemies
         }
 
         public bool GrowsDown;           // cuelga del techo (crece hacia abajo)
+
+        // Índice de la caja actual en la tabla (IX+11), −1 si es la física o una calculada.
+        public int BoxIndex = -1;
+
+        // Cambia la caja por la de la tabla b14:9006 (IX+11; docs/items_enemies.md, "Cajas por tipo"). left: la caja
+        // mirando a la izquierda cuando es otra (4E/4F). Sin tabla (pruebas) se queda la caja física y da false.
+        protected bool SetBox(EnemyContext ctx, int index, int left = -1)
+        {
+            var t = ctx.Boxes;
+            if (t == null || index < 0 || index >= t.Count) return false;
+            HitBox = t[index];
+            LeftBox = left >= 0 && left < t.Count ? t[left] : null;
+            BoxIndex = index;
+            Grow = 1;
+            return true;
+        }
+
+        // Caja de la tabla o, sin tabla, la física recortada a la fracción grow (lo que se hacía antes de tener cajas).
+        protected void SetBoxOrGrow(EnemyContext ctx, int index, float grow)
+        {
+            if (!SetBox(ctx, index)) Grow = grow;
+        }
+
+        // Caja que no sale de la tabla (b03:B23E/B4F4: 0x57, 0x60, 0x62), con la convención de la tabla (bordes
+        // incluidos: h + 1 × w + 1 px).
+        protected void SetBox(int dy, int dx, int h, int w)
+        {
+            HitBox = new BoxRect { dy = dy, dx = dx, h = h, w = w };
+            LeftBox = null;
+            BoxIndex = -1;
+        }
+
+        // ---------- sondeo de salto a otro piso (0x0A, 0x1F, 0x25, 0x2D) ----------
+
+        // b04:9A67: primero un hueco libre en el piso de destino (tabla 9ADF: subir, (y − 16, x + 32 | x − 16); bajar,
+        // (y + 16, x + 40 | x − 24)) y después la plataforma de destino (9C68/9CA3: subir, suelo en (y − 16, x + 64 |
+        // x − 48); bajar, suelo en y + 48), con x' en [0x10, 0xF0) e y' en [0x28, 0xB9) [C] (docs/enemy_ai.md, 0x0A,
+        // 0x1F y 0x25). [I] Sin datos en las fichas: la x de la plataforma al bajar (se usa la del hueco), y las
+        // comprobaciones extra de 9D1C/9D2D, que aquí se reducen a que el cuerpo quepa donde cae.
+        protected bool ProbeLevelJump(EnemyContext ctx, int kind)
+        {
+            if (kind != 1 && kind != 2) return false;
+            bool up = kind == 1;
+            float gx = X + (FacingLeft ? (up ? -16 : -24) : (up ? 32 : 40));
+            float gy = up ? Y - 16 : Y + 16;
+            if (gx < 0 || gx >= P.RoomWidthPx || Solid(ctx, gx, gy)) return false;
+            float px = up ? X + (FacingLeft ? -48 : 64) : gx;
+            float floor = up ? Y - 16 : Y + 48;
+            float ty = floor - 16;
+            if (px < 0x10 || px >= 0xF0 || ty < 0x28 || ty >= 0xB9) return false;
+            return Solid(ctx, px, floor) && BodyFree(ctx, px, ty);
+        }
 
         // Cajas contra el jugador y contra la espada y las armas (los jefes tienen varias y distintas). Semiabiertas.
         public virtual IEnumerable<(float x0, float y0, float x1, float y1)> ContactRects() { yield return Box(); }

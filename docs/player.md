@@ -231,3 +231,9 @@ La demo 0 empieza sobre el ascensor vertical de la sala 146 del castillo (ver [e
 - **Paredes:** se miran desde 9 px por encima de los pies, no desde 11 como el techo. Cayendo pegado a una pared que acaba en la fila 7, el jugador se suelta al pasar de y = 105 a y = 110.
 - **Pendiente:** en la sala 101, tras aterrizar con ↑ todavía pulsado desde el aire, el original se queda quieto un tick más que el remake antes de andar. Puede que guarde la pulsación de ↑ hecha en el aire.
 
+### Más comprobaciones [O]
+
+- **Umbral del toque de salto** (`tools/openmsx/jump_tap.py`, castillo 1): con ↑ pulsado 4 frames no despega; con 5 depende del desfase con el tick, y con 6 siempre. Cada 2 frames más de pulsación suben 6 px (120 → 113 → 107 → 101): ↑ tiene que seguir pulsado en el tick en que despegaría, como hace el remake.
+- **Espadazo en el aire:** un espadazo empezado en la bajada sigue contando al aterrizar, y el jugador no anda hasta que acaba (4 ticks desde que empieza). El tick de aterrizaje se sigue moviendo como en el aire. Es igual en el remake.
+- **Escudo del esqueleto 0x25** (`tools/openmsx/shield_check.py`, sala 104, enemigos congelados): por delante la espada no le quita vida (8 → 8 con 3 espadazos) y por la espalda sí (8 → 5).
+

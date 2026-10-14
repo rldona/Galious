@@ -106,7 +106,8 @@ namespace MazeOfKnight.Tests
             var rig = Setup(Room(), spawns: new EntityJson { type = 0x25, x = 100, y = 104 });
             var skel = rig.Enemies.Enemies[0];
             var arrow = rig.Fire(2);
-            for (int t = 0; t < 30 && arrow.Alive; t++) { skel.X = 100; skel.Y = 104; rig.Weapons.Tick(rig.Motor, rig.World, rig.Enemies, null, rig.Items); }
+            // De espaldas a la flecha: por delante, su escudo la rebotaría.
+            for (int t = 0; t < 30 && arrow.Alive; t++) { skel.X = 100; skel.Y = 104; skel.FacingLeft = false; rig.Weapons.Tick(rig.Motor, rig.World, rig.Enemies, null, rig.Items); }
             Assert.Less(skel.Hp, 8, "le ha dado");
             Assert.Greater(arrow.X, 130, "y ha seguido");
         }

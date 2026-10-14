@@ -326,6 +326,9 @@ También van la tabla (`boxes` como [dy, dx, alto, ancho] y `boxRects` como obje
 ### Contraste con el remake
 
 - **Contacto**: el remake usa x − 8 … x + 7, y − 16 … y − 1 (16 × 16). El original usa x − 6 … x + 6, y − 14 … y − 2 (13 × 13 px). Con el esqueleto 0x25 (caja 4E: dy 1, dx 0, 15 × 24), el daño empieza cuando x + 6 ≥ IX+7. La medida en openMSX daba «x + 7 toca el borde izquierdo», un píxel de diferencia [O pendiente de repetir con la caja exacta].
+- **Cajas por fotograma**: el remake cambia la caja (IX+11) según el estado de cada tipo marcado «Cambia: sí», con las parejas sprite → caja de la tabla (`Enemy.SetBox`); las calculadas (0x57, 0x60, 0x62) se rehacen cada tick. [I] La fase de las animaciones que dependen de E604 no está medida, el alto del chorro 0x60 (IX+9) se aproxima con la columna entera y el orden del giro del hueso 0x54/0x55 se toma del 0x18.
+- **Pistón 0x04**: la caja 22 va en la cabeza (la y del enemigo baja con la columna); la columna solo se dibuja.
+- **Escudos**: IX+2 bit 2 (0x06, 0x36, 0x69 y el 0x12 oculto o emergiendo) y bit 1 por delante (0x0A, 0x25) se aplican a la espada y a las armas (`Enemy.ShieldAll` / `ShieldSide`).
 - **Espada**: el alcance en x coincide a la derecha (x + 8 … x + 18). A la izquierda el remake va un píxel más allá (x − 19 … x − 9 frente a x − 18 … x − 8). En altura, el original cubre solo y − 7 … y − 4; el remake, y − 12 … y − 3.
 
 ### Tabla b14:9006 (0x7A cajas; a partir de 91EE empiezan los punteros de los jefes, b03:BD73)

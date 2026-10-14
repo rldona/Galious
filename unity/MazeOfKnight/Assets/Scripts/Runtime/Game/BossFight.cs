@@ -16,7 +16,16 @@ namespace MazeOfKnight.Game
         public enum Stage { Idle, Invoking, Summoning, Fighting, Dissolving, KeyOnFloor, Fanfare, RightExitOnly }
 
         readonly BossesData data;
-        public Stage Current { get; private set; } = Stage.Idle;
+        Stage current = Stage.Idle;
+        public Stage Current
+        {
+            get => current;
+            private set { if (value != current) StageTicks = 0; current = value; }
+        }
+        // Ticks desde que empezó la etapa actual (los efectos de BossEffects van por frames: × 2).
+        public int StageTicks { get; private set; }
+        // Caja del jefe al vencerlo, para la disolución en puntos.
+        public (float x0, float y0, float x1, float y1) LastBossRect { get; private set; }
         public BossInfo Info { get; private set; }
         public RoomModel Room { get; private set; }
         public int World { get; private set; }
@@ -38,7 +47,8 @@ namespace MazeOfKnight.Game
         public bool LocksExits => Current != Stage.Idle;
         // Tras Galious (sin llave): solo se abre la salida derecha, que lleva a la sala 6 (E64B = 6, docs/ending.md).
         public bool RightExitOpen => Current == Stage.RightExitOnly;
-        public bool FreezesPlayer => Current == Stage.Invoking;
+        // Estados 15, 19 y 20: el juego no corre (invocación, disolución y celebración).
+        public bool FreezesPlayer => Current == Stage.Invoking || Current == Stage.Dissolving || Current == Stage.Fanfare;
         public bool InFight => Current == Stage.Summoning || Current == Stage.Fighting;
 
         // Al entrar en una sala (world 0 = castillo).
@@ -53,11 +63,15 @@ namespace MazeOfKnight.Game
             lastKey = '\0';
         }
 
-        // Una tecla de letra o número. Repetir la misma letra pide soltarla antes (aquí: otra tecla entre medias o
-        // un tick sin teclas; [I] el teclado del sistema ya da una pulsación por letra, así que se acepta siempre).
+        // Una tecla de letra o número. El original lee el teclado una vez por tick y solo cuenta una letra si cambia: repetir
+        // la misma pide soltarla antes (un tick sin teclas, KeysReleased) o pulsar otra entre medias. Así la repetición
+        // automática del sistema tampoco escribe letras de más.
         public void Type(char ch)
         {
             if (!Listening || !char.IsLetterOrDigit(ch)) return;
+            ch = char.ToUpperInvariant(ch);
+            if (ch == lastKey) return;
+            lastKey = ch;
             buffer += char.ToUpperInvariant(ch);
             int max = Math.Max(1, data.invocation.bufferLength);
             if (buffer.Length > max) buffer = buffer.Substring(buffer.Length - max);
@@ -69,8 +83,12 @@ namespace MazeOfKnight.Game
             }
         }
 
+        // Un tick sin ninguna tecla pulsada: la letra siguiente cuenta aunque sea la misma.
+        public void KeysReleased() => lastKey = '\0';
+
         public void Tick(EnemySystem enemies, Func<Boss> spawnBoss)
         {
+            StageTicks++;
             switch (Current)
             {
                 case Stage.Invoking:
@@ -120,6 +138,7 @@ namespace MazeOfKnight.Game
         {
             if (Current != Stage.Fighting) return;
             Defeated.Add(World);
+            if (Boss != null) LastBossRect = Boss.DrawRect();
             Boss = null;
             Current = Stage.Dissolving;
             timer = data.defeat.dissolveFrames / 2;

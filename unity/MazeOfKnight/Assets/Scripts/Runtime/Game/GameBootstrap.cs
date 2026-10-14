@@ -55,6 +55,25 @@ namespace MazeOfKnight.Game
         PlayerMotor motor;
         public LiftSystem Lifts { get; private set; }
         readonly List<SpriteRenderer> liftViews = new List<SpriteRenderer>();
+        Sprite liftSprite;
+
+        // Ascensor: dos bloques de 16 × 16 con marco, como los del original (dibujados aquí, sin sus gráficos).
+        Sprite LiftSprite()
+        {
+            if (liftSprite != null) return liftSprite;
+            var tex = new Texture2D(32, 16, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
+            Color edge = new Color(0.95f, 0.95f, 0.95f), face = new Color(0.75f, 0.2f, 0.25f), dark = new Color(0.35f, 0.08f, 0.1f);
+            for (int y = 0; y < 16; y++)
+                for (int x = 0; x < 32; x++)
+                {
+                    int bx = x & 15;
+                    bool border = bx == 0 || bx == 15 || y == 0 || y == 15;
+                    bool inner = bx == 2 || bx == 13 || y == 2 || y == 13;
+                    tex.SetPixel(x, y, border ? edge : inner ? dark : face);
+                }
+            tex.Apply();
+            return liftSprite = Sprite.Create(tex, new Rect(0, 0, 32, 16), Vector2.zero, RoomCoords.PixelsPerUnit);
+        }
         public EnemySystem Enemies { get; private set; }
         public WeaponSystem Weapons { get; private set; }
         public int SelectedWeapon;   // E510: 1 flecha … 6 lupa (0 = ninguna)
@@ -96,6 +115,7 @@ namespace MazeOfKnight.Game
             Enemies.Spawned += ShowEnemy;
             Enemies.HasItem = t => Collected.Contains(t);
             Enemies.Killed += e => { if (enemyViews.TryGetValue(e, out var v)) v.enabled = false; Say("Enemigo derrotado"); };
+            Enemies.Clinked += _ => Say("Clinc");
             var weaponsJson = Resources.Load<TextAsset>("Weapons");
             Weapons = new WeaponSystem(weaponsJson != null ? JsonUtility.FromJson<WeaponsData>(weaponsJson.text) : null);
             Weapons.Spawned += ShowProjectile;
@@ -118,6 +138,10 @@ namespace MazeOfKnight.Game
             var endingJson = Resources.Load<TextAsset>("Ending");
             endingData = endingJson != null ? JsonUtility.FromJson<EndingData>(endingJson.text) : new EndingData();
             ending = gameObject.AddComponent<EndingScreen>();
+            Sound.Ensure();
+            var bossFx = gameObject.AddComponent<BossEffects>();
+            bossFx.game = this;
+            bossFx.player = player;
             if (UnityEngine.InputSystem.Keyboard.current != null)
                 UnityEngine.InputSystem.Keyboard.current.onTextInput += OnTextInput;
             LoadMap(mapName);
@@ -152,6 +176,13 @@ namespace MazeOfKnight.Game
                 AttractMode.LoadSave = false;
                 if (!LoadSavedGame()) Say("No hay partida guardada");
             }
+            if (AttractMode.Current == AttractMode.Mode.Game)
+            {
+                // PLAY START ya ha pedido la 0x87 (castillo con su entrada); si no (skipAttract), se pide aquí.
+                if (Sound.Instance != null && Sound.Instance.CurrentSong != 0x87) Sound.PlayMusic(0x87);
+                musicWanted = 0x88;
+            }
+            else Sound.StopMusic();
             switch (AttractMode.Current)
             {
                 case AttractMode.Mode.Attract:
@@ -166,6 +197,8 @@ namespace MazeOfKnight.Game
                     if (demo.map != mapName) LoadMap(demo.map);
                     motor.Place(World, World.Room(demo.room), demo.x, demo.y);
                     Lifts.PresetForStart(demo.room);   // la demo 0 empieza sobre el ascensor de la sala 146
+                    Sound.PlayMusic(0x88);
+                    musicWanted = 0x88;
                     Inventory.Add(1);
                     SelectedWeapon = 1;
                     Arrows = 100;
@@ -189,10 +222,10 @@ namespace MazeOfKnight.Game
             World = new RoomWorld(map.rooms.Select(r => r.room));
             rocks = new Rocks(name, World, brokenRocks);
             rocks.Broken += OnRockBroken;
-            rocks.Hit += r => Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}");
+            rocks.Hit += r => { Sound.Effect(0x1E); Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}"); };
             keyDoors = new KeyDoors(name, World, openedDoors);
             keyDoors.Changed += d => mapView.ShowKeyDoor(d.room, d.x, d.y, d.height);
-            keyDoors.Opened += d => Say(d.cls == 1 ? "Puerta abierta (se cerrará detrás)" : "Puerta abierta");
+            keyDoors.Opened += d => { Sound.Effect(d.cls == 1 ? 0x22 : 0x21); Say(d.cls == 1 ? "Puerta abierta (se cerrará detrás)" : "Puerta abierta"); };
             roomObjects = new RoomObjects(name, World, roomObjectState);
             roomObjects.CellsChanged += (room, col, row, w, h) => mapView.RedrawCells(World, room, col, row, w, h);
             roomObjects.Message += Say;
@@ -231,6 +264,8 @@ namespace MazeOfKnight.Game
             }
             Inventory.EnterWorld(world);
             LoadMap(OriginalWorlds.MapName(world));
+            worldRetaken = false;
+            Jingle(0x8E);                     // al entrar por la puerta (estado 8), luego la música del mundo
             var (x, y) = OriginalWorlds.Entry[world];
             motor.Place(World, World.Room(1), x, y);
             Say($"WORLD {world}");
@@ -260,6 +295,7 @@ namespace MazeOfKnight.Game
             }
             motor.Shoes = Inventory.Has(Inventory.Shoes);
             if (Collected.Count != itemsApplied) ApplyWorldItems();
+            ShowWorld10Door();
             TickBossFight();
             if (TouchBaby())
                 return;
@@ -276,9 +312,15 @@ namespace MazeOfKnight.Game
             Enemies.Tick();
             var drop = Enemies.PickUp(motor);
             if (drop != null)
+            {
+                Sound.Effect(0x2D);
                 Say(TakeLoot(drop));
+            }
             if (motor.AttackStartedThisTick)
+            {
+                Sound.Effect(0x13);
                 Enemies.Strike(motor, Collected);
+            }
             if (player.ConsumeFire() && !AttractRunning)
                 FireWeapon();
             Weapons.Tick(motor, World, Enemies, rocks, Collected);
@@ -302,10 +344,12 @@ namespace MazeOfKnight.Game
                 Say($"Llave usada ({Keys})");
             LiquidDamage();
             TickVitality();
+            UpdateMusic();
+            TickSteppingStones();
             if (mapName == "castle")
             {
                 var spot = castleItems.Tick(motor, firedEvents.Contains((mapName, motor.Room.id)), Bosses.Defeated.Contains, Collected.Contains);
-                if (spot != null) { SpawnItem(motor.Room, spot.Value.Type, spot.Value.X, spot.Value.Y); Say("¡Ha aparecido algo!"); }
+                if (spot != null) { SpawnItem(motor.Room, spot.Value.Type, spot.Value.X, spot.Value.Y); Sound.Effect(0x2E); Say("¡Ha aparecido algo!"); }
             }
             for (int i = looseItems.Count - 1; i >= 0; i--)
             {
@@ -318,6 +362,7 @@ namespace MazeOfKnight.Game
                 Inventory.Add(type);
                 Destroy(go);
                 looseItems.RemoveAt(i);
+                Jingle(0x85);
                 Say(PickUp(type));
             }
             // Recoger un objeto a la vista al tocarlo.
@@ -340,6 +385,7 @@ namespace MazeOfKnight.Game
                     ApplyWorldItems();
                 Destroy(go);
                 visibleItems.RemoveAt(i);
+                if (room.item.type >= 0x2D && room.item.type <= 0x2F) Sound.Effect(0x2D); else Jingle(0x85);
                 Say(PickUp(room.item.type));
             }
         }
@@ -351,6 +397,7 @@ namespace MazeOfKnight.Game
             int c = (int)motor.Character;
             if (enemy is Fairy)
             {
+                Sound.Effect(0x29);
                 // El hada rellena la vitalidad (b04:612C).
                 Refill(c);
                 enemy.Alive = false;
@@ -387,6 +434,7 @@ namespace MazeOfKnight.Game
                 return;
             int c = (int)motor.Character;
             PendingVitality[c] -= damage;
+            if (Vitality[c] + PendingVitality[c] < 6) Sound.Effect(0x2A);   // aviso de vitalidad baja (b03:B3DC)
             motor.Knockback(dir);
             HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
             Say(message);
@@ -420,7 +468,7 @@ namespace MazeOfKnight.Game
         void OnRoomCleared(RoomModel room)
         {
             firedEvents.Add((mapName, room.id));
-            if (ApplyEvent(room.id) > 0) Say("Se oye algo abrirse…");
+            if (ApplyEvent(room.id) > 0) { Sound.Effect(0x2E); Say("Se oye algo abrirse…"); }
         }
 
         // Mundo 3, sala 4: el pozo enlaza hacia arriba consigo mismo. Subir 5 veces seguidas abre el muro de arriba a la
@@ -428,11 +476,12 @@ namespace MazeOfKnight.Game
         int shaftClimbs;
         void OnRoomChanged(RoomModel from, RoomModel to)
         {
+            RingBell(to);
             if (Inventory.CurrentWorld != 3 || from == null || from.id != 4) return;
             if (to.id != 4 || motor.Y < OriginalPhysics.RoomBottomPx - 32) { shaftClimbs = 0; return; }
             if (++shaftClimbs < 5 || firedEvents.Contains((mapName, -1))) return;
             firedEvents.Add((mapName, -1));
-            if (ApplyEvent(-1) > 0) Say("Se oye algo abrirse…");
+            if (ApplyEvent(-1) > 0) { Sound.Effect(0x2E); Say("Se oye algo abrirse…"); }
         }
 
         int ApplyEvent(int openerRoom)
@@ -462,6 +511,8 @@ namespace MazeOfKnight.Game
 
         void TickBossFight()
         {
+            if (UnityEngine.InputSystem.Keyboard.current != null && !UnityEngine.InputSystem.Keyboard.current.anyKey.isPressed)
+                Bosses.KeysReleased();
             Bosses.Tick(Enemies, () => Enemies.SpawnBoss(Bosses.Info, Inventory.Has(0x07), Inventory.Has(0x08), Inventory.Has(0x0B)));
             World.LockedRoom = Bosses.LocksExits ? Bosses.Room : null;
             World.LockAllowsRight = Bosses.RightExitOpen;
@@ -541,8 +592,20 @@ namespace MazeOfKnight.Game
                             && World.Ladder(motor.Room, e.x, OriginalPhysics.RoomTopPx + 2);
                 if (!enter) continue;
                 if (s.state == 16 && s.entry.needsItem != 0 && !Inventory.Has(s.entry.needsItem)) return false;
-                shrineScreen.Show(new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys, Lives, ResurrectionCredit, motor.Character));
+                var visit = new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys, Lives, ResurrectionCredit, motor.Character);
+                musicWanted = 0x8D;
                 SetPaused(true);
+                if (s.state == 16)
+                {
+                    // Castillo (estado 16): centrado en godX + 8, suena 0x82 y se hunde 16 px en 64 frames; luego el dios.
+                    Sound.PlayMusic(0x82, 0x8D);
+                    StartCoroutine(Sink(true, () => shrineScreen.Show(visit)));
+                }
+                else
+                {
+                    Sound.PlayMusic(0x8D);
+                    shrineScreen.Show(visit);
+                }
                 return true;
             }
             return false;
@@ -563,10 +626,30 @@ namespace MazeOfKnight.Game
             var s = v.Shrine;
             var room = World.Room(s.exit.toRoom);
             if (s.state == 16)
+            {
+                // Al salir se redibuja la sala y el jugador sube los 16 px en el mismo sitio.
                 motor.Place(World, room, s.exit.x, s.exit.y);
+                StartCoroutine(Sink(false, () => SetPaused(false)));
+            }
             else
+            {
                 motor.PlaceOnLadder(room, s.exit.x, s.exit.y);
-            SetPaused(false);
+                SetPaused(false);
+            }
+        }
+
+        // Hundirse (o subir) 16 px en 64 frames (design bible, cap. 8: sinkPixels, sinkFrames).
+        System.Collections.IEnumerator Sink(bool down, System.Action then)
+        {
+            int px = shrines.rules.sinkPixels > 0 ? shrines.rules.sinkPixels : 16, frames = shrines.rules.sinkFrames > 0 ? shrines.rules.sinkFrames : 64;
+            for (float f = 0; f < frames; f += Time.deltaTime * 60f)
+            {
+                float t = f / frames;
+                player.HopPx = -px * (down ? t : 1 - t);
+                yield return null;
+            }
+            player.HopPx = 0;
+            then();
         }
 
         // ---------- partida guardada (Demeter; SaveGame.cs) ----------
@@ -586,7 +669,7 @@ namespace MazeOfKnight.Game
                 lives = (int[])Lives.Clone(),
                 credits = (int[])ResurrectionCredit.Clone(),
                 arrows = v.Arrows, coins = v.Coins, keys = v.Keys,
-                weapon = SelectedWeapon, character = (int)motor.Character,
+                weapon = SelectedWeapon, character = (int)motor.Character, world10Door = World10Door,
                 takenItems = SaveData.Pack(takenItems), brokenRocks = SaveData.Pack(brokenRocks),
                 openedDoors = SaveData.Pack(openedDoors), roomObjects = SaveData.Pack(roomObjectState),
                 firedEvents = SaveData.Pack(firedEvents),
@@ -619,6 +702,7 @@ namespace MazeOfKnight.Game
             }
             Arrows = d.arrows; Coins = d.coins; Keys = d.keys;
             SelectedWeapon = d.weapon;
+            World10Door = d.world10Door;
             SaveData.Unpack(d.takenItems, takenItems);
             SaveData.Unpack(d.brokenRocks, brokenRocks);
             SaveData.Unpack(d.openedDoors, openedDoors);
@@ -688,7 +772,7 @@ namespace MazeOfKnight.Game
         // Experiencia por muerte (BF27[tipo], ×2 con el Vase); a 48, se rellena la vitalidad.
         void GainExperience(Enemy e)
         {
-            int exp = enemyCatalog?.Find(e.Type)?.experience ?? 0;
+            int exp = e.ExperienceOverride ?? enemyCatalog?.Find(e.Type)?.experience ?? 0;
             if (exp <= 0) return;
             int c = (int)motor.Character;
             if (Inventory.AddExperience(motor.Character, exp) && Vitality[c] < MaxVitality[c])
@@ -729,6 +813,56 @@ namespace MazeOfKnight.Game
 
         int itemsApplied;
 
+        // Piedras del agua del mundo 5, sala 11 (SteppingStones.cs). Vuelven a empezar al entrar en la sala.
+        SteppingStones stones;
+        RoomModel stonesRoom;
+
+        void TickSteppingStones()
+        {
+            var room = motor.Room;
+            bool here = room.objects != null && System.Array.Exists(room.objects, o => (o.type & 0x0F) == 6);
+            if (stonesRoom != null && stonesRoom != room)
+            {
+                // Al salir se quita la piedra que hubiera (al volver empieza de nuevo).
+                if (stones?.Current is int c && World.Room(stonesRoom.id) == stonesRoom) SetStone(stonesRoom, c, false);
+                stones = null;
+                stonesRoom = null;
+            }
+            if (!here) return;
+            if (stonesRoom != room)
+            {
+                stonesRoom = room;
+                stones = new SteppingStones();
+                stones.Appeared += x => { SetStone(room, x, true); Sound.Effect(0x04); };
+                stones.Vanished += x => SetStone(room, x, false);
+            }
+            stones.Tick(motor.X, motor.Y);
+        }
+
+        void SetStone(RoomModel room, int x, bool on)
+        {
+            int col = x / 8, row = (0x78 - OriginalPhysics.RoomTopPx) / 8;
+            if (on) World.SetSolid(room, col, row, 2, 2);
+            else World.CopyFrom(room, room.collision, col, row, 2, 2);
+            mapView.RedrawCells(World, room, col, row, 2, 2);
+        }
+
+        // E06E (0..3), elegido al empezar la partida: dónde sale la puerta del mundo 10.
+        public int World10Door = new System.Random().Next(4);
+        RoomModel world10Room;
+
+        void ShowWorld10Door()
+        {
+            if (mapName != "castle" || world10Room != null || !Bosses.Defeated.Contains(9) || Bosses.Active) return;
+            var room = World.Room(OriginalWorlds.World10DoorRoom[World10Door]);
+            if (room == null) return;
+            var (x, y) = OriginalWorlds.World10DoorPos[World10Door];
+            world10Room = room;
+            room.doorWorld = 10;
+            room.door = new PointJson { x = x, y = y };
+            mapView.ShowDoor(room, x, y);
+        }
+
         void ApplyCarpet()
         {
             if (Inventory.CurrentWorld != 8 || !Inventory.Has(Inventory.Carpet)) return;
@@ -759,6 +893,8 @@ namespace MazeOfKnight.Game
 
         void OnDestroy()
         {
+            // La puerta del mundo 10 se pone en los datos de la sala: se quita para no tocar el asset importado.
+            if (world10Room != null) { world10Room.doorWorld = 0; world10Room.door = new PointJson(); }
             if (UnityEngine.InputSystem.Keyboard.current != null)
                 UnityEngine.InputSystem.Keyboard.current.onTextInput -= OnTextInput;
         }
@@ -803,6 +939,25 @@ namespace MazeOfKnight.Game
             return c;
         }
 
+        readonly Dictionary<Enemy, (int dx, int dy)> bossArt = new Dictionary<Enemy, (int, int)>();
+        BossGfxList bossGfx;
+
+        [System.Serializable] class BossGfx { public int world, dx, dy, w, h; public string file; }
+        [System.Serializable] class BossGfxList { public BossGfx[] bosses = new BossGfx[0]; }
+
+        (Sprite sprite, int dx, int dy) BossArt(int world)
+        {
+            if (bossGfx == null)
+            {
+                var j = Resources.Load<TextAsset>("Gfx/bosses_gfx");
+                bossGfx = j != null ? JsonUtility.FromJson<BossGfxList>(j.text) : new BossGfxList();
+            }
+            var b = System.Array.Find(bossGfx.bosses, x => x.world == world);
+            var tex = b != null ? Resources.Load<Texture2D>("Gfx/" + b.file) : null;
+            if (tex == null) return (null, 0, 0);
+            return (Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0, 1), RoomCoords.PixelsPerUnit), b.dx, b.dy);
+        }
+
         void ShowEnemy(Enemy e)
         {
             var go = new GameObject($"Enemigo 0x{e.Type:X2}");
@@ -811,6 +966,13 @@ namespace MazeOfKnight.Game
             sr.color = EnemyColor(e);
             sr.sortingOrder = 8;
             enemyViews[e] = sr;
+            // Jefe: su dibujo del original, si se ha importado (tools/extract/boss_gfx.py; un solo fotograma [I]).
+            if (e is Boss && BossArt(Bosses.World) is var art && art.sprite != null)
+            {
+                sr.sprite = art.sprite;
+                sr.color = Color.white;
+                bossArt[e] = (art.dx, art.dy);
+            }
         }
 
         void LateUpdate()
@@ -840,6 +1002,14 @@ namespace MazeOfKnight.Game
             {
                 if (sr == null) continue;
                 sr.enabled = e.Alive && e.Visible;
+                if (bossArt.TryGetValue(e, out var off))
+                {
+                    // Como en el original, en la rejilla de 8 px (pivote arriba a la izquierda).
+                    var tl = RoomCoords.PixelToWorld(e.Room, ((int)e.X & ~7) + off.dx, ((int)e.Y & ~7) + off.dy);
+                    sr.transform.position = new Vector3(tl.x, tl.y, 0);
+                    sr.transform.localScale = Vector3.one;
+                    continue;
+                }
                 var (x0, y0, x1, y1) = e.DrawRect();
                 var bottomLeft = RoomCoords.PixelToWorld(e.Room, (int)x0, (int)y1);
                 sr.transform.position = new Vector3(bottomLeft.x, bottomLeft.y, 0);
@@ -855,8 +1025,8 @@ namespace MazeOfKnight.Game
                     {
                         var go = new GameObject("Ascensor");
                         var lsr = go.AddComponent<SpriteRenderer>();
-                        lsr.sprite = enemySprite;
-                        lsr.color = new Color(0.85f, 0.85f, 0.9f);
+                        lsr.sprite = LiftSprite();
+                        lsr.color = Color.white;
                         lsr.sortingOrder = 6;
                         liftViews.Add(lsr);
                     }
@@ -864,7 +1034,7 @@ namespace MazeOfKnight.Game
                     v.enabled = true;
                     var bl = RoomCoords.PixelToWorld(motor.Room, l.X, l.Y + Lifts.Box.height);
                     v.transform.position = new Vector3(bl.x, bl.y, 0);
-                    v.transform.localScale = new Vector3(Lifts.Box.width / 16f, Lifts.Box.height / 16f, 1);
+                    v.transform.localScale = Vector3.one;
                 }
             for (; n < liftViews.Count; n++)
                 liftViews[n].enabled = false;
@@ -901,14 +1071,87 @@ namespace MazeOfKnight.Game
             if (!motor.InLiquid)
             {
                 liquidTicks = 0;
+                wasInLiquid = false;
                 return;
             }
+            if (!wasInLiquid) { wasInLiquid = true; Sound.Effect(0x24); }   // entrar en el agua (b03:B063)
             bool aphroditeInWater = motor.Character == Character.Aphrodite && motor.Liquid == TileClass.Water;
             int every = aphroditeInWater ? OriginalPhysics.AphroditeWaterDamageTicks : OriginalPhysics.LiquidDamageTicks;
             if (++liquidTicks < every)
                 return;
             liquidTicks = 0;
             PendingVitality[(int)motor.Character]--;
+            Sound.Effect(0x25);
+        }
+        bool wasInLiquid;
+
+        // ---------- música (docs/music.md, "Canciones") ----------
+
+        int musicWanted = -1;            // la de fondo que toca ahora (sin contar las fanfarrias)
+        bool worldRetaken;               // tras coger la Gran Llave sigue la 0x8B hasta salir del mundo
+
+        // Fanfarria corta y luego la música de fondo que toque.
+        void Jingle(int id)
+        {
+            musicWanted = -1;
+            Sound.PlayMusic(id, BackgroundMusic());
+            musicWanted = BackgroundMusic();
+        }
+
+        int BackgroundMusic()
+        {
+            if (shrineScreen != null && shrineScreen.Open) return 0x8D;
+            if (Bosses != null && Bosses.Room == motor.Room)
+            {
+                switch (Bosses.Current)
+                {
+                    case BossFight.Stage.Invoking: return 0x81;
+                    case BossFight.Stage.Summoning:
+                    case BossFight.Stage.Fighting: return 0x90;
+                    case BossFight.Stage.Dissolving: return 0x84;
+                    case BossFight.Stage.KeyOnFloor: return 0x91;
+                    case BossFight.Stage.Fanfare:
+                    case BossFight.Stage.RightExitOnly: return 0x8B;
+                }
+                if (Bosses.Listening) return 0x8F;
+            }
+            if (mapName == "castle") return 0x88;
+            return worldRetaken ? 0x8B : 0x8A;
+        }
+
+        // Cada tick: si la música de fondo cambia (sala del jefe, combate, mundo, castillo…), se pide.
+        void UpdateMusic()
+        {
+            if (Bosses.Current == BossFight.Stage.Fanfare) worldRetaken = true;
+            int want = BackgroundMusic();
+            if (want == musicWanted) return;
+            // Las fanfarrias sin bucle (invocación, jefe vencido) dejan detrás la siguiente.
+            if (want == 0x81) Sound.PlayMusic(0x81, 0x90);
+            else if (want == 0x84) Sound.PlayMusic(0x84, 0x91);
+            else if (!(want == 0x88 && Sound.Instance != null && Sound.Instance.CurrentSong == 0x87)) Sound.PlayMusic(want);
+            musicWanted = want;
+        }
+
+        // La Campana (0x14, b00:5D24): en el castillo, al entrar en una sala de la lista del mundo de número más alto con
+        // la puerta desbloqueada y sin abrir, suena 0x28. [I] Desbloqueada = el mundo 1, o el jefe del anterior vencido;
+        // el mundo 10 (según E06E) no se mira.
+        static readonly int[][] BellRooms =
+        {
+            new int[0], new[] { 104, 90, 91, 92, 105, 117, 118 }, new[] { 98, 86, 87, 97, 99, 110, 111, 112 },
+            new[] { 63, 55, 56, 64, 76, 77, 78 }, new[] { 57, 67, 68 }, new[] { 62, 54, 55, 74, 75, 76 },
+            new[] { 114, 101, 113, 126, 127 }, new[] { 6, 2, 7, 14 }, new[] { 23, 13, 22, 33 }, new[] { 108, 2, 3, 4 },
+        };
+
+        void RingBell(RoomModel to)
+        {
+            if (mapName != "castle" || !Inventory.Has(0x14)) return;
+            for (int w = 9; w >= 1; w--)
+            {
+                bool unlocked = w == 1 || Bosses.Defeated.Contains(w - 1);
+                if (!unlocked || Inventory.OpenedDoors.Contains(w)) continue;
+                if (System.Array.IndexOf(BellRooms[w], to.id) >= 0) { Sound.Effect(0x28); Say("La campana suena"); }
+                return;
+            }
         }
 
         public void Refill(int c) => PendingVitality[c] = MaxVitality[c] - Vitality[c];
@@ -940,6 +1183,8 @@ namespace MazeOfKnight.Game
             if (Lives[c] > 0) Lives[c]--;
             else if (Lives[o] > 0) { Lives[o]--; motor.Character = (Character)o; c = o; }
             else { StartGameOver(); return; }
+            Sound.Effect(0x2B);
+            Jingle(0x95);
             if (Vitality[c] <= 0) Vitality[c] = MaxVitality[c];
             if (Bosses.InFight)
             {
@@ -969,6 +1214,8 @@ namespace MazeOfKnight.Game
             GameOver = true;
             SetPaused(true);
             gameOverUntil = Time.time + 7f;
+            Sound.Effect(0x2B);
+            Sound.PlayMusic(0x95);
             Say("GAME OVER");
         }
 
@@ -979,6 +1226,7 @@ namespace MazeOfKnight.Game
             var room = rock.room;
             if (room.hasItem && room.item.x == rock.x && room.item.y == rock.y)
                 ShowItem(room);
+            Sound.Effect(0x20);
             Say("Piedra rota");
         }
 

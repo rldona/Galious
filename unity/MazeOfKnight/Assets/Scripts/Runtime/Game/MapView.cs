@@ -23,7 +23,7 @@ namespace MazeOfKnight.Game
         public TileBase revolvingDoor;
 
         Grid grid;
-        Tilemap front, rocks, keyDoors;
+        Tilemap front, rocks, keyDoors, doorsLayer;
 
         public void Build(MapData map, RoomWorld world)
         {
@@ -33,7 +33,7 @@ namespace MazeOfKnight.Game
             grid.transform.SetParent(transform, false);
             grid.cellSize = new Vector3(RoomCoords.TileSize, RoomCoords.TileSize, 0);
             var back = Layer("Fondo", -10);
-            var doors = Layer("Puertas", -8);
+            var doors = doorsLayer = Layer("Puertas", -8);
             front = Layer("Colisión", -5);
             rocks = Layer("Piedras", -4);
             keyDoors = Layer("Puertas con llave", -3);
@@ -73,6 +73,9 @@ namespace MazeOfKnight.Game
                         front.SetTile(RoomCoords.Cell(room, c, r),
                             TileFor(world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8)));
         }
+
+        // Puerta de mundo que aparece en juego (la del mundo 10).
+        public void ShowDoor(RoomModel room, int x, int y) => Fill(doorsLayer, room, x, y, 4, 3, door);
 
         // Sala oscura (mundo 5, sala 6, sin la Candle): los muros no se ven, pero siguen ahí.
         public void SetDark(RoomWorld world, RoomModel room, bool dark)

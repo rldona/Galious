@@ -8,11 +8,19 @@ namespace MazeOfKnight.Game.Enemies
     // 0x03: babosa de techo. Dormida (la mitad) hasta que el jugador pasa por debajo; despierta anda colgada a
     // tirones: quieta 8 ticks, 16 a 1 px/tick, quieta 4 y una pausa de 24. Gira al acabarse el techo o ante una
     // pared. Siempre empieza hacia la derecha (b04: las dos ramas cargan +1) [C].
+    // Cajas: dormida y en la pausa C4 → 66 (6 × 14); quieta antes de avanzar CC/D0 → 77; avanzando C8 → 74.
     public class CeilingSlug : Enemy
     {
         int phase, step, timer;
 
-        public override void Init(EnemyContext ctx) { phase = ctx.Coin() ? 0 : -1; Vx = 1; }
+        public override void Init(EnemyContext ctx) { phase = ctx.Coin() ? 0 : -1; Vx = 1; SetBox(ctx, 0x66); }
+
+        void UpdateBox(EnemyContext ctx)
+        {
+            if (phase == 0 && step < 8) SetBox(ctx, 0x77);
+            else if (phase == 0 && step < 28) SetBox(ctx, 0x74);
+            else SetBox(ctx, 0x66);
+        }
 
         public override void Tick(EnemyContext ctx)
         {
@@ -30,33 +38,43 @@ namespace MazeOfKnight.Game.Enemies
                     if (--timer <= 0) phase = 0;
                     break;
             }
+            UpdateBox(ctx);
         }
     }
 
     // 0x04: pistón (sin sprite). Baja 8 px cada 15 ticks hasta un sólido o y = 0xB0 y vuelve a subir. El original lo
-    // dibuja con tiles (99, 9C, 9D, B4, B5), que no son sólidos [O]: la columna entera hace daño pero no tapa el paso.
-    // La fase latente (seguir la y del jugador) no se usa porque no se sabe quién la elige.
+    // dibuja con tiles (99, 9C, 9D, B4, B5), que no son sólidos [O]: no tapa el paso. La y del enemigo es la cabeza
+    // (la fase 0 baja y en 8 px), así que la caja (22, 8 × 9) está en la cabeza y solo la cabeza toca al jugador y a
+    // las armas [C] (b03:B954 con origen en IX+5/IX+7); la columna de encima solo se dibuja.
+    // [I] La fase latente (2: esperar al jugador 0..24 px por debajo; 3: seguir su y) no se usa: la ficha no dice
+    // quién elige la fase inicial.
     public class Piston : Enemy
     {
         int length, timer = 15;
         bool retract;
         float top;
 
-        public override void Init(EnemyContext ctx) { top = Y; Height = 8; GrowsDown = true; }
+        public override void Init(EnemyContext ctx) { top = Y; Height = 8; }
 
         public override void Tick(EnemyContext ctx)
         {
             if (--timer > 0) return;
             timer = 15;
-            float head = top + 8 * length;
             if (!retract)
             {
-                if (head >= 0xB0 || Solid(ctx, X, head + 8) || Solid(ctx, X + 8, head + 8)) retract = true;
+                if (Y >= 0xB0 || Solid(ctx, X, Y + 8) || Solid(ctx, X + 8, Y + 8)) retract = true;
                 else length++;
             }
             else if (length > 0) length--;
             else retract = false;
-            Height = 8 + 8 * length;
+            Y = top + 8 * length;
+        }
+
+        // Se dibuja la columna entera, del techo a la cabeza.
+        public override (float x0, float y0, float x1, float y1) DrawRect()
+        {
+            var (x0, _, x1, y1) = Box();
+            return (x0, Math.Min(top, Y), x1, y1);
         }
     }
 
