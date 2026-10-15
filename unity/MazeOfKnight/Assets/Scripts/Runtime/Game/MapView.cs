@@ -191,9 +191,8 @@ namespace MazeOfKnight.Game
         {
             shownRocks[(room, x, y)] = visible;
             int col0 = x >> 3, row0 = (y - OriginalPhysics.RoomTopPx) >> 3;
-            if (lastWorld != null)
-                for (int c = col0; c < col0 + 2; c++)
-                    UpdateRim(lastWorld, room, c, row0);
+            if (lastWorld != null && Style != null)
+                RedrawCells(lastWorld, room, col0, row0, 2, 2);
             if (visible && Style?.Rock != null) FillPattern(rocks, room, x, y, Style.Rock, 2);
             else Fill(rocks, room, x, y, 2, 2, visible ? rock : null);
         }
@@ -238,6 +237,9 @@ namespace MazeOfKnight.Game
                 return Style.LadderRight;
             if (Style == null || cls != TileClass.Solid)
                 return TileFor(cls);
+            // La piedra es sólida, pero se ve la piedra y no el macizo de la sala.
+            if (RockAt(room, col, row))
+                return null;
             // Más oscuro cuanto más lejos del aire: el macizo se lee como masa y su borde como el sitio donde se pisa.
             for (int d = 1; d <= 2; d++)
                 for (int dr = -d; dr <= d; dr++)

@@ -50,6 +50,18 @@ namespace MazeOfKnight.Game.Visuals
                 yield return new WaitForSeconds(0.6f);
                 ScreenCapture.CaptureScreenshot(Path.Combine(dir, "interfaz_menu.png"));
                 yield return new WaitForSeconds(0.6f);
+                if (menu != null) menu.Toggle();
+                // Cajas de colisión (F9) en salas con enemigos.
+                HitboxOverlay.Show = true;
+                foreach (int id in new[] { 45, 20, 90 })
+                {
+                    var room = game.World.Room(id);
+                    if (room == null) continue;
+                    game.Motor.Place(game.World, room, 128, 120);
+                    yield return new WaitForSeconds(1.2f);
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"interfaz_cajas_{id}.png"));
+                    yield return new WaitForSeconds(0.4f);
+                }
             }
             Application.Quit();
         }

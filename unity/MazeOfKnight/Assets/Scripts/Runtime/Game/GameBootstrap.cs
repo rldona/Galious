@@ -1006,7 +1006,10 @@ namespace MazeOfKnight.Game
                 {
                     sr.sprite = weaponArt.Weapon(p.Id, (p.Age / 3) & 1);
                     sr.flipX = p.Dir < 0;
+                    var size = sr.sprite.bounds.size;
+                    sr.transform.localScale = new Vector3((x1 - x0) / 16f / size.x, (y1 - y0) / 16f / size.y, 1);
                     if (!p.Exploding && p.Id != 5) sr.color = Color.white;
+                    if (sr.flipX) sr.transform.position = new Vector3(bl.x + (x1 - x0) / 16f, bl.y, 0);   // como los enemigos
                 }
                 else
                     sr.sprite = enemySprite;
@@ -1037,8 +1040,18 @@ namespace MazeOfKnight.Game
                 sr.flipX = e.FacingLeft;
                 // Estilo del remake: el dibujo de su arquetipo (Visuals/EnemyArt); si no, el cuadrado de color.
                 var art = Visuals.Atmosphere.EnemyArt;
-                if (art != null) { sr.sprite = art.For(e, Time.time); sr.color = Color.white; }
+                if (art != null)
+                {
+                    // El dibujo, recortado a su silueta, llena exactamente la caja que se pinta (la de colisión).
+                    sr.sprite = art.For(e, Time.time);
+                    sr.color = Color.white;
+                    var size = sr.sprite.bounds.size;
+                    sr.transform.localScale = new Vector3((x1 - x0) / 16f / size.x, Mathf.Max(0.05f, (y1 - y0) / 16f) / size.y, 1);
+                }
                 else { sr.sprite = enemySprite; sr.color = EnemyColor(e); }
+                // flipX voltea alrededor del pivote (abajo a la izquierda): mirando a la izquierda el dibujo caería una
+                // caja entera a la izquierda de donde está el enemigo. Se coloca desde la esquina de la derecha.
+                if (sr.flipX) sr.transform.position = new Vector3(bottomLeft.x + (x1 - x0) / 16f, bottomLeft.y, 0);
             }
             // Ascensores de la sala: dos bloques de 16 × 16 (x … x + 31, y … y + 15).
             int n = 0;

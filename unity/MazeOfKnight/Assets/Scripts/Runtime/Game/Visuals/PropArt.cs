@@ -57,16 +57,54 @@ namespace MazeOfKnight.Game.Visuals
 
         // ---------- piedras y puertas ----------
 
+        // Polígono convexo (vértices en sentido horario): distancia con signo aproximada (máximo de los semiplanos).
+        static float Convex(float x, float y, (float x, float y)[] v)
+        {
+            float d = -999;
+            for (int i = 0; i < v.Length; i++)
+            {
+                var a = v[i];
+                var b = v[(i + 1) % v.Length];
+                float ex = b.x - a.x, ey = b.y - a.y, len = Mathf.Sqrt(ex * ex + ey * ey);
+                // Normal hacia fuera (sentido horario, y hacia arriba).
+                float nx = -ey / len, ny = ex / len;
+                d = Mathf.Max(d, (x - a.x) * nx + (y - a.y) * ny);
+            }
+            return d;
+        }
+
+        // Piedra: bloque tallado que llena sus 2 × 2 tiles, con caras iluminadas desde arriba a la izquierda, aristas
+        // claras, una grieta quebrada que sale del borde y alguna mella.
         static Texture2D PaintRock()
         {
             var cv = new ColorCanvas(16 * S, 16 * S, S, 0, 0);
-            Func<float, float, float> body = (x, y) => Mathf.Min(Ellipse(x, y, 8, 7.4f, 7.4f, 6.8f), Box(x, y, 8, 3.2f, 7.4f, 3.0f) - 0.4f);
-            cv.Fill(body, Stone, 0, 0, 16, 15);
-            cv.Fill((x, y) => Mathf.Max(body(x, y), Ellipse(x, y, 6.2f, 10.4f, 6.0f, 4.0f)), StoneLight, 0, 6, 13, 15);
-            cv.Fill((x, y) => Mathf.Max(body(x, y), -Ellipse(x, y, 7.4f, 8.6f, 7.8f, 6.6f)), StoneDark, 0, 0, 16, 10);
-            cv.Fill((x, y) => Mathf.Min(Segment(x, y, 5.2f, 12.2f, 7.6f, 8.6f, 0.28f), Segment(x, y, 7.6f, 8.6f, 6.6f, 5.4f, 0.24f)), Hole, 4, 4, 9, 13);
-            cv.Fill((x, y) => Segment(x, y, 11.6f, 4.0f, 13.0f, 7.6f, 0.24f), Hole, 10.5f, 3, 14, 8.5f);
-            cv.Fill((x, y) => Ellipse(x, y, 4.4f, 11.6f, 1.4f, 0.7f), new Color(1, 1, 1, 0.35f), 2.5f, 10.5f, 6.5f, 12.8f);
+            var outline = new[] { (0.6f, 0.4f), (0.4f, 9.6f), (2.4f, 14.6f), (8.6f, 15.6f), (14.2f, 14.2f), (15.6f, 8.2f), (15.4f, 0.4f) };
+            Func<float, float, float> body = (x, y) => Convex(x, y, outline);
+            cv.Fill(body, Stone, 0, 0, 16, 16);
+            // Caras: arriba (la más clara), izquierda (media) y derecha (oscura), separadas en un punto descentrado.
+            var c = (6.8f, 9.4f);
+            var top = new[] { (2.4f, 14.6f), (8.6f, 15.6f), (14.2f, 14.2f), (15.6f, 8.2f), c, (0.4f, 9.6f) };
+            var right = new[] { c, (15.6f, 8.2f), (15.4f, 0.4f), (7.6f, 0.4f) };
+            cv.Fill((x, y) => Mathf.Max(Convex(x, y, top), body(x, y)), StoneLight, 0, 8, 16, 16);
+            cv.Fill((x, y) => Mathf.Max(Convex(x, y, right), body(x, y)), StoneDark, 6.5f, 0, 16, 10);
+            // Aristas claras entre caras.
+            cv.Fill((x, y) => Mathf.Min(Segment(x, y, 0.6f, 9.6f, c.Item1, c.Item2, 0.22f), Segment(x, y, c.Item1, c.Item2, 15.6f, 8.2f, 0.22f)),
+                new Color(1, 1, 1, 0.35f), 0, 8, 16, 11);
+            cv.Fill((x, y) => Segment(x, y, c.Item1, c.Item2, 7.6f, 0.6f, 0.2f), new Color(0, 0, 0, 0.3f), 6, 0, 9, 10);
+            // Grieta quebrada desde el borde de arriba.
+            var crack = new[] { (10.6f, 15.0f), (10.0f, 12.6f), (11.4f, 10.8f), (10.6f, 8.6f), (11.8f, 6.2f) };
+            for (int i = 0; i + 1 < crack.Length; i++)
+            {
+                var (ax, ay) = crack[i];
+                var (bx, by) = crack[i + 1];
+                float w = 0.32f - i * 0.05f;
+                cv.Fill((x, y) => Segment(x, y, ax, ay, bx, by, w), Hole, Mathf.Min(ax, bx) - 1, Mathf.Min(ay, by) - 1, Mathf.Max(ax, bx) + 1, Mathf.Max(ay, by) + 1);
+            }
+            cv.Fill((x, y) => Segment(x, y, 11.0f, 11.6f, 12.8f, 12.2f, 0.18f), Hole, 10.5f, 11, 13.5f, 13);
+            // Mellas y motas.
+            foreach (var (mx, my, r) in new[] { (3.6f, 4.2f, 0.7f), (12.8f, 3.0f, 0.5f), (4.4f, 12.0f, 0.45f), (13.2f, 11.6f, 0.4f) })
+                cv.Fill((x, y) => Circle(x, y, mx, my, r), new Color(0, 0, 0, 0.35f), mx - 1, my - 1, mx + 1, my + 1);
+            cv.Fill((x, y) => Segment(x, y, 3.0f, 13.6f, 6.4f, 14.6f, 0.3f), new Color(1, 1, 1, 0.45f), 2.5f, 13, 7, 15.2f);
             cv.Ink(Ink, 1);
             return cv.ToTexture();
         }

@@ -90,8 +90,27 @@ namespace MazeOfKnight.Game.Visuals
         {
             var key = (kind, mod, accent, frame);
             if (!cache.TryGetValue(key, out var s))
-                cache[key] = s = ToSprite(Paint(kind, mod, Accents[accent % Accents.Length], frame), S * Px, Vector2.zero);
+                cache[key] = s = Trimmed(Paint(kind, mod, Accents[accent % Accents.Length], frame));
             return s;
+        }
+
+        // Sprite recortado a la silueta (lo opaco, con el contorno): el juego lo estira a la caja de colisión, así lo que
+        // se ve es lo que golpea, como en el original, donde la caja sale del propio sprite.
+        static Sprite Trimmed(Texture2D tex)
+        {
+            int x0 = tex.width, y0 = tex.height, x1 = -1, y1 = -1;
+            var px = tex.GetPixels32();
+            for (int y = 0; y < tex.height; y++)
+                for (int x = 0; x < tex.width; x++)
+                    if (px[y * tex.width + x].a > 40)
+                    {
+                        if (x < x0) x0 = x;
+                        if (x > x1) x1 = x;
+                        if (y < y0) y0 = y;
+                        if (y > y1) y1 = y;
+                    }
+            if (x1 < 0) return ToSprite(tex, S * Px, Vector2.zero);
+            return Sprite.Create(tex, new Rect(x0, y0, x1 - x0 + 1, y1 - y0 + 1), Vector2.zero, S * Px, 0, SpriteMeshType.FullRect);
         }
 
         // ---------- pintura (en una caja de 16 × 16 px, mirando a la derecha) ----------
@@ -461,7 +480,7 @@ namespace MazeOfKnight.Game.Visuals
                 default: Ball(cv, Mod.Bomb, Accents[1], frame); break;
             }
             if (id == 1 || id == 2 || id == 5) cv.Ink(new Color(0.03f, 0.03f, 0.05f), 2);
-            cache[key] = s = ToSprite(cv.ToTexture(), S * Px, Vector2.zero);
+            cache[key] = s = Trimmed(cv.ToTexture());
             return s;
         }
     }

@@ -137,6 +137,7 @@ namespace MazeOfKnight.Game.Visuals
 
             motes = BuildMotes();
             gameObject.AddComponent<RemakeHud>().game = game;
+            gameObject.AddComponent<HitboxOverlay>().game = game;
             enemyArt = new EnemyArt();
             characters = new CharacterArt { ShieldLevel = () => game != null && game.Inventory != null ? game.Inventory.ShieldLevel : 0 };
             slash = Layer("Estela del espadazo", 12, additive);

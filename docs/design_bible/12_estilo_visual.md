@@ -108,10 +108,10 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
   - trampas de piedra con cara tallada (boca, agujero de flechas, pistón); hechiceros con túnica; pinchos;
   - proyectiles (orbes), huesos, dardos; botín (monedas, flechas, llaves), explosión, hada y el bebé;
   - las armas del jugador: flecha, cerámica, fuego y mina.
-  - El dibujo llena la caja que pinta el juego (`Enemy.DrawRect`): no cambia ninguna colisión. Los jefes con su imagen importada la conservan.
+  - El dibujo, recortado a su silueta, se estira a la caja que pinta el juego (`Enemy.DrawRect`, la de colisión): lo que se ve es lo que golpea, como en el original, donde la caja sale del sprite. Mirando a la izquierda se coloca desde la esquina derecha (flipX voltea sobre el pivote). Los jefes con su imagen importada la conservan.
   - **Maze of Knight → Hoja de enemigos** guarda todos los arquetipos en `logs/unity/enemigos.png`.
 - **Piedras, puertas, ascensores y objetos** (`PropArt.cs`, arte provisional por código, con contorno de tinta):
-  - piedra: roca tallada con grietas que ocupa sus 2 × 2 tiles; puerta de mundo: pórtico griego (columnas, frontón y la entrada oscura con un brillo); puerta con llave: reja de bronce con cerradura, que encoge con la apertura; puerta giratoria: madera con un eje; ascensor: losa de mármol con franja dorada;
+  - piedra: bloque tallado a facetas (cara de arriba clara, la derecha oscura) con una grieta quebrada, que llena sus 2 × 2 tiles; debajo no se dibuja el macizo ni el borde del suelo; puerta de mundo: pórtico griego (columnas, frontón y la entrada oscura con un brillo); puerta con llave: reja de bronce con cerradura, que encoge con la apertura; puerta giratoria: madera con un eje; ascensor: losa de mármol con franja dorada;
   - los 47 objetos con su icono (armas, objetos de mundo, Cross, Great Key, escudos de cobre, plata y oro, corona, arpa, Biblia…) y un halo suave detrás;
   - piedras y puertas son tiles de 8 px recortados de un dibujo mayor: ocupan exactamente sus celdas de colisión.
   - **Maze of Knight → Hoja de objetos** guarda los iconos, la piedra, las puertas y el ascensor en `logs/unity/objetos.png`.
@@ -156,6 +156,7 @@ Con el estilo puesto (F7), la interfaz del remake sustituye al texto de pruebas,
 
 - **F7:** pone o quita el estilo del remake y vuelve a los tiles provisionales.
 - **F8:** el texto de pruebas (controles, sala, posición, estado) encima del marcador.
+- **F9:** las cajas de colisión encima del juego: verde el jugador, amarillo la espada, rojo los enemigos que hacen daño (`HitboxOverlay.cs`).
 - **F6:** recorre las paletas de los 11 mapas sobre la sala actual.
 - **Maze of Knight → Capturas del estilo visual** (o `VisualPreview.CaptureBatch` en batch): guarda 13 capturas en `logs/unity/visual_NN.png`, de varias salas del castillo con cada paleta.
 
