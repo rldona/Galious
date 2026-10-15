@@ -68,7 +68,11 @@ namespace MazeOfKnight.Game
             var s = Visit.Shrine;
             if (Visuals.Atmosphere.Styled)
             {
-                DrawStyled(R, scale);
+                {
+                    // Centrado en la ventana: el recuadro del menú (y = 28…196) en el medio.
+                    var (CR, cscale) = Visuals.UiKit.Centered(-4, 28, 264, 168);
+                    DrawStyled(CR, cscale);
+                }
                 return;
             }
 

@@ -103,6 +103,15 @@ namespace MazeOfKnight.Game.Visuals
 
         // ---------- piezas ----------
 
+        // Coloca un recuadro en coordenadas de la pantalla del original (256 × 192 px; los menús usan las filas de
+        // debajo del marcador, y = 32…192) centrado en la ventana, con un margen. Devuelve la conversión y la escala.
+        public static (System.Func<float, float, float, float, Rect> R, float scale) Centered(float x0, float y0, float w, float h)
+        {
+            float scale = Mathf.Min(Screen.width / w, Screen.height / h) * 0.94f;
+            float ox = (Screen.width - w * scale) / 2 - x0 * scale, oy = (Screen.height - h * scale) / 2 - y0 * scale;
+            return ((x, y, rw, rh) => new Rect(ox + x * scale, oy + y * scale, rw * scale, rh * scale), scale);
+        }
+
         // Panel con marco de filigrana.
         public static void Panel(Rect r)
         {

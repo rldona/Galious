@@ -19,6 +19,7 @@ namespace MazeOfKnight.Game.Visuals
             if (i < 0 || i + 1 >= args.Length) return;
             dir = args[i + 1];
             AttractMode.Current = AttractMode.Mode.Game;
+            Application.runInBackground = true;      // sin la ventana delante, el juego se pararía
             var go = new GameObject("Capturas de la interfaz");
             DontDestroyOnLoad(go);
             go.AddComponent<UiCapture>();
