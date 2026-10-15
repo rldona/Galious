@@ -31,6 +31,9 @@ namespace MazeOfKnight.Game.Visuals
         public static Material CharacterMaterial { get; private set; }
         // Dibujos de enemigos y armas; null con el estilo quitado.
         public static EnemyArt EnemyArt { get; private set; }
+        // Objetos y ascensores; null con el estilo quitado.
+        public static PropArt Props { get; private set; }
+        PropArt props;
         EnemyArt enemyArt;
 
         // Entre salas no hay fundido: el corte seco del original es más fluido. Solo al entrar o salir de un mundo.
@@ -98,6 +101,7 @@ namespace MazeOfKnight.Game.Visuals
             w.Apply();
             white = Sprite.Create(w, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
 
+            props = new PropArt();
             BuildTiles();
             if (mapView != null)
             {
@@ -156,6 +160,7 @@ namespace MazeOfKnight.Game.Visuals
             if (CharacterMaterial != null) Destroy(CharacterMaterial);
             CharacterMaterial = null;
             EnemyArt = null;
+            Props = null;
         }
 
         SpriteRenderer Layer(string name, int order, Material mat)
@@ -243,7 +248,7 @@ namespace MazeOfKnight.Game.Visuals
             waterTile = NewTile("Agua", waterSprite);
             lavaTile = NewTile("Lava", lavaSprite);
             bossTile = NewTile("Pasable en el combate", solidSprite);
-            tiles = new MapView.StyleTiles { Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile };
+            tiles = new MapView.StyleTiles { Rock = props.Rock, Door = props.Door, KeyDoor = props.KeyDoor, Revolving = props.Revolving, Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile };
         }
 
         void ColorTiles(WorldPalette p)
@@ -343,6 +348,7 @@ namespace MazeOfKnight.Game.Visuals
                 Outline(player.sword);
                 player.Art = on ? characters : null;
                 EnemyArt = on ? enemyArt : null;
+                Props = on ? props : null;
                 player.Slash = slash;
             }
             shownRoom = null;                        // vuelve a montar la sala

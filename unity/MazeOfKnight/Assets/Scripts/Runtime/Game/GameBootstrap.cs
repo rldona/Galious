@@ -540,8 +540,8 @@ namespace MazeOfKnight.Game
             var go = new GameObject(name);
             var sr = go.AddComponent<SpriteRenderer>();
             StyleSprite(sr);
-            sr.sprite = itemSprite;
-            sr.color = color;
+            sr.sprite = ItemSprite(Inventory.GreatKey);
+            sr.color = Visuals.Atmosphere.Props != null ? Color.white : color;
             sr.sortingOrder = 7;
             var p = RoomCoords.PixelToWorld(room, x + 8, y + 16);
             go.transform.position = new Vector3(p.x, p.y, 0);
@@ -1056,6 +1056,7 @@ namespace MazeOfKnight.Game
                     }
                     var v = liftViews[n++];
                     v.enabled = true;
+                    v.sprite = Visuals.Atmosphere.Props?.Lift ?? LiftSprite();
                     var bl = RoomCoords.PixelToWorld(motor.Room, l.X, l.Y + Lifts.Box.height);
                     v.transform.position = new Vector3(bl.x, bl.y, 0);
                     v.transform.localScale = Vector3.one;
@@ -1264,7 +1265,7 @@ namespace MazeOfKnight.Game
             var go = new GameObject($"Objeto 0x{type:X2} (sala {room.id})");
             var sr = go.AddComponent<SpriteRenderer>();
             StyleSprite(sr);
-            sr.sprite = itemSprite;
+            sr.sprite = ItemSprite(type);
             sr.sortingOrder = 7;
             var p = RoomCoords.PixelToWorld(room, x + 8, y + 16);
             go.transform.position = new Vector3(p.x, p.y, 0);
@@ -1278,11 +1279,14 @@ namespace MazeOfKnight.Game
             var go = new GameObject($"Objeto 0x{room.item.type:X2} (sala {room.id})");
             var sr = go.AddComponent<SpriteRenderer>();
             StyleSprite(sr);
-            sr.sprite = itemSprite;
+            sr.sprite = ItemSprite(room.item.type);
             sr.sortingOrder = 5;
             go.transform.position = RoomCoords.PixelToWorld(room, room.item.x + 8, room.item.y + 16);
             visibleItems.Add((room, go));
         }
+
+        // Con el estilo del remake, el dibujo de cada objeto (Visuals/PropArt); si no, el rombo provisional.
+        Sprite ItemSprite(int type) => Visuals.Atmosphere.Props?.Item(type) ?? itemSprite;
 
         public void Say(string text)
         {

@@ -110,8 +110,12 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
   - las armas del jugador: flecha, cerámica, fuego y mina.
   - El dibujo llena la caja que pinta el juego (`Enemy.DrawRect`): no cambia ninguna colisión. Los jefes con su imagen importada la conservan.
   - **Maze of Knight → Hoja de enemigos** guarda todos los arquetipos en `logs/unity/enemigos.png`.
+- **Piedras, puertas, ascensores y objetos** (`PropArt.cs`, arte provisional por código, con contorno de tinta):
+  - piedra: roca tallada con grietas que ocupa sus 2 × 2 tiles; puerta de mundo: pórtico griego (columnas, frontón y la entrada oscura con un brillo); puerta con llave: reja de bronce con cerradura, que encoge con la apertura; puerta giratoria: madera con un eje; ascensor: losa de mármol con franja dorada;
+  - los 47 objetos con su icono (armas, objetos de mundo, Cross, Great Key, escudos de cobre, plata y oro, corona, arpa, Biblia…) y un halo suave detrás;
+  - piedras y puertas son tiles de 8 px recortados de un dibujo mayor: ocupan exactamente sus celdas de colisión.
+  - **Maze of Knight → Hoja de objetos** guarda los iconos, la piedra, las puertas y el ascensor en `logs/unity/objetos.png`.
 - **Pendiente:**
-  - piedras, ascensores, puertas y objetos de sala con dibujo propio;
   - chispas al golpear;
   - un temblor de cámara pequeño en los golpes fuertes;
   - partículas al romper piedras y paredes.
@@ -158,4 +162,5 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 | `Runtime/Game/MapView.cs` | tiles del estilo: macizo en 3 tonos y borde iluminado |
 | `Runtime/Game/Visuals/CharacterArt.cs` | Popolon y Aphrodite: fotogramas, animación y estela del espadazo |
 | `Runtime/Game/Visuals/EnemyArt.cs` | enemigos por arquetipos, botín y armas del jugador |
+| `Runtime/Game/Visuals/PropArt.cs` | piedras, puertas, ascensores e iconos de los objetos |
 | `Runtime/Game/Visuals/ColorCanvas.cs` | lienzo de color con contorno de tinta para personajes y enemigos |

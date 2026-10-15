@@ -156,6 +156,51 @@ namespace MazeOfKnight.EditorTools
             Debug.Log($"[VisualPreview] hoja de enemigos en {OutDir}");
         }
 
+        // Hoja de objetos (los 47 iconos) y, debajo, piedra, puertas y ascensor: logs/unity/objetos.png.
+        [MenuItem("Maze of Knight/Hoja de objetos", false, 64)]
+        public static void PropSheet()
+        {
+            var art = new PropArt();
+            const int cell = 64, cols = 12;
+            var sprites = new List<Sprite>();
+            for (int t = 1; t <= 0x2F; t++) sprites.Add(art.Item(t));
+            int itemRows = (sprites.Count + cols - 1) / cols;
+            int w = cell * cols, h = cell * itemRows + 112;
+            var sheet = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            var bg = new Color(0.23f, 0.28f, 0.38f);
+            var fill = new Color[w * h];
+            for (int i = 0; i < fill.Length; i++) fill[i] = bg;
+            sheet.SetPixels(fill);
+            void Blit(Sprite sp, int ox, int oy)
+            {
+                var r = sp.textureRect;
+                var px = sp.texture.GetPixels((int)r.x, (int)r.y, (int)r.width, (int)r.height);
+                for (int y = 0; y < (int)r.height; y++)
+                    for (int x = 0; x < (int)r.width; x++)
+                    {
+                        if (ox + x >= w || oy + y >= h) continue;
+                        var p = px[y * (int)r.width + x];
+                        sheet.SetPixel(ox + x, oy + y, Color.Lerp(sheet.GetPixel(ox + x, oy + y), new Color(p.r, p.g, p.b), p.a));
+                    }
+            }
+            for (int k = 0; k < sprites.Count; k++)
+                Blit(sprites[k], (k % cols) * cell, h - (k / cols + 1) * cell);
+            void BlitTiles(UnityEngine.Tilemaps.TileBase[,] t, int ox)
+            {
+                for (int r = 0; r < t.GetLength(0); r++)
+                    for (int c = 0; c < t.GetLength(1); c++)
+                        Blit(((UnityEngine.Tilemaps.Tile)t[r, c]).sprite, ox + c * 32, 8 + (t.GetLength(0) - 1 - r) * 32);
+            }
+            BlitTiles(art.Rock, 8);
+            BlitTiles(art.Door, 96);
+            BlitTiles(art.KeyDoor, 248);
+            BlitTiles(art.Revolving, 300);
+            Blit(art.Lift, 360, 8);
+            sheet.Apply();
+            File.WriteAllBytes(Path.Combine(OutDir, "objetos.png"), sheet.EncodeToPNG());
+            Debug.Log($"[VisualPreview] hoja de objetos en {OutDir}");
+        }
+
         static void Capture(Camera cam, string path)
         {
             const int w = 1280, h = 800;

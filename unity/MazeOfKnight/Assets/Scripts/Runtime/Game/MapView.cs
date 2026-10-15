@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MazeOfKnight.Data;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -27,9 +28,16 @@ namespace MazeOfKnight.Game
         public class StyleTiles
         {
             public TileBase Solid, SolidInner, SolidDeep, Rim, Ladder, Water, Lava, BossPassable;
+            public TileBase[,] Rock, Door, KeyDoor, Revolving;    // dibujos de varias celdas: [fila desde arriba, columna]
         }
 
         public StyleTiles Style;
+
+        // Lo que se ha puesto encima de la colisión, para volver a dibujarlo al cambiar de estilo.
+        readonly Dictionary<(RoomModel, int, int), bool> shownRocks = new Dictionary<(RoomModel, int, int), bool>();
+        readonly Dictionary<(RoomModel, int, int), int> shownKeyDoors = new Dictionary<(RoomModel, int, int), int>();
+        readonly HashSet<(RoomModel, int, int)> shownRevolving = new HashSet<(RoomModel, int, int)>();
+        readonly HashSet<(RoomModel, int, int)> shownDoors = new HashSet<(RoomModel, int, int)>();
 
         Grid grid;
         Tilemap back, front, rim, rocks, keyDoors, doorsLayer;
@@ -48,18 +56,27 @@ namespace MazeOfKnight.Game
         {
             Style = style;
             if (front == null) return;
+            foreach (var ((room, x, y), visible) in new Dictionary<(RoomModel, int, int), bool>(shownRocks)) ShowRock(room, x, y, visible);
+            foreach (var (room, x, y) in new List<(RoomModel, int, int)>(shownDoors)) ShowDoor(room, x, y);
+            foreach (var (room, x, y) in new List<(RoomModel, int, int)>(shownRevolving)) ShowRevolvingDoor(room, x, y);
             back.GetComponent<TilemapRenderer>().enabled = style == null;
             rim.ClearAllTiles();
             if (lastMap != null)
                 foreach (var data in lastMap.rooms)
                     if (!data.room.shrine)
                         RedrawCells(lastWorld, data.room, 0, 0, RoomCoords.Cols, RoomCoords.Rows);
+            // Las puertas con llave tapan su columna de la colisión: después de redibujarla.
+            foreach (var ((room, x, y), h) in new Dictionary<(RoomModel, int, int), int>(shownKeyDoors)) ShowKeyDoor(room, x, y, h);
         }
 
         public void Build(MapData map, RoomWorld world)
         {
             lastMap = map;
             lastWorld = world;
+            shownRocks.Clear();
+            shownKeyDoors.Clear();
+            shownRevolving.Clear();
+            shownDoors.Clear();
             if (grid != null)
                 DestroyImmediate(grid.gameObject);
             grid = new GameObject($"{map.mapName} (salas)").AddComponent<Grid>();
@@ -88,16 +105,18 @@ namespace MazeOfKnight.Game
                         if (!room.shrine) UpdateRim(world, room, col, row);
                     }
                 if (room.doorWorld > 0)
-                    Fill(doors, room, room.door.x, room.door.y, 4, 3, door);
+                    ShowDoor(room, room.door.x, room.door.y);
             }
         }
 
         // Puerta con llave: columna de 1 x 3 tiles, cerrada hasta la altura dada (desde arriba).
         public void ShowKeyDoor(RoomModel room, int x, int y, int height)
         {
+            shownKeyDoors[(room, x, y)] = height;
             Fill(front, room, x, y, 1, 3, null);
             Fill(keyDoors, room, x, y, 1, 3, null);
-            Fill(keyDoors, room, x, y, 1, height, keyDoor);
+            if (Style?.KeyDoor != null) FillPattern(keyDoors, room, x, y, Style.KeyDoor, height);
+            else Fill(keyDoors, room, x, y, 1, height, keyDoor);
         }
 
         // Vuelve a dibujar la capa de colisión de un rectángulo (en tiles) a partir del estado actual del mundo.
@@ -125,7 +144,12 @@ namespace MazeOfKnight.Game
         }
 
         // Puerta de mundo que aparece en juego (la del mundo 10).
-        public void ShowDoor(RoomModel room, int x, int y) => Fill(doorsLayer, room, x, y, 4, 3, door);
+        public void ShowDoor(RoomModel room, int x, int y)
+        {
+            shownDoors.Add((room, x, y));
+            if (Style?.Door != null) FillPattern(doorsLayer, room, x, y, Style.Door, 3);
+            else Fill(doorsLayer, room, x, y, 4, 3, door);
+        }
 
         // Sala oscura (mundo 5, sala 6, sin la Candle): los muros no se ven, pero siguen ahí.
         public void SetDark(RoomWorld world, RoomModel room, bool dark)
@@ -145,10 +169,32 @@ namespace MazeOfKnight.Game
         }
 
         // Puerta giratoria: columna de 1 x 3 tiles con su propio color, encima de la colisión.
-        public void ShowRevolvingDoor(RoomModel room, int x, int y) => Fill(keyDoors, room, x, y, 1, 3, revolvingDoor);
+        public void ShowRevolvingDoor(RoomModel room, int x, int y)
+        {
+            shownRevolving.Add((room, x, y));
+            if (Style?.Revolving != null) FillPattern(keyDoors, room, x, y, Style.Revolving, 3);
+            else Fill(keyDoors, room, x, y, 1, 3, revolvingDoor);
+        }
 
-        public void ShowRock(RoomModel room, int x, int y, bool visible) =>
-            Fill(rocks, room, x, y, 2, 2, visible ? rock : null);
+        public void ShowRock(RoomModel room, int x, int y, bool visible)
+        {
+            shownRocks[(room, x, y)] = visible;
+            if (visible && Style?.Rock != null) FillPattern(rocks, room, x, y, Style.Rock, 2);
+            else Fill(rocks, room, x, y, 2, 2, visible ? rock : null);
+        }
+
+        // Dibujo de varias celdas: las 'rowsShown' filas de arriba del patrón.
+        static void FillPattern(Tilemap tm, RoomModel room, int x, int y, TileBase[,] pattern, int rowsShown)
+        {
+            int col0 = x >> 3, row0 = (y - OriginalPhysics.RoomTopPx) >> 3;
+            for (int r = 0; r < pattern.GetLength(0); r++)
+                for (int c = 0; c < pattern.GetLength(1); c++)
+                {
+                    int rr = row0 + r, cc = col0 + c;
+                    if (rr >= 0 && rr < RoomCoords.Rows && cc >= 0 && cc < RoomCoords.Cols)
+                        tm.SetTile(RoomCoords.Cell(room, cc, rr), r < rowsShown ? pattern[r, c] : null);
+                }
+        }
 
         // Vacía la colisión dibujada de un hueco (al romper una piedra).
         public void ClearSolid(RoomModel room, int x, int y, int width, int height)
