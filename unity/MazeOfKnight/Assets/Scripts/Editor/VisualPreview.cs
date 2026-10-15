@@ -83,10 +83,10 @@ namespace MazeOfKnight.EditorTools
             var cells = new List<(Character, CharacterArt.Anim, int, int)>();
             foreach (var (c, shield) in new[] { (Character.Popolon, 0), (Character.Popolon, 3), (Character.Aphrodite, 0), (Character.Aphrodite, 2) })
                 foreach (var (a, n) in new[] { (CharacterArt.Anim.Idle, 2), (CharacterArt.Anim.Walk, 4), (CharacterArt.Anim.Prep, 1), (CharacterArt.Anim.Rise, 1),
-                             (CharacterArt.Anim.Fall, 1), (CharacterArt.Anim.Ladder, 2), (CharacterArt.Anim.Attack, 2), (CharacterArt.Anim.Hurt, 1) })
+                             (CharacterArt.Anim.Fall, 1), (CharacterArt.Anim.Ladder, 2), (CharacterArt.Anim.Attack, 3), (CharacterArt.Anim.Hurt, 1) })
                     for (int i = 0; i < n; i++) cells.Add((c, a, i, shield));
             var first = art.Get(Character.Popolon, CharacterArt.Anim.Idle, 0).texture;
-            int cw = first.width, ch = first.height, cols = 14;
+            int cw = first.width, ch = first.height, cols = 15;
             int rows = cells.Count / cols;
             var sheet = new Texture2D(cw * cols, ch * rows, TextureFormat.RGBA32, false);
             var bg = new Color(0.23f, 0.28f, 0.38f);

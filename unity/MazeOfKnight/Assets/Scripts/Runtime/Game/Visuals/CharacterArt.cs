@@ -38,7 +38,7 @@ namespace MazeOfKnight.Game.Visuals
         {
             Build(Character.Popolon, 0);
             Build(Character.Aphrodite, 0);
-            SlashSprite = ToSprite(Slash(), 64f / 1.2f, new Vector2(0.5f, 0.5f));
+            SlashSprite = ToSprite(Slash(), 128f / (12f / RoomCoords.PixelsPerUnit), new Vector2(0.5f, 0.5f));   // 12 px de largo
         }
 
         // Los fotogramas de un personaje con un escudo (se pintan la primera vez que hacen falta).
@@ -65,8 +65,11 @@ namespace MazeOfKnight.Game.Visuals
                 Add(Anim.Fall, 0, new Pose { FootFront = 1.6f, LiftFront = 0.4f, FootBack = -1.8f, LiftBack = 0.2f, Cape = 1.8f, CapeLift = 2.2f });
                 Add(Anim.Ladder, 0, new Pose { Ladder = true, ArmPhase = 0 });
                 Add(Anim.Ladder, 1, new Pose { Ladder = true, ArmPhase = 1 });
-                Add(Anim.Attack, 0, new Pose { Sword = 1, Lean = 0.8f, FootFront = 1.6f, FootBack = -1.4f, Cape = 1.2f });
-                Add(Anim.Attack, 1, new Pose { Sword = 2, Lean = 0.5f, FootFront = 1.4f, FootBack = -1.2f, Cape = 0.8f });
+                // Estocada con impulso (la espada del original golpea en una franja horizontal, x + 8 … x + 18):
+                // lanzarse con el pie adelantado y la hoja extendida, recoger a media distancia y quedar en guardia.
+                Add(Anim.Attack, 0, new Pose { Sword = 1, Lean = 1.6f, Crouch = 0.5f, FootFront = 2.8f, FootBack = -2.4f, Cape = 1.9f, CapeLift = 0.6f });
+                Add(Anim.Attack, 1, new Pose { Sword = 3, Lean = 0.9f, Crouch = 0.25f, FootFront = 2.0f, FootBack = -1.8f, Cape = 1.3f, CapeLift = 0.3f });
+                Add(Anim.Attack, 2, new Pose { Sword = 2, Lean = 0.4f, FootFront = 1.4f, FootBack = -1.2f, Cape = 0.8f });
                 Add(Anim.Hurt, 0, new Pose { Lean = -1.2f, Crouch = 0.6f, FootFront = 0.8f, FootBack = -1.6f, Cape = 1.5f, CapeLift = 1.5f, Hurt = true });
             }
         }
@@ -91,7 +94,7 @@ namespace MazeOfKnight.Game.Visuals
             var c = m.Character;
             int shield = ShieldLevel?.Invoke() ?? 0;
             if (m.State == MotorState.Knockback || m.Stunned > 0) return Get(c, Anim.Hurt, 0, shield);
-            if (m.AttackTicks > 0) return Get(c, Anim.Attack, m.AttackTicks >= 3 ? 0 : 1, shield);
+            if (m.AttackTicks > 0) return Get(c, Anim.Attack, m.AttackTicks >= 3 ? 0 : m.AttackTicks == 2 ? 1 : 2, shield);
             switch (m.State)
             {
                 case MotorState.Ladder:
@@ -251,10 +254,13 @@ namespace MazeOfKnight.Game.Visuals
                     cv.Fill((x, y) => Mathf.Max(Segment(x, y, 7.0f, 5.6f, 17.6f, 5.5f, 0.55f), 0), new Color(0.88f, 0.93f, 1f), 6.5f, 4.5f, 18.5f, 6.6f);
                     cv.Fill((x, y) => Segment(x, y, 7.4f, 5.85f, 16.8f, 5.75f, 0.15f), Color.white, 7, 5.4f, 17.5f, 6.3f);
                 }
-                else if (p.Sword == 2)
+                else if (p.Sword == 3 || p.Sword == 2)
                 {
-                    cv.Fill((x, y) => Segment(x, y, lx + 1.0f, torsoY + 0.8f, lx + 4.2f, 4.6f, 0.75f), k.BodyLight, lx, 3, lx + 6, torsoY + 2);
-                    cv.Fill((x, y) => Segment(x, y, lx + 4.6f, 4.4f, lx + 12.5f, 1.6f, 0.5f), new Color(0.82f, 0.88f, 0.98f), lx + 4, 0, lx + 13.5f, 5.5f);
+                    // Recogiendo (a media distancia) o en guardia: la hoja sigue horizontal, apuntando al frente.
+                    float hand = p.Sword == 3 ? 5.0f : 3.6f, tip = p.Sword == 3 ? 14.0f : 10.6f, hy = p.Sword == 3 ? 5.7f : 6.0f;
+                    cv.Fill((x, y) => Segment(x, y, lx + 1.1f, torsoY + 0.9f, lx + hand, hy, 0.75f), k.BodyLight, lx, hy - 1, lx + hand + 1, torsoY + 2);
+                    cv.Fill((x, y) => Box(x, y, lx + hand + 0.9f, hy, 0.35f, 1.0f), k.Trim, lx + hand, hy - 1.5f, lx + hand + 2, hy + 1.5f);
+                    cv.Fill((x, y) => Segment(x, y, lx + hand + 1.3f, hy, lx + tip, hy - 0.1f, 0.5f), new Color(0.86f, 0.91f, 0.99f), lx + hand, hy - 1, lx + tip + 1, hy + 1);
                 }
                 if (!hasShield)
                 {
@@ -285,20 +291,23 @@ namespace MazeOfKnight.Game.Visuals
             return cv.ToTexture();
         }
 
-        // Estela del espadazo: media luna blanca que se afila en las puntas.
+        // Estela de la estocada: destello horizontal a lo largo de la hoja, más brillante en la punta, con dos líneas de
+        // velocidad detrás (128 × 32; la izquierda es el lado del jugador).
         static Texture2D Slash()
         {
-            const int n = 64;
-            var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
-            for (int y = 0; y < n; y++)
-                for (int x = 0; x < n; x++)
+            const int w = 128, h = 32;
+            var tex = new Texture2D(w, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
                 {
-                    float u = (x + 0.5f) / n * 2 - 1, v = (y + 0.5f) / n * 2 - 1;
-                    float ang = Mathf.Atan2(v, u + 0.55f), r = Mathf.Sqrt((u + 0.55f) * (u + 0.55f) + v * v);
-                    float span = Mathf.Clamp01(1 - Mathf.Abs(ang) / 1.15f);
-                    float thick = 0.22f * span;
-                    float a = Mathf.Clamp01(1 - Mathf.Abs(r - 1.05f) / Mathf.Max(thick, 1e-3f)) * span;
-                    tex.SetPixel(x, y, new Color(1, 1, 1, a * a));
+                    float u = (x + 0.5f) / w, v = (y + 0.5f) / h * 2 - 1;
+                    float core = Mathf.SmoothStep(0, 1, u / 0.18f) * (1 - Mathf.SmoothStep(0.9f, 1f, u)) * Mathf.Exp(-(v / 0.2f) * (v / 0.2f)) * (0.35f + 0.65f * u);
+                    float lines = 0;
+                    foreach (float lv in new[] { -0.6f, 0.55f })
+                        lines = Mathf.Max(lines, Mathf.Clamp01(1 - Mathf.Abs(v - lv) / 0.09f) * Mathf.Clamp01(u / 0.1f) * Mathf.Clamp01((0.68f - u) / 0.2f) * 0.6f);
+                    float tip = Mathf.Clamp01(1 - Vector2.Distance(new Vector2(u * 4, v), new Vector2(0.93f * 4, 0)) / 0.45f);
+                    float a = Mathf.Clamp01(Mathf.Max(core, Mathf.Max(lines, tip * tip)));
+                    tex.SetPixel(x, y, new Color(1, 1, 1, a));
                 }
             tex.Apply();
             return tex;

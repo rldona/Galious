@@ -93,8 +93,9 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
   - **Popolon:** yelmo corintio claro (la «máscara», con rendija en T), cresta roja transversal y capa granate; en el escudo, un sol.
   - **Aphrodite:** yelmo con alas, melena dorada y capa violeta; en el escudo, una rosa.
   - **Escudo:** solo si se tiene uno de las tiendas, con su metal (cobre, plata u oro; el mejor que se lleve, `Inventory.ShieldLevel`). Sin escudo se ve el brazo.
-  - **Fotogramas:** quieto (2, respira), andar (4, avanzan con la distancia recorrida), preparar el salto, subir, caer, escalera (2, con la altura), espadazo (2: estocada hasta x + 18 y recogida) y golpe recibido.
-  - **Estela del espadazo:** media luna aditiva sobre la zona que golpea, que se apaga en los 4 ticks del golpe.
+  - **Fotogramas:** quieto (2, respira), andar (4, avanzan con la distancia recorrida), preparar el salto, subir, caer, escalera (2, con la altura), espadazo (3) y golpe recibido.
+  - **Espadazo:** una estocada recta con impulso, como la del original (golpea en la franja horizontal x + 8 … x + 18, y − 7 … y − 4): en los ticks 4 y 3 se lanza con el pie adelantado y la hoja hasta x + 18 (el golpe es en el primero), en el 2 la recoge a media distancia y en el 1 queda en guardia, con la hoja horizontal.
+  - **Estela:** destello horizontal aditivo a lo largo de la hoja, más brillante en la punta, con dos líneas de velocidad; fuerte en el tick del golpe y se apaga al recoger.
   - Los pies están en el pivote y la hoja llega donde golpea la espada del original: el dibujo no cambia ninguna caja.
   - **Maze of Knight → Hoja de personajes** guarda todos los fotogramas en `logs/unity/personajes.png`.
 

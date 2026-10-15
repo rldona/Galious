@@ -174,7 +174,7 @@ namespace MazeOfKnight.Game
                 if (sword != null) sword.enabled = false;
                 if (Slash != null)
                 {
-                    // Estela: media luna sobre la zona que golpea, que se apaga en los 4 ticks del golpe.
+                    // Estela de la estocada sobre la zona que golpea (x + 8 … x + 18, y − 7 … y − 4).
                     Slash.enabled = Motor.AttackTicks > 0;
                     if (Slash.enabled)
                     {
@@ -182,7 +182,9 @@ namespace MazeOfKnight.Game
                         var at = RoomCoords.PixelToWorld(Motor.Room, (sx0 + sx1 + 1) / 2, (sy0 + sy1) / 2 + 1);
                         Slash.transform.position = new Vector3(at.x, at.y, 0);
                         Slash.flipX = Motor.FacingLeft;
-                        Slash.color = new Color(1, 1, 1, Motor.AttackTicks / (float)OriginalPhysics.SwordTicks);
+                        // Fuerte en el tick del golpe y se apaga al recoger la hoja.
+                        float a = Motor.AttackTicks >= 4 ? 1f : Motor.AttackTicks == 3 ? 0.7f : Motor.AttackTicks == 2 ? 0.3f : 0f;
+                        Slash.color = new Color(1, 1, 1, a);
                     }
                 }
                 return;
