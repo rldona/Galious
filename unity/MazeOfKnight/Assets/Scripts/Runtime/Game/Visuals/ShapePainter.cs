@@ -85,7 +85,7 @@ namespace MazeOfKnight.Game.Visuals
         }
 
         // Triángulo isósceles: base centrada en (cx, by) de semiancho hw, punta en (cx, ty) (arriba o abajo).
-        static float Spike(float px, float py, float cx, float by, float hw, float ty)
+        internal static float Spike(float px, float py, float cx, float by, float hw, float ty)
         {
             float h = ty - by;
             float t = (py - by) / h;                   // 0 en la base, 1 en la punta

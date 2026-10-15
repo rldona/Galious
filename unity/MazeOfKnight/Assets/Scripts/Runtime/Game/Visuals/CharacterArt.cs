@@ -148,62 +148,10 @@ namespace MazeOfKnight.Game.Visuals
             (Color.clear, Color.clear), (C("#c27445"), C("#6e3a1c")), (C("#c9cfdc"), C("#7a8296")), (C("#e2b84a"), C("#8f6a14")),
         };
 
-        class Canvas
-        {
-            public readonly Color[] Px = new Color[W * H];
-
-            // Forma en píxeles del original (pies en (0, 0), mirando a la derecha); color encima con borde suave.
-            public void Fill(Func<float, float, float> sdf, Color color, float x0, float y0, float x1, float y1)
-            {
-                int ix0 = Mathf.Max(0, (int)((x0 + Wpx / 2f) * S) - 2), ix1 = Mathf.Min(W - 1, (int)((x1 + Wpx / 2f) * S) + 2);
-                int iy0 = Mathf.Max(0, (int)((y0 + FootY) * S) - 2), iy1 = Mathf.Min(H - 1, (int)((y1 + FootY) * S) + 2);
-                const float soft = 0.5f / S;
-                for (int y = iy0; y <= iy1; y++)
-                    for (int x = ix0; x <= ix1; x++)
-                    {
-                        float px = (x + 0.5f) / S - Wpx / 2f, py = (y + 0.5f) / S - FootY;
-                        float d = sdf(px, py);
-                        float a = Mathf.Clamp01(0.5f - d / (2 * soft)) * color.a;
-                        if (a <= 0) continue;
-                        int i = y * W + x;
-                        var o = Px[i];
-                        float na = a + o.a * (1 - a);
-                        var rgb = (new Color(color.r, color.g, color.b) * a + new Color(o.r, o.g, o.b) * o.a * (1 - a)) / Mathf.Max(na, 1e-5f);
-                        Px[i] = new Color(rgb.r, rgb.g, rgb.b, na);
-                    }
-            }
-
-            // Contorno de tinta: dilata la silueta 2 texels por debajo de lo pintado.
-            public void Ink(Color ink)
-            {
-                var src = (Color[])Px.Clone();
-                for (int y = 0; y < H; y++)
-                    for (int x = 0; x < W; x++)
-                    {
-                        int i = y * W + x;
-                        if (src[i].a >= 0.99f) continue;
-                        float m = 0;
-                        for (int dy = -2; dy <= 2; dy++)
-                            for (int dx = -2; dx <= 2; dx++)
-                            {
-                                if (dx * dx + dy * dy > 5) continue;
-                                int xx = x + dx, yy = y + dy;
-                                if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
-                                m = Mathf.Max(m, src[yy * W + xx].a);
-                            }
-                        if (m <= 0) continue;
-                        var o = src[i];
-                        float na = o.a + m * (1 - o.a);
-                        var rgb = (new Color(o.r, o.g, o.b) * o.a + new Color(ink.r, ink.g, ink.b) * m * (1 - o.a)) / Mathf.Max(na, 1e-5f);
-                        Px[i] = new Color(rgb.r, rgb.g, rgb.b, na);
-                    }
-            }
-        }
-
         static Texture2D Paint(Character who, int shield, Pose p)
         {
             var k = who == Character.Popolon ? PopolonColors : AphroditeColors;
-            var cv = new Canvas();
+            var cv = new ColorCanvas(W, H, S, Wpx / 2f, FootY);
             var (shieldFace, shieldRim) = Shields[shield];
             bool hasShield = shield > 0;
             float up = p.Bob - p.Crouch;                       // el cuerpo baja al agacharse
@@ -331,10 +279,7 @@ namespace MazeOfKnight.Game.Visuals
             }
 
             cv.Ink(new Color(0.03f, 0.03f, 0.05f));
-            var tex = new Texture2D(W, H, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
-            tex.SetPixels(cv.Px);
-            tex.Apply(false, false);
-            return tex;
+            return cv.ToTexture();
         }
 
         // Estela del espadazo: media luna blanca que se afila en las puntas.

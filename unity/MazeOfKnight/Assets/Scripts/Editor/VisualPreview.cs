@@ -111,6 +111,51 @@ namespace MazeOfKnight.EditorTools
             Debug.Log($"[VisualPreview] hoja de personajes en {OutDir}");
         }
 
+        // Hoja con los dibujos de enemigos (los 2 fotogramas de cada arquetipo): logs/unity/enemigos.png.
+        [MenuItem("Maze of Knight/Hoja de enemigos", false, 63)]
+        public static void EnemySheet()
+        {
+            var art = new EnemyArt();
+            var K = typeof(EnemyArt.Kind);
+            var list = new List<(EnemyArt.Kind, EnemyArt.Mod, int)>
+            {
+                (EnemyArt.Kind.Beetle, EnemyArt.Mod.None, 2), (EnemyArt.Kind.Beetle, EnemyArt.Mod.Horns, 0), (EnemyArt.Kind.Beetle, EnemyArt.Mod.Shield, 8),
+                (EnemyArt.Kind.Beetle, EnemyArt.Mod.Spear, 4), (EnemyArt.Kind.Beetle, EnemyArt.Mod.Skeleton | EnemyArt.Mod.Shield, 8),
+                (EnemyArt.Kind.Beetle, EnemyArt.Mod.Wide | EnemyArt.Mod.Horns, 3), (EnemyArt.Kind.Worm, EnemyArt.Mod.None, 6),
+                (EnemyArt.Kind.Winged, EnemyArt.Mod.None, 3), (EnemyArt.Kind.Fairy, EnemyArt.Mod.None, 8), (EnemyArt.Kind.Wisp, EnemyArt.Mod.None, 4),
+                (EnemyArt.Kind.Wisp, EnemyArt.Mod.Head, 7), (EnemyArt.Kind.Orb, EnemyArt.Mod.None, 1), (EnemyArt.Kind.Ball, EnemyArt.Mod.Spiky, 5),
+                (EnemyArt.Kind.Ball, EnemyArt.Mod.Shell, 2), (EnemyArt.Kind.Ball, EnemyArt.Mod.None, 7), (EnemyArt.Kind.Ball, EnemyArt.Mod.Rock, 0),
+                (EnemyArt.Kind.Ball, EnemyArt.Mod.Bomb, 1), (EnemyArt.Kind.Fish, EnemyArt.Mod.None, 6), (EnemyArt.Kind.Flame, EnemyArt.Mod.None, 0),
+                (EnemyArt.Kind.Flame, EnemyArt.Mod.Water, 4), (EnemyArt.Kind.Stone, EnemyArt.Mod.Piston, 2), (EnemyArt.Kind.Stone, EnemyArt.Mod.Mouth, 1),
+                (EnemyArt.Kind.Stone, EnemyArt.Mod.Arrow, 5), (EnemyArt.Kind.Stone, EnemyArt.Mod.None, 3), (EnemyArt.Kind.Robe, EnemyArt.Mod.None, 3),
+                (EnemyArt.Kind.Spikes, EnemyArt.Mod.None, 0), (EnemyArt.Kind.Bone, EnemyArt.Mod.None, 8), (EnemyArt.Kind.Dart, EnemyArt.Mod.None, 1),
+                (EnemyArt.Kind.Plant, EnemyArt.Mod.None, 2), (EnemyArt.Kind.Loot, EnemyArt.Mod.Coins, 5), (EnemyArt.Kind.Loot, EnemyArt.Mod.Arrow, 5),
+                (EnemyArt.Kind.Loot, EnemyArt.Mod.Keys, 5), (EnemyArt.Kind.Burst, EnemyArt.Mod.None, 5), (EnemyArt.Kind.Baby, EnemyArt.Mod.None, 7),
+            };
+            const int cell = 64, cols = 12;
+            int n = list.Count * 2, rows = (n + cols - 1) / cols;
+            var sheet = new Texture2D(cell * cols, cell * rows, TextureFormat.RGBA32, false);
+            var bg = new Color(0.23f, 0.28f, 0.38f);
+            var fill = new Color[sheet.width * sheet.height];
+            for (int i = 0; i < fill.Length; i++) fill[i] = bg;
+            sheet.SetPixels(fill);
+            for (int k = 0; k < n; k++)
+            {
+                var (kind, mod, acc) = list[k / 2];
+                var px = art.Get(kind, mod, acc, k & 1).texture.GetPixels();
+                int ox = (k % cols) * cell, oy = (rows - 1 - k / cols) * cell;
+                for (int y = 0; y < cell; y++)
+                    for (int x = 0; x < cell; x++)
+                    {
+                        var p = px[y * cell + x];
+                        sheet.SetPixel(ox + x, oy + y, Color.Lerp(bg, new Color(p.r, p.g, p.b), p.a));
+                    }
+            }
+            sheet.Apply();
+            File.WriteAllBytes(Path.Combine(OutDir, "enemigos.png"), sheet.EncodeToPNG());
+            Debug.Log($"[VisualPreview] hoja de enemigos en {OutDir}");
+        }
+
         static void Capture(Camera cam, string path)
         {
             const int w = 1280, h = 800;

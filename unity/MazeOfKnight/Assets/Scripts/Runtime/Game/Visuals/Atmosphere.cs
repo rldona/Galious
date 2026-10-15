@@ -29,6 +29,9 @@ namespace MazeOfKnight.Game.Visuals
 
         // Material de personajes (contorno + destello); null con el estilo quitado o sin el shader.
         public static Material CharacterMaterial { get; private set; }
+        // Dibujos de enemigos y armas; null con el estilo quitado.
+        public static EnemyArt EnemyArt { get; private set; }
+        EnemyArt enemyArt;
 
         // Entre salas no hay fundido: el corte seco del original es más fluido. Solo al entrar o salir de un mundo.
         const float MapFadeSeconds = 0.8f;
@@ -125,6 +128,7 @@ namespace MazeOfKnight.Game.Visuals
             playerLight.falloffIntensity = 0.6f;
 
             motes = BuildMotes();
+            enemyArt = new EnemyArt();
             characters = new CharacterArt { ShieldLevel = () => game != null && game.Inventory != null ? game.Inventory.ShieldLevel : 0 };
             slash = Layer("Estela del espadazo", 12, additive);
             slash.sprite = characters.SlashSprite;
@@ -151,6 +155,7 @@ namespace MazeOfKnight.Game.Visuals
         {
             if (CharacterMaterial != null) Destroy(CharacterMaterial);
             CharacterMaterial = null;
+            EnemyArt = null;
         }
 
         SpriteRenderer Layer(string name, int order, Material mat)
@@ -337,6 +342,7 @@ namespace MazeOfKnight.Game.Visuals
                 Outline(player.body);
                 Outline(player.sword);
                 player.Art = on ? characters : null;
+                EnemyArt = on ? enemyArt : null;
                 player.Slash = slash;
             }
             shownRoom = null;                        // vuelve a montar la sala

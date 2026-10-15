@@ -101,8 +101,17 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 - **Shader `MazeOfKnight/SpriteOutlineFlash`:**
   - sprite sin iluminar con contorno de tinta de 1 texel;
   - destello de color al golpear: blanco 0,12 s en los enemigos, rojo 0,15 s en el jugador.
+- **Enemigos** (`EnemyArt.cs`, arte provisional por código, 2 fotogramas): un arquetipo según cómo se mueve cada tipo (su clase en `Enemies/`), con el lenguaje de los personajes (caparazón oscuro, máscara clara con ojos huecos, contorno de tinta) y un color de acento por tipo:
+  - escarabajos andantes, con variantes de cuernos, escudo (caballero), lanza (soldado), esqueleto y ancho;
+  - gusanos y babosas; alados (murciélagos, aves, moscas); espíritus translúcidos (fantasmas, almas, cabezas);
+  - bolas con pinchos, caparazón, piedra o mecha; peces; llamas y chorros de agua;
+  - trampas de piedra con cara tallada (boca, agujero de flechas, pistón); hechiceros con túnica; pinchos;
+  - proyectiles (orbes), huesos, dardos; botín (monedas, flechas, llaves), explosión, hada y el bebé;
+  - las armas del jugador: flecha, cerámica, fuego y mina.
+  - El dibujo llena la caja que pinta el juego (`Enemy.DrawRect`): no cambia ninguna colisión. Los jefes con su imagen importada la conservan.
+  - **Maze of Knight → Hoja de enemigos** guarda todos los arquetipos en `logs/unity/enemigos.png`.
 - **Pendiente:**
-  - enemigos con forma propia;
+  - piedras, ascensores, puertas y objetos de sala con dibujo propio;
   - chispas al golpear;
   - un temblor de cámara pequeño en los golpes fuertes;
   - partículas al romper piedras y paredes.
@@ -148,3 +157,5 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 | `Art/Resources/Shaders/Additive.shader` | brillos aditivos |
 | `Runtime/Game/MapView.cs` | tiles del estilo: macizo en 3 tonos y borde iluminado |
 | `Runtime/Game/Visuals/CharacterArt.cs` | Popolon y Aphrodite: fotogramas, animación y estela del espadazo |
+| `Runtime/Game/Visuals/EnemyArt.cs` | enemigos por arquetipos, botín y armas del jugador |
+| `Runtime/Game/Visuals/ColorCanvas.cs` | lienzo de color con contorno de tinta para personajes y enemigos |

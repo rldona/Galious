@@ -1001,6 +1001,15 @@ namespace MazeOfKnight.Game
                 var bl = RoomCoords.PixelToWorld(Weapons.Room ?? motor.Room, (int)x0, (int)y1);
                 sr.transform.position = new Vector3(bl.x, bl.y, 0);
                 sr.transform.localScale = new Vector3((x1 - x0) / 16f, (y1 - y0) / 16f, 1);
+                var weaponArt = Visuals.Atmosphere.EnemyArt;
+                if (weaponArt != null)
+                {
+                    sr.sprite = weaponArt.Weapon(p.Id, (p.Age / 3) & 1);
+                    sr.flipX = p.Dir < 0;
+                    if (!p.Exploding && p.Id != 5) sr.color = Color.white;
+                }
+                else
+                    sr.sprite = enemySprite;
                 if (p.Exploding) sr.color = new Color(1f, 0.9f, 0.3f, 0.7f);
                 else if (p.Id == 5) sr.color = p.Armed && (p.Age / 4) % 2 == 0 ? Color.white : Color.gray;
             }
@@ -1026,6 +1035,10 @@ namespace MazeOfKnight.Game
                 sr.transform.position = new Vector3(bottomLeft.x, bottomLeft.y, 0);
                 sr.transform.localScale = new Vector3((x1 - x0) / 16f, Mathf.Max(0.05f, (y1 - y0) / 16f), 1);
                 sr.flipX = e.FacingLeft;
+                // Estilo del remake: el dibujo de su arquetipo (Visuals/EnemyArt); si no, el cuadrado de color.
+                var art = Visuals.Atmosphere.EnemyArt;
+                if (art != null) { sr.sprite = art.For(e, Time.time); sr.color = Color.white; }
+                else { sr.sprite = enemySprite; sr.color = EnemyColor(e); }
             }
             // Ascensores de la sala: dos bloques de 16 × 16 (x … x + 31, y … y + 15).
             int n = 0;
