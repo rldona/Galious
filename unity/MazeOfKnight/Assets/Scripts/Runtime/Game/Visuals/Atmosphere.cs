@@ -62,6 +62,7 @@ namespace MazeOfKnight.Game.Visuals
         readonly Dictionary<int, Sprite> fogCache = new Dictionary<int, Sprite>();
         readonly Dictionary<WorldPalette, Sprite> skyCache = new Dictionary<WorldPalette, Sprite>();
         MapView.StyleTiles tiles;
+        Tile ladderRightTile;
         Tile solidTile, solidInnerTile, solidDeepTile, rimTile, ladderTile, waterTile, lavaTile, bossTile;
         MapView.StyleTiles placeholderTiles;
 
@@ -208,7 +209,8 @@ namespace MazeOfKnight.Game.Visuals
                 for (int x = 0; x < n; x++)
                     tex.SetPixel(x, y, px(x, y));
             tex.Apply();
-            return Sprite.Create(tex, new Rect(0, 0, n, n), Vector2.zero, n / RoomCoords.TileSize, 0, SpriteMeshType.FullRect);
+            // Pivote en el centro: el tilemap pone el pivote en el centro de la celda (tileAnchor 0,5).
+            return Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), n / RoomCoords.TileSize, 0, SpriteMeshType.FullRect);
         }
 
         static Tile NewTile(string name, Sprite sprite)
@@ -238,10 +240,15 @@ namespace MazeOfKnight.Game.Visuals
                 if (y == 15 && (x % 5 == 1)) a = 1;
                 return new Color(1, 1, 1, a * 0.9f);
             });
-            var ladderSprite = TileSprite((x, y) =>
+            // La escalera ocupa 2 tiles: el de la izquierda lleva el larguero izquierdo y el de la derecha, el derecho.
+            var ladderLeftSprite = TileSprite((x, y) =>
             {
-                bool rail = x <= 1 || x >= 14;
-                bool rung = (y % 8) is 2 or 3;
+                bool rail = x >= 2 && x <= 4, rung = x > 4 && (y % 8) is 2 or 3;
+                return rail || rung ? new Color(1, 1, 1, 1) : Color.clear;
+            });
+            var ladderRightSprite = TileSprite((x, y) =>
+            {
+                bool rail = x >= 11 && x <= 13, rung = x < 11 && (y % 8) is 2 or 3;
                 return rail || rung ? new Color(1, 1, 1, 1) : Color.clear;
             });
             var waterSprite = TileSprite((x, y) => new Color(1, 1, 1, 0.55f + 0.05f * Mathf.Sin(x * 0.8f + y * 0.3f)));
@@ -250,11 +257,12 @@ namespace MazeOfKnight.Game.Visuals
             solidInnerTile = NewTile("Macizo (dentro)", solidSprite);
             solidDeepTile = NewTile("Macizo (fondo)", solidSprite);
             rimTile = NewTile("Borde", rimSprite);
-            ladderTile = NewTile("Escalera", ladderSprite);
+            ladderTile = NewTile("Escalera (izquierda)", ladderLeftSprite);
+            ladderRightTile = NewTile("Escalera (derecha)", ladderRightSprite);
             waterTile = NewTile("Agua", waterSprite);
             lavaTile = NewTile("Lava", lavaSprite);
             bossTile = NewTile("Pasable en el combate", solidSprite);
-            tiles = new MapView.StyleTiles { Rock = props.Rock, Door = props.Door, KeyDoor = props.KeyDoor, Revolving = props.Revolving, Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile };
+            tiles = new MapView.StyleTiles { Rock = props.Rock, Door = props.Door, KeyDoor = props.KeyDoor, Revolving = props.Revolving, Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, LadderRight = ladderRightTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile };
         }
 
         void ColorTiles(WorldPalette p)
@@ -264,7 +272,7 @@ namespace MazeOfKnight.Game.Visuals
             solidDeepTile.color = Color.Lerp(p.Ground, Color.black, 0.68f);
             bossTile.color = Color.Lerp(p.Ground, p.Rim, 0.18f);
             rimTile.color = p.Rim;
-            ladderTile.color = Color.Lerp(p.Rim, p.Ground, 0.35f);
+            ladderTile.color = ladderRightTile.color = Color.Lerp(p.Rim, p.Ground, 0.35f);
             waterTile.color = p.Liquid;
             lavaTile.color = WorldPalette.Lava;
             mapView?.RefreshStyle();

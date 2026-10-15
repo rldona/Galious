@@ -43,7 +43,7 @@ namespace MazeOfKnight.Game.Visuals
                 for (int c = 0; c < cols; c++)
                 {
                     var tile = ScriptableObject.CreateInstance<Tile>();
-                    tile.sprite = Sprite.Create(tex, new Rect(c * n, (rows - 1 - r) * n, n, n), Vector2.zero, n / RoomCoords.TileSize, 0, SpriteMeshType.FullRect);
+                    tile.sprite = Sprite.Create(tex, new Rect(c * n, (rows - 1 - r) * n, n, n), new Vector2(0.5f, 0.5f), n / RoomCoords.TileSize, 0, SpriteMeshType.FullRect);   // pivote en el centro de la celda
                     t[r, c] = tile;
                 }
             return t;

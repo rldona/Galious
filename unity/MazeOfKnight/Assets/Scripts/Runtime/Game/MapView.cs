@@ -27,7 +27,7 @@ namespace MazeOfKnight.Game
         // fondo en damero y se añade el borde iluminado encima de cada suelo. La colisión no cambia.
         public class StyleTiles
         {
-            public TileBase Solid, SolidInner, SolidDeep, Rim, Ladder, Water, Lava, BossPassable;
+            public TileBase Solid, SolidInner, SolidDeep, Rim, Ladder, LadderRight, Water, Lava, BossPassable;
             public TileBase[,] Rock, Door, KeyDoor, Revolving;    // dibujos de varias celdas: [fila desde arriba, columna]
         }
 
@@ -137,7 +137,8 @@ namespace MazeOfKnight.Game
         void UpdateRim(RoomWorld world, RoomModel room, int col, int row)
         {
             if (rim == null || row < 0 || row >= RoomCoords.Rows || col < 0 || col >= RoomCoords.Cols) return;
-            bool on = Style != null &&
+            // Sin borde sobre una piedra (es sólida, pero no es suelo de la sala).
+            bool on = Style != null && !RockAt(room, col, row) &&
                       world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8) == TileClass.Solid &&
                       world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8 - 8) != TileClass.Solid;
             rim.SetTile(RoomCoords.Cell(room, col, row), on ? Style.Rim : null);
@@ -176,9 +177,23 @@ namespace MazeOfKnight.Game
             else Fill(keyDoors, room, x, y, 1, 3, revolvingDoor);
         }
 
+        bool RockAt(RoomModel room, int col, int row)
+        {
+            foreach (var r in room.rocks)
+            {
+                int rc = r.x >> 3, rr = (r.y - OriginalPhysics.RoomTopPx) >> 3;
+                if (col >= rc && col < rc + 2 && row >= rr && row < rr + 2 && shownRocks.TryGetValue((room, r.x, r.y), out bool v) && v) return true;
+            }
+            return false;
+        }
+
         public void ShowRock(RoomModel room, int x, int y, bool visible)
         {
             shownRocks[(room, x, y)] = visible;
+            int col0 = x >> 3, row0 = (y - OriginalPhysics.RoomTopPx) >> 3;
+            if (lastWorld != null)
+                for (int c = col0; c < col0 + 2; c++)
+                    UpdateRim(lastWorld, room, c, row0);
             if (visible && Style?.Rock != null) FillPattern(rocks, room, x, y, Style.Rock, 2);
             else Fill(rocks, room, x, y, 2, 2, visible ? rock : null);
         }
@@ -216,6 +231,11 @@ namespace MazeOfKnight.Game
         TileBase TileAtCell(RoomWorld world, RoomModel room, int col, int row)
         {
             var cls = world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8);
+            // Escalera de 2 tiles: la mitad derecha es la que tiene escalera a su izquierda.
+            if (Style?.LadderRight != null && cls == TileClass.Ladder &&
+                world.TileAt(room, (col - 1) * 8, OriginalPhysics.RoomTopPx + row * 8) == TileClass.Ladder &&
+                world.TileAt(room, (col - 2) * 8, OriginalPhysics.RoomTopPx + row * 8) != TileClass.Ladder)
+                return Style.LadderRight;
             if (Style == null || cls != TileClass.Solid)
                 return TileFor(cls);
             // Más oscuro cuanto más lejos del aire: el macizo se lee como masa y su borde como el sitio donde se pisa.
