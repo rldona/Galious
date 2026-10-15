@@ -62,6 +62,40 @@ namespace MazeOfKnight.Game.Visuals
                     ScreenCapture.CaptureScreenshot(Path.Combine(dir, $"interfaz_cajas_{id}.png"));
                     yield return new WaitForSeconds(0.4f);
                 }
+                HitboxOverlay.Show = false;
+                // Chispas: un golpe y una muerte forzados contra el primer enemigo de la sala, y una piedra que se rompe.
+                foreach (var e in game.Enemies.Enemies)
+                    if (e.Alive && e.Room == game.Motor.Room)
+                    {
+                        HitEffects.EnemyHit(e, game.Motor);
+                        HitEffects.EnemyKilled(e, new Color(0.82f, 0.82f, 0.88f));
+                        break;
+                    }
+                foreach (var r in game.Motor.Room.rocks) { HitEffects.RockHit(game.Motor.Room, r.x, r.y, true); break; }
+                yield return new WaitForSeconds(0.08f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(dir, "golpes_chispas.png"));
+                yield return new WaitForSeconds(0.4f);
+                // Santuario (tienda de Ares, castillo).
+                if (game.DebugOpenShrine("Ares"))
+                {
+                    yield return new WaitForSeconds(0.8f);
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, "interfaz_santuario.png"));
+                    yield return new WaitForSeconds(0.5f);
+                    game.GetComponent<ShrineScreen>()?.Close();
+                    yield return new WaitForSeconds(0.5f);
+                }
+                // Jefe del mundo 1: la sala se apaga al invocarlo y queda en penumbra roja durante el combate.
+                game.DebugEnterWorld(1);
+                yield return new WaitForSeconds(1.5f);
+                game.DebugGoToBoss();
+                yield return new WaitForSeconds(1.0f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(dir, "jefe_0_sala.png"));
+                foreach (char ch in game.Bosses.Info.word) { game.Bosses.Type(ch); yield return new WaitForSeconds(0.15f); }
+                yield return new WaitForSeconds(2.5f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(dir, "jefe_1_invocando.png"));
+                yield return new WaitForSeconds(5.5f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(dir, "jefe_2_combate.png"));
+                yield return new WaitForSeconds(0.5f);
             }
             Application.Quit();
         }

@@ -222,7 +222,7 @@ namespace MazeOfKnight.Game
             World = new RoomWorld(map.rooms.Select(r => r.room));
             rocks = new Rocks(name, World, brokenRocks);
             rocks.Broken += OnRockBroken;
-            rocks.Hit += r => { Sound.Effect(0x1E); Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}"); };
+            rocks.Hit += r => { Visuals.HitEffects.RockHit(r.room, r.x, r.y, r.hp <= 0); Sound.Effect(0x1E); Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}"); };
             keyDoors = new KeyDoors(name, World, openedDoors);
             keyDoors.Changed += d => mapView.ShowKeyDoor(d.room, d.x, d.y, d.height);
             keyDoors.Opened += d => { Sound.Effect(d.cls == 1 ? 0x22 : 0x21); Say(d.cls == 1 ? "Puerta abierta (se cerrará detrás)" : "Puerta abierta"); };
@@ -436,6 +436,7 @@ namespace MazeOfKnight.Game
             PendingVitality[c] -= damage;
             if (Vitality[c] + PendingVitality[c] < 6) Sound.Effect(0x2A);   // aviso de vitalidad baja (b03:B3DC)
             motor.Knockback(dir);
+            Visuals.HitEffects.PlayerHurt(motor);
             HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
             Say(message);
         }
@@ -1301,6 +1302,30 @@ namespace MazeOfKnight.Game
         // Con el estilo del remake, el dibujo de cada objeto (Visuals/PropArt); si no, el rombo provisional.
         Sprite ItemSprite(int type) => Visuals.Atmosphere.Props?.Item(type) ?? itemSprite;
 
+        // ---------- depuración y capturas (F2, Visuals/UiCapture) ----------
+
+        public void DebugEnterWorld(int world) => EnterWorld(world);
+
+        public void DebugGoToBoss()
+        {
+            var info = Bosses.InfoFor(Inventory.CurrentWorld);
+            var room = info != null ? World.Room(info.room) : null;
+            if (room == null) return;
+            var (bx, by) = StandSpot(room);
+            motor.Place(World, room, bx, by);
+            Say($"[depuración] sala del jefe: escribe {info.word}");
+        }
+
+        // Abre la pantalla del primer santuario de ese dios en el mapa actual.
+        public bool DebugOpenShrine(string god)
+        {
+            var s = shrines.shrines.FirstOrDefault(x => x.map == mapName && x.god == god);
+            if (s == null) return false;
+            SetPaused(true);
+            shrineScreen.Show(new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys, Lives, ResurrectionCredit, motor.Character));
+            return true;
+        }
+
         public void Say(string text)
         {
             Message = text;
@@ -1346,16 +1371,7 @@ namespace MazeOfKnight.Game
             }
             // Depuración: F2 lleva a la sala del jefe del mundo en el que estás.
             if (UnityEngine.InputSystem.Keyboard.current?.f2Key.wasPressedThisFrame == true && Inventory.CurrentWorld > 0 && !Bosses.Active)
-            {
-                var info = Bosses.InfoFor(Inventory.CurrentWorld);
-                var room = info != null ? World.Room(info.room) : null;
-                if (room != null)
-                {
-                    var (bx, by) = StandSpot(room);
-                    motor.Place(World, room, bx, by);
-                    Say($"[depuración] sala del jefe: escribe {info.word}");
-                }
-            }
+                DebugGoToBoss();
             // Depuración: G da las seis armas y 50 flechas para probarlas.
             if (!TypingWord && UnityEngine.InputSystem.Keyboard.current?.gKey.wasPressedThisFrame == true)
             {

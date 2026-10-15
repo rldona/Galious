@@ -51,6 +51,14 @@ namespace MazeOfKnight.EditorTools
                 QualitySettings.renderPipeline = pipeline;
             }
             QualitySettings.SetQualityLevel(current, false);
+            // Material iluminado para la sala (tilemaps), en Resources para que entre en el compilado: el que da el pipeline
+            // (default2DMaterial) sale vacío en tiempo de ejecución.
+            const string litPath = "Assets/Art/Resources/Materials/SpriteLit.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(litPath) == null)
+            {
+                if (!AssetDatabase.IsValidFolder("Assets/Art/Resources/Materials")) AssetDatabase.CreateFolder("Assets/Art/Resources", "Materials");
+                AssetDatabase.CreateAsset(new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Lit-Default")) { name = "SpriteLit" }, litPath);
+            }
             AssetDatabase.SaveAssets();
             Debug.Log($"[RenderSetup] {PipelinePath} con {renderer.GetType().Name}");
         }

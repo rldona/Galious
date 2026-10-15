@@ -183,6 +183,114 @@ namespace MazeOfKnight.Game.Visuals
             return cv.ToTexture();
         }
 
+        // ---------- dioses ----------
+
+        readonly Dictionary<string, Sprite> gods = new Dictionary<string, Sprite>();
+
+        // Retrato de un dios de los santuarios (busto en un medallón de 32 × 32): Demeter, Hephaestus, Ares, Athena,
+        // Asclepius y Death.
+        public Sprite God(string name)
+        {
+            if (!gods.TryGetValue(name ?? "", out var s))
+                gods[name ?? ""] = s = ToSprite(PaintGod(name ?? ""), S * RoomCoords.PixelsPerUnit, new Vector2(0.5f, 0.5f));
+            return s;
+        }
+
+        static Texture2D PaintGod(string name)
+        {
+            var cv = new ColorCanvas(32 * S, 32 * S, S, 0, 0);
+            Color skin = C("#e8cdb0"), skinShade = C("#c09a7a"), robe, bg;
+            switch (name)
+            {
+                case "Hephaestus": robe = C("#6a4a2a"); bg = C("#3a1a10"); break;
+                case "Ares": robe = C("#7a2228"); bg = C("#2a0e12"); break;
+                case "Athena": robe = C("#4a5a8a"); bg = C("#141c30"); break;
+                case "Asclepius": robe = C("#e6e0d0"); bg = C("#16302a"); break;
+                case "Death": robe = C("#1c1a24"); bg = C("#0a0a10"); break;
+                default: robe = C("#5f8a4a"); bg = C("#1e2a14"); break;   // Demeter
+            }
+            // Fondo del medallón y un halo.
+            cv.Fill((x, y) => Circle(x, y, 16, 16, 15.2f), bg, 0, 0, 32, 32);
+            cv.Fill((x, y) => Circle(x, y, 16, 18, 10f), new Color(1, 1, 1, 0.06f), 4, 6, 28, 30);
+            if (name == "Hephaestus")
+                cv.Fill((x, y) => Circle(x, y, 16, 4, 9f), new Color(1f, 0.5f, 0.15f, 0.35f), 5, 0, 27, 14);
+            // Hombros y túnica.
+            cv.Fill((x, y) => Mathf.Max(Ellipse(x, y, 16, 3.5f, 11.5f, 7.5f), Circle(x, y, 16, 16, 15.2f)), robe, 2, 0, 30, 11);
+            cv.Fill((x, y) => Mathf.Max(Segment(x, y, 9, 9.6f, 19, 1.0f, 0.9f), Circle(x, y, 16, 16, 15.2f)), Color.Lerp(robe, Color.white, 0.25f), 8, 0, 20, 11);
+            if (name == "Death")
+            {
+                // Capucha y calavera, con la guadaña detrás.
+                cv.Fill((x, y) => Segment(x, y, 25, 3, 25, 27, 0.6f), C("#6a5a40"), 23, 2, 27, 28);
+                cv.Fill((x, y) => Mathf.Max(Mathf.Abs(Circle(x, y, 19, 24, 8)) - 0.9f, Mathf.Max(24 - y, x - 25.4f)), C("#c9cfdc"), 10, 23, 26, 33);
+                cv.Fill((x, y) => Mathf.Min(Circle(x, y, 16, 17, 7.4f), Box(x, y, 16, 11, 7.0f, 5.0f)), robe, 8, 6, 24, 25);
+                cv.Fill((x, y) => Mathf.Min(Circle(x, y, 16, 16.4f, 4.2f), Box(x, y, 16, 12.4f, 2.6f, 1.6f)), C("#e8e2cf"), 11, 10, 21, 21);
+                cv.Fill((x, y) => Mathf.Min(Circle(x, y, 14.4f, 16.6f, 1.2f), Circle(x, y, 17.6f, 16.6f, 1.2f)), Hole, 12.5f, 15, 19.5f, 18);
+                cv.Fill((x, y) => Mathf.Min(Mathf.Min(Box(x, y, 15, 12.0f, 0.3f, 0.8f), Box(x, y, 16, 12.0f, 0.3f, 0.8f)), Box(x, y, 17, 12.0f, 0.3f, 0.8f)), Hole, 14, 11, 18, 13);
+                cv.Fill((x, y) => Mathf.Min(Circle(x, y, 14.4f, 16.6f, 0.35f), Circle(x, y, 17.6f, 16.6f, 0.35f)), C("#ff4a3a"), 13.5f, 16, 18.5f, 17.5f);
+            }
+            else
+            {
+                bool beard = name == "Hephaestus" || name == "Ares" || name == "Asclepius";
+                // Cuello, cara y pelo.
+                cv.Fill((x, y) => Box(x, y, 16, 9.6f, 2.2f, 2.4f), skinShade, 13, 7, 19, 12.5f);
+                if (name == "Demeter" || name == "Athena" || name == "")
+                    cv.Fill((x, y) => Mathf.Min(Ellipse(x, y, 16, 15.2f, 6.4f, 8.6f), Box(x, y, 16, 9.0f, 6.2f, 3.0f)), name == "Athena" ? C("#3a2a1a") : C("#c9953a"), 9, 6, 23, 24);
+                cv.Fill((x, y) => Ellipse(x, y, 16, 16.4f, 4.6f, 5.6f), skin, 11, 10.5f, 21, 22.5f);
+                cv.Fill((x, y) => Mathf.Max(Ellipse(x, y, 16, 16.4f, 4.6f, 5.6f), 16 - x), new Color(skinShade.r, skinShade.g, skinShade.b, 0.6f), 16, 10.5f, 21, 22.5f);
+                cv.Fill((x, y) => Mathf.Min(Ellipse(x, y, 14.2f, 17.2f, 0.7f, 0.5f), Ellipse(x, y, 17.8f, 17.2f, 0.7f, 0.5f)), Hole, 13, 16.5f, 19, 18);
+                cv.Fill((x, y) => Segment(x, y, 14.8f, 13.4f, 17.2f, 13.4f, 0.25f), C("#8a4a3a"), 14, 13, 18, 14);
+                if (beard)
+                {
+                    var bc = name == "Asclepius" ? C("#e8e6e0") : name == "Ares" ? C("#2a1a12") : C("#4a2a18");
+                    cv.Fill((x, y) => Mathf.Max(Ellipse(x, y, 16, 12.6f, 4.8f, 4.6f), y - 14.4f), bc, 11, 7.5f, 21, 15);
+                    cv.Fill((x, y) => Segment(x, y, 14.6f, 14.6f, 17.4f, 14.6f, 0.4f), bc, 14, 14, 18, 15.4f);
+                }
+                switch (name)
+                {
+                    case "Hephaestus":
+                        cv.Fill((x, y) => Mathf.Max(Ellipse(x, y, 16, 20.6f, 5.2f, 3.6f), 19.6f - y), C("#5a3a22"), 10.5f, 19.5f, 21.5f, 24.5f);
+                        cv.Fill((x, y) => Segment(x, y, 23.5f, 4, 26.5f, 14, 0.5f), C("#8a6a3a"), 22.5f, 3, 27.5f, 15);
+                        cv.Fill((x, y) => Box(x, y, 26.6f, 14.6f, 2.2f, 1.4f) - 0.2f, C("#8d909c"), 24, 13, 29.5f, 16.5f);
+                        break;
+                    case "Ares":
+                        cv.Fill((x, y) => Mathf.Max(Circle(x, y, 16, 18.0f, 5.6f), 16.6f - y), C("#c08a3e"), 10, 16, 22, 24);
+                        cv.Fill((x, y) => Mathf.Max(Mathf.Abs(Circle(x, y, 16, 19.0f, 7.2f)) - 1.2f, 21.0f - y), C("#d23c32"), 8, 20, 24, 27.5f);
+                        cv.Fill((x, y) => Box(x, y, 16, 18.2f, 5.6f, 0.45f), C("#7f5520"), 10, 17.5f, 22, 19);
+                        break;
+                    case "Athena":
+                        cv.Fill((x, y) => Mathf.Max(Circle(x, y, 16, 20.6f, 5.4f), 19.4f - y), C("#c9cfdc"), 10, 19, 22, 26.5f);
+                        cv.Fill((x, y) => Mathf.Max(Mathf.Abs(Circle(x, y, 16, 21.4f, 6.6f)) - 0.8f, 23.4f - y), C("#4f6fb0"), 9, 23, 23, 28.6f);
+                        // Lechuza en el hombro.
+                        cv.Fill((x, y) => Ellipse(x, y, 25.0f, 8.4f, 2.6f, 3.2f), C("#a0886a"), 22, 5, 28, 12);
+                        cv.Fill((x, y) => Mathf.Min(Circle(x, y, 24.0f, 9.6f, 0.8f), Circle(x, y, 26.0f, 9.6f, 0.8f)), C("#f2d27a"), 23, 8.5f, 27, 10.6f);
+                        cv.Fill((x, y) => Mathf.Min(Circle(x, y, 24.0f, 9.6f, 0.35f), Circle(x, y, 26.0f, 9.6f, 0.35f)), Hole, 23.5f, 9, 26.5f, 10.2f);
+                        break;
+                    case "Asclepius":
+                        cv.Fill((x, y) => Mathf.Max(Ellipse(x, y, 16, 20.4f, 4.8f, 3.0f), 19.8f - y), C("#e8e6e0"), 11, 19.5f, 21, 23.5f);
+                        cv.Fill((x, y) => Segment(x, y, 25, 2, 25, 24, 0.55f), C("#8a6a3a"), 24, 1, 26, 25);
+                        for (int k = 0; k < 4; k++)
+                        {
+                            float sy = 5 + k * 4.4f;
+                            cv.Fill((x, y) => Mathf.Abs(Ellipse(x, y, 25, sy + 2.2f, 1.6f, 2.0f)) - 0.35f, C("#5fae5a"), 22.5f, sy, 27.5f, sy + 4.5f);
+                        }
+                        break;
+                    default:
+                        // Demeter: corona de espigas.
+                        for (int k = -2; k <= 2; k++)
+                        {
+                            float wx = 16 + k * 2.4f, top = 25.4f - Mathf.Abs(k) * 0.9f;
+                            cv.Fill((x, y) => Mathf.Min(Segment(x, y, wx, 21, wx, top, 0.35f), Ellipse(x, y, wx, top - 0.6f, 0.7f, 1.4f)), C("#e6c04a"), wx - 1.5f, 20, wx + 1.5f, top + 1.5f);
+                        }
+                        break;
+                }
+            }
+            // Marco del medallón.
+            cv.Fill((x, y) => Mathf.Abs(Circle(x, y, 16, 16, 15.2f)) - 0.7f, C("#e6c04a"), 0, 0, 32, 32);
+            cv.Fill((x, y) => Mathf.Abs(Circle(x, y, 16, 16, 13.9f)) - 0.25f, C("#9a7420"), 1, 1, 31, 31);
+            cv.Ink(Ink, 1);
+            return cv.ToTexture();
+        }
+
         // ---------- objetos ----------
 
         public Sprite Item(int type)

@@ -24,6 +24,11 @@ namespace MazeOfKnight.Game
         bool hopping;
         static readonly Color Msx14 = new Color(0.73f, 0.73f, 0.73f);
 
+        // Para el estilo del remake (Visuals/Atmosphere), que lo convierte en un cambio de luz en vez de los puntos y el
+        // fondo negro: cuánto se ha apagado la sala (0–1) y si el borde está parpadeando.
+        public float Darkness { get; private set; }
+        public bool BorderFlash { get; private set; }
+
         void Start()
         {
             var rnd = new System.Random(7);
@@ -70,6 +75,8 @@ namespace MazeOfKnight.Game
             if (cam != null)
             {
                 bool flash = here && f.Current == BossFight.Stage.Invoking && frames < 60;
+                BorderFlash = flash && (frames / 2) % 2 == 1;
+                if (Visuals.Atmosphere.Styled) flash = false;
                 if (flash) { cameraColor ??= cam.backgroundColor; cam.backgroundColor = (frames / 2) % 2 == 0 ? Color.black : Msx14; }
                 else if (cameraColor != null) { cam.backgroundColor = cameraColor.Value; cameraColor = null; }
             }
@@ -77,7 +84,8 @@ namespace MazeOfKnight.Game
             // Fondo negro: se forma en puntos durante la invocación y se queda hasta que acaba la celebración.
             float back = !here ? 0 : f.Current == BossFight.Stage.Invoking ? (frames - 60) / 128f : f.Current == BossFight.Stage.RightExitOnly ? 0 : 1;
             back = Mathf.Clamp01(back);
-            backdrop.enabled = back > 0;
+            Darkness = back;
+            backdrop.enabled = back > 0 && !Visuals.Atmosphere.Styled;
             if (backdrop.enabled)
             {
                 backdrop.transform.position = RoomCoords.RoomOrigin(m.Room);

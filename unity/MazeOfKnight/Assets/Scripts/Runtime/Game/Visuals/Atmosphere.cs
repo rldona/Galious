@@ -49,7 +49,10 @@ namespace MazeOfKnight.Game.Visuals
         readonly List<SpriteRenderer> shafts = new List<SpriteRenderer>();
         readonly List<(SpriteRenderer glow, Light2D light)> lamps = new List<(SpriteRenderer, Light2D)>();
         ParticleSystem motes;
-        Light2D globalLight, playerLight;
+        Light2D globalLight, playerLight, bossLight;
+        BossEffects bossFx;
+        float darkness;
+        readonly Dictionary<SpriteRenderer, Color> baseColors = new Dictionary<SpriteRenderer, Color>();
         Volume volume;
         Bloom bloom;
         Vignette vignette;
@@ -134,11 +137,18 @@ namespace MazeOfKnight.Game.Visuals
             playerLight.pointLightInnerRadius = 0.2f;
             playerLight.intensity = 0.55f;
             playerLight.falloffIntensity = 0.6f;
+            bossLight = NewLight("Luz del jefe", Light2D.LightType.Point);
+            bossLight.pointLightOuterRadius = 6.5f;
+            bossLight.pointLightInnerRadius = 0.5f;
+            bossLight.falloffIntensity = 0.5f;
+            bossLight.color = new Color(1f, 0.35f, 0.25f);
+            bossLight.intensity = 0;
 
             motes = BuildMotes();
             gameObject.AddComponent<RemakeHud>().game = game;
             gameObject.AddComponent<HitboxOverlay>().game = game;
             enemyArt = new EnemyArt();
+            gameObject.AddComponent<HitEffects>().Init(additive, unlit, dot);
             characters = new CharacterArt { ShieldLevel = () => game != null && game.Inventory != null ? game.Inventory.ShieldLevel : 0 };
             slash = Layer("Estela del espadazo", 12, additive);
             slash.sprite = characters.SlashSprite;
@@ -407,7 +417,9 @@ namespace MazeOfKnight.Game.Visuals
             if (!subscribed && game.Enemies != null)
             {
                 subscribed = true;
-                game.Enemies.Hit += e => Flash(game.EnemyView(e), 0.12f);
+                game.Enemies.Hit += e => { Flash(game.EnemyView(e), 0.12f); HitEffects.EnemyHit(e, game.Motor); };
+                game.Enemies.Clinked += e => HitEffects.Clink(e, game.Motor);
+                game.Enemies.Killed += e => HitEffects.EnemyKilled(e, new Color(0.82f, 0.82f, 0.88f));
             }
 
             bool busy = game.AttractRunning || game.EndingRunning;
@@ -432,6 +444,7 @@ namespace MazeOfKnight.Game.Visuals
             TickFlashes();
             if (!styled) return;
             Parallax(motor);
+            BossLighting();
         }
 
         // ---------- una sala ----------
@@ -464,6 +477,8 @@ namespace MazeOfKnight.Game.Visuals
             if (!skyCache.TryGetValue(palette, out var skySprite))
                 skyCache[palette] = skySprite = ShapePainter.ToSprite(ShapePainter.Gradient(palette.SkyTop, palette.SkyBottom), 1, new Vector2(0.5f, 0.5f));
             sky.sprite = skySprite;
+            sky.color = Color.white;
+            baseColors[sky] = Color.white;
             sky.transform.localScale = new Vector3(RoomCoords.RoomSize.x * 1.4f, RoomCoords.RoomSize.y * 1.4f / 128f, 1);
             sky.transform.position = new Vector3(center.x, center.y, 0);
 
@@ -506,6 +521,7 @@ namespace MazeOfKnight.Game.Visuals
         {
             sr.sprite = sprite;
             sr.color = color;
+            baseColors[sr] = color;
             sr.flipX = flip;
             sr.transform.localScale = Vector3.one;
             sr.transform.position = new Vector3(center.x, center.y, 0);
@@ -517,6 +533,7 @@ namespace MazeOfKnight.Game.Visuals
                 fogCache[seed] = s = ShapePainter.ToSprite(ShapePainter.FogBand(seed), 256f / (RoomCoords.RoomSize.x * 1.5f), new Vector2(0.5f, 0.5f));
             sr.sprite = s;
             sr.color = color;
+            baseColors[sr] = color;
             sr.transform.position = new Vector3(pos.x, pos.y, 0);
             sr.transform.localScale = new Vector3(1, height / (64f / (256f / (RoomCoords.RoomSize.x * 1.5f))), 1);
         }
@@ -615,6 +632,54 @@ namespace MazeOfKnight.Game.Visuals
         }
 
         static Color WithAlpha(Color c, float a) => new Color(c.r, c.g, c.b, a);
+
+        // Combate contra el jefe: en el original la decoración se deshace en puntos y queda el fondo negro (BossEffects).
+        // Aquí la sala se apaga con el mismo avance: las capas del fondo hacia negro, la luz global baja y se vuelve
+        // roja, una luz roja sobre el jefe, más viñeta; el parpadeo del borde al invocarlo es un destello de luz.
+        void BossLighting()
+        {
+            if (bossFx == null) bossFx = game.GetComponent<BossEffects>();
+            float target = bossFx != null ? bossFx.Darkness : 0;
+            darkness = Mathf.MoveTowards(darkness, target, Time.deltaTime * 2.5f);
+            float d = darkness;
+            foreach (var kv in baseColors)
+            {
+                if (kv.Key == null) continue;
+                var c = kv.Value;
+                var dark = Color.Lerp(c, new Color(0.05f, 0.01f, 0.02f, c.a), 0.82f * d);
+                dark.a = c.a * (kv.Key == sky ? 1 : 1 - 0.35f * d);
+                kv.Key.color = dark;
+            }
+            if (palette != null)
+            {
+                globalLight.color = Color.Lerp(palette.Ambient, new Color(1f, 0.55f, 0.5f), d);
+                globalLight.intensity = Mathf.Lerp(palette.AmbientIntensity, 0.5f, d) + (bossFx != null && bossFx.BorderFlash ? 0.6f : 0);
+                vignette.intensity.Override(0.38f + 0.22f * d);
+                vignette.color.Override(Color.Lerp(palette.SkyTop * 0.4f, new Color(0.25f, 0, 0.02f), d));
+            }
+            playerLight.intensity = 0.55f + 0.4f * d;
+            // Los aditivos con alfa casi 0 seguían viéndose (medido en las capturas del combate): se dejan de dibujar.
+            foreach (var s in shafts)
+            {
+                if (s.enabled) { var c = s.color; c.a *= 1 - d; s.color = c; }
+                s.forceRenderingOff = d > 0.9f;
+            }
+            foreach (var (glow, light) in lamps)
+            {
+                if (light.enabled) { light.intensity *= 1 - 0.8f * d; glow.color = WithAlpha(glow.color, 0.8f * (1 - d)); }
+                glow.forceRenderingOff = d > 0.9f;
+            }
+            var boss = game.Bosses?.Boss;
+            if (boss != null && boss.Alive && boss.Room == game.Motor.Room)
+            {
+                var (x0, y0, x1, y1) = boss.Box();
+                var p = RoomCoords.PixelToWorld(boss.Room, (int)((x0 + x1) / 2), (int)((y0 + y1) / 2));
+                bossLight.transform.position = new Vector3(p.x, p.y, 0);
+                bossLight.intensity = 1.3f * d * (1 + 0.08f * Mathf.Sin(Time.time * 6));
+            }
+            else
+                bossLight.intensity = Mathf.MoveTowards(bossLight.intensity, 0, Time.deltaTime * 2);
+        }
 
         static void Set(SpriteRenderer sr, Vector2 pos) => sr.transform.position = new Vector3(pos.x, pos.y, 0);
 

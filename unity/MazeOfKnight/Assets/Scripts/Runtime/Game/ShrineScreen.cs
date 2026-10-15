@@ -17,6 +17,15 @@ namespace MazeOfKnight.Game
 
         public bool Open => Visit != null;
 
+        // Salir del santuario como con ↓ (lo usan las capturas).
+        public void Close()
+        {
+            if (Visit == null) return;
+            var v = Visit;
+            Visit = null;
+            game.LeaveShrine(v);
+        }
+
         public void Show(ShrineVisit visit)
         {
             Visit = visit;
@@ -117,11 +126,12 @@ namespace MazeOfKnight.Game
             void T(Rect r, string str, float px, TextAnchor a, Color c, bool title = false) =>
                 Visuals.UiKit.Text(r, str, px * scale / Visuals.UiKit.Scale, a, c, title);
             Visuals.UiKit.Box(new Rect(0, 0, Screen.width, Screen.height), new Color(0, 0, 0, 0.85f));
-            Visuals.UiKit.TitleLine(R(0, 38, 256, 10), s.god.ToUpperInvariant(), 8 * scale / Visuals.UiKit.Scale);
-            // Retrato provisional: un halo dorado.
-            Visuals.UiKit.Medallion(R(118, 48, 20, 20));
-            Visuals.UiKit.Panel(R(28, 66, 200, 54));
-            T(R(44, 72, 176, 44), Visit.Text, 6.2f, TextAnchor.UpperLeft, Visuals.UiKit.Bone);
+            Visuals.UiKit.TitleLine(R(0, 30, 256, 10), s.god.ToUpperInvariant(), 8 * scale / Visuals.UiKit.Scale);
+            // Retrato del dios.
+            if (props != null) Visuals.UiKit.Icon(R(114, 40, 28, 28), props.God(s.god));
+            else Visuals.UiKit.Medallion(R(118, 48, 20, 20));
+            Visuals.UiKit.Panel(R(28, 70, 200, 50));
+            T(R(44, 76, 176, 42), Visit.Text, 6.2f, TextAnchor.UpperLeft, Visuals.UiKit.Bone);
 
             if (s.kind == "shop")
             {

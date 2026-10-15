@@ -79,7 +79,8 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
   - bloom con umbral 0,75, intensidad 0,9 y dispersión 0,72;
   - viñeta de intensidad 0,38 con el color del cielo oscurecido;
   - contraste +12 y saturación −6.
-- **Combate contra un jefe:** el fondo negro de `BossEffects` tapa las capas de fondo. Pendiente: hacerlo como cambio de luz (cap. 11).
+- **Combate contra un jefe:** en el original la decoración se deshace en puntos y queda el fondo negro (`BossEffects`). Con el estilo, es un cambio de luz con el mismo avance (`BossEffects.Darkness`, 0–1): las capas del fondo se oscurecen hacia un rojo casi negro, la luz global baja a 0,5 y se vuelve roja, se apagan los rayos y las farolas, la viñeta se refuerza en rojo, una luz roja acompaña al jefe y la luz del jugador sube. El parpadeo del borde al invocarlo es un destello de la luz global.
+- **La sala está iluminada:** los tilemaps usan `Resources/Materials/SpriteLit` (Sprite-Lit-Default de URP 2D, lo crea `RenderSetup`), así que las luces 2D alumbran suelos, paredes y escaleras. El material del pipeline (`default2DMaterial`) sale vacío en el compilado.
 
 ## Transiciones
 
@@ -116,10 +117,13 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
   - los 47 objetos con su icono (armas, objetos de mundo, Cross, Great Key, escudos de cobre, plata y oro, corona, arpa, Biblia…) y un halo suave detrás;
   - piedras y puertas son tiles de 8 px recortados de un dibujo mayor: ocupan exactamente sus celdas de colisión.
   - **Maze of Knight → Hoja de objetos** guarda los iconos, la piedra, las puertas y el ascensor en `logs/unity/objetos.png`.
-- **Pendiente:**
-  - chispas al golpear;
-  - un temblor de cámara pequeño en los golpes fuertes;
-  - partículas al romper piedras y paredes.
+- **Golpes** (`HitEffects.cs`, solo aspecto: el juego no se para en el golpe):
+  - espada o arma contra un enemigo: chispas blancas y amarillas desde el borde de su caja, a la altura de la espada, hacia fuera; destello blanco del enemigo y una sacudida corta de la cámara (más fuerte con un jefe);
+  - escudo («clinc»): chispas azuladas que rebotan hacia el jugador;
+  - enemigo muerto: estallido de chispas y esquirlas;
+  - piedra golpeada: esquirlas y chispas; rota, lluvia de trozos y polvo;
+  - golpe al jugador: chispas rojas, destello rojo y la sacudida más fuerte.
+- **Pendiente:** esquirlas al golpear y romper las paredes de clase 7.
 
 ## Interfaz
 
@@ -133,7 +137,8 @@ Con el estilo puesto (F7), la interfaz del remake sustituye al texto de pruebas,
   - arriba a la derecha, flechas, monedas y llaves con sus iconos, y el arma elegida;
   - abajo, la vida del jefe en combate (o el aviso de escribir la palabra) y los mensajes;
   - al cambiar de mapa, su nombre en grande con el tema debajo (como los títulos de zona), 3,5 s.
-- **Menú de objetos (F1) y santuarios:** las mismas posiciones del original, con marco de filigrana, los retratos de los personajes, los iconos de `PropArt` y un marco dorado para lo elegido.
+- **Menú de objetos (F1) y santuarios:** las mismas posiciones del original, centradas en la ventana, con marco de filigrana, los retratos de los personajes, los iconos de `PropArt` y un marco dorado para lo elegido.
+- **Dioses de los santuarios** (`PropArt.God`): busto en un medallón dorado. Demeter con corona de espigas; Hephaestus barbudo, con gorro de herrero, martillo y el brillo de la fragua; Ares con yelmo y cresta; Athena con el yelmo alzado y una lechuza; Asclepius anciano con el bastón y la serpiente; la Muerte, calavera encapuchada con guadaña.
 - **Capturas:** el juego compilado acepta `-capturaInterfaz <carpeta>`: empieza la partida, guarda el marcador, da unos objetos, abre el menú F1, guarda las capturas y sale (`UiCapture.cs`). OnGUI no sale en `Camera.Render`, por eso las capturas del editor no la muestran.
 
 ## Producción del arte
@@ -176,5 +181,6 @@ Con el estilo puesto (F7), la interfaz del remake sustituye al texto de pruebas,
 | `Runtime/Game/Visuals/EnemyArt.cs` | enemigos por arquetipos, botín y armas del jugador |
 | `Runtime/Game/Visuals/PropArt.cs` | piedras, puertas, ascensores e iconos de los objetos |
 | `Runtime/Game/Visuals/UiKit.cs`, `RemakeHud.cs` | piezas de la interfaz y marcador del remake |
-| `Runtime/Game/Visuals/UiCapture.cs` | capturas de la interfaz con `-capturaInterfaz` |
+| `Runtime/Game/Visuals/UiCapture.cs` | capturas de la interfaz con `-capturaInterfaz` (marcador, menú, cajas, golpes, santuario y combate del jefe) |
+| `Runtime/Game/Visuals/HitEffects.cs` | chispas, esquirlas y sacudida al golpear |
 | `Runtime/Game/Visuals/ColorCanvas.cs` | lienzo de color con contorno de tinta para personajes y enemigos |

@@ -281,7 +281,12 @@ namespace MazeOfKnight.Game
             var go = new GameObject(name);
             go.transform.SetParent(grid.transform, false);
             var tm = go.AddComponent<Tilemap>();
-            go.AddComponent<TilemapRenderer>().sortingOrder = order;
+            var r = go.AddComponent<TilemapRenderer>();
+            r.sortingOrder = order;
+            // Material iluminado (Sprite-Lit-Default de URP 2D, Resources/Materials/SpriteLit, lo crea RenderSetup): las luces 2D de Visuals/Atmosphere
+            // alumbran la sala. Sin luces 2D (estilo quitado) la luz global es blanca y se ve igual que sin luz.
+            var lit = Resources.Load<Material>("Materials/SpriteLit");
+            if (lit != null) r.sharedMaterial = lit;
             return tm;
         }
     }
