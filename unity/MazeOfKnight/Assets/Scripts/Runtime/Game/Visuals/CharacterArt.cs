@@ -84,6 +84,100 @@ namespace MazeOfKnight.Game.Visuals
             return frames.TryGetValue((c, shield, a, i), out var s) ? s : frames[(c, shield, Anim.Idle, 0)];
         }
 
+        // ---------- arte dibujado ----------
+
+        // Clips dibujados a mano (ArtLibrary), por nombre: <personaje>_<accion>, con <personaje> popolon o aphrodite y
+        // <accion> quieto, correr, girar, salto_preparar, salto_subir, salto_caer, escalera, estocada (fotograma
+        // "golpe" en el tick del golpe), golpe (recibido), muerte y celebrar. Si falta uno, se usa el generado.
+        public ArtLibrary Drawn;
+        readonly FrameAnimator anim = new FrameAnimator();
+        static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "estocada", "golpe", "muerte", "celebrar" };
+        int lastAttackTicks;
+        bool lastFacingLeft, facingKnown;
+        string drawnAction;
+
+        static string Prefix(Character c) => c == Character.Popolon ? "popolon" : "aphrodite";
+
+        FrameClip DrawnClip(Character c, string action)
+        {
+            var clip = Drawn?.Clip($"{Prefix(c)}_{action}");
+            if (clip != null && OneShot.Contains(action)) clip.Loop = false;
+            return clip;
+        }
+
+        // Acción que pide el estado del motor (la misma lógica que el arte generado) y si se mueve por el suelo.
+        static string Action(PlayerMotor m, int dx)
+        {
+            if (m.State == MotorState.Knockback || m.Stunned > 0) return "golpe";
+            if (m.AttackTicks > 0) return "estocada";
+            switch (m.State)
+            {
+                case MotorState.Ladder: return "escalera";
+                case MotorState.JumpPrep: return "salto_preparar";
+                case MotorState.Jump: return "salto_subir";
+                case MotorState.Fall: return "salto_caer";
+            }
+            return dx > 0 && dx < 20 || m.State == MotorState.Carried ? "correr" : "quieto";
+        }
+
+        // El fotograma dibujado que toca, o null si no hay clip para esta acción. La estocada arranca en su fotograma
+        // "golpe" justo en el tick del golpe del original; las acciones de una vez (girar, estocada…) se terminan de ver
+        // si el personaje sigue en el suelo. La escalera avanza con la y, como el original, no con el tiempo.
+        Sprite DrawnFrame(PlayerMotor m, float dt, int dx)
+        {
+            if (Drawn == null || Drawn.Count == 0) return null;
+            var c = m.Character;
+            string action = Action(m, dx);
+            bool grounded = action is "correr" or "quieto";
+            bool newAttack = m.AttackTicks > 0 && lastAttackTicks == 0;
+            lastAttackTicks = m.AttackTicks;
+            bool turned = facingKnown && m.FacingLeft != lastFacingLeft && grounded;
+            facingKnown = true;
+            lastFacingLeft = m.FacingLeft;
+
+            if (newAttack && DrawnClip(c, "estocada") is var hit && hit != null)
+            {
+                anim.PlayAt(hit, Math.Max(0, hit.TagFrame("golpe")));
+                drawnAction = "estocada";
+            }
+            else if (turned && DrawnClip(c, "girar") is var turn && turn != null)
+            {
+                anim.Play(turn, true);
+                drawnAction = "girar";
+            }
+            else if (grounded && drawnAction is "estocada" or "girar" && anim.Clip != null && !anim.Finished)
+            {
+                // Se termina de ver la acción de una vez.
+            }
+            else
+            {
+                var clip = DrawnClip(c, action);
+                if (clip == null) { drawnAction = null; anim.Stop(); return null; }
+                if (action == "escalera")
+                {
+                    drawnAction = action;
+                    anim.PlayAt(clip, ((m.Y >> 2) % Math.Max(1, clip.Length) + clip.Length) % clip.Length);
+                    return anim.Current;
+                }
+                anim.Play(clip, drawnAction != action && OneShot.Contains(action));
+                drawnAction = action;
+            }
+            anim.Tick(dt);
+            return anim.Current;
+        }
+
+        // Capa del escudo dibujada aparte (<personaje>_escudo_<cobre|plata|oro>_<accion>), en el mismo fotograma que el
+        // cuerpo; null si no hay escudo o no está dibujada.
+        public Sprite DrawnShield(PlayerMotor m)
+        {
+            int shield = ShieldLevel?.Invoke() ?? 0;
+            if (shield <= 0 || Drawn == null || anim.Clip == null || drawnAction == null) return null;
+            string metal = shield == 1 ? "cobre" : shield == 2 ? "plata" : "oro";
+            var clip = Drawn.Clip($"{Prefix(m.Character)}_escudo_{metal}_{drawnAction}");
+            if (clip == null || clip.Length == 0) return null;
+            return clip.Frames[Math.Min(anim.Frame, clip.Length - 1)];
+        }
+
         // El fotograma que toca según el estado del motor (andar avanza con la distancia recorrida; la escalera, con la y).
         public Sprite Frame(PlayerMotor m, float dt)
         {
@@ -91,6 +185,8 @@ namespace MazeOfKnight.Game.Visuals
             int dx = Math.Abs(m.X - lastX), dy = m.Y - lastY;
             lastX = m.X;
             lastY = m.Y;
+            var drawnSprite = DrawnFrame(m, dt, dx);
+            if (drawnSprite != null) return drawnSprite;
             var c = m.Character;
             int shield = ShieldLevel?.Invoke() ?? 0;
             if (m.State == MotorState.Knockback || m.Stunned > 0) return Get(c, Anim.Hurt, 0, shield);

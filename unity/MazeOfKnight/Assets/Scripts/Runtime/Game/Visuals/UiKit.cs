@@ -112,10 +112,20 @@ namespace MazeOfKnight.Game.Visuals
             return ((x, y, rw, rh) => new Rect(ox + x * scale, oy + y * scale, rw * scale, rh * scale), scale);
         }
 
+        // Marco y medallón dibujados a mano (ArtLibrary, carpeta interfaz: marco.png en 9 partes y medallon.png); null = generados.
+        public static Texture2D DrawnFrame
+        {
+            get => drawnFrame;
+            set { drawnFrame = value; frameStyle = null; }
+        }
+        static Texture2D drawnFrame;
+        public static Texture2D DrawnRing;
+
         // Panel con marco de filigrana.
         public static void Panel(Rect r)
         {
-            if (frameStyle == null) frameStyle = Sliced(frameTex = FrameTexture(), 20);
+            if (frameStyle == null)
+                frameStyle = drawnFrame != null ? Sliced(drawnFrame, drawnFrame.width / 4) : Sliced(frameTex = FrameTexture(), 20);
             if (Event.current.type == EventType.Repaint) frameStyle.Draw(r, false, false, false, false);
         }
 
@@ -124,6 +134,7 @@ namespace MazeOfKnight.Game.Visuals
 
         public static void Medallion(Rect r)
         {
+            if (DrawnRing != null) { GUI.DrawTexture(r, DrawnRing); return; }
             if (ringTex == null) ringTex = RingTexture();
             GUI.DrawTexture(r, ringTex);
         }

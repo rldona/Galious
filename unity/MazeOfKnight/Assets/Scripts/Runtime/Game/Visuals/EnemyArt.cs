@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MazeOfKnight.Game.Enemies;
 using UnityEngine;
 using static MazeOfKnight.Game.Visuals.ShapePainter;
@@ -78,8 +79,72 @@ namespace MazeOfKnight.Game.Visuals
             return (Kind.Beetle, e is Boss ? Mod.Horns | Mod.Wide : Mod.None, acc);
         }
 
+        // Arte dibujado a mano (ArtLibrary): clips enemigoXX_<accion> con XX el tipo en hexadecimal (dos cifras) y
+        // <accion> quieto o mover (de momento; anticipar, atacar, golpe y muerte cuando llegue el arte). Cada enemigo
+        // lleva su reproductor a 24 fps; el dibujo se estira a su caja igual que el generado, así que cada fotograma se
+        // dibuja con la proporción de la caja del enemigo (docs/art/encargo/cajas_colision.md).
+        public ArtLibrary Drawn;
+        class DrawnState { public FrameAnimator Anim = new FrameAnimator(); public float Last; }
+        readonly Dictionary<Enemy, DrawnState> drawn = new Dictionary<Enemy, DrawnState>();
+        float lastPrune;
+
+        // Clips dibujados de cada tipo (enemigoXX_*), con la proporción de su primer fotograma.
+        readonly Dictionary<int, List<(FrameClip clip, float aspect, bool moving)>> typeClips = new Dictionary<int, List<(FrameClip, float, bool)>>();
+
+        List<(FrameClip clip, float aspect, bool moving)> ClipsFor(int type)
+        {
+            if (typeClips.TryGetValue(type, out var list)) return list;
+            list = new List<(FrameClip, float, bool)>();
+            string prefix = $"enemigo{type:x2}_";
+            foreach (var name in Drawn.Names)
+            {
+                if (!name.StartsWith(prefix)) continue;
+                var c = Drawn.Clip(name);
+                if (c == null || c.Length == 0 || c.Frames[0] == null) continue;
+                var b = c.Frames[0].bounds.size;
+                string action = name.Substring(prefix.Length);
+                bool moving = action is "mover" or "volar" or "andar" or "correr" or "nadar" or "rodar";
+                list.Add((c, b.y > 0 ? b.x / b.y : 1, moving));
+            }
+            typeClips[type] = list;
+            return list;
+        }
+
+        // El clip que mejor encaja con la caja actual del enemigo: entre los dibujados de su tipo, el de proporción más
+        // parecida (los tipos que cambian de caja, como el murciélago colgado o volando, llevan un clip por estado);
+        // a igual proporción, "mover" si se mueve y cualquier otro si está quieto.
+        Sprite DrawnFor(Enemy e, float time)
+        {
+            if (Drawn == null || Drawn.Count == 0 || e is Boss) return null;
+            var clips = ClipsFor(e.Type);
+            if (clips.Count == 0) return null;
+            bool moving = Math.Abs(e.Vx) + Math.Abs(e.Vy) > 0.01f;
+            var (x0, y0, x1, y1) = e.DrawRect();
+            float aspect = y1 - y0 > 0.5f ? (x1 - x0) / (y1 - y0) : 1f;
+            FrameClip clip = null;
+            float best = float.MaxValue;
+            foreach (var (c, a, m) in clips)
+            {
+                float d = Mathf.Abs(Mathf.Log(a / aspect)) + (m == moving ? 0 : 0.25f);
+                if (d < best) { best = d; clip = c; }
+            }
+            if (clip == null) return null;
+            if (!drawn.TryGetValue(e, out var s)) drawn[e] = s = new DrawnState { Last = time };
+            s.Anim.Play(clip);
+            s.Anim.Tick(Mathf.Max(0, time - s.Last));
+            s.Last = time;
+            if (time - lastPrune > 2f)
+            {
+                lastPrune = time;
+                foreach (var dead in drawn.Keys.Where(k => !k.Alive).ToList()) drawn.Remove(dead);
+            }
+            return s.Anim.Current;
+        }
+
         public Sprite For(Enemy e, float time)
         {
+            var drawnSprite = DrawnFor(e, time);
+            if (drawnSprite != null) return drawnSprite;
             var (kind, mod, acc) = Classify(e);
             float speed = kind == Kind.Winged || kind == Kind.Fairy ? 8f : kind == Kind.Flame || kind == Kind.Burst ? 10f : 3f;
             int frame = ((int)(time * speed) + (e.GetHashCode() & 7)) & 1;

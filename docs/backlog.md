@@ -27,5 +27,8 @@ Lo que falta por hacer en Unity. El estado de lo ya hecho está en [unity.md](un
 
 ## Estilo visual
 
-- Arte dibujado para sustituir el generado, una fuente libre incluida en el proyecto (design_bible/12_estilo_visual.md).
+- Arte dibujado para sustituir el generado, una fuente libre incluida en el proyecto (design_bible/12_estilo_visual.md). El encargo y su material: docs/art/encargo/.
+- Conectar los jefes dibujados (`jefeNN_<pose>_<accion>`) en `GameBootstrap.ShowEnemy`: hoy usan su imagen del original si está importada; `EnemyArt.DrawnFor` los salta.
+- Un compilado para el artista sin los datos de la ROM (sin `Assets/Generated` ni audio), si se decide entregar el juego en vez de capturas (docs/art/encargo/revision_encargo.md).
+- Enemigos dibujados: acciones `anticipar`, `atacar`, `golpe` y `muerte` (hoy solo `quieto` y `mover`) cuando `Enemy` exponga su estado de ataque.
 

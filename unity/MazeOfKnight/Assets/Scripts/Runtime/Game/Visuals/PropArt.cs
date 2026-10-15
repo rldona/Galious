@@ -21,8 +21,33 @@ namespace MazeOfKnight.Game.Visuals
             Blue = C("#4f8fe0"), White = C("#f2efe6"), Red = C("#d2453c"), Green = C("#6fc36a"), Marble = C("#d9d6cc"),
             MarbleShade = C("#a9a69c"), Stone = C("#6b6d78"), StoneLight = C("#8d909c"), StoneDark = C("#45474f"), Hole = C("#08080d");
 
-        public readonly TileBase[,] Rock, Door, DoorClosed, DoorHalf, KeyDoor, Revolving;
-        public readonly Sprite Lift;
+        public TileBase[,] Rock, Door, DoorClosed, DoorHalf, KeyDoor, Revolving;
+        public Sprite Lift;
+
+        // Arte dibujado (ArtLibrary, carpeta objetos_sala): sustituye los dibujos generados por los PNG que existan,
+        // troceados en sus tiles de 8 px (piedra 2 × 2, puerta de mundo 4 × 3, puerta con llave y giratoria 1 × 3).
+        public void UseDrawn(ArtLibrary drawn)
+        {
+            if (drawn == null) return;
+            TileBase[,] From(string name, int cols, int rows, TileBase[,] fallback)
+            {
+                var clip = drawn.Clip(name);
+                return clip != null && clip.Length > 0 && clip.Frames[0] != null ? Tiles(clip.Frames[0].texture, cols, rows) : fallback;
+            }
+            Rock = From("piedra", 2, 2, Rock);
+            Door = From("puerta_mundo_abierta", 4, 3, Door);
+            DoorHalf = From("puerta_mundo_media", 4, 3, DoorHalf);
+            DoorClosed = From("puerta_mundo_cerrada", 4, 3, DoorClosed);
+            KeyDoor = From("puerta_llave", 1, 3, KeyDoor);
+            Revolving = From("puerta_giratoria", 1, 3, Revolving);
+            var lift = drawn.Clip("ascensor");
+            if (lift != null && lift.Length > 0 && lift.Frames[0] != null)
+            {
+                // El juego coloca el ascensor por su esquina de abajo a la izquierda (como el generado).
+                var t = lift.Frames[0].texture;
+                Lift = Sprite.Create(t, new Rect(0, 0, t.width, t.height), Vector2.zero, lift.Frames[0].pixelsPerUnit, 0, SpriteMeshType.FullRect);
+            }
+        }
         readonly Dictionary<int, Sprite> items = new Dictionary<int, Sprite>();
 
         public PropArt()
@@ -40,7 +65,7 @@ namespace MazeOfKnight.Game.Visuals
         static TileBase[,] Tiles(Texture2D tex, int cols, int rows)
         {
             var t = new TileBase[rows, cols];
-            int n = 8 * S;
+            int n = tex.width / cols;        // texels por tile: 8 · S en los generados, 64 en los dibujados
             for (int r = 0; r < rows; r++)
                 for (int c = 0; c < cols; c++)
                 {

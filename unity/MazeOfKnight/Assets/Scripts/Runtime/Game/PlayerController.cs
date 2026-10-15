@@ -14,6 +14,7 @@ namespace MazeOfKnight.Game
         // Estilo del remake (Visuals/Atmosphere): fotogramas dibujados y la estela del espadazo. Null = provisional.
         public Visuals.CharacterArt Art;
         public SpriteRenderer Slash;
+        SpriteRenderer shieldOverlay;        // capa del escudo dibujado (CharacterArt.DrawnShield)
         Sprite placeholder;
         public Color popolonColor = new Color(0.35f, 0.55f, 1f);
         public Color aphroditeColor = new Color(1f, 0.45f, 0.7f);
@@ -172,6 +173,22 @@ namespace MazeOfKnight.Game
                 body.flipX = Motor.FacingLeft ^ HopFlip;
                 body.transform.localScale = Vector3.one;
                 if (sword != null) sword.enabled = false;
+                // Escudo dibujado en una capa aparte (el arte no repite el cuerpo por cada metal), en el mismo fotograma.
+                var shieldSprite = Art.DrawnShield(Motor);
+                if (shieldSprite != null)
+                {
+                    if (shieldOverlay == null)
+                    {
+                        shieldOverlay = new GameObject("Escudo").AddComponent<SpriteRenderer>();
+                        shieldOverlay.transform.SetParent(body.transform, false);
+                        shieldOverlay.sortingOrder = body.sortingOrder + 1;
+                    }
+                    shieldOverlay.enabled = true;
+                    shieldOverlay.sprite = shieldSprite;
+                    shieldOverlay.flipX = body.flipX;
+                    shieldOverlay.sharedMaterial = body.sharedMaterial;
+                }
+                else if (shieldOverlay != null) shieldOverlay.enabled = false;
                 if (Slash != null)
                 {
                     // Estela de la estocada sobre la zona que golpea (x + 8 … x + 18, y − 7 … y − 4).
@@ -190,6 +207,7 @@ namespace MazeOfKnight.Game
                 return;
             }
             if (Slash != null) Slash.enabled = false;
+            if (shieldOverlay != null) shieldOverlay.enabled = false;
             if (body != null)
             {
                 if (placeholder != null) body.sprite = placeholder;

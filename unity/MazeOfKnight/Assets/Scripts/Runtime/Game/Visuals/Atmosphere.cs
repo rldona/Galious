@@ -13,9 +13,14 @@ namespace MazeOfKnight.Game.Visuals
     // Ambiente del remake al estilo de Hollow Knight (docs/design_bible/12_estilo_visual.md). Solo es aspecto: no toca
     // la lógica, la colisión ni los tiempos del original.
     //  - Capas por sala: cielo en degradado, siluetas lejanas, niebla, siluetas medias, niebla baja, (sala), motas y un
-    //    primer plano en silueta. Con la cámara fija, la profundidad sale de un parallax según la posición del jugador.
-    //  - Luces 2D sobre la sala: luz global de la paleta, una luz que acompaña al jugador y farolas en las paredes.
-    //    Rayos de luz y halos aditivos que el bloom recoge. Viñeta y algo de contraste.
+    //    primer plano en silueta. Son planos a distinta profundidad delante de una cámara en perspectiva (RoomCamera):
+    //    el parallax sale solo de esa profundidad cuando la cámara se desplaza un poco siguiendo al jugador, y los
+    //    planos lejanos y el primer plano se ven desenfocados (shader LayerBlur).
+    //  - Oclusión ambiental calculada a partir de la colisión (AmbientOcclusion) y sombras de contacto bajo el jugador
+    //    y los enemigos.
+    //  - Luces 2D sobre la sala: luz global de la paleta, una luz que acompaña al jugador y farolas en las paredes, con
+    //    mapas de normales si el arte los trae. Rayos de luz y halos aditivos que el bloom recoge. Viñeta y algo de
+    //    contraste.
     //  - Fundido desde negro al cambiar de sala (dura lo que la pausa de 11 ticks del original) y más largo al cambiar de
     //    mapa.
     //  - Personajes, enemigos y objetos con contorno de tinta y destello al recibir un golpe.
@@ -41,11 +46,33 @@ namespace MazeOfKnight.Game.Visuals
 
         // Entre salas no hay fundido: el corte seco del original es más fluido. Solo al entrar o salir de un mundo.
         const float MapFadeSeconds = 0.8f;
-        const float ParallaxFollow = 0.08f;          // cuánto "seguiría" una cámara virtual al jugador
+        const float ParallaxFollow = 0.12f;          // cuánto sigue la cámara al jugador (RoomCamera.Shift)
+
+        // Profundidad de cada plano (z; la sala está en 0, la cámara a RoomCamera.Depth = 10 delante) y su desenfoque en
+        // texels del dibujo (shader LayerBlur). Un plano a z se corre en pantalla z / (10 + z) de lo que se mueva la
+        // cámara: 0,71 el lejano, 0,5 el medio, 0,26 el cercano y −0,67 el primer plano.
+        public const float ZSky = 40f, ZFar = 24f, ZFogFar = 16f, ZMid = 10f, ZFogLow = 5f, ZNear = 3.5f, ZFront = -4f;
+        const float BlurFar = 3f, BlurFogFar = 2f, BlurMid = 1.6f, BlurFogLow = 1f, BlurNear = 0.6f, BlurFront = 2.5f;
 
         Camera cam;
+        RoomCamera roomCamera;
         Transform root;
-        SpriteRenderer sky, far, mid, near, fogFar, fogLow, front, fade;
+        SpriteRenderer sky, far, mid, near, fogFar, fogLow, front, fade, occlusion;
+        readonly List<SpriteRenderer> shadows = new List<SpriteRenderer>();
+        CollisionGridOverlay grid;
+        Shader layerShader;
+        RoomModel occludedRoom;
+        int occludedHash;
+        ArtLibrary drawn;
+        readonly HashSet<Tile> drawnTiles = new HashSet<Tile>();   // tiles dibujados: a todo color, no se tiñen
+
+        Sprite DrawnSprite(string name)
+        {
+            var clip = drawn?.Clip(name);
+            return clip != null && clip.Length > 0 ? clip.Frames[0] : null;
+        }
+
+        Texture2D DrawnTexture(string name) => DrawnSprite(name)?.texture;
         readonly List<SpriteRenderer> shafts = new List<SpriteRenderer>();
         readonly List<(SpriteRenderer glow, Light2D light)> lamps = new List<(SpriteRenderer, Light2D)>();
         ParticleSystem motes;
@@ -85,9 +112,11 @@ namespace MazeOfKnight.Game.Visuals
         {
             cam = GetComponent<Camera>();
             if (cam == null) cam = Camera.main;
+            roomCamera = cam != null ? cam.GetComponent<RoomCamera>() : null;
             block = new MaterialPropertyBlock();
             var outline = Resources.Load<Shader>("Shaders/SpriteOutlineFlash");
             var add = Resources.Load<Shader>("Shaders/Additive");
+            layerShader = Resources.Load<Shader>("Shaders/LayerBlur");
             // Nada de Shader.Find: en el compilado solo están los shaders referenciados (los de Resources siempre).
             if (outline == null || add == null)
             {
@@ -108,7 +137,13 @@ namespace MazeOfKnight.Game.Visuals
             w.Apply();
             white = Sprite.Create(w, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
 
+            // Arte dibujado a mano (Assets/Art/Resources/Dibujado, por nombre): sustituye al generado pieza a pieza.
+            drawn = ArtLibrary.Load();
+            if (drawn.Count > 0) Debug.Log($"[Atmosphere] {drawn.Count} clips dibujados");
             props = new PropArt();
+            props.UseDrawn(drawn);
+            UiKit.DrawnFrame = DrawnTexture("marco");
+            UiKit.DrawnRing = DrawnTexture("medallon");
             BuildTiles();
             if (mapView != null)
             {
@@ -120,16 +155,21 @@ namespace MazeOfKnight.Game.Visuals
             }
 
             root = new GameObject("Ambiente").transform;
-            sky = Layer("Cielo", -100, unlit);
-            far = Layer("Siluetas lejanas", -60, unlit);
-            fogFar = Layer("Niebla lejana", -55, unlit);
-            mid = Layer("Siluetas medias", -40, unlit);
-            fogLow = Layer("Niebla baja", -35, unlit);
-            near = Layer("Siluetas cercanas", -20, unlit);
-            front = Layer("Primer plano", 50, unlit);
+            sky = Layer("Cielo", -100, Blurred(0), ZSky);
+            far = Layer("Siluetas lejanas", -60, Blurred(BlurFar), ZFar);
+            fogFar = Layer("Niebla lejana", -55, Blurred(BlurFogFar), ZFogFar);
+            mid = Layer("Siluetas medias", -40, Blurred(BlurMid), ZMid);
+            fogLow = Layer("Niebla baja", -35, Blurred(BlurFogLow), ZFogLow);
+            near = Layer("Siluetas cercanas", -20, Blurred(BlurNear), ZNear);
+            front = Layer("Primer plano", 50, Blurred(BlurFront), ZFront);
+            // Encima de los tiles (−6 … −3) y debajo de los objetos y personajes (5 …).
+            occlusion = Layer("Oclusión ambiental", -2, unlit);
             fade = Layer("Fundido", 1000, unlit);
             fade.sprite = white;
             fade.color = Color.black;
+            grid = gameObject.AddComponent<CollisionGridOverlay>();
+            grid.game = game;
+            grid.Init(unlit);
 
             globalLight = NewLight("Luz global", Light2D.LightType.Global);
             playerLight = NewLight("Luz del jugador", Light2D.LightType.Point);
@@ -149,7 +189,8 @@ namespace MazeOfKnight.Game.Visuals
             gameObject.AddComponent<HitboxOverlay>().game = game;
             enemyArt = new EnemyArt();
             gameObject.AddComponent<HitEffects>().Init(additive, unlit, dot);
-            characters = new CharacterArt { ShieldLevel = () => game != null && game.Inventory != null ? game.Inventory.ShieldLevel : 0 };
+            enemyArt.Drawn = drawn;
+            characters = new CharacterArt { ShieldLevel = () => game != null && game.Inventory != null ? game.Inventory.ShieldLevel : 0, Drawn = drawn };
             slash = Layer("Estela del espadazo", 12, additive);
             slash.sprite = characters.SlashSprite;
             slash.enabled = false;
@@ -181,14 +222,24 @@ namespace MazeOfKnight.Game.Visuals
             Styled = false;
         }
 
-        SpriteRenderer Layer(string name, int order, Material mat)
+        SpriteRenderer Layer(string name, int order, Material mat, float z = 0)
         {
             var go = new GameObject(name);
             go.transform.SetParent(root, false);
+            go.transform.localPosition = new Vector3(0, 0, z);
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sortingOrder = order;
             sr.sharedMaterial = mat;
             return sr;
+        }
+
+        // Material de una capa del ambiente con su desenfoque (LayerBlur); sin el shader, el sprite sin luz.
+        Material Blurred(float blur)
+        {
+            if (layerShader == null) return unlit;
+            var m = new Material(layerShader) { name = $"Capa (desenfoque {blur})" };
+            m.SetFloat("_Blur", blur);
+            return m;
         }
 
         Light2D NewLight(string name, Light2D.LightType type)
@@ -199,7 +250,20 @@ namespace MazeOfKnight.Game.Visuals
             l.lightType = type;
             l.targetSortingLayers = SortingLayer.layers.Select(s => s.id).ToArray();
             l.shadowsEnabled = false;
+            if (type != Light2D.LightType.Global)
+            {
+                // Los tiles y objetos con mapa de normales (_NormalMap, ArtImporter) se modelan con la luz. Las
+                // propiedades son de solo lectura en tiempo de ejecución: se fijan en sus campos serializados.
+                SetField(l, "m_NormalMapQuality", Light2D.NormalMapQuality.Fast);
+                SetField(l, "m_NormalMapDistance", 1.5f);
+            }
             return l;
+        }
+
+        static void SetField(object target, string field, object value)
+        {
+            var f = target.GetType().GetField(field, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            if (f != null) f.SetValue(target, value);
         }
 
         // Personajes con el material de contorno (si el estilo está puesto).
@@ -273,19 +337,68 @@ namespace MazeOfKnight.Game.Visuals
             waterTile = NewTile("Agua", waterSprite);
             lavaTile = NewTile("Lava", lavaSprite);
             bossTile = NewTile("Pasable en el combate", solidSprite);
-            tiles = new MapView.StyleTiles { Rock = props.Rock, Door = props.Door, DoorClosed = props.DoorClosed, DoorHalf = props.DoorHalf, KeyDoor = props.KeyDoor, Revolving = props.Revolving, Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, LadderRight = ladderRightTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile };
+            foreach (var t in new[] { solidTile, solidInnerTile, solidDeepTile, bossTile, rimTile, ladderTile, ladderRightTile, waterTile, lavaTile })
+                generatedTiles[t] = t.sprite;
+            ApplyDrawnTiles(MapIndex());
+            tiles = new MapView.StyleTiles { Rock = props.Rock, Door = props.Door, DoorClosed = props.DoorClosed, DoorHalf = props.DoorHalf, KeyDoor = props.KeyDoor, Revolving = props.Revolving, Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, LadderRight = ladderRightTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile, SolidVariants = solidVariants, InnerVariants = innerVariants };
         }
+
+        readonly Dictionary<Tile, Sprite> generatedTiles = new Dictionary<Tile, Sprite>();
+
+        // Tiles dibujados del mapa (carpeta tiles, mundoNN_…): sustituyen al generado y van a todo color; donde falte
+        // uno vuelve el generado, que se tiñe con la paleta.
+        void ApplyDrawnTiles(int mapIndex)
+        {
+            string m = $"mundo{mapIndex:00}";
+            void Set(Tile t, string name)
+            {
+                var s = DrawnSprite(name);
+                if (s != null) { t.sprite = s; t.color = Color.white; drawnTiles.Add(t); }
+                else { if (generatedTiles.TryGetValue(t, out var g)) t.sprite = g; drawnTiles.Remove(t); }
+            }
+            Set(solidTile, $"{m}_macizo_borde");
+            Set(solidInnerTile, $"{m}_macizo_interior");
+            Set(solidDeepTile, $"{m}_macizo_fondo");
+            Set(bossTile, $"{m}_macizo_borde");
+            Set(rimTile, $"{m}_borde_suelo");
+            Set(ladderTile, $"{m}_escalera_izq");
+            Set(ladderRightTile, $"{m}_escalera_der");
+            Set(waterTile, $"{m}_agua");
+            Set(lavaTile, $"{m}_lava");
+            // Variantes (_v2, _v3…) del borde y del interior, para romper la repetición.
+            TileBase[] Variants(string baseName)
+            {
+                var list = new List<TileBase>();
+                for (int v = 2; v <= 6; v++)
+                {
+                    var s = DrawnSprite($"{baseName}_v{v}");
+                    if (s == null) break;
+                    if (!variantTiles.TryGetValue(s, out var t)) variantTiles[s] = t = NewTile($"{baseName}_v{v}", s);
+                    list.Add(t);
+                }
+                return list.ToArray();
+            }
+            solidVariants = Variants($"{m}_macizo_borde");
+            innerVariants = Variants($"{m}_macizo_interior");
+            if (tiles != null) { tiles.SolidVariants = solidVariants; tiles.InnerVariants = innerVariants; }
+        }
+
+        readonly Dictionary<Sprite, Tile> variantTiles = new Dictionary<Sprite, Tile>();
+        TileBase[] solidVariants, innerVariants;
 
         void ColorTiles(WorldPalette p)
         {
-            solidTile.color = p.Ground;
-            solidInnerTile.color = Color.Lerp(p.Ground, Color.black, 0.4f);
-            solidDeepTile.color = Color.Lerp(p.Ground, Color.black, 0.68f);
-            bossTile.color = Color.Lerp(p.Ground, p.Rim, 0.18f);
-            rimTile.color = p.Rim;
-            ladderTile.color = ladderRightTile.color = Color.Lerp(p.Rim, p.Ground, 0.35f);
-            waterTile.color = p.Liquid;
-            lavaTile.color = WorldPalette.Lava;
+            ApplyDrawnTiles(paletteOverride >= 0 ? paletteOverride : MapIndex());
+            void Tint(Tile t, Color c) { if (!drawnTiles.Contains(t)) t.color = c; }
+            Tint(solidTile, p.Ground);
+            Tint(solidInnerTile, Color.Lerp(p.Ground, Color.black, 0.4f));
+            Tint(solidDeepTile, Color.Lerp(p.Ground, Color.black, 0.68f));
+            Tint(bossTile, Color.Lerp(p.Ground, p.Rim, 0.18f));
+            Tint(rimTile, p.Rim);
+            Tint(ladderTile, Color.Lerp(p.Rim, p.Ground, 0.35f));
+            Tint(ladderRightTile, Color.Lerp(p.Rim, p.Ground, 0.35f));
+            Tint(waterTile, p.Liquid);
+            Tint(lavaTile, WorldPalette.Lava);
             mapView?.RefreshStyle();
         }
 
@@ -309,7 +422,8 @@ namespace MazeOfKnight.Game.Visuals
             emission.rateOverTime = 9f;
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Box;
-            shape.scale = new Vector3(RoomCoords.RoomSize.x, RoomCoords.RoomSize.y, 0.1f);
+            // Repartidas en profundidad (de medio delante de la sala a 5,5 detrás): cada mota con su parallax.
+            shape.scale = new Vector3(RoomCoords.RoomSize.x * 1.3f, RoomCoords.RoomSize.y * 1.3f, 6f);
             var col = ps.colorOverLifetime;
             col.enabled = true;
             var g = new Gradient();
@@ -354,8 +468,10 @@ namespace MazeOfKnight.Game.Visuals
         {
             styled = on;
             Styled = on;
+            RoomCamera.Perspective = on;
             root.gameObject.SetActive(true);
-            foreach (var sr in new[] { sky, far, mid, near, fogFar, fogLow, front }) sr.enabled = on;
+            foreach (var sr in new[] { sky, far, mid, near, fogFar, fogLow, front, occlusion }) sr.enabled = on;
+            foreach (var s in shadows) s.enabled = false;
             foreach (var s in shafts) s.enabled = on;
             foreach (var (glow, light) in lamps) { glow.enabled = on; light.enabled = on; }
             playerLight.enabled = on;
@@ -444,6 +560,8 @@ namespace MazeOfKnight.Game.Visuals
             TickFlashes();
             if (!styled) return;
             Parallax(motor);
+            UpdateOcclusion(motor.Room);
+            UpdateShadows(motor);
             BossLighting();
         }
 
@@ -454,15 +572,16 @@ namespace MazeOfKnight.Game.Visuals
             palette = WorldPalette.For(paletteOverride >= 0 ? paletteOverride : MapIndex());
             // Recolorear los tiles recorre todo el mapa: solo cuando cambia la paleta. Las capas del tema se generan
             // entonces todas a la vez, para no generarlas al entrar en una sala.
+            int mapIndex = paletteOverride >= 0 ? paletteOverride : MapIndex();
             if (palette != tiledPalette)
             {
                 tiledPalette = palette;
                 ColorTiles(palette);
                 for (int v = 0; v < 3; v++)
                     foreach (var d in new[] { ShapePainter.Depth.Far, ShapePainter.Depth.Mid, ShapePainter.Depth.Near })
-                        LayerSprite(palette.Theme, d, v);
-                LayerSprite(palette.Theme, ShapePainter.Depth.Front, 0);
-                LayerSprite(palette.Theme, ShapePainter.Depth.Front, 1);
+                        LayerSprite(mapIndex, palette.Theme, d, v);
+                LayerSprite(mapIndex, palette.Theme, ShapePainter.Depth.Front, 0);
+                LayerSprite(mapIndex, palette.Theme, ShapePainter.Depth.Front, 1);
             }
             globalLight.color = palette.Ambient;
             globalLight.intensity = palette.AmbientIntensity;
@@ -479,19 +598,19 @@ namespace MazeOfKnight.Game.Visuals
             sky.sprite = skySprite;
             sky.color = Color.white;
             baseColors[sky] = Color.white;
-            sky.transform.localScale = new Vector3(RoomCoords.RoomSize.x * 1.4f, RoomCoords.RoomSize.y * 1.4f / 128f, 1);
-            sky.transform.position = new Vector3(center.x, center.y, 0);
+            // Cada plano se escala por su profundidad para cubrir en pantalla lo mismo que cubriría en z = 0.
+            sky.transform.localScale = new Vector3(RoomCoords.RoomSize.x * 1.4f, RoomCoords.RoomSize.y * 1.4f / 128f, 1) * RoomCamera.ScaleAt(ZSky);
+            sky.transform.position = new Vector3(center.x, center.y, ZSky);
 
-            Place(far, LayerSprite(palette.Theme, ShapePainter.Depth.Far, variant), palette.Far, flip, center);
-            Place(mid, LayerSprite(palette.Theme, ShapePainter.Depth.Mid, (variant + 1) % 3), palette.Mid, !flip, center);
-            Place(near, LayerSprite(palette.Theme, ShapePainter.Depth.Near, (variant + 2) % 3), WithAlpha(Color.Lerp(palette.Mid, palette.Ground, 0.35f), 0.6f), flip, center);
-            var frontSprite = LayerSprite(palette.Theme, ShapePainter.Depth.Front, room.id % 2);
-            Place(front, frontSprite, Color.Lerp(palette.Ground, Color.black, 0.75f), flip, center);
+            Place(far, LayerSprite(mapIndex, palette.Theme, ShapePainter.Depth.Far, variant), palette.Far, flip, center, ZFar);
+            Place(mid, LayerSprite(mapIndex, palette.Theme, ShapePainter.Depth.Mid, (variant + 1) % 3), palette.Mid, !flip, center, ZMid);
+            Place(near, LayerSprite(mapIndex, palette.Theme, ShapePainter.Depth.Near, (variant + 2) % 3), WithAlpha(Color.Lerp(palette.Mid, palette.Ground, 0.35f), 0.6f), flip, center, ZNear);
             // El primer plano cubre la sala con un 10 % de margen (las siluetas asoman por los bordes).
-            front.transform.localScale = Vector3.one * (RoomCoords.RoomSize.x * 1.1f / (ShapePainter.Width / ShapePainter.PixelsPerUnit));
+            var frontSprite = LayerSprite(mapIndex, palette.Theme, ShapePainter.Depth.Front, room.id % 2);
+            Place(front, frontSprite, Color.Lerp(palette.Ground, Color.black, 0.75f), flip, center, ZFront, RoomCoords.RoomSize.x * 1.1f);
 
-            PlaceFog(fogFar, center + new Vector2(0, -1.5f), new Color(palette.Fog.r, palette.Fog.g, palette.Fog.b, 0.35f), 1, 3.5f);
-            PlaceFog(fogLow, center + new Vector2(0, -RoomCoords.RoomSize.y / 2 + 1.2f), new Color(palette.Fog.r, palette.Fog.g, palette.Fog.b, 0.3f), 2, 2.5f);
+            PlaceFog(fogFar, center + new Vector2(0, -1.5f), new Color(palette.Fog.r, palette.Fog.g, palette.Fog.b, 0.35f), 1, 3.5f, ZFogFar);
+            PlaceFog(fogLow, center + new Vector2(0, -RoomCoords.RoomSize.y / 2 + 1.2f), new Color(palette.Fog.r, palette.Fog.g, palette.Fog.b, 0.3f), 2, 2.5f, ZFogLow);
 
             var main = motes.main;
             main.startColor = new Color(palette.Motes.r, palette.Motes.g, palette.Motes.b, 0.7f);
@@ -501,41 +620,232 @@ namespace MazeOfKnight.Game.Visuals
             vel.x = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f);
             vel.y = new ParticleSystem.MinMaxCurve(rise * 0.6f, rise);
             vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
-            motes.transform.position = new Vector3(center.x, center.y, 0);
+            motes.transform.position = new Vector3(center.x, center.y, 2.5f);
             motes.Clear();
             motes.Simulate(6f, true, true);
             motes.Play();
 
             BuildLights(room, center);
+            BuildDecor(room, mapIndex);
+            occludedRoom = null;                 // la oclusión se rehace en LateUpdate
         }
 
-        Sprite LayerSprite(Theme theme, ShapePainter.Depth depth, int variant)
+        // ---------- piezas de decoración ----------
+
+        // Piezas sueltas dibujadas (carpeta decoracion, mundoNN_<pieza>), colocadas por sala con su número de sala como
+        // semilla, siempre igual: farolas en los puntos de luz, lianas colgando de los techos y estatuas en los suelos
+        // anchos. Van a distinta profundidad detrás del plano de juego (escaladas para verse a su tamaño) y nunca donde
+        // se pisa. Sin piezas dibujadas no sale nada.
+        readonly List<SpriteRenderer> decor = new List<SpriteRenderer>();
+        List<Vector2> lampSpots = new List<Vector2>();
+        const float ZDecorNear = 1.2f, ZDecorMid = 2.2f;
+
+        void BuildDecor(RoomModel room, int mapIndex)
         {
+            int n = 0;
+            string m = $"mundo{mapIndex:00}";
+            SpriteRenderer Next(Sprite s, Vector2 at, float z, int order, bool flip = false, float scale = 1f)
+            {
+                if (n == decor.Count) decor.Add(Layer("Decoración", -1, unlit));
+                var sr = decor[n++];
+                sr.enabled = true;
+                sr.sprite = s;
+                sr.sortingOrder = order;
+                sr.flipX = flip;
+                sr.color = Color.white;
+                baseColors[sr] = Color.white;
+                sr.transform.localScale = Vector3.one * (scale * RoomCamera.ScaleAt(z));
+                // Un punto a profundidad z se ve desplazado hacia el centro: se separa en la misma proporción para que
+                // la pieza caiga en pantalla donde está su celda (con la cámara en el centro de la sala).
+                var c = RoomCoords.RoomOrigin(room) + RoomCoords.RoomSize / 2f;
+                var q = c + (at - c) * RoomCamera.ScaleAt(z);
+                sr.transform.position = new Vector3(q.x, q.y, z);
+                return sr;
+            }
+            var rng = new System.Random(room.id * 7919 + mapIndex * 31);
+            var w = game.World;
+            bool Solid(int col, int row) => col >= 0 && col < RoomCoords.Cols && row >= 0 && row < RoomCoords.Rows && SolidAt(room, col, row);
+            bool Air(int col, int row) => col >= 0 && col < RoomCoords.Cols && row >= 0 && row < RoomCoords.Rows &&
+                w.TileAt(room, col * 8 + 4, OriginalPhysics.RoomTopPx + row * 8 + 4) == TileClass.Empty;
+            Vector2 CellCenter(int col, int row) => RoomCoords.PixelToWorld(room, col * 8 + 4, OriginalPhysics.RoomTopPx + row * 8 + 4);
+
+            // Farolas: la pieza va sobre el punto de luz (su halo y su Light2D ya están ahí).
+            var lamp = DrawnSprite($"{m}_farola");
+            if (lamp != null)
+                foreach (var p in lampSpots)
+                    Next(lamp, p, 0.6f, -1);
+
+            // Lianas: cuelgan de celdas macizas con aire debajo, en la mitad de arriba; 2 a 5 por sala.
+            var vines = new List<Sprite>();
+            for (int v = 1; v <= 4; v++) { var s = DrawnSprite($"{m}_liana_{v:00}"); if (s != null) vines.Add(s); }
+            if (vines.Count > 0)
+            {
+                int want = 2 + rng.Next(4);
+                for (int tries = 0; tries < 120 && want > 0; tries++)
+                {
+                    int col = 1 + rng.Next(30), row = rng.Next(12);
+                    if (!Solid(col, row) || !Air(col, row + 1) || !Air(col, row + 2)) continue;
+                    // que no haya otra pieza a menos de 2 tiles
+                    var top = CellCenter(col, row) + new Vector2(0, -RoomCoords.TileSize / 2);
+                    bool near = false;
+                    for (int k = 0; k < n; k++) if (Mathf.Abs(decor[k].transform.position.x - top.x) < 1.0f) near = true;
+                    if (near) continue;
+                    var s = vines[rng.Next(vines.Count)];
+                    float z = rng.Next(2) == 0 ? ZDecorNear : ZDecorMid;
+                    float h = s.bounds.size.y;
+                    Next(s, top + new Vector2(0, -h / 2), z, -1, rng.Next(2) == 0);
+                    want--;
+                }
+            }
+
+            // Estatuas y columnas: en el suelo, pegadas a una pared, donde hay 3 tiles de aire encima; como mucho 2.
+            var statues = new List<Sprite>();
+            foreach (var name in new[] { "estatua", "columna_rota", "pedestal" }) { var s = DrawnSprite($"{m}_{name}"); if (s != null) statues.Add(s); }
+            if (statues.Count > 0)
+            {
+                int want = rng.Next(3);
+                for (int tries = 0; tries < 120 && want > 0; tries++)
+                {
+                    int col = 1 + rng.Next(30), row = 3 + rng.Next(16);
+                    if (!Solid(col, row) || !Air(col, row - 1) || !Air(col, row - 2) || !Air(col, row - 3)) continue;
+                    bool wallLeft = Solid(col - 1, row - 1), wallRight = Solid(col + 1, row - 1);
+                    if (!wallLeft && !wallRight) continue;
+                    var floor = CellCenter(col, row) + new Vector2(0, RoomCoords.TileSize / 2);
+                    bool near = false;
+                    for (int k = 0; k < n; k++) if (Vector2.Distance(decor[k].transform.position, floor) < 2.5f) near = true;
+                    if (near) continue;
+                    var s = statues[rng.Next(statues.Count)];
+                    float h = s.bounds.size.y;
+                    Next(s, floor + new Vector2(0, h / 2), ZDecorMid, -1, wallRight);
+                    want--;
+                }
+            }
+            for (; n < decor.Count; n++) decor[n].enabled = false;
+        }
+
+        // ---------- oclusión ambiental y sombras de contacto ----------
+
+        bool SolidAt(RoomModel room, int col, int row) =>
+            game.World.TileAt(room, col * 8 + 4, OriginalPhysics.RoomTopPx + row * 8 + 4) == TileClass.Solid;
+
+        // Textura de oclusión de la sala (AmbientOcclusion), rehecha si cambia la colisión (muros que se abren).
+        void UpdateOcclusion(RoomModel room)
+        {
+            int hash = AmbientOcclusion.Hash((c, r) => SolidAt(room, c, r), RoomCoords.Cols, RoomCoords.Rows);
+            if (room == occludedRoom && hash == occludedHash) return;
+            occludedRoom = room;
+            occludedHash = hash;
+            if (occlusion.sprite != null) Destroy(occlusion.sprite.texture);
+            var alpha = AmbientOcclusion.Compute((c, r) => SolidAt(room, c, r), RoomCoords.Cols, RoomCoords.Rows);
+            var tex = AmbientOcclusion.ToTexture(alpha, RoomCoords.Cols, RoomCoords.Rows);
+            occlusion.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero, AmbientOcclusion.TexelsPerTile / RoomCoords.TileSize, 0, SpriteMeshType.FullRect);
+            occlusion.color = Color.white;
+            var o = RoomCoords.RoomOrigin(room);
+            occlusion.transform.position = new Vector3(o.x, o.y, 0);
+        }
+
+        // Sombra suave bajo el jugador y cada enemigo, en el suelo que tienen debajo (hasta 5 tiles), más tenue cuanto
+        // más alto estén.
+        void UpdateShadows(PlayerMotor motor)
+        {
+            int n = 0;
+            void Shadow(RoomModel room, float cx, float feetY, float widthPx)
+            {
+                int floor = -1;
+                for (int k = 0; k <= 40; k += 8)
+                {
+                    int py = (int)feetY + k;
+                    if (py >= OriginalPhysics.RoomBottomPx) break;
+                    if (game.World.TileAt(room, (int)cx, py) == TileClass.Solid)
+                    {
+                        floor = OriginalPhysics.RoomTopPx + ((py - OriginalPhysics.RoomTopPx) & ~7);
+                        break;
+                    }
+                }
+                if (floor < 0) return;
+                float height = floor - feetY;
+                float a = 0.42f * Mathf.Clamp01(1 - height / 40f);
+                if (a <= 0.02f) return;
+                if (n == shadows.Count)
+                {
+                    var sr = Layer("Sombra de contacto", -2, unlit);
+                    sr.sprite = dot;
+                    shadows.Add(sr);
+                }
+                var s = shadows[n++];
+                s.enabled = true;
+                s.color = new Color(0, 0, 0, a);
+                var p = RoomCoords.PixelToWorld(room, (int)cx, floor);
+                s.transform.position = new Vector3(p.x, p.y, 0);
+                float w = widthPx / RoomCoords.PixelsPerUnit * 1.15f;
+                s.transform.localScale = new Vector3(w, w * 0.3f, 1);
+            }
+            var room = motor.Room;
+            if (motor.State != MotorState.Ladder)
+                Shadow(room, motor.X, motor.Y, 14);
+            if (game.Enemies != null)
+                foreach (var e in game.Enemies.Enemies)
+                {
+                    if (!e.Alive || !e.Visible || e.Room != room || e is Boss) continue;
+                    var (x0, y0, x1, y1) = e.DrawRect();
+                    Shadow(room, (x0 + x1) / 2, y1, x1 - x0);
+                }
+            for (; n < shadows.Count; n++) shadows[n].enabled = false;
+        }
+
+        readonly HashSet<Sprite> drawnLayers = new HashSet<Sprite>();
+
+        // Plano del fondo: el dibujado del mapa (carpeta fondos, mundoNN_fondo_lejano | _medio | _cercano | _primer_plano)
+        // si existe; si no, la silueta generada del tema. El dibujado va a todo color (no se tiñe).
+        Sprite LayerSprite(int mapIndex, Theme theme, ShapePainter.Depth depth, int variant)
+        {
+            string suffix = depth switch
+            {
+                ShapePainter.Depth.Far => "fondo_lejano",
+                ShapePainter.Depth.Mid => "fondo_medio",
+                ShapePainter.Depth.Near => "fondo_cercano",
+                _ => "primer_plano",
+            };
+            var d = DrawnSprite($"mundo{mapIndex:00}_{suffix}");
+            if (d != null) { drawnLayers.Add(d); return d; }
             var key = (theme, depth, variant);
             if (!layerCache.TryGetValue(key, out var s))
-                layerCache[key] = s = ShapePainter.ToSprite(ShapePainter.Layer(theme, depth, variant + 1), ShapePainter.PixelsPerUnit, new Vector2(0.5f, 0.5f));
+            {
+                var tex = ShapePainter.Layer(theme, depth, variant + 1);
+                tex.wrapMode = TextureWrapMode.Clamp;      // el desenfoque no debe traer el borde opuesto
+                layerCache[key] = s = ShapePainter.ToSprite(tex, ShapePainter.PixelsPerUnit, new Vector2(0.5f, 0.5f));
+            }
             return s;
         }
 
-        void Place(SpriteRenderer sr, Sprite sprite, Color color, bool flip, Vector2 center)
+        // Coloca una capa a profundidad z, escalada para cubrir en pantalla lo mismo que en z = 0.
+        void Place(SpriteRenderer sr, Sprite sprite, Color color, bool flip, Vector2 center, float z, float coverWidth = -1)
         {
             sr.sprite = sprite;
+            if (drawnLayers.Contains(sprite)) color = new Color(1, 1, 1, color.a >= 0.99f ? 1 : Mathf.Max(color.a, 0.85f));
             sr.color = color;
             baseColors[sr] = color;
             sr.flipX = flip;
-            sr.transform.localScale = Vector3.one;
-            sr.transform.position = new Vector3(center.x, center.y, 0);
+            // Un plano cubre coverWidth unidades (24 = la sala con margen) sea cual sea la resolución de su dibujo.
+            if (coverWidth < 0) coverWidth = RoomCoords.RoomSize.x * 1.5f;
+            float fit = sprite != null && sprite.bounds.size.x > 0 ? coverWidth / sprite.bounds.size.x : 1;
+            sr.transform.localScale = Vector3.one * (fit * RoomCamera.ScaleAt(z));
+            sr.transform.position = new Vector3(center.x, center.y, z);
         }
 
-        void PlaceFog(SpriteRenderer sr, Vector2 pos, Color color, int seed, float height)
+        void PlaceFog(SpriteRenderer sr, Vector2 pos, Color color, int seed, float height, float z)
         {
             if (!fogCache.TryGetValue(seed, out var s))
-                fogCache[seed] = s = ShapePainter.ToSprite(ShapePainter.FogBand(seed), 256f / (RoomCoords.RoomSize.x * 1.5f), new Vector2(0.5f, 0.5f));
+            {
+                var tex = ShapePainter.FogBand(seed);
+                tex.wrapMode = TextureWrapMode.Clamp;
+                fogCache[seed] = s = ShapePainter.ToSprite(tex, 256f / (RoomCoords.RoomSize.x * 1.5f), new Vector2(0.5f, 0.5f));
+            }
             sr.sprite = s;
             sr.color = color;
             baseColors[sr] = color;
-            sr.transform.position = new Vector3(pos.x, pos.y, 0);
-            sr.transform.localScale = new Vector3(1, height / (64f / (256f / (RoomCoords.RoomSize.x * 1.5f))), 1);
+            sr.transform.position = new Vector3(pos.x, pos.y, z);
+            sr.transform.localScale = new Vector3(1, height / (64f / (256f / (RoomCoords.RoomSize.x * 1.5f))), 1) * RoomCamera.ScaleAt(z);
         }
 
         // Rayos de luz desde arriba y farolas en las paredes (sitios elegidos con el número de sala, siempre los mismos).
@@ -571,6 +881,7 @@ namespace MazeOfKnight.Game.Visuals
                 if (spots.Any(o => Vector2.Distance(o, p) < 4f)) continue;
                 spots.Add(p);
             }
+            lampSpots = spots;
             while (lamps.Count < spots.Count)
             {
                 var glow = Layer("Farola", -29, additive);
@@ -604,16 +915,18 @@ namespace MazeOfKnight.Game.Visuals
             var room = motor.Room;
             var center = RoomCoords.RoomOrigin(room) + RoomCoords.RoomSize / 2f;
             var p = RoomCoords.PixelToWorld(room, motor.X, motor.Y - 8);
+            // La cámara sigue un poco al jugador; la sala no se mueve en pantalla (RoomCamera compensa el encuadre) y
+            // cada plano se desplaza según su profundidad. Las capas solo llevan un vaivén lento propio.
             Vector2 v = (p - center) * ParallaxFollow;
+            if (roomCamera != null) roomCamera.Shift = v;
             float t = Time.time;
             Vector2 sway = new Vector2(Mathf.Sin(t * 0.21f), Mathf.Sin(t * 0.17f) * 0.5f) * 0.06f;
-            // Una capa de profundidad k (0 lejos, 1 la sala, >1 delante) se desplaza v·(1 − k) respecto a la sala.
-            Set(far, center + v * 0.85f + sway * 0.5f);
-            Set(mid, center + v * 0.55f + sway);
-            Set(near, center + v * 0.25f + sway * 1.4f);
-            Set(front, center + v * -0.6f);
-            Set(fogFar, center + new Vector2(Mathf.Sin(t * 0.05f) * 2f, -1.5f) + v * 0.7f);
-            Set(fogLow, center + new Vector2(Mathf.Sin(t * 0.08f + 1) * 1.5f, -RoomCoords.RoomSize.y / 2 + 1.2f) + v * 0.3f);
+            Set(far, center + sway * 0.5f);
+            Set(mid, center + sway);
+            Set(near, center + sway * 1.4f);
+            Set(front, center);
+            Set(fogFar, center + new Vector2(Mathf.Sin(t * 0.05f) * 2f, -1.5f));
+            Set(fogLow, center + new Vector2(Mathf.Sin(t * 0.08f + 1) * 1.5f, -RoomCoords.RoomSize.y / 2 + 1.2f));
             playerLight.transform.position = new Vector3(p.x, p.y, 0);
             foreach (var s in shafts)
                 if (s.enabled)
@@ -681,7 +994,8 @@ namespace MazeOfKnight.Game.Visuals
                 bossLight.intensity = Mathf.MoveTowards(bossLight.intensity, 0, Time.deltaTime * 2);
         }
 
-        static void Set(SpriteRenderer sr, Vector2 pos) => sr.transform.position = new Vector3(pos.x, pos.y, 0);
+        // Mueve una capa en x e y conservando su profundidad.
+        static void Set(SpriteRenderer sr, Vector2 pos) => sr.transform.position = new Vector3(pos.x, pos.y, sr.transform.position.z);
 
         void StartFade(float seconds)
         {
@@ -694,7 +1008,9 @@ namespace MazeOfKnight.Game.Visuals
             if (cam != null)
             {
                 fade.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, 0);
-                fade.transform.localScale = new Vector3(cam.orthographicSize * cam.aspect * 2.2f, cam.orthographicSize * 2.2f, 1);
+                float hw = roomCamera != null ? roomCamera.HalfWidth : cam.orthographicSize * cam.aspect;
+                float hh = roomCamera != null ? roomCamera.HalfHeight : cam.orthographicSize;
+                fade.transform.localScale = new Vector3(hw * 2.4f, hh * 2.4f, 1);
             }
             fadeLeft = Mathf.Max(0, fadeLeft - Time.deltaTime);
             float a = fadeTotal > 0 ? Mathf.SmoothStep(0, 1, fadeLeft / fadeTotal) : 0;

@@ -28,6 +28,8 @@ namespace MazeOfKnight.Game
         public class StyleTiles
         {
             public TileBase Solid, SolidInner, SolidDeep, Rim, Ladder, LadderRight, Water, Lava, BossPassable;
+            // Variantes del borde y del interior (arte dibujado) para romper la repetición; se eligen por celda.
+            public TileBase[] SolidVariants, InnerVariants;
             public TileBase[,] Rock, Door, KeyDoor, Revolving;    // dibujos de varias celdas: [fila desde arriba, columna]
             public TileBase[,] DoorClosed, DoorHalf;              // puerta de mundo cerrada y con la fila de abajo abierta
         }
@@ -256,9 +258,22 @@ namespace MazeOfKnight.Game
                         if (System.Math.Max(System.Math.Abs(dr), System.Math.Abs(dc)) != d) continue;
                         var t = world.TileAt(room, (col + dc) * 8, OriginalPhysics.RoomTopPx + (row + dr) * 8);
                         if (t != TileClass.Solid && t != TileClass.BossPassable)
-                            return d == 1 ? Style.Solid : Style.SolidInner;
+                            return d == 1 ? Variant(Style.SolidVariants, Style.Solid, room, col, row) : Variant(Style.InnerVariants, Style.SolidInner, room, col, row);
                     }
             return Style.SolidDeep;
+        }
+
+        // Una variante por celda, siempre la misma para la misma celda (el tile base es la más frecuente).
+        static TileBase Variant(TileBase[] variants, TileBase fallback, RoomModel room, int col, int row)
+        {
+            if (variants == null || variants.Length == 0) return fallback;
+            unchecked
+            {
+                int h = (room.id * 73856093) ^ (col * 19349663) ^ (row * 83492791);
+                h = (h >> 3) & 0x7fffffff;
+                int k = h % (variants.Length * 3);
+                return k < variants.Length ? variants[k] : fallback;
+            }
         }
 
         TileBase TileFor(TileClass cls)

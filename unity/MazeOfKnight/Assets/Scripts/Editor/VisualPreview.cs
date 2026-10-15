@@ -18,7 +18,7 @@ namespace MazeOfKnight.EditorTools
         const string Flag = "MazeOfKnight.VisualPreview.Running";
         static readonly (int room, int x, int y, int palette)[] Shots =
         {
-            (1, 192, 120, 0), (2, 120, 184, 0), (72, 120, 120, 0), (13, 128, 120, 1), (20, 128, 120, 2), (30, 128, 120, 3),
+            (1, 192, 120, 0), (2, 120, 184, 0), (72, 120, 120, 0), (98, 128, 120, 0), (13, 128, 120, 1), (20, 128, 120, 2), (30, 128, 120, 3),
             (45, 128, 120, 4), (60, 128, 120, 5), (75, 128, 120, 6), (90, 128, 120, 7), (101, 128, 120, 8), (118, 128, 120, 9),
             (130, 128, 120, 10),
         };
@@ -40,6 +40,12 @@ namespace MazeOfKnight.EditorTools
 
         static VisualPreview()
         {
+            if (SessionState.GetBool(PackFlag, false))
+            {
+                frame = shot = packWorld = 0;
+                EditorApplication.update += PackTick;
+                return;
+            }
             if (!SessionState.GetBool(Flag, false)) return;
             frame = shot = 0;
             EditorApplication.update += Tick;
@@ -71,6 +77,76 @@ namespace MazeOfKnight.EditorTools
                 EditorApplication.isPlaying = false;
                 Debug.Log($"[VisualPreview] {Shots.Length} capturas en {OutDir}");
                 if (Application.isBatchMode) EditorApplication.delayCall += () => EditorApplication.Exit(0);
+            }
+        }
+
+        // ---------- lote del encargo de arte (docs/art/encargo/README.md) ----------
+        // Las tres hojas del arte provisional y una captura por zona (y varias del castillo) con la rejilla de colisión
+        // (F10) encima, en logs/unity/encargo/. En batch:
+        //   Unity -batchmode -projectPath unity/MazeOfKnight -executeMethod MazeOfKnight.EditorTools.VisualPreview.ArtPackBatch
+        // Las capturas llevan la disposición de las salas del original: no se versionan, se entregan aparte.
+        const string PackFlag = "MazeOfKnight.VisualPreview.ArtPack";
+        static readonly (int world, int room, int x, int y)[] PackShots =
+        {
+            (0, 1, 192, 120), (0, 2, 120, 184), (0, 13, 128, 120), (0, 43, 128, 120), (0, 72, 120, 120), (0, 104, 128, 120), (0, 137, 128, 120),
+            (1, 1, 128, 120), (2, 1, 128, 120), (3, 1, 128, 120), (4, 1, 128, 120), (5, 1, 128, 120),
+            (6, 1, 128, 120), (7, 1, 128, 120), (8, 1, 128, 120), (9, 1, 128, 120), (10, 1, 128, 120),
+        };
+        static int packWorld;
+        static string PackDir => Path.Combine(OutDir, "encargo");
+
+        [MenuItem("Maze of Knight/Lote del encargo de arte", false, 65)]
+        public static void ArtPackBatch()
+        {
+            Directory.CreateDirectory(PackDir);
+            CharacterSheet();
+            EnemySheet();
+            PropSheet();
+            foreach (var f in new[] { "personajes.png", "enemigos.png", "objetos.png" })
+                File.Copy(Path.Combine(OutDir, f), Path.Combine(PackDir, f), true);
+            EditorSceneManager.OpenScene(GameSceneBuilder.ScenePath);
+            var boot = Object.FindAnyObjectByType<GameBootstrap>();
+            if (boot != null) boot.skipAttract = true;
+            AttractMode.Current = AttractMode.Mode.Attract;
+            SessionState.SetBool(PackFlag, true);
+            EditorApplication.isPlaying = true;
+        }
+
+        static void PackTick()
+        {
+            if (!EditorApplication.isPlaying) return;
+            var boot = Object.FindAnyObjectByType<GameBootstrap>();
+            var atmo = Object.FindAnyObjectByType<Atmosphere>();
+            if (boot == null || boot.Motor == null || atmo == null) return;
+            frame++;
+            if (shot >= PackShots.Length)
+            {
+                EditorApplication.update -= PackTick;
+                SessionState.SetBool(PackFlag, false);
+                CollisionGridOverlay.Show = false;
+                EditorApplication.isPlaying = false;
+                Debug.Log($"[VisualPreview] lote del encargo en {PackDir}");
+                if (Application.isBatchMode) EditorApplication.delayCall += () => EditorApplication.Exit(0);
+                return;
+            }
+            var s = PackShots[shot];
+            if (frame % 60 == 5 && s.world != packWorld)
+            {
+                boot.DebugEnterWorld(s.world);
+                packWorld = s.world;
+            }
+            if (frame % 60 == 20)
+            {
+                var room = boot.World.Room(s.room);
+                if (room != null) boot.Motor.Place(boot.World, room, s.x, s.y);
+                atmo.PreviewPalette(-1, true);
+                CollisionGridOverlay.Show = true;
+            }
+            if (frame % 60 == 58)
+            {
+                string zone = s.world == 0 ? "castillo" : $"mundo{s.world:00}";
+                Capture(Camera.main, Path.Combine(PackDir, $"sala_{zone}_{s.room:000}.png"));
+                shot++;
             }
         }
 
@@ -208,6 +284,8 @@ namespace MazeOfKnight.EditorTools
             var old = cam.targetTexture;
             cam.targetTexture = rt;
             cam.aspect = (float)w / h;
+            // La cámara en perspectiva lleva su propia matriz (RoomCamera): rehacerla para esta proporción.
+            cam.GetComponent<RoomCamera>()?.ApplyProjection((float)w / h);
             cam.Render();
             RenderTexture.active = rt;
             var tex = new Texture2D(w, h, TextureFormat.RGB24, false);

@@ -1,0 +1,6 @@
+Arte dibujado a mano de Maze of Knight (docs/art/encargo/README.md).
+
+Carpetas: personajes/, enemigos/, jefes/, objetos_sala/, tiles/, fondos/, interfaz/, efectos/.
+Nombres: <tipo>_<accion>_<NN>[_<etiqueta>].png (fotograma NN de dos cifras) o <tipo>_<nombre>.png (una pieza).
+Escala: 8 texels por pixel del original (128 texels por unidad). El importador (Editor/ArtImporter.cs) fija
+PPU, filtro, pivote (pies en personajes, enemigos, jefes y objetos_sala) y engancha <nombre>_n.png como mapa de normales.
