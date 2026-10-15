@@ -43,6 +43,7 @@ En total son 321 salas, contando la sala 6 del mundo 10 (la del final) [C]. Cada
 ## Viaje
 
 - **Entrar en un mundo:** abajo sobre una puerta abierta (estado 8), con su jingle [C].
+- **Abrir una puerta:** desbloqueada, se abre sola al ponerse delante de ella: el hueco se abre de abajo arriba en 3 pasos de 6 ticks y la Great Key se gasta [O].
 - **Salir:** cruzar el borde de la sala 1 del mundo que enlaza al castillo (estado 13) [C].
 - **Atajos:**
   - **Wing (0x27):** en el menú de objetos, el número de un mundo abierto lleva a la sala de su puerta [O*].

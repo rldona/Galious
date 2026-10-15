@@ -136,6 +136,12 @@ Puertas de mundo (E688) en el castillo: sala 104 → 1, 98 → 2, 63 → 3, 57 �
 ## Puertas y llaves [C][O*]
 - Al cargar la sala (b02:9971) se rellenan E688–E68B, y E689 = E062+n & 3.
 - Si E689 tiene el bit 1 (desbloqueada) y el jugador está en la puerta, se abre sola: 4 pasos de animación (E68D/E68E, sonido 0x22). Al terminar, E689 y E062+n pasan a bit 0 (abierta) y se borra el bit 1 (b02:99C8).
+- **Medido** (`tools/openmsx/door_open_measure.py`, sala 104, E689 = 2) [O]:
+  - empieza en cuanto el jugador está en el sitio de entrar (y = Y_puerta + 0x18, x de X_puerta + 14 a + 18), sin pulsar nada; un píxel más arriba, o fuera de ese tramo, no;
+  - no hace falta quedarse: andando por delante sigue abriéndose;
+  - E68D va de 1 a 4 y E68E cuenta de 6 a 1, una vez cada tick (2 frames): 3 pasos de 6 ticks;
+  - la puerta son 4 × 3 tiles: dintel `5A` y un hueco de 2 × 2 (`5B`) entre jambas `5A`. Al empezar el 2.º paso la fila de abajo del hueco pasa a `6D 6E` (abierta); al empezar el 3.º, la de arriba; al acabar el 3.º la puerta está abierta;
+  - al final E062 + 1 = 1 (bit 1 borrado) y la flag de la Great Key (E07B) vale 0: la llave se gasta.
 - Al coger el **objeto 0x0C** (rutina de recogida b03:B701) se hace `(E061 + E041 + 1) |= 2`: en el castillo desbloquea la puerta del mundo 1; dentro del mundo k, la del k+1, y además activa E031 (estado 20).
 - Con la puerta abierta, abajo en la puerta → E01F = 1 → estado 8 → mundo E688 + 1. Se ha visto con la puerta abierta a mano (E689 = 1) en la sala 104.
 

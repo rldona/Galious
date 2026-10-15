@@ -29,6 +29,7 @@ namespace MazeOfKnight.Game
         {
             public TileBase Solid, SolidInner, SolidDeep, Rim, Ladder, LadderRight, Water, Lava, BossPassable;
             public TileBase[,] Rock, Door, KeyDoor, Revolving;    // dibujos de varias celdas: [fila desde arriba, columna]
+            public TileBase[,] DoorClosed, DoorHalf;              // puerta de mundo cerrada y con la fila de abajo abierta
         }
 
         public StyleTiles Style;
@@ -37,7 +38,7 @@ namespace MazeOfKnight.Game
         readonly Dictionary<(RoomModel, int, int), bool> shownRocks = new Dictionary<(RoomModel, int, int), bool>();
         readonly Dictionary<(RoomModel, int, int), int> shownKeyDoors = new Dictionary<(RoomModel, int, int), int>();
         readonly HashSet<(RoomModel, int, int)> shownRevolving = new HashSet<(RoomModel, int, int)>();
-        readonly HashSet<(RoomModel, int, int)> shownDoors = new HashSet<(RoomModel, int, int)>();
+        readonly Dictionary<(RoomModel, int, int), int> shownDoors = new Dictionary<(RoomModel, int, int), int>();
 
         Grid grid;
         Tilemap back, front, rim, rocks, keyDoors, doorsLayer;
@@ -57,7 +58,7 @@ namespace MazeOfKnight.Game
             Style = style;
             if (front == null) return;
             foreach (var ((room, x, y), visible) in new Dictionary<(RoomModel, int, int), bool>(shownRocks)) ShowRock(room, x, y, visible);
-            foreach (var (room, x, y) in new List<(RoomModel, int, int)>(shownDoors)) ShowDoor(room, x, y);
+            foreach (var ((room, x, y), open) in new Dictionary<(RoomModel, int, int), int>(shownDoors)) ShowDoor(room, x, y, open);
             foreach (var (room, x, y) in new List<(RoomModel, int, int)>(shownRevolving)) ShowRevolvingDoor(room, x, y);
             back.GetComponent<TilemapRenderer>().enabled = style == null;
             rim.ClearAllTiles();
@@ -104,8 +105,6 @@ namespace MazeOfKnight.Game
                             front.SetTile(cell, tile);
                         if (!room.shrine) UpdateRim(world, room, col, row);
                     }
-                if (room.doorWorld > 0)
-                    ShowDoor(room, room.door.x, room.door.y);
             }
         }
 
@@ -144,12 +143,21 @@ namespace MazeOfKnight.Game
             rim.SetTile(RoomCoords.Cell(room, col, row), on ? Style.Rim : null);
         }
 
-        // Puerta de mundo que aparece en juego (la del mundo 10).
-        public void ShowDoor(RoomModel room, int x, int y)
+        // Puerta de mundo (4 × 3 tiles: dintel y un hueco de 2 × 2 entre dos jambas), con 'openRows' filas del hueco
+        // abiertas desde abajo: 0 cerrada, 1 a medio abrir, 2 abierta (WorldDoors).
+        public void ShowDoor(RoomModel room, int x, int y, int openRows)
         {
-            shownDoors.Add((room, x, y));
-            if (Style?.Door != null) FillPattern(doorsLayer, room, x, y, Style.Door, 3);
-            else Fill(doorsLayer, room, x, y, 4, 3, door);
+            shownDoors[(room, x, y)] = openRows;
+            if (Style?.Door != null)
+            {
+                var pattern = openRows >= 2 ? Style.Door : openRows == 1 ? Style.DoorHalf : Style.DoorClosed;
+                FillPattern(doorsLayer, room, x, y, pattern ?? Style.Door, 3);
+                return;
+            }
+            Fill(doorsLayer, room, x, y, 4, 3, door);
+            // Sin estilo: el hueco cerrado con el tile de las puertas con llave.
+            for (int r = 1; r <= 2 - openRows; r++)
+                Fill(doorsLayer, room, x + 8, y + 8 * r, 2, 1, keyDoor);
         }
 
         // Sala oscura (mundo 5, sala 6, sin la Candle): los muros no se ven, pero siguen ahí.

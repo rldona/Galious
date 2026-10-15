@@ -21,7 +21,8 @@ namespace MazeOfKnight.Game
         public int CurrentWorld { get; private set; }            // 0 = castillo
         public readonly int[] Experience = new int[2];             // por personaje (Aphrodite = 0, Popolon = 1)
         public int BibleUses;
-        public readonly HashSet<int> OpenedDoors = new HashSet<int>();   // mundos cuya puerta se ha abierto (Ala)
+        public readonly HashSet<int> OpenedDoors = new HashSet<int>();     // mundos cuya puerta se ha abierto (WorldDoors, Ala)
+        public readonly HashSet<int> UnlockedDoors = new HashSet<int>();   // desbloqueadas con la Gran Llave y sin abrir
 
         public Inventory(ItemsData data, List<int> active)
         {
@@ -51,11 +52,8 @@ namespace MazeOfKnight.Game
         {
             Active.RemoveAll(PerWorld);
             CurrentWorld = world;
-            if (world > 0)
-            {
-                OpenedDoors.Add(world);
-                if (worldItems.TryGetValue(world, out var set)) Active.AddRange(set);
-            }
+            if (world > 0 && worldItems.TryGetValue(world, out var set))
+                Active.AddRange(set);
         }
 
         // Partida guardada: objetos de cada mundo como mundo * 256 + objeto.

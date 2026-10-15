@@ -148,6 +148,19 @@ namespace MazeOfKnight.Game.Visuals
             }
         }
 
+        // Puerta de mundo que se abre (WorldDoors): polvo que cae del hueco a cada paso y un temblor pequeño.
+        public static void DoorStep(RoomModel room, int doorX, int doorY, int openRows)
+        {
+            if (Instance == null || room == null || !Atmosphere.Styled) return;
+            var dust = new Color(0.78f, 0.74f, 0.66f, 0.7f);
+            for (int k = 0; k < 4; k++)
+            {
+                var at = World(room, doorX + 9 + k * 4.5f, doorY + 24 - 8 * openRows);
+                Instance.Burst(Instance.debris, at, 4, dust, new Color(0.5f, 0.48f, 0.44f, 0.5f), 1.4f, 120, 270, 0.14f, 0.7f);
+            }
+            RoomCamera.Shake(0.04f);
+        }
+
         public static void PlayerHurt(PlayerMotor m)
         {
             if (Instance == null || m == null || !Atmosphere.Styled) return;

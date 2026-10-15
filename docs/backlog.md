@@ -23,7 +23,7 @@ Lo que falta por hacer en Unity. El estado de lo ya hecho está en [unity.md](un
 ## Prueba de partida completa
 
 - `Editor/Walkthrough/` recorre cada mapa con el motor del jugador (todas las teclas, tick a tick) y lleva la progresión del original hasta el final (menú **Maze of Knight → Prueba de partida completa**, informe en `logs/unity/walkthrough.md`). Escrito pero sin resultados: la búsqueda del castillo (con los ascensores) no acabó la primera pasada en 6 minutos. Falta reducir estados: buscar sala a sala desde sus entradas, quitar del estado lo que no cambia el movimiento y guardar los estados compactos en vez de copias del motor.
-- Encontrado al prepararla: las puertas de mundo están todas abiertas (`GameBootstrap.allDoorsOpen`). En el original cada una se desbloquea con la Gran Llave del mundo anterior (la del mundo 1, con la del castillo) y se abre con una animación (docs/state_machine.md, puertas). `BossFight` y `ShowWorld10Door` cambian el RoomModel importado en memoria (`right`, `doorWorld`).
+- `BossFight` y `ShowWorld10Door` cambian el RoomModel importado en memoria (`right`, `doorWorld`).
 
 ## Estilo visual
 

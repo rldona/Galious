@@ -75,6 +75,22 @@ namespace MazeOfKnight.Game.Visuals
                 yield return new WaitForSeconds(0.08f);
                 ScreenCapture.CaptureScreenshot(Path.Combine(dir, "golpes_chispas.png"));
                 yield return new WaitForSeconds(0.4f);
+                // Puerta del mundo 1 (castillo, sala 104): cerrada, abriéndose y abierta.
+                var doorRoom = game.World.Room(104);
+                if (doorRoom != null && doorRoom.doorWorld == 1)
+                {
+                    game.Motor.Place(game.World, doorRoom, doorRoom.door.x - 24, doorRoom.door.y + 0x18);
+                    yield return new WaitForSeconds(0.8f);
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, "puerta_0_cerrada.png"));
+                    yield return new WaitForSeconds(0.3f);
+                    game.Doors.KeyTaken(0);
+                    game.Motor.Place(game.World, doorRoom, doorRoom.door.x + 16, doorRoom.door.y + 0x18);
+                    yield return new WaitForSeconds(0.32f);
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, "puerta_1_abriendo.png"));
+                    yield return new WaitForSeconds(0.8f);
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, "puerta_2_abierta.png"));
+                    yield return new WaitForSeconds(0.3f);
+                }
                 // Santuario (tienda de Ares, castillo).
                 if (game.DebugOpenShrine("Ares"))
                 {

@@ -273,7 +273,7 @@ namespace MazeOfKnight.Game.Visuals
             waterTile = NewTile("Agua", waterSprite);
             lavaTile = NewTile("Lava", lavaSprite);
             bossTile = NewTile("Pasable en el combate", solidSprite);
-            tiles = new MapView.StyleTiles { Rock = props.Rock, Door = props.Door, KeyDoor = props.KeyDoor, Revolving = props.Revolving, Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, LadderRight = ladderRightTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile };
+            tiles = new MapView.StyleTiles { Rock = props.Rock, Door = props.Door, DoorClosed = props.DoorClosed, DoorHalf = props.DoorHalf, KeyDoor = props.KeyDoor, Revolving = props.Revolving, Solid = solidTile, SolidInner = solidInnerTile, SolidDeep = solidDeepTile, Rim = rimTile, Ladder = ladderTile, LadderRight = ladderRightTile, Water = waterTile, Lava = lavaTile, BossPassable = bossTile };
         }
 
         void ColorTiles(WorldPalette p)

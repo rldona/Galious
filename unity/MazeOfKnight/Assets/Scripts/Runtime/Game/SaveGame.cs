@@ -15,6 +15,7 @@ namespace MazeOfKnight.Game
         public List<int> items = new List<int>();
         public List<int> worldItems = new List<int>();      // mundo * 256 + objeto
         public List<int> openedWorlds = new List<int>();
+        public List<int> unlockedWorlds = new List<int>();   // puertas desbloqueadas sin abrir
         public List<int> bossesDefeated = new List<int>();
         public int bibleUses;
         public int[] experience = new int[2], vitality = new int[2], maxVitality = new int[2];

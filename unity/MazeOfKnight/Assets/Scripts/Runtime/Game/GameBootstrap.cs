@@ -16,8 +16,6 @@ namespace MazeOfKnight.Game
         public int startX = 192;
         public int startY = 120;
         public Character startCharacter = Character.Popolon;
-        [Tooltip("Sin inventario todavía: todas las puertas de mundo abiertas y sin requisitos de personaje.")]
-        public bool allDoorsOpen = true;
 
         public MapView mapView;
         public PlayerController player;
@@ -78,6 +76,7 @@ namespace MazeOfKnight.Game
         public WeaponSystem Weapons { get; private set; }
         public int SelectedWeapon;   // E510: 1 flecha … 6 lupa (0 = ninguna)
         public Inventory Inventory { get; private set; }
+        public WorldDoors Doors { get; private set; }
         public PlayerMotor Motor => motor;
         EnemyCatalog enemyCatalog;
         InventoryMenu menu;
@@ -122,6 +121,19 @@ namespace MazeOfKnight.Game
             Weapons.PlayerHit += (damage, dir) => Hurt(Inventory.ReduceDamage(damage), dir, $"-{damage} (mina)");
             var itemsJson = Resources.Load<TextAsset>("Items");
             Inventory = new Inventory(itemsJson != null ? JsonUtility.FromJson<ItemsData>(itemsJson.text) : null, Collected);
+            Doors = new WorldDoors(Inventory.UnlockedDoors, Inventory.OpenedDoors);
+            Doors.Stage += (w, rows) =>
+            {
+                ShowWorldDoor(w);
+                if (rows > 0) Visuals.HitEffects.DoorStep(motor.Room, motor.Room.door.x, motor.Room.door.y, rows);
+            };
+            Doors.DoorOpened += w =>
+            {
+                // Al abrirse se gasta la Gran Llave (su flag se borra, b02:99C8).
+                Collected.Remove(Inventory.GreatKey);
+                ShowWorldDoor(w);
+                Say($"La puerta del mundo {w} se ha abierto");
+            };
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
             menu = gameObject.AddComponent<InventoryMenu>();
@@ -230,6 +242,9 @@ namespace MazeOfKnight.Game
             roomObjects.CellsChanged += (room, col, row, w, h) => mapView.RedrawCells(World, room, col, row, w, h);
             roomObjects.Message += Say;
             mapView.Build(map, World);
+            foreach (var room in World.Rooms)
+                if (room.doorWorld > 0)
+                    mapView.ShowDoor(room, room.door.x, room.door.y, Doors.OpenRows(room.doorWorld));
             foreach (var d in roomObjects.RevolvingDoors)
                 mapView.ShowRevolvingDoor(d.room, d.x, d.y);
             foreach (var r in rocks.All)
@@ -249,11 +264,21 @@ namespace MazeOfKnight.Game
                 if (m == name) ApplyEvent(id);
         }
 
-        void EnterWorld(int world)
+        void EnterWorld(int world) => EnterWorld(world, false);
+
+        // Abajo delante de una puerta de mundo: solo se entra si está abierta (WorldDoors).
+        void EnterWorld(int world, bool force)
         {
-            if (!allDoorsOpen || !OriginalWorlds.HasEntry(world) || !maps.ContainsKey(OriginalWorlds.MapName(world)))
+            if (!OriginalWorlds.HasEntry(world) || !maps.ContainsKey(OriginalWorlds.MapName(world)))
             {
-                Say($"La puerta del mundo {world} no se abre (aún no implementado)");
+                Say($"Falta el mundo {world}: importa las salas");
+                return;
+            }
+            if (!force && !Doors.IsOpen(world))
+            {
+                // El original no dice nada; el remake lo explica (no cambia nada más).
+                if (Doors.OpeningWorld != world)
+                    Say(Doors.Unlocked.Contains(world) ? "La puerta se está abriendo" : "La puerta está cerrada: hace falta la Gran Llave");
                 return;
             }
             string blocked = Inventory.WorldEntryBlocked(world, motor.Character);
@@ -296,6 +321,9 @@ namespace MazeOfKnight.Game
             motor.Shoes = Inventory.Has(Inventory.Shoes);
             if (Collected.Count != itemsApplied) ApplyWorldItems();
             ShowWorld10Door();
+            int opening = Doors.OpeningWorld;
+            Doors.Tick(motor, mapName == "castle");
+            if (Doors.OpeningWorld != 0 && opening == 0) Sound.Effect(0x22);
             TickBossFight();
             if (TouchBaby())
                 return;
@@ -379,8 +407,12 @@ namespace MazeOfKnight.Game
                 Inventory.Add(room.item.type);
                 if (SelectedWeapon == 0 && room.item.type >= 1 && room.item.type <= 6)
                     SelectedWeapon = room.item.type;
-                if (room.item.type == Inventory.GreatKey && Inventory.GreatKeyBoost(Vitality, MaxVitality, motor.Character))
-                    Say($"Vitalidad máxima {MaxVitality[(int)motor.Character]}");
+                if (room.item.type == Inventory.GreatKey)
+                {
+                    Doors.KeyTaken(Inventory.CurrentWorld);
+                    if (Inventory.GreatKeyBoost(Vitality, MaxVitality, motor.Character))
+                        Say($"Vitalidad máxima {MaxVitality[(int)motor.Character]}");
+                }
                 if (room.item.type == Inventory.Carpet)
                     ApplyWorldItems();
                 Destroy(go);
@@ -529,6 +561,7 @@ namespace MazeOfKnight.Game
                     Destroy(keyView);
                     keyView = null;
                     Inventory.Add(Inventory.GreatKey);
+                    Doors.KeyTaken(Inventory.CurrentWorld);
                     if (Inventory.GreatKeyBoost(Vitality, MaxVitality, motor.Character))
                         Say($"Gran Llave: vitalidad máxima {MaxVitality[(int)motor.Character]}");
                     Bosses.KeyTaken();
@@ -663,6 +696,7 @@ namespace MazeOfKnight.Game
                 items = new List<int>(Collected),
                 worldItems = Inventory.WorldItemsPacked(),
                 openedWorlds = new List<int>(Inventory.OpenedDoors),
+                unlockedWorlds = new List<int>(Inventory.UnlockedDoors),
                 bossesDefeated = new List<int>(Bosses.Defeated),
                 bibleUses = Inventory.BibleUses,
                 experience = (int[])Inventory.Experience.Clone(),
@@ -693,6 +727,14 @@ namespace MazeOfKnight.Game
             foreach (var w in d.openedWorlds) Inventory.OpenedDoors.Add(w);
             Bosses.Defeated.Clear();
             foreach (var w in d.bossesDefeated) Bosses.Defeated.Add(w);
+            Inventory.UnlockedDoors.Clear();
+            foreach (var w in d.unlockedWorlds) Inventory.UnlockedDoors.Add(w);
+            // Partidas de antes de cerrar las puertas: se deducen de las llaves cogidas (la del castillo y la de cada jefe).
+            if (d.unlockedWorlds.Count == 0)
+            {
+                if (d.items.Contains(Inventory.GreatKey) || d.bossesDefeated.Count > 0 || d.openedWorlds.Count > 0) Doors.KeyTaken(0);
+                foreach (var w in d.bossesDefeated) Doors.KeyTaken(w);
+            }
             Inventory.BibleUses = d.bibleUses;
             for (int c = 0; c < 2; c++)
             {
@@ -855,14 +897,22 @@ namespace MazeOfKnight.Game
 
         void ShowWorld10Door()
         {
-            if (mapName != "castle" || world10Room != null || !Bosses.Defeated.Contains(9) || Bosses.Active) return;
+            if (mapName != "castle" || world10Room != null || !(Doors.Unlocked.Contains(10) || Doors.IsOpen(10)) || Bosses.Active) return;
             var room = World.Room(OriginalWorlds.World10DoorRoom[World10Door]);
             if (room == null) return;
             var (x, y) = OriginalWorlds.World10DoorPos[World10Door];
             world10Room = room;
             room.doorWorld = 10;
             room.door = new PointJson { x = x, y = y };
-            mapView.ShowDoor(room, x, y);
+            mapView.ShowDoor(room, x, y, Doors.OpenRows(10));
+        }
+
+        // Vuelve a dibujar la puerta de ese mundo si está en el mapa cargado.
+        void ShowWorldDoor(int world)
+        {
+            if (mapName != "castle") return;
+            var room = World.Rooms.FirstOrDefault(r => r.doorWorld == world);
+            if (room != null) mapView.ShowDoor(room, room.door.x, room.door.y, Doors.OpenRows(world));
         }
 
         void ApplyCarpet()
@@ -1186,8 +1236,7 @@ namespace MazeOfKnight.Game
             if (mapName != "castle" || !Inventory.Has(0x14)) return;
             for (int w = 9; w >= 1; w--)
             {
-                bool unlocked = w == 1 || Bosses.Defeated.Contains(w - 1);
-                if (!unlocked || Inventory.OpenedDoors.Contains(w)) continue;
+                if (!Doors.Unlocked.Contains(w)) continue;
                 if (System.Array.IndexOf(BellRooms[w], to.id) >= 0) { Sound.Effect(0x28); Say("La campana suena"); }
                 return;
             }
@@ -1304,7 +1353,19 @@ namespace MazeOfKnight.Game
 
         // ---------- depuración y capturas (F2, Visuals/UiCapture) ----------
 
-        public void DebugEnterWorld(int world) => EnterWorld(world);
+        public void DebugEnterWorld(int world) => EnterWorld(world, true);
+
+        // Depuración (F5): abre todas las puertas de mundo que hay (la del 10 aparece con la llave del 9).
+        void DebugOpenAllDoors()
+        {
+            for (int w = 1; w <= 9; w++)
+            {
+                Doors.Unlocked.Remove(w);
+                Doors.Opened.Add(w);
+                ShowWorldDoor(w);
+            }
+            Say("[depuración] puertas de mundo 1–9 abiertas");
+        }
 
         public void DebugGoToBoss()
         {
@@ -1369,6 +1430,8 @@ namespace MazeOfKnight.Game
                     Say("[depuración] sala del bebé: rompe las piedras");
                 }
             }
+            if (UnityEngine.InputSystem.Keyboard.current?.f5Key.wasPressedThisFrame == true)
+                DebugOpenAllDoors();
             // Depuración: F2 lleva a la sala del jefe del mundo en el que estás.
             if (UnityEngine.InputSystem.Keyboard.current?.f2Key.wasPressedThisFrame == true && Inventory.CurrentWorld > 0 && !Bosses.Active)
                 DebugGoToBoss();

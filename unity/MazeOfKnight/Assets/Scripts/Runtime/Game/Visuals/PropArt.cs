@@ -21,14 +21,16 @@ namespace MazeOfKnight.Game.Visuals
             Blue = C("#4f8fe0"), White = C("#f2efe6"), Red = C("#d2453c"), Green = C("#6fc36a"), Marble = C("#d9d6cc"),
             MarbleShade = C("#a9a69c"), Stone = C("#6b6d78"), StoneLight = C("#8d909c"), StoneDark = C("#45474f"), Hole = C("#08080d");
 
-        public readonly TileBase[,] Rock, Door, KeyDoor, Revolving;
+        public readonly TileBase[,] Rock, Door, DoorClosed, DoorHalf, KeyDoor, Revolving;
         public readonly Sprite Lift;
         readonly Dictionary<int, Sprite> items = new Dictionary<int, Sprite>();
 
         public PropArt()
         {
             Rock = Tiles(PaintRock(), 2, 2);
-            Door = Tiles(PaintDoor(), 4, 3);
+            Door = Tiles(PaintDoor(2), 4, 3);
+            DoorHalf = Tiles(PaintDoor(1), 4, 3);
+            DoorClosed = Tiles(PaintDoor(0), 4, 3);
             KeyDoor = Tiles(PaintKeyDoor(), 1, 3);
             Revolving = Tiles(PaintRevolving(), 1, 3);
             Lift = ToSprite(PaintLift(), S * RoomCoords.PixelsPerUnit, Vector2.zero);
@@ -109,13 +111,40 @@ namespace MazeOfKnight.Game.Visuals
             return cv.ToTexture();
         }
 
-        // Pórtico griego: escalón, dos columnas, frontón y la entrada oscura con un brillo.
-        static Texture2D PaintDoor()
+        // Pórtico griego: escalón, dos columnas, frontón y la entrada oscura con un brillo. Cerrada, una losa de piedra
+        // con bandas de bronce y el sello de la Gran Llave tapa la entrada; al abrirse sube por detrás del friso, como en
+        // el original, que abre el hueco de abajo arriba ('openRows' filas de 8 px abiertas: 0, 1 o 2).
+        static Texture2D PaintDoor(int openRows)
         {
             var cv = new ColorCanvas(32 * S, 24 * S, S, 0, 0);
-            cv.Fill((x, y) => Box(x, y, 16, 10.5f, 10.2f, 9.6f), Hole, 5, 0, 27, 21);
+            Func<float, float, float> entrance = (x, y) => Box(x, y, 16, 10.5f, 10.2f, 9.6f);
+            cv.Fill(entrance, Hole, 5, 0, 27, 21);
             cv.Fill((x, y) => Mathf.Max(Ellipse(x, y, 16, 3.5f, 8.4f, 9.5f), -y), C("#1c2440"), 7, 0, 25, 14);
             cv.Fill((x, y) => Mathf.Max(Ellipse(x, y, 16, 1.5f, 5.0f, 6.0f), -y), new Color(0.6f, 0.75f, 1f, 0.35f), 10, 0, 22, 8);
+            if (openRows < 2)
+            {
+                float lift = openRows == 0 ? 0 : 7.6f;
+                Func<float, float, float> slab = (x, y) => Mathf.Max(Box(x, y, 16, 10.5f + lift, 10.0f, 9.6f), entrance(x, y));
+                cv.Fill(slab, Stone, 5, 0, 27, 21);
+                // Sillares: juntas horizontales y una vertical alterna.
+                for (int k = 1; k <= 3; k++)
+                {
+                    float jy = 0.9f + lift + k * 4.8f;
+                    cv.Fill((x, y) => Mathf.Max(Box(x, y, 16, jy, 10.0f, 0.18f), slab(x, y)), StoneDark, 5, jy - 1, 27, jy + 1);
+                    float jx = k % 2 == 0 ? 11.0f : 21.0f;
+                    float my = jy - 2.4f;
+                    cv.Fill((x, y) => Mathf.Max(Box(x, y, jx, my, 0.18f, 2.4f), slab(x, y)), StoneDark, jx - 1, my - 3, jx + 1, my + 3);
+                }
+                cv.Fill((x, y) => Mathf.Max(Box(x, y, 16, 1.4f + lift, 10.0f, 0.5f), slab(x, y)), StoneLight, 5, 0, 27, 3 + lift);
+                // Bandas de bronce y el sello dorado de la llave.
+                foreach (float bx in new[] { 8.2f, 23.8f })
+                    cv.Fill((x, y) => Mathf.Max(Box(x, y, bx, 10.5f + lift, 0.8f, 9.6f), slab(x, y)), Bronze, bx - 1.5f, 0, bx + 1.5f, 21);
+                float sy = 10.5f + lift;
+                cv.Fill((x, y) => Mathf.Max(Circle(x, y, 16, sy, 3.6f), entrance(x, y)), GoldDark, 12, sy - 4, 20, sy + 4);
+                cv.Fill((x, y) => Mathf.Max(Circle(x, y, 16, sy, 2.9f), entrance(x, y)), Gold, 12, sy - 4, 20, sy + 4);
+                cv.Fill((x, y) => Mathf.Max(Mathf.Min(Circle(x, y, 16, sy + 0.8f, 0.9f), Box(x, y, 16, sy - 0.6f, 0.35f, 1.3f)), entrance(x, y)), Hole, 14, sy - 3, 18, sy + 3);
+                cv.Fill((x, y) => Mathf.Max(Box(x, y, 16, 0.6f + lift, 10.2f, 0.35f), entrance(x, y)), new Color(0, 0, 0, 0.45f), 5, 0, 27, 2 + lift);
+            }
             foreach (float cx in new[] { 3.6f, 28.4f })
             {
                 cv.Fill((x, y) => Box(x, y, cx, 9.6f, 2.4f, 9.0f), Marble, cx - 3, 0, cx + 3, 19);
