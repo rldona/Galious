@@ -33,6 +33,9 @@ namespace MazeOfKnight.Game.Visuals
         public static EnemyArt EnemyArt { get; private set; }
         // Objetos y ascensores; null con el estilo quitado.
         public static PropArt Props { get; private set; }
+        public static CharacterArt Characters { get; private set; }
+        // El estilo del remake está puesto (lo mira la interfaz).
+        public static bool Styled { get; private set; }
         PropArt props;
         EnemyArt enemyArt;
 
@@ -132,6 +135,7 @@ namespace MazeOfKnight.Game.Visuals
             playerLight.falloffIntensity = 0.6f;
 
             motes = BuildMotes();
+            gameObject.AddComponent<RemakeHud>().game = game;
             enemyArt = new EnemyArt();
             characters = new CharacterArt { ShieldLevel = () => game != null && game.Inventory != null ? game.Inventory.ShieldLevel : 0 };
             slash = Layer("Estela del espadazo", 12, additive);
@@ -161,6 +165,8 @@ namespace MazeOfKnight.Game.Visuals
             CharacterMaterial = null;
             EnemyArt = null;
             Props = null;
+            Characters = null;
+            Styled = false;
         }
 
         SpriteRenderer Layer(string name, int order, Material mat)
@@ -328,6 +334,7 @@ namespace MazeOfKnight.Game.Visuals
         void Apply(bool on)
         {
             styled = on;
+            Styled = on;
             root.gameObject.SetActive(true);
             foreach (var sr in new[] { sky, far, mid, near, fogFar, fogLow, front }) sr.enabled = on;
             foreach (var s in shafts) s.enabled = on;
@@ -349,6 +356,7 @@ namespace MazeOfKnight.Game.Visuals
                 player.Art = on ? characters : null;
                 EnemyArt = on ? enemyArt : null;
                 Props = on ? props : null;
+                Characters = on ? characters : null;
                 player.Slash = slash;
             }
             shownRoom = null;                        // vuelve a montar la sala

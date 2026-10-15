@@ -71,6 +71,9 @@ namespace MazeOfKnight.Game.Visuals
             }
         }
 
+        // La parte del fotograma donde está el cuerpo (para retratos): sin el sitio de la espada.
+        public static readonly Rect PortraitCrop = new Rect(14f / Wpx, 0.02f, 20f / Wpx, 20f / Hpx);
+
         public Sprite Get(Character c, Anim a, int i, int shield = 0)
         {
             shield = Mathf.Clamp(shield, 0, 3);

@@ -66,6 +66,11 @@ namespace MazeOfKnight.Game
             text.fontSize = Mathf.Max(10, (int)(6.5f * scale));
             small.fontSize = Mathf.Max(8, (int)(5f * scale));
             var s = Visit.Shrine;
+            if (Visuals.Atmosphere.Styled)
+            {
+                DrawStyled(R, scale);
+                return;
+            }
 
             Box(R(0, 32, 256, 160), Color.black);
             GUI.Label(R(0, 40, 256, 8), s.god.ToUpperInvariant(), small);
@@ -97,6 +102,49 @@ namespace MazeOfKnight.Game
             GUI.Label(R(4, 182, 250, 10),
                 $"flechas {Visit.Arrows:000}   monedas {Visit.Coins:000}   llaves {Visit.Keys:000}     ← → elegir   Espacio {(s.kind == "shop" ? "comprar" : "aceptar")}   ↓ salir",
                 small);
+        }
+
+        // Con el estilo del remake (Visuals/UiKit): marco de filigrana, el nombre del dios como título, iconos en la tienda
+        // y la mano sustituida por un marco dorado. Las posiciones son las del original.
+        void DrawStyled(System.Func<float, float, float, float, Rect> R, float scale)
+        {
+            var s = Visit.Shrine;
+            var props = Visuals.Atmosphere.Props;
+            void T(Rect r, string str, float px, TextAnchor a, Color c, bool title = false) =>
+                Visuals.UiKit.Text(r, str, px * scale / Visuals.UiKit.Scale, a, c, title);
+            Visuals.UiKit.Box(new Rect(0, 0, Screen.width, Screen.height), new Color(0, 0, 0, 0.85f));
+            Visuals.UiKit.TitleLine(R(0, 38, 256, 10), s.god.ToUpperInvariant(), 8 * scale / Visuals.UiKit.Scale);
+            // Retrato provisional: un halo dorado.
+            Visuals.UiKit.Medallion(R(118, 48, 20, 20));
+            Visuals.UiKit.Panel(R(28, 66, 200, 54));
+            T(R(44, 72, 176, 44), Visit.Text, 6.2f, TextAnchor.UpperLeft, Visuals.UiKit.Bone);
+
+            if (s.kind == "shop")
+            {
+                Visuals.UiKit.Panel(R(28, 122, 200, 60));
+                for (int slot = 0; slot < 3; slot++)
+                {
+                    var item = Visit.ItemAt(slot);
+                    if (item == null) continue;
+                    float x = 72 + 48 * slot;
+                    if (!Visit.Sold.Contains(slot))
+                    {
+                        if (props != null) Visuals.UiKit.Icon(R(x - 2, 126, 20, 20), props.Item(item.type));
+                        T(R(x - 18, 146, 52, 8), item.name, 4.2f, TextAnchor.MiddleCenter, Visuals.UiKit.Dim);
+                    }
+                    T(R(x - 8, 154, 32, 10), item.price.ToString("00"), 6, TextAnchor.MiddleCenter, Visuals.UiKit.Gold, true);
+                    if (Visit.Cursor == slot)
+                        Visuals.UiKit.Frame(R(x - 10, 124, 36, 42), Visuals.UiKit.Gold, Mathf.Max(1, scale * 0.6f));
+                }
+            }
+            if (Visit.AskYesNo)
+            {
+                T(R(60, 106, 60, 10), "SÍ", 6.5f, TextAnchor.MiddleCenter, Visit.Yes ? Visuals.UiKit.Gold : Visuals.UiKit.Dim, true);
+                T(R(136, 106, 60, 10), "NO", 6.5f, TextAnchor.MiddleCenter, Visit.Yes ? Visuals.UiKit.Dim : Visuals.UiKit.Gold, true);
+            }
+            T(R(0, 184, 256, 8),
+                $"flechas {Visit.Arrows:000}   monedas {Visit.Coins:000}   llaves {Visit.Keys:000}     ← → elegir   Espacio {(s.kind == "shop" ? "comprar" : "aceptar")}   ↓ salir",
+                4.2f, TextAnchor.MiddleCenter, Visuals.UiKit.Dim);
         }
 
         static void Box(Rect r, Color c)

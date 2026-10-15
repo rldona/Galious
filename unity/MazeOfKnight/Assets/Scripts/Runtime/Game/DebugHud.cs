@@ -2,7 +2,8 @@ using UnityEngine;
 
 namespace MazeOfKnight.Game
 {
-    // Ayuda en pantalla para las pruebas: controles, mapa, sala, posición en píxeles del original y estado.
+    // Ayuda en pantalla para las pruebas: controles, mapa, sala, posición en píxeles del original y estado. Con el estilo
+    // del remake solo sale con F8 (el marcador es Visuals/RemakeHud).
     public class DebugHud : MonoBehaviour
     {
         public GameBootstrap bootstrap;
@@ -13,10 +14,13 @@ namespace MazeOfKnight.Game
         {
             if (player == null || player.Motor == null || bootstrap.EndingRunning || bootstrap.AttractRunning)
                 return;
+            // Con el estilo del remake el marcador es RemakeHud; esto solo con F8.
+            if (Visuals.Atmosphere.Styled && !Visuals.RemakeHud.ShowDebug)
+                return;
             style ??= new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(12, Screen.height / 45) };
             var m = player.Motor;
             string text =
-                "← → andar   ↑ saltar / subir   ↓ bajar / entrar   Espacio espada   M arma   F1 (o I) objetos   K +1 llave   G armas   F2 sala del jefe   F4 sala del bebé   Esc salir\n" +
+                "← → andar   ↑ saltar / subir   ↓ bajar / entrar   Espacio espada   M arma   F1 (o I) objetos   K +1 llave   G armas   F2 sala del jefe   F4 sala del bebé   F6 paleta   F7 estilo   F8 pruebas   Esc salir\n" +
                 $"VIT Popolon {Bar(bootstrap.Vitality[1], bootstrap.MaxVitality[1])} x{bootstrap.Lives[1]}   Aphrodite {Bar(bootstrap.Vitality[0], bootstrap.MaxVitality[0])} x{bootstrap.Lives[0]}" +
                 (bootstrap.Inventory != null ? $"   EXP {bootstrap.Inventory.Experience[(int)m.Character]}/48" : "") +
                 $"   flechas {bootstrap.Arrows:000}   monedas {bootstrap.Coins:000}   llaves {bootstrap.Keys:000}   arma: {bootstrap.WeaponName(bootstrap.SelectedWeapon)}\n" +

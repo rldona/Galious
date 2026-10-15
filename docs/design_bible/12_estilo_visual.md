@@ -120,11 +120,20 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
   - un temblor de cámara pequeño en los golpes fuertes;
   - partículas al romper piedras y paredes.
 
-## Interfaz (pendiente)
+## Interfaz
 
-- **Marcos de filigrana blanca** sobre negro. El friso griego (meandro) sustituye a las volutas.
-- **Tipografía serif** de inspiración clásica y licencia libre, por ejemplo Cinzel (OFL).
-- **Vitalidad:** una fila de iconos en lugar de la barra, sin cambiar las unidades del original.
+Con el estilo puesto (F7), la interfaz del remake sustituye al texto de pruebas, que sigue disponible con F8. Se dibuja con OnGUI (`UiKit.cs`, `RemakeHud.cs`).
+- **Tipografía:** Optima para títulos y Palatino para el texto, del sistema (con Georgia de reserva). Más adelante, una fuente libre incluida en el proyecto, por ejemplo Cinzel (OFL).
+- **Marcos:** filigrana blanca de doble filete con un meandro griego en cada esquina, sobre negro translúcido.
+- **Marcador:**
+  - arriba a la izquierda, un medallón con el personaje que juega;
+  - su vitalidad como barra ornamentada que crece con el máximo (como la del original: una unidad por paso, con marcas cada 8, una por Gran Llave); el daño y la cura pendientes se ven antes de aplicarse;
+  - debajo, la vitalidad y las vidas del otro personaje, y la experiencia (0–48);
+  - arriba a la derecha, flechas, monedas y llaves con sus iconos, y el arma elegida;
+  - abajo, la vida del jefe en combate (o el aviso de escribir la palabra) y los mensajes;
+  - al cambiar de mapa, su nombre en grande con el tema debajo (como los títulos de zona), 3,5 s.
+- **Menú de objetos (F1) y santuarios:** las mismas posiciones del original, con marco de filigrana, los retratos de los personajes, los iconos de `PropArt` y un marco dorado para lo elegido.
+- **Capturas:** el juego compilado acepta `-capturaInterfaz <carpeta>`: empieza la partida, guarda el marcador, da unos objetos, abre el menú F1, guarda las capturas y sale (`UiCapture.cs`). OnGUI no sale en `Camera.Render`, por eso las capturas del editor no la muestran.
 
 ## Producción del arte
 
@@ -146,6 +155,7 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 ## Controles de prueba
 
 - **F7:** pone o quita el estilo del remake y vuelve a los tiles provisionales.
+- **F8:** el texto de pruebas (controles, sala, posición, estado) encima del marcador.
 - **F6:** recorre las paletas de los 11 mapas sobre la sala actual.
 - **Maze of Knight → Capturas del estilo visual** (o `VisualPreview.CaptureBatch` en batch): guarda 13 capturas en `logs/unity/visual_NN.png`, de varias salas del castillo con cada paleta.
 
@@ -163,4 +173,6 @@ Definidas en `WorldPalette.cs`. Cada paleta tiene estos colores:
 | `Runtime/Game/Visuals/CharacterArt.cs` | Popolon y Aphrodite: fotogramas, animación y estela del espadazo |
 | `Runtime/Game/Visuals/EnemyArt.cs` | enemigos por arquetipos, botín y armas del jugador |
 | `Runtime/Game/Visuals/PropArt.cs` | piedras, puertas, ascensores e iconos de los objetos |
+| `Runtime/Game/Visuals/UiKit.cs`, `RemakeHud.cs` | piezas de la interfaz y marcador del remake |
+| `Runtime/Game/Visuals/UiCapture.cs` | capturas de la interfaz con `-capturaInterfaz` |
 | `Runtime/Game/Visuals/ColorCanvas.cs` | lienzo de color con contorno de tinta para personajes y enemigos |

@@ -112,6 +112,11 @@ namespace MazeOfKnight.Game
             small.fontSize = Mathf.Max(8, (int)(4.2f * scale));
             label.fontSize = Mathf.Max(10, (int)(6.5f * scale));
             bool blink = (Time.frameCount / 8) % 2 == 0;
+            if (Visuals.Atmosphere.Styled)
+            {
+                DrawStyled(R, scale, blink);
+                return;
+            }
 
             Box(R(0, 32, 256, 160), new Color(0, 0, 0, 0.92f));
             // Retratos (fila de personaje).
@@ -155,6 +160,60 @@ namespace MazeOfKnight.Game
             GUI.Label(R(4, 33, 250, 8), help, small);
             var names = game.Inventory.Active.Select(t => game.Inventory.Data.Get(t)?.name).Where(n => n != null && !n.StartsWith("Quiver"));
             GUI.Label(R(4, 184, 250, 8), string.Join(" · ", names), small);
+        }
+
+        // Con el estilo del remake (Visuals/UiKit): el mismo menú con marco de filigrana, iconos y los personajes
+        // dibujados. Las posiciones son las del original.
+        void DrawStyled(System.Func<float, float, float, float, Rect> R, float scale, bool blink)
+        {
+            var props = Visuals.Atmosphere.Props;
+            var chars = Visuals.Atmosphere.Characters;
+            void T(Rect r, string text, float px, TextAnchor a, Color c, bool title = false) =>
+                Visuals.UiKit.Text(r, text, px * scale / Visuals.UiKit.Scale, a, c, title);
+            Visuals.UiKit.Shade(new Rect(0, 0, Screen.width, Screen.height), 0.55f);
+            Visuals.UiKit.Panel(R(-4, 28, 264, 168));
+            Visuals.UiKit.TitleLine(R(0, 33, 256, 8), "OBJETOS", 6.5f * scale / Visuals.UiKit.Scale);
+
+            // Retratos: solo si ese personaje tiene vidas.
+            int shield = game.Inventory.ShieldLevel;
+            foreach (var (c, x) in new[] { (Character.Popolon, 96f), (Character.Aphrodite, 144f) })
+            {
+                bool alive = game.Lives[(int)c] > 0;
+                if (chars != null) Visuals.UiKit.Icon(R(x - 4, 38, 24, 26), chars.Get(c, Visuals.CharacterArt.Anim.Idle, 0, shield), alive ? 1 : 0.25f, false, Visuals.CharacterArt.PortraitCrop);
+                T(R(x - 16, 64, 48, 8), $"{c} ×{game.Lives[(int)c]}", 4.4f, TextAnchor.MiddleCenter, alive ? Visuals.UiKit.Bone : Visuals.UiKit.Dim);
+            }
+            if (row != 0 || blink)
+                Visuals.UiKit.Frame(R(character == Character.Popolon ? 90 : 138, 38, 28, 34), Visuals.UiKit.Gold, Mathf.Max(1, scale * 0.6f));
+
+            T(R(96, 70, 64, 10), "ITEM", 6, TextAnchor.MiddleCenter, Visuals.UiKit.Bone, true);
+            foreach (var item in game.Inventory.Data.items)
+            {
+                var m = item.menu;
+                if (m.area != "items" && m.area != "world") continue;
+                bool own = game.Inventory.Has(item.type) || item.type == 0x28 && shield > 0;
+                var cell = R(m.x, m.y, 15, 15);
+                Visuals.UiKit.Frame(cell, new Color(1, 1, 1, own ? 0.25f : 0.08f), Mathf.Max(1, scale * 0.3f));
+                if (!own || props == null) continue;
+                int type = item.type == 0x28 ? new[] { 0x28, 0x28, 0x2B, 0x2C }[shield] : item.type;
+                Visuals.UiKit.Icon(cell, props.Item(type));
+            }
+            T(R(8, 128, 120, 10), "MAPA", 6, TextAnchor.MiddleLeft, Visuals.UiKit.Bone, true);
+            DrawMap(R);
+
+            // Armas.
+            Visuals.UiKit.Frame(R(104, 160, 136, 24), new Color(1, 1, 1, 0.5f), Mathf.Max(1, scale * 0.4f));
+            foreach (var w in game.Inventory.Data.items.Where(i => i.menu.area == "weapons"))
+            {
+                if (!game.Inventory.Has(w.type) || props == null) continue;
+                Visuals.UiKit.Icon(R(WeaponX[w.type - 1] - 2, 164, 16, 16), props.Item(w.type));
+            }
+            if (weapon > 0 && (row != 1 || blink))
+                Visuals.UiKit.Frame(R(WeaponX[weapon - 1] - 4, 163, 20, 18), Visuals.UiKit.Gold, Mathf.Max(1, scale * 0.6f));
+
+            string help = "↑↓ fila   ←→ cambiar   F1 cerrar" +
+                          (game.Inventory.Has(Inventory.AngelRing) ? "   Return: Angel Ring" : "") +
+                          (game.Inventory.Has(Inventory.Wing) && game.Inventory.CurrentWorld == 0 ? "   1-9: Ala" : "");
+            T(R(0, 186, 256, 8), help, 4.2f, TextAnchor.MiddleCenter, Visuals.UiKit.Dim);
         }
 
         // Mapa del mundo (con el Map de ese mundo): una celda de 8 × 4 px por sala; la sala actual en rojo y, con la
