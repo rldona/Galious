@@ -20,7 +20,8 @@ namespace MazeOfKnight.Game.Visuals
     {
         public const float Lip = 2f;                 // px que asoma el suelo por encima de donde se pisa
         public const float Overlap = 0.8f;           // cada pieza empieza al 80 % de la anterior
-        public const float TechoMax = 12f;           // px que cuelga un techo como mucho (lo largo, las estalactitas)
+        public const float TechoMax = 12f;
+        public const float SueloMax = 9f;            // y un suelo (los escombros de los Canales son gruesos)           // px que cuelga un techo como mucho (lo largo, las estalactitas)
         // Capas, de atrás adelante (como Team Cherry): 4, el fondo lejano (un trozo de una sala de Hollow Knight, apagado);
         // 3, el degradado con niebla, rocas grandes y arcos y estatuas; 2, el juego (el sólido y sus bordes); 1, siluetas
         // negras por delante de los personajes, asomando por los bordes de la sala.
@@ -34,19 +35,21 @@ namespace MazeOfKnight.Game.Visuals
         {
             public string Zone;
             public Color FarTint, BackTop, BackLow, Deep, Far;
+            public int DetailEvery = 6;     // un adorno de cada tantas casillas de suelo
         }
         static Look L(string zone, string farTint, string top, float topA, string low, float lowA, string deep, string far) => new Look
         {
-            Zone = zone, FarTint = Hex(farTint, 1), BackTop = Hex(top, topA), BackLow = Hex(low, lowA), Deep = Hex(deep, 0.85f), Far = Hex(far, 0.7f),
+            Zone = zone, FarTint = Hex(farTint, 1), BackTop = Hex(top, topA), BackLow = Hex(low, lowA), Deep = Hex(deep, 0.45f), Far = Hex(far, 0.7f),
         };
+        static Look With(Look l, int detailEvery) { l.DetailEvery = detailEvery; return l; }
         static Color Hex(string h, float a) { ColorUtility.TryParseHtmlString(h, out var c); c.a = a; return c; }
         // Índice 0 = castillo, 1–10 = mundos (el reparto acordado con el usuario el 16 de octubre de 2026). Sin su kit
         // importado, una zona usa la de los Cruces.
         public static readonly Look[] Looks =
         {
             L("cruces", "#6b7899", "#0a0d14", 0.8f, "#29334a", 0.45f, "#2b354d", "#5c6e94"),      // castillo
-            L("greenpath", "#7a9993", "#08100f", 0.8f, "#1f3d38", 0.45f, "#1f3833", "#527a73"),   // 1 cueva verde agua
-            L("canales", "#6b8a99", "#070d12", 0.8f, "#1f3542", 0.45f, "#1d313d", "#4f7385"),     // 2 arrecife
+            With(L("greenpath", "#7a9993", "#08100f", 0.8f, "#1f3d38", 0.45f, "#1f3833", "#527a73"), 4),   // 1 cueva verde agua (hierba)
+            With(L("canales", "#6b8a99", "#070d12", 0.8f, "#1f3542", 0.45f, "#1d313d", "#4f7385"), 16),   // 2 arrecife (tarros, pocos)
             L("colmena", "#99876b", "#120d06", 0.8f, "#4a3a1f", 0.45f, "#3d301b", "#8a7449"),     // 3 guarida ámbar
             L("cristal", "#8a7a99", "#0e0914", 0.8f, "#3a2a4d", 0.45f, "#30243f", "#73609a"),     // 4 cristal violeta
             L("ciudad", "#6b7d99", "#070b14", 0.8f, "#1f2d4a", 0.45f, "#1d2840", "#4f6494"),      // 5 ruinas hundidas
@@ -152,10 +155,10 @@ namespace MazeOfKnight.Game.Visuals
                 foreach (var (c0, c1) in Runs(c => S(c, r) && !S(c, r - 1)))
                 {
                     float surface = OriginalPhysics.RoomTopPx + r * 8;
-                    Row(room, root.transform, rng, "suelo", c0 * 8, c1 * 8, surface - Lip, -4);
-                    // Adornos encima (hierba, huesos, bases de columna): uno de cada 5 casillas, de 12 px de alto como mucho.
+                    Row(room, root.transform, rng, "suelo", c0 * 8, c1 * 8, surface - Lip, -4, SueloMax);
+                    // Adornos encima (hierba, huesos, tarros): uno de cada Look.DetailEvery casillas, de 12 px de alto como mucho.
                     for (int c = c0; c < c1; c++)
-                        if (rng.Next(5) == 0 && Pick("detalle", rng) is Sprite d)
+                        if (rng.Next(look.DetailEvery) == 0 && Pick("detalle", rng) is Sprite d)
                         {
                             var size = SizePx(d);
                             float k = Mathf.Min(1, 12f / size.y);
@@ -331,7 +334,25 @@ namespace MazeOfKnight.Game.Visuals
                 float poke = 4 + (float)rng.NextDouble() * (Poke - 4);
                 float k = 1.5f + (float)rng.NextDouble() * 0.5f;
                 var size = SizePx(sp) * k;
-                if (size.y > bottom - (floor - poke)) { k *= (bottom - (floor - poke)) / size.y; size = SizePx(sp) * k; }
+                // A lo ancho, dentro del suelo donde se apoya (más 4 px por lado): no sobresale en el aire.
+                int left = c, right = c;
+                while (left > 0 && solid(left - 1, r + 1) && !solid(left - 1, r)) left--;
+                while (right < RoomCoords.Cols - 1 && solid(right + 1, r + 1) && !solid(right + 1, r)) right++;
+                float runW = (right - left + 1) * 8 + 8;
+                if (size.x > runW) { k *= runW / size.x; size = SizePx(sp) * k; }
+                int half = Mathf.CeilToInt(size.x / 16);
+                c = Mathf.Clamp(c, left + half - 1, right - half + 1);
+                // A lo alto, solo la roca de debajo de ese suelo, la más fina de las columnas que cubre (si hay aire más
+                // abajo, no se mete en él).
+                float limit = bottom;
+                for (int cc = Mathf.Max(0, c - half); cc <= Mathf.Min(RoomCoords.Cols - 1, c + half); cc++)
+                {
+                    int depth = 0;
+                    while (r + 1 + depth < RoomCoords.Rows && solid(cc, r + 1 + depth)) depth++;
+                    if (r + 1 + depth < RoomCoords.Rows) limit = Mathf.Min(limit, floor + depth * 8);
+                }
+                if (size.y > limit - (floor - poke)) { k *= (limit - (floor - poke)) / size.y; size = SizePx(sp) * k; }
+                if (k < 1f) continue;                            // no cabe: más pequeño ya no parecería más cerca
                 Put(room, parent, sp, c * 8 + 4 - size.x / 2, floor - poke, k, rng.Next(2) == 0, ForeOrder, Silhouette);
             }
             if (rng.Next(2) == 0 && Pick("pp_arriba", rng) is Sprite hang)
@@ -345,8 +366,24 @@ namespace MazeOfKnight.Game.Visuals
                     float poke = 8 + (float)rng.NextDouble() * (PokeUp - 8);
                     float k = 1.4f + (float)rng.NextDouble() * 0.4f;
                     var size = SizePx(hang) * k;
-                    if (size.y > ceiling + poke - top) { k *= (ceiling + poke - top) / size.y; size = SizePx(hang) * k; }
-                    Put(room, parent, hang, c * 8 + 4 - size.x / 2, ceiling + poke - size.y, k, rng.Next(2) == 0, ForeOrder, Silhouette);
+                    // Igual que abajo: a lo ancho, dentro del techo donde cuelga; a lo alto, la roca más fina de encima.
+                    int left = c, right = c;
+                    while (left > 0 && solid(left - 1, r - 1) && !solid(left - 1, r)) left--;
+                    while (right < RoomCoords.Cols - 1 && solid(right + 1, r - 1) && !solid(right + 1, r)) right++;
+                    if (r == 0) { left = 0; right = RoomCoords.Cols - 1; }
+                    float runW = (right - left + 1) * 8 + 8;
+                    if (size.x > runW) { k *= runW / size.x; size = SizePx(hang) * k; }
+                    int half = Mathf.CeilToInt(size.x / 16);
+                    c = Mathf.Clamp(c, left + half - 1, right - half + 1);
+                    float limit = top;
+                    for (int cc = Mathf.Max(0, c - half); cc <= Mathf.Min(RoomCoords.Cols - 1, c + half); cc++)
+                    {
+                        int depth = 0;
+                        while (r - 1 - depth >= 0 && solid(cc, r - 1 - depth)) depth++;
+                        if (r - 1 - depth >= 0) limit = Mathf.Max(limit, ceiling - depth * 8);
+                    }
+                    if (size.y > ceiling + poke - limit) { k *= (ceiling + poke - limit) / size.y; size = SizePx(hang) * k; }
+                    if (size.y > 4) Put(room, parent, hang, c * 8 + 4 - size.x / 2, ceiling + poke - size.y, k, rng.Next(2) == 0, ForeOrder, Silhouette);
                 }
             }
         }

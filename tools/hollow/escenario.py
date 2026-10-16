@@ -9,7 +9,9 @@ interior de la roca en Hollow Knight, y las piezas visten sus bordes.
 
 Un kit por zona de Hollow Knight (KITS; cada mundo del original lleva una, la tabla está en Visuals/HollowScenery):
 sale a Assets/Art/Resources/Hollow/escenario/<zona>/<papel>__<pieza>.png, fuera de git como el resto del arte de Team
-Cherry. Las piezas salen de hollow-knight-crossroads/atlas_<atlas>/ (ya recortadas).
+Cherry. Las piezas salen de hollow-knight-crossroads/atlas_<atlas>/ (ya recortadas) o, para las zonas que no están ahí,
+de su caja en un atlas sin recortar de hollow-knight-texturas/atlas_sprites (las cajas salen de la hoja numerada de
+atlas_piezas.py; se guarda la mancha más grande de la caja).
 Papeles:
   - suelo: el borde de arriba de un sólido (donde se pisa);
   - techo: el borde de abajo (lo que cuelga);
@@ -27,12 +29,26 @@ from pathlib import Path
 
 from PIL import Image, ImageFilter
 
+import atlas_piezas
+
+Image.MAX_IMAGE_PIXELS = None   # las salas enteras de Hollow Knight pasan de 90 megapíxeles
+
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/escenario"
 SCALE = 1.375   # la del Caballero
 KIT = "hollow-knight-crossroads"
 
-# zona → papel → piezas (atlas/nombre). Las de pared con _l/_r se usan cada una en su lado; las demás se voltean.
+GG = "GG_Waterway.png"          # el del Palacio de los dioses, con las piezas de los Canales
+SLUICE = "Water_Sluice.png"
+
+
+def A(atlas, box, name):
+    """Una pieza por su caja en un atlas sin recortar. Con atlas None, 'box' es una pieza recortada con otro nombre (la
+    misma dos veces sale el doble)."""
+    return (atlas, box, name)
+
+
+# zona → papel → piezas (atlas/nombre, o A(atlas, caja, nombre)). Las de pared con _l/_r se usan cada una en su lado; las demás se voltean.
 KITS = {
     # Castillo: los Cruces Olvidados.
     "cruces": {
@@ -82,7 +98,40 @@ KITS = {
         "pp_arriba": ["atlas_Green/fung_FG_hanging_01", "atlas_Green/fungd_vine_02", "atlas_Green/fungd_roof_vine_01_0004_a"],
         "detalle": ["atlas_Green/grass_01_idle0000", "atlas_Green/grass_03_idle0000", "atlas_Green/simple_grass0000"],
     },
+    # Mundo 2 (arrecife): los Canales Reales. Escombros por suelo, un borde que gotea por techo, columnas y muros de
+    # ladrillo de la esclusa por pared; rejas redondas de desagüe, tuberías, cadenas y el gran arco al fondo.
+    "canales": {
+        "suelo": [A(GG, (1166, 388, 1482, 476), "escombros_a"), A(GG, (372, 496, 632, 588), "escombros_b"),
+                  "atlas_Crossroads/highway_01_layered_0003_Layer-0", "atlas_Crossroads/highway_01_layered_0001_Layer-4"],
+        "techo": ["atlas_Crossroads/roof_03", A(None, "atlas_Crossroads/roof_03", "roof_03_b"), A(GG, (988, 98, 1306, 176), "borde_goteando")],
+        "estalactita": [A(GG, (1464, 114, 1528, 552), "gota_larga")],
+        "pared_izq": [A(SLUICE, (416, 250, 492, 512), "ladrillo_columna_a"), A(SLUICE, (498, 250, 572, 512), "ladrillo_columna_b")],
+        "pared_der": [A(SLUICE, (218, 252, 412, 512), "ladrillo_muro")],
+        "masa": ["atlas_Crossroads/Mines_Layered_0020_a", A(GG, (736, 50, 990, 362), "desague_a"),
+                 A(GG, (1160, 592, 1382, 898), "desague_b")],
+        "fondo": [A("waterways.png", (10, 98, 704, 502), "arco"), A("waterways.png", (523, 36, 1003, 331), "reja_media"),
+                  A(GG, (736, 50, 990, 362), "desague_a"), A(GG, (1160, 592, 1382, 898), "desague_b"),
+                  A(GG, (1844, 472, 2030, 552), "tuberia"), A(GG, (120, 6, 414, 498), "cadenas")],
+        "pp_abajo": [A(GG, (1166, 388, 1482, 476), "escombros_a"),
+                     A(GG, (372, 496, 632, 588), "escombros_b")],
+        "pp_arriba": [A(GG, (120, 6, 414, 498), "cadenas"), A(GG, (930, 264, 1052, 752), "tubos"),
+                      A(GG, (988, 98, 1306, 176), "borde_goteando")],
+        "detalle": [A(GG, (1568, 850, 1696, 984), "tarro"), A(GG, (1704, 890, 1832, 1022), "barril"),
+                    A(GG, (640, 450, 750, 566), "piedras")],
+    },
 }
+
+
+def load_piece(src, name):
+    if isinstance(name, tuple) and name[0] is None:
+        name = name[1]
+    elif isinstance(name, tuple):
+        atlas, box, _ = name
+        return atlas_piezas.piece(Image.open(src / "hollow-knight-texturas/atlas_sprites" / atlas).convert("RGBA"), box)
+    p = src / KIT / f"{name}.png"
+    if not p.exists():
+        raise SystemExit(f"No está la pieza {p}")
+    return Image.open(p).convert("RGBA")
 
 
 def build(src):
@@ -95,15 +144,13 @@ def build(src):
         n = 0
         for role, names in roles.items():
             for name in names:
-                p = src / KIT / f"{name}.png"
-                if not p.exists():
-                    raise SystemExit(f"No está la pieza {p}")
-                im = Image.open(p).convert("RGBA")
+                im = load_piece(src, name)
                 bb = im.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox()
                 if bb:
                     im = im.crop(bb)
                 im = im.resize((max(1, round(im.width * SCALE)), max(1, round(im.height * SCALE))), Image.LANCZOS)
-                im.save(out / f"{role}__{Path(name).name}.png")
+                label = name[2] if isinstance(name, tuple) else Path(name).name
+                im.save(out / f"{role}__{label}.png")
                 n += 1
         far = build_far(src, zone, out)
         print(f"escenario {zone}: {n} piezas y {far} fondos lejanos")
@@ -127,6 +174,10 @@ FAR = {
                               ("Fungus1_25", 923, 611), ("Fungus1_23", 7719, 568), ("Fungus1_03", 3186, 873),
                               ("Fungus1_24", 2183, 2475), ("Fungus1_29", 2914, 1930), ("Fungus1_32", 1677, 1793),
                               ("Fungus1_06", 871, 707)]),
+    "canales": ("Waterways", [("Waterways_01", 8774, 566), ("Waterways_01", 8675, 1647), ("Waterways_01", 7698, 1966),
+                              ("Waterways_09", 1514, 605), ("Waterways_09", 1127, 634), ("Waterways_04", 5157, 2865),
+                              ("Waterways_04b", 4825, 2305), ("Waterways_04b", 7010, 1069), ("Waterways_04b", 2302, 2144),
+                              ("Waterways_04", 6137, 2619)]),
 }
 
 
