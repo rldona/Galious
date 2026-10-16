@@ -168,6 +168,16 @@ namespace MazeOfKnight.Game.Visuals
         // un cuenco se quedaba siempre en la entrada).
         public static System.Func<RoomModel, float, float, bool> Reserved;
 
+        // ¿Algún punto del tramo [x0, x1] del suelo y está reservado? (de 4 en 4 px: una pieza ancha no tapa nada aunque su
+        // centro quede fuera)
+        static bool ReservedSpan(RoomModel room, float x0, float x1, float y)
+        {
+            if (Reserved == null) return false;
+            for (float x = x0; x < x1 + 4; x += 4)
+                if (Reserved(room, Mathf.Min(x, x1), y)) return true;
+            return false;
+        }
+
         // Rehace el escenario de una sala (al construir el mapa y cuando cambia su colisión).
         public void BuildRoom(RoomWorld world, RoomModel room, Transform parent)
         {
@@ -187,13 +197,14 @@ namespace MazeOfKnight.Game.Visuals
                     Row(room, root.transform, rng, "suelo", c0 * 8, c1 * 8, surface - Lip, -4, SueloMax);
                     // Adornos encima (hierba, huesos, tarros): uno de cada Look.DetailEvery casillas, de 12 px de alto como mucho.
                     for (int c = c0; c < c1; c++)
-                        if (rng.Next(look.DetailEvery) == 0 && Pick("detalle", rng) is Sprite d && Reserved?.Invoke(room, c * 8 + 4, surface) != true)
+                        if (rng.Next(look.DetailEvery) == 0 && Pick("detalle", rng) is Sprite d)
                         {
                             var size = SizePx(d);
                             float k = Mathf.Min(1, 12f / size.y, (c1 - c0) * 8 / size.x);
                             // Dentro del tramo de suelo: no asoma por el borde de la plataforma.
                             float w = size.x * k, x = Mathf.Clamp(c * 8 + 4 - w / 2, c0 * 8, c1 * 8 - w);
-                            Put(room, root.transform, d, x, surface - Lip + 1 - size.y * k, k, rng.Next(2) == 0, -4, Color.white);
+                            if (!ReservedSpan(room, x, x + w, surface))
+                                Put(room, root.transform, d, x, surface - Lip + 1 - size.y * k, k, rng.Next(2) == 0, -4, Color.white);
                         }
                 }
             // Techos: tramos con aire debajo; alguna estalactita si quedan 5 filas libres.
@@ -493,6 +504,7 @@ namespace MazeOfKnight.Game.Visuals
                     if (k < 0.3f) continue;
                     x = Mathf.Clamp(x, left * 8, (right + 1) * 8 - size.x);
                 }
+                if (ReservedSpan(room, x, x + size.x, floor)) continue;   // tapaba la lápida de la palabra
                 Put(room, parent, sp, x, floor - size.y + 2, k, rng.Next(2) == 0, -9, look.Far);
             }
         }

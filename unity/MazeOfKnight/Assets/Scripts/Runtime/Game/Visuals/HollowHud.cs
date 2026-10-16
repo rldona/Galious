@@ -193,9 +193,10 @@ namespace MazeOfKnight.Game.Visuals
             else if (bosses != null && bosses.Listening)
                 UiKit.Text(new Rect(0, Screen.height - pad - 30 * s, Screen.width, 26 * s), "Escribe la palabra de la lápida", 15, TextAnchor.MiddleCenter, UiKit.Dim);
 
-            // Delante de una puerta de mundo: "Entrar" o que está cerrada y hace falta la Gran Llave. En el centro de la pantalla
+            // Delante de una puerta de mundo: "Entrar" o que está cerrada y hace falta la Gran Llave; delante de la lápida de
+            // la palabra, cómo leerla. En el centro de la pantalla
             // (encima de la puerta suele estar el techo; lo pidió el usuario).
-            if (game.DoorHint is string hint)
+            if ((game.DoorHint ?? game.TombstoneHint) is string hint)
             {
                 var hr = new Rect(Screen.width * 0.3f, (Screen.height - 42 * s) / 2, Screen.width * 0.4f, 42 * s);
                 UiKit.Shade(hr, 0.6f);

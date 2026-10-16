@@ -107,6 +107,10 @@ namespace MazeOfKnight.Game
             return null;
         }
 
+        // Sitios de 2 × 2 casillas (x, y en píxeles del original) de una sala de los que apartarse, como de las escaleras: las
+        // lápidas de cada mundo (el banco de antes del jefe del mundo 1 tapaba la de la palabra). Lo pone GameBootstrap.
+        public static System.Func<RoomModel, IEnumerable<(int x, int y)>> Avoid;
+
         // Un suelo de 'tiles' casillas (4, un banco) con 'air' filas de aire encima (3), lo más cerca del centro de la sala.
         public static (int x, int y)? Spot(RoomWorld world, RoomModel room, int margin = Margin, int tiles = 4, int air = 3)
         {
@@ -135,6 +139,8 @@ namespace MazeOfKnight.Game
             foreach (var l in room.ladders) Mark(l.x, l.y, 2, l.height);
             if (room.doorWorld > 0 && room.door != null) Mark(room.door.x, room.door.y, 4, 3);
             if (room.hasItem) Mark(room.item.x, room.item.y, 2, 2);
+            if (Avoid?.Invoke(room) is IEnumerable<(int x, int y)> avoid)
+                foreach (var (ax, ay) in avoid) Mark(ax, ay, 2, 2);
             if (room.wallBlock != null && room.wallBlock.openedBy != 0) Mark(room.wallBlock.col * 8, P.RoomTopPx + room.wallBlock.row * 8, 4, 3);
             // Encima del suelo, nada a menos de 'margin' casillas; debajo, nada justo bajo el banco (una escalera que baja
             // desde el suelo a unas casillas no estorba al sentarse).

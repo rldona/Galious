@@ -80,7 +80,7 @@ namespace MazeOfKnight.Game
                     string why = game.Lives[(int)other] <= 0 ? $"{other} no tiene vidas"
                         : game.Inventory.WorldEntryBlocked(game.Inventory.CurrentWorld, other);
                     if (why == null) character = other;
-                    else game.Say(why);
+                    else game.Notice(why);
                 }
                 else
                 {

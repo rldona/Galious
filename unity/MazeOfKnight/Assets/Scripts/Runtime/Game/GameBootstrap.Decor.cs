@@ -161,7 +161,8 @@ namespace MazeOfKnight.Game
             l.pointLightInnerRadius = 12f / RoomCoords.PixelsPerUnit;
         }
 
-        // La tablilla de la palabra: un brillo suave detrás, que late.
+        // La tablilla de la palabra: un brillo detrás, que late, y una luz que la alumbra (con un brillo suave no se
+        // distinguía del decorado).
         static void Glow(GameObject go)
         {
             var halo = new GameObject("Brillo");
@@ -169,9 +170,20 @@ namespace MazeOfKnight.Game
             var sr = halo.AddComponent<SpriteRenderer>();
             sr.sprite = Resources.Load<Sprite>("Hollow/inventario/luz");
             sr.sortingOrder = 1;
-            sr.color = new Color(0.8f, 0.85f, 1f, 0.45f);
+            sr.color = new Color(0.8f, 0.88f, 1f, 0.8f);
             halo.transform.localPosition = new Vector3(0, 0.9f, 0);
-            halo.transform.localScale = new Vector3(1.6f, 1.6f, 1);
+            halo.transform.localScale = new Vector3(2.4f, 2.4f, 1);
+            halo.AddComponent<Visuals.Pulse>();
+            var lightGo = new GameObject("Luz 2D");
+            lightGo.transform.SetParent(go.transform, false);
+            lightGo.transform.localPosition = new Vector3(0, 0.9f, 0);
+            var l = lightGo.AddComponent<Light2D>();
+            l.lightType = Light2D.LightType.Point;
+            l.targetSortingLayers = SortingLayer.layers.Select(sl => sl.id).ToArray();
+            l.color = new Color(0.8f, 0.88f, 1f);
+            l.intensity = 1.2f;
+            l.pointLightOuterRadius = 32f / RoomCoords.PixelsPerUnit;
+            l.pointLightInnerRadius = 8f / RoomCoords.PixelsPerUnit;
         }
     }
 }

@@ -14,7 +14,8 @@ namespace MazeOfKnight.Game
         static Rumble instance;
         float low, high, until;            // el pulso de ahora
         float holdLow, holdHigh, holdUntil;   // lo que se mantiene mientras se siga pidiendo (concentrarse)
-        bool running;
+        Gamepad sentPad;
+        float sentLow = -1, sentHigh = -1;   // lo último que se le ha pedido al mando
         float nativeSent = -1, nativeAt;
 
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
@@ -96,8 +97,16 @@ namespace MazeOfKnight.Game
                 return;
             }
             if (gp == null) return;
-            if (l > 0 || h > 0) { gp.SetMotorSpeeds(l, h); running = true; }
-            else if (running) { gp.SetMotorSpeeds(0, 0); running = false; }
+            // Solo cuando cambia (en pasos de 0,1). En Linux cada SetMotorSpeeds sube un efecto nuevo al mando y estos
+            // admiten pocos: pedirlo en cada fotograma dejaba una vibración larga y luego ninguna (Legion Go 2 con SteamOS).
+            l = Mathf.Round(l * 10) / 10;
+            h = Mathf.Round(h * 10) / 10;
+            if (gp != sentPad) { sentPad = gp; sentLow = sentHigh = -1; }
+            if (l == sentLow && h == sentHigh) return;
+            if (l > 0 || h > 0) gp.SetMotorSpeeds(l, h);
+            else gp.ResetHaptics();              // parado del todo (en Linux también quita el efecto)
+            sentLow = l;
+            sentHigh = h;
         }
 
         void OnApplicationFocus(bool focus) { if (!focus) StopAll(); }
@@ -105,7 +114,8 @@ namespace MazeOfKnight.Game
 
         void StopAll()
         {
-            Gamepad.current?.SetMotorSpeeds(0, 0);
+            Gamepad.current?.ResetHaptics();
+            sentLow = sentHigh = -1;
             if (Native) { GH_Stop(); nativeSent = 0; }
         }
 

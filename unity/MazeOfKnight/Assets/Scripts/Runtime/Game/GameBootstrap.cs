@@ -240,7 +240,7 @@ namespace MazeOfKnight.Game
             if (AttractMode.Current == AttractMode.Mode.Game && AttractMode.LoadSave)
             {
                 AttractMode.LoadSave = false;
-                if (!LoadSavedGame()) Say("No hay partida guardada");
+                if (!LoadSavedGame()) Notice("No hay partida guardada");
             }
             if (AttractMode.Current == AttractMode.Mode.Game)
             {
@@ -367,11 +367,38 @@ namespace MazeOfKnight.Game
             }
         }
 
+        // HollowHud: delante de la lápida con la palabra del jefe, cómo leerla (el usuario no la distinguía del decorado).
+        // Null si no toca.
+        public string TombstoneHint
+        {
+            get
+            {
+                if (motor == null || motor.Room == null || motor.State != MotorState.Ground || Busy || Weapons == null) return null;
+                int e041 = maps.TryGetValue(mapName, out var md) ? md.e041 : -1;
+                if (Weapons.ReadTombstone(motor, e041) == null) return null;   // las lápidas sin palabra no cuentan
+                if (!Collected.Contains(6)) return "Una lápida · hace falta la Lupa para leerla";
+                return SelectedWeapon == 6 ? "Lupa  ·  Leer la lápida" : "Elige la Lupa para leer la lápida";
+            }
+        }
+
+        // Las lápidas de una sala (para que no les pongan delante un banco ni a Cornifer).
+        IEnumerable<(int x, int y)> Tombstones(RoomModel room)
+        {
+            if (Weapons == null) yield break;
+            foreach (var kv in AllWorlds)
+            {
+                if (kv.Value.Room(room.id) != room || !maps.TryGetValue(kv.Key, out var md)) continue;
+                foreach (var t in Weapons.Data.magnifier.tombstones)
+                    if (t.e041 == md.e041 && t.room == room.id) yield return (t.x, t.y);
+            }
+        }
+
         Benches BenchList
         {
             get
             {
                 if (benches != null) return benches;
+                Benches.Avoid = Tombstones;
                 return benches = new Benches(AllWorlds, startRoom, w => Bosses?.InfoFor(w)?.room ?? -1);
             }
         }
@@ -559,20 +586,20 @@ namespace MazeOfKnight.Game
         {
             if (!OriginalWorlds.HasEntry(world) || !maps.ContainsKey(OriginalWorlds.MapName(world)))
             {
-                Say($"Falta el mundo {world}: importa las salas");
+                Notice($"Falta el mundo {world}: importa las salas");
                 return;
             }
             if (!force && !Doors.IsOpen(world))
             {
                 // El original no dice nada; el remake lo explica (no cambia nada más).
                 if (Doors.OpeningWorld != world)
-                    Say(Doors.Unlocked.Contains(world) ? "La puerta se está abriendo" : "La puerta está cerrada: hace falta la Gran Llave");
+                    Notice(Doors.Unlocked.Contains(world) ? "La puerta se está abriendo" : "La puerta está cerrada: hace falta la Gran Llave");
                 return;
             }
             string blocked = Inventory.WorldEntryBlocked(world, motor.Character);
             if (blocked != null)
             {
-                Say(blocked);
+                Notice(blocked);
                 return;
             }
             Inventory.EnterWorld(world);
@@ -581,7 +608,7 @@ namespace MazeOfKnight.Game
             Jingle(0x8E);                     // al entrar por la puerta (estado 8), luego la música del mundo
             var (x, y) = OriginalWorlds.Entry[world];
             motor.Place(World, World.Room(1), x, y);
-            Say($"WORLD {world}");
+            if (!Visuals.HollowHud.Available) Say($"Mundo {world}");   // con el marcador de Hollow Knight ya sale su título
         }
 
         void ExitToCastle(int code)
@@ -832,7 +859,7 @@ namespace MazeOfKnight.Game
             {
                 // Lupa: lee la lápida del mundo y muestra la palabra del jefe.
                 var t = Weapons.ReadTombstone(motor, maps[mapName].e041);
-                Say(t != null ? $"La lápida dice: {maps[mapName].bossWord}" : "Aquí no hay nada que leer");
+                Notice(t != null ? $"La lápida dice: {maps[mapName].bossWord}" : "Aquí no hay nada que leer");
                 return;
             }
             if (Weapons.CanFire(w, motor, Collected, Arrows) != null) return;
@@ -1092,7 +1119,7 @@ namespace MazeOfKnight.Game
             if (!string.IsNullOrEmpty(shadeMap)) { d.shadeMap = shadeMap; d.shadeRoom = shadeRoom; d.shadeX = shadeX; d.shadeY = shadeY; d.shadeGeo = shadeGeo; }
             for (int c = 0; c < 2; c++) d.vitality[c] = Mathf.Clamp(Vitality[c] + PendingVitality[c], 0, MaxVitality[c]);
             try { d.Write(); Say("Partida guardada"); }
-            catch (System.Exception e) { Say($"No se pudo guardar: {e.Message}"); }
+            catch (System.Exception e) { Notice($"No se pudo guardar: {e.Message}"); }
         }
 
         // Se carga desde el título (L) y se aparece a la salida del santuario de Demeter.
@@ -1213,8 +1240,8 @@ namespace MazeOfKnight.Game
         // Ala: en el castillo, a la puerta de un mundo ya abierto.
         public bool UseWing(int world)
         {
-            if (Inventory.CurrentWorld != 0) { Say("El ala solo funciona en el castillo"); return false; }
-            if (!Inventory.OpenedDoors.Contains(world)) { Say($"La puerta del mundo {world} aún no se ha abierto"); return false; }
+            if (Inventory.CurrentWorld != 0) { Notice("El ala solo funciona en el castillo"); return false; }
+            if (!Inventory.OpenedDoors.Contains(world)) { Notice($"La puerta del mundo {world} aún no se ha abierto"); return false; }
             var room = World.Room(Inventory.WingRoom(world));
             if (room == null || room.doorWorld == 0) return false;
             motor.Place(World, room, room.door.x + OriginalWorlds.DoorExitDx, room.door.y + OriginalWorlds.DoorExitDy);
@@ -1897,7 +1924,7 @@ namespace MazeOfKnight.Game
             gameOverUntil = Time.time + 7f;
             Sound.Effect(0x2B);
             Sound.PlayMusic(0x95);
-            Say("GAME OVER");
+            Notice("GAME OVER");
         }
 
         void OnRockBroken(Rocks.Rock rock)
@@ -1997,7 +2024,17 @@ namespace MazeOfKnight.Game
             return true;
         }
 
+        // Mensaje abajo en la pantalla. Con el marcador de Hollow Knight (RemakeRules.HollowMessages) solo salen los avisos
+        // (Notice) y, con las teclas de depuración, todos: "Enemigo derrotado", "Piedra rota", lo recogido… sobraban (el
+        // usuario, 17 de octubre de 2026; Hollow Knight no escribe nada).
         public void Say(string text)
+        {
+            if (RemakeRules.HollowMessages && Visuals.HollowHud.Available && !RemakeRules.DebugKeys) return;
+            Notice(text);
+        }
+
+        // Lo que hace falta saber y no se ve de otra forma: lo que dice la lápida y por qué no se puede hacer algo.
+        public void Notice(string text)
         {
             Message = text;
             messageUntil = Time.time + 2.5f;

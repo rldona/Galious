@@ -30,6 +30,10 @@ namespace MazeOfKnight.Game
         // las flechas lo atravesaban sin daño, acercarse para darle con la espada era imposible y un toque mataba (el
         // usuario, 17 de octubre de 2026). Remake, como en Hollow Knight: el False Knight recibe golpes en todo el cuerpo y
         // tocar a un jefe quita BossContactMasks (de 1 a 3 máscaras, más cuanto más fuerte en el original).
+        // Original: abajo salen mensajes de lo que pasa (enemigo derrotado, piedra rota, lo recogido…). Remake (el usuario,
+        // 17 de octubre de 2026), como Hollow Knight, que no escribe nada: solo los avisos (GameBootstrap.Notice: lo que dice
+        // la lápida y por qué no se puede hacer algo); con las teclas de depuración, todos.
+        public static bool HollowMessages = true;         // activado: lo ha pedido el usuario
         public static bool HollowBosses = true;           // activado: lo ha pedido el usuario
         public static int BossContactMasks(int original) => System.Math.Max(1, System.Math.Min(3, (original + 6) / 12));
 
