@@ -32,6 +32,8 @@ import diario  # noqa: E402
 import cornifer  # noqa: E402
 import musica  # noqa: E402
 import tajos  # noqa: E402
+import armas  # noqa: E402
+import decorados  # noqa: E402
 import iconos  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
@@ -279,6 +281,8 @@ def main(argv):
     cornifer.build(src)
     musica.build(src)
     tajos.build(src)
+    armas.build(src)
+    decorados.build(src)
     iconos.build(src)
 
 

@@ -61,6 +61,15 @@ namespace MazeOfKnight.Game
             return true;
         }
 
+        // Para las capturas: dispara esa arma.
+        public void DebugFire(int weapon)
+        {
+            Inventory.Add(weapon);
+            SelectedWeapon = weapon;
+            Arrows = Mathf.Max(Arrows, 50);
+            FireWeapon();
+        }
+
         // Para las capturas.
         public void DebugGoToCornifer(int world)
         {

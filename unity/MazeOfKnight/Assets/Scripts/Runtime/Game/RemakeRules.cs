@@ -88,6 +88,12 @@ namespace MazeOfKnight.Game
         // saltar, saltar va con su propio botón (A en el mando, Z en el teclado, Controls) y ↑ solo apunta y sube
         // escaleras. Cajas del golpe: SlashHalf a cada lado del centro y SlashReach de alto.
         public static bool HollowSlashes = true;          // activado: lo ha pedido el usuario
+
+        // Original: la música del chip PSG en todo el juego. Remake (lo pidió el usuario): la de fondo es la de Hollow Knight
+        // (Visuals/HollowMusic): la de la zona de cada mapa (castillo → Cruces Olvidados, mundo 1 → Sendero Verde…), la de
+        // los santuarios y la de la pelea con cada jefe. Las fanfarrias (objetos, invocación, jefe vencido, muerte, final)
+        // siguen con el chip, con la otra bajada mientras suenan.
+        public static bool HollowMusic = true;            // activado: lo ha pedido el usuario
         public const int SlashHalf = 10, SlashReach = 16;
         public const int BounceRise = 5;                  // entrada de OriginalPhysics.RiseTable desde la que rebota
 

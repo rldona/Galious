@@ -75,6 +75,9 @@ namespace MazeOfKnight.Game.Visuals
                 yield return null;
             }
             Debug.Log($"[Capturas] la espada suena a los {heard * 1000:0} ms");
+            Debug.Log($"[Capturas] vibración: {Rumble.Describe()}");
+            Debug.Log($"[Capturas] música de la partida: {FindAnyObjectByType<GameBootstrap>()?.HollowTrack()}, nivel {Sound.OutputLevel():0.0000}");
+            Rumble.Pulse(0.5f, 0.5f, 0.3f);
             Sound.Instance.MusicMuted = false;
             var pause = FindAnyObjectByType<HollowPauseMenu>();
             if (pause != null) { pause.ShowNow(); yield return new WaitForSeconds(0.4f); yield return Shot("menu_pausa"); }

@@ -175,7 +175,9 @@ namespace MazeOfKnight.Game
             // medio abrir y nada abierta. El marco, el de siempre (abierto).
             if (Visuals.HollowItems.Piece("puerta_mundo_cerrada") != null)
             {
-                if (Style?.Door != null) FillPattern(doorsLayer, room, x, y, Style.Door, 3);
+                // El marco: con los decorados de Hollow Knight (GameBootstrap.ShowDecor: arco y columnas) no se pinta.
+                if (Resources.Load<Sprite>("Hollow/decorados/arco") != null) { }
+                else if (Style?.Door != null) FillPattern(doorsLayer, room, x, y, Style.Door, 3);
                 else Fill(doorsLayer, room, x, y, 4, 3, door);
                 var gate = openRows >= 2 ? null : Visuals.HollowItems.Piece(openRows == 1 ? "puerta_mundo_media" : "puerta_mundo_cerrada");
                 Piece(("mundo", room, x, y), room, x + 16, y + 24, gate, -7);

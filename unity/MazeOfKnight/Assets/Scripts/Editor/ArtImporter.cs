@@ -29,7 +29,19 @@ namespace MazeOfKnight.EditorTools
         static bool FeetPivot(string path)
         {
             string folder = Path.GetFileName(Path.GetDirectoryName(path)).ToLowerInvariant();
-            return folder is "personajes" or "enemigos" or "jefes" or "objetos_sala" or "bancos" or "cornifer";
+            return folder is "personajes" or "enemigos" or "jefes" or "objetos_sala" or "bancos" or "cornifer" or "decorados";
+        }
+
+        // La música de Hollow Knight (Resources/Hollow/musica): se lee del disco mientras suena, sin descomprimirla entera.
+        void OnPreprocessAudio()
+        {
+            if (!assetPath.Replace('\\', '/').Contains("Resources/Hollow/musica/")) return;
+            var importer = (AudioImporter)assetImporter;
+            var settings = importer.defaultSampleSettings;
+            settings.loadType = AudioClipLoadType.Streaming;
+            settings.compressionFormat = AudioCompressionFormat.Vorbis;
+            settings.quality = 0.6f;
+            importer.defaultSampleSettings = settings;
         }
 
         void OnPreprocessTexture()

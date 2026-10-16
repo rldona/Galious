@@ -159,6 +159,7 @@ namespace MazeOfKnight.Game
             if (RemakeRules.HollowCharms && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.ItemTutorial>().game = this;
             if (RemakeRules.HollowJournal && Visuals.HuntersJournal.Available) gameObject.AddComponent<Visuals.HuntersJournal>().game = this;
             if (RemakeRules.HollowMaps && Visuals.CorniferView.Available) (CorniferView = gameObject.AddComponent<Visuals.CorniferView>()).game = this;
+            if (RemakeRules.HollowMusic && Visuals.HollowMusic.Available) gameObject.AddComponent<Visuals.HollowMusic>().game = this;
             if (Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.WordPad>().game = this;
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
@@ -288,6 +289,7 @@ namespace MazeOfKnight.Game
             World = new RoomWorld(map.rooms.Select(r => r.room));
             rocks = new Rocks(name, World, brokenRocks);
             rocks.Broken += OnRockBroken;
+            rocks.Broken += _ => UpdateShrineDoors();
             rocks.Hit += r => { strikeHits++; Visuals.HitEffects.RockHit(r.room, r.x, r.y, r.hp <= 0); Sound.Effect(0x1E); Rumble.Pulse(0.35f, 0.5f, 0.1f); Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}"); };
             keyDoors = new KeyDoors(name, World, openedDoors);
             keyDoors.Changed += d => mapView.ShowKeyDoor(d.room, d.x, d.y, d.height);
@@ -295,6 +297,7 @@ namespace MazeOfKnight.Game
             roomObjects = new RoomObjects(name, World, roomObjectState);
             roomObjects.CellsChanged += (room, col, row, w, h) => mapView.RedrawCells(World, room, col, row, w, h);
             roomObjects.Message += Say;
+            roomObjects.Chime += () => Sound.Effect(0x2E);
             mapView.Build(map, World);
             foreach (var room in World.Rooms)
                 if (room.doorWorld > 0)
@@ -317,6 +320,7 @@ namespace MazeOfKnight.Game
             foreach (var (m, id) in firedEvents)
                 if (m == name) ApplyEvent(id);
             ShowBenches();
+            ShowDecor();
             CorniferView?.UseMap();
         }
 
@@ -1449,6 +1453,17 @@ namespace MazeOfKnight.Game
                 sr.transform.position = new Vector3(bl.x, bl.y, 0);
                 sr.transform.localScale = new Vector3((x1 - x0) / 16f, (y1 - y0) / 16f, 1);
                 var weaponArt = Visuals.Atmosphere.EnemyArt;
+                if (Visuals.HollowWeapons.Frame(p.Id, p.Age) is Sprite hk && !p.Exploding)
+                {
+                    // El proyectil de Hollow Knight, a su tamaño, en el centro de la caja y mirando hacia donde va.
+                    sr.sprite = hk;
+                    var c = RoomCoords.PixelToWorld(Weapons.Room ?? motor.Room, (int)((x0 + x1) / 2), (int)((y0 + y1) / 2));
+                    sr.transform.position = new Vector3(c.x, c.y, 0);
+                    sr.transform.localScale = new Vector3(p.Dir < 0 ? -1 : 1, 1, 1);
+                    sr.flipX = false;
+                    sr.color = p.Id == 5 && !p.Armed ? new Color(1, 1, 1, 0.7f) : Color.white;
+                    continue;
+                }
                 if (weaponArt != null)
                 {
                     sr.sprite = weaponArt.Weapon(p.Id, (p.Age / 3) & 1);
@@ -1651,6 +1666,20 @@ namespace MazeOfKnight.Game
             Sound.PlayMusic(id, BackgroundMusic());
             musicWanted = BackgroundMusic();
         }
+
+        // RemakeRules.HollowMusic: la pista de Hollow Knight (Visuals/HollowMusic) para la música de fondo que toca ahora.
+        public string HollowTrack()
+        {
+            if (!RemakeRules.HollowMusic || motor == null || Busy || Bosses == null) return null;
+            int want = BackgroundMusic();
+            if (want == 0x8D) return "santuario";
+            if ((want == 0x90 || want == 0x81) && Bosses.Info != null) return $"jefe{Bosses.Info.id}";
+            if (mapName == "castle") return "castillo";
+            return Inventory.CurrentWorld > 0 ? $"mundo{Inventory.CurrentWorld}" : "castillo";
+        }
+
+        // Las canciones del original que son de fondo (en bucle): con la música de Hollow Knight, el chip las calla.
+        public static bool IsBackgroundSong(int id) => id is 0x88 or 0x8A or 0x8B or 0x8D or 0x8F or 0x90 or 0x91;
 
         int BackgroundMusic()
         {

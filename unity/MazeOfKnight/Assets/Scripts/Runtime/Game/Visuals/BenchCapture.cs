@@ -147,6 +147,16 @@ namespace MazeOfKnight.Game.Visuals
                 Debug.Log($"[Capturas] espadazo abajo: dir {game.Motor.SlashDir}, ticks {game.Motor.AttackTicks}, {game.Motor.State}, pausa {game.player.Paused}, menú {game.MenuOpen}");
                 yield return null;
                 yield return Shot("espadazo_abajo");
+                // Las armas: flecha, de cerámica, fuego rodante y mina, de pie junto al banco.
+                game.DebugGoToBench(bench);
+                yield return new WaitForSeconds(0.8f);
+                foreach (int w in new[] { 1, 2, 3, 5 })
+                {
+                    game.DebugFire(w);
+                    yield return new WaitForSeconds(0.12f);
+                    yield return Shot($"arma_{w}");
+                    yield return new WaitForSeconds(0.6f);
+                }
             }
             Application.Quit();
         }

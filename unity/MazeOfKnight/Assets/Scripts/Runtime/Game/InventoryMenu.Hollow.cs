@@ -463,6 +463,29 @@ namespace MazeOfKnight.Game
 
         static Sprite benchPin, here;
 
+        // Sin el mapa: el pergamino tachado y el aviso, como en Hollow Knight.
+        void DrawNoMap(Rect body)
+        {
+            float s = S, cx = body.center.x, cy = body.center.y - 30 * s, r = 64 * s;
+            if (HollowItems.Icon(Inventory.Map) is Sprite scroll) UiKit.Icon(new Rect(cx - r * 0.7f, cy - r * 0.7f, r * 1.4f, r * 1.4f), scroll, 0.85f);
+            // El círculo y la raya, con puntos.
+            for (int i = 0; i < 72; i++)
+            {
+                float a = i * Mathf.PI * 2 / 72;
+                UiKit.Box(new Rect(cx + Mathf.Cos(a) * r - 1.5f * s, cy + Mathf.Sin(a) * r - 1.5f * s, 3 * s, 3 * s), UiKit.Bone);
+            }
+            for (int i = -26; i <= 26; i++)
+            {
+                float t = i / 26f * r * 0.92f;
+                UiKit.Box(new Rect(cx + t * 0.7071f - 2 * s, cy - t * 0.7071f - 2 * s, 4 * s, 4 * s), UiKit.Bone);
+            }
+            UiKit.Text(new Rect(body.x, cy + r + 24 * s, body.width, 40 * s), "No tienes el mapa de esta zona", 24, TextAnchor.MiddleCenter, UiKit.Bone);
+            bool cornifer = false;
+            foreach (var c in game.CorniferList.All) if (c.World == game.Inventory.CurrentWorld) cornifer = true;
+            UiKit.Text(new Rect(body.x, cy + r + 64 * s, body.width, 30 * s),
+                cornifer ? "Cornifer lo vende en algún rincón de este mundo." : "Nadie ha cartografiado esta zona.", 16, TextAnchor.MiddleCenter, UiKit.Dim);
+        }
+
         void DrawMapTab(Rect body)
         {
             float s = S;
@@ -474,8 +497,11 @@ namespace MazeOfKnight.Game
             if (zone != "") UiKit.Text(new Rect(body.x, body.y + 26 * s, body.width, 26 * s), zone, 17, TextAnchor.MiddleCenter, UiKit.Dim, true);
             var rw = game.WorldFor(map);
             if (!RemakeRules.HollowMaps || rw == null) return;
-            bool inked = game.HasMapOf(world);
-            var tex = HandMap.Get(map, rw, game.VisitedRooms, inked);
+            // Como en Hollow Knight: sin el mapa de la zona no se ve nada. El castillo, sin Cornifer, se conoce desde el
+            // principio.
+            bool hasMap = world == 0 || game.HasMapOf(world);
+            if (!hasMap) { DrawNoMap(body); return; }
+            var tex = HandMap.Get(map, rw, game.VisitedRooms);
             var area = new Rect(body.x, body.y + 64 * s, body.width, body.height - 110 * s);
             // Lo más grande que quepa, sin que una sala pase de un tercio del ancho (con pocas salas visitadas).
             float k = Mathf.Min(Mathf.Min(area.width / tex.width, area.height / tex.height), area.width / 3f / HandMap.RoomW);
@@ -490,10 +516,10 @@ namespace MazeOfKnight.Game
             benchPin ??= Resources.Load<Sprite>("Hollow/inventario/pin_banco");
             here ??= Resources.Load<Sprite>("Hollow/hud/mascara_00");
             foreach (var b in game.BenchesIn(map))
-                if ((inked || game.VisitedRooms.Contains((map, b.Room))) && rw.Room(b.Room) is RoomModel br)
+                if (game.VisitedRooms.Contains((map, b.Room)) && rw.Room(b.Room) is RoomModel br)
                     UiKit.Icon(At(br, b.X, b.Y, 26 * s), benchPin, 0.9f);
             var wm = world > 0 ? inv.MapOf(world) : null;
-            if (inked && wm != null && inv.Has(Inventory.Lamp) && rw.Room(wm.bossRoom) is RoomModel boss)
+            if (wm != null && inv.Has(Inventory.Lamp) && rw.Room(wm.bossRoom) is RoomModel boss)
             {
                 var bp = At(boss, 128, 120, 18 * s);
                 UiKit.Box(bp, new Color(0.9f, 0.3f, 0.25f, 0.85f));
@@ -506,9 +532,7 @@ namespace MazeOfKnight.Game
                 if (here != null) UiKit.Icon(At(m.Room, m.X, m.Y, size), here);
                 else UiKit.Box(At(m.Room, m.X, m.Y, 10 * s), UiKit.Gold);
             }
-            string foot = world == 0 ? "Nadie ha cartografiado el castillo: es tu boceto."
-                : inked ? (inv.Has(Inventory.Lamp) ? "El mapa de Cornifer. La marca roja es el jefe." : "El mapa de Cornifer.")
-                : "Un boceto de lo que has recorrido. Cornifer vende el mapa de este mundo.";
+            string foot = "Lo visitado se entinta; el resto, solo su contorno." + (inv.Has(Inventory.Lamp) ? "  La marca roja es el jefe." : "");
             UiKit.Text(new Rect(body.x, body.yMax - 34 * s, body.width, 30 * s), foot, 16, TextAnchor.MiddleCenter, UiKit.Dim);
         }
     }

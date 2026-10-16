@@ -40,6 +40,9 @@ namespace MazeOfKnight.Game
 
         public event System.Action<RoomModel, int, int, int, int> CellsChanged;   // sala, col, fila, ancho, alto
         public event System.Action<string> Message;
+        // Algo cambia en la sala (una pared rota, una escalera que se va, un muro que se cierra): la campanita 0x2E. En el
+        // original suena al romper la pared; en el resto la añade el remake (lo pidió el usuario).
+        public event System.Action Chime;
 
         public RoomObjects(string mapName, RoomWorld world, HashSet<(string, int, int, int)> persistent)
         {
@@ -168,6 +171,7 @@ namespace MazeOfKnight.Game
                 w.timer = ClosingWallStepTicks - 1;
                 persistent.Add((mapName, w.room.id, w.x, w.y));
                 Message?.Invoke("Un muro se cierra a tu espalda");
+                Chime?.Invoke();
             }
         }
 
@@ -197,6 +201,7 @@ namespace MazeOfKnight.Game
                 world.Clear(b.room, b.x >> 3, Row(b.y), 4, 3);
                 CellsChanged?.Invoke(b.room, b.x >> 3, Row(b.y), 4, 3);
                 Message?.Invoke("La pared se rompe");
+                Chime?.Invoke();
             }
         }
 
@@ -223,6 +228,7 @@ namespace MazeOfKnight.Game
                     usingLadder.timer = LadderRetractTicks;
                     SetLadder(usingLadder, false);
                     Message?.Invoke("La escalera desaparece");
+                    Chime?.Invoke();
                 }
                 usingLadder = null;
             }
