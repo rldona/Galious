@@ -169,7 +169,7 @@ namespace MazeOfKnight.Game.Visuals
                 yield return Shot($"enemigos_sala_{id:000}");
             }
             // Objetos en salas del castillo (Bible, Earrings, monedas, Pitcher) con su icono de Hollow Knight.
-            foreach (int id in new[] { 11, 13, 18, 19, 16, 40, 77 })
+            foreach (int id in new[] { 7, 11, 13, 18, 19, 16, 40, 77, 146 })
             {
                 var r = game.World.Room(id);
                 if (r == null) continue;

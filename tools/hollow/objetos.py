@@ -78,10 +78,13 @@ PIECES = {
     "puerta_giratoria": ("Switches and gates", "Bone Gate Closed", 0, (64, 192)),
     "puerta_mundo_cerrada": ("Boss Door Anim", "Idle", 0, (128, 128)),
     "puerta_mundo_media": ("Boss Door Anim", "Break", 4, (128, 128)),
+    # Ascensor (dos bloques, 32 × 16 px): la plataforma del Coliseo, arriba del hueco (el jugador se apoya en su borde
+    # de arriba).
+    "ascensor": ("Colosseum Plat Anim", "Expanded", 0, (256, 128), "arriba"),
 }
 
 
-def piece(src, col, clip, frame, box):
+def piece(src, col, clip, frame, box, top=False):
     import csv
     rows = [r for r in csv.DictReader(open(src / "hollow-knight-tk2d" / col / "clip_frames.csv", encoding="utf-8")) if r["clip"] == clip]
     im = Image.open(src / "hollow-knight-tk2d" / col / rows[min(frame, len(rows) - 1)]["archivo_png"]).convert("RGBA")
@@ -90,7 +93,7 @@ def piece(src, col, clip, frame, box):
     im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
     # En un lienzo del tamaño del hueco, abajo en el centro (así el pivote de los pies es el del hueco).
     canvas = Image.new("RGBA", box, (0, 0, 0, 0))
-    canvas.paste(im, ((box[0] - im.width) // 2, box[1] - im.height), im)
+    canvas.paste(im, ((box[0] - im.width) // 2, 0 if top else box[1] - im.height), im)
     return canvas
 
 
@@ -114,8 +117,8 @@ def build(src):
         s = SIZE / max(im.size)
         im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
         im.save(OUT / f"objeto{t:02x}.png")
-    for name, (col, clip, frame, box) in PIECES.items():
-        im = piece(src, col, clip, frame, box)
+    for name, (col, clip, frame, box, *align) in PIECES.items():
+        im = piece(src, col, clip, frame, box, top=align == ["arriba"])
         if name == "puerta_llave":
             # Lo que se ve de la puerta mientras sube: sus h casillas de abajo.
             for h in (1, 2, 3):

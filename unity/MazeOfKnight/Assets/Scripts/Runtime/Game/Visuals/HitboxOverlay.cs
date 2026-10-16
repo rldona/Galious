@@ -7,7 +7,8 @@ namespace MazeOfKnight.Game.Visuals
     // (docs/items_enemies.md, "Cajas de colisión"):
     //   - verde: el jugador contra los enemigos (x − 6 … x + 6, y − 14 … y − 2);
     //   - amarillo: la espada mientras golpea;
-    //   - rojo: cada enemigo que hace daño (sus cajas de contacto); gris, los que no.
+    //   - rojo: cada enemigo que hace daño (sus cajas de contacto); gris, los que no;
+    //   - cian: los ascensores.
     public class HitboxOverlay : MonoBehaviour
     {
         public GameBootstrap game;
@@ -41,6 +42,10 @@ namespace MazeOfKnight.Game.Visuals
                 var (sx0, sx1, sy0, sy1) = m.SwordRect();
                 Draw(here, sx0, sy0, sx1 + 1, sy1 + 1, Color.yellow);
             }
+            // Ascensores de la sala (cian): x … x + 31, y … y + 15.
+            if (game.Lifts != null)
+                foreach (var l in game.Lifts.InRoom(here.id))
+                    Draw(here, l.X, l.Y, l.X + game.Lifts.Box.width, l.Y + game.Lifts.Box.height, Color.cyan);
             if (game.Enemies == null) return;
             foreach (var e in game.Enemies.Enemies)
             {

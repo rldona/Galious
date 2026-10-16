@@ -1185,9 +1185,19 @@ namespace MazeOfKnight.Game
                     }
                     var v = liftViews[n++];
                     v.enabled = true;
-                    v.sprite = Visuals.Atmosphere.Props?.Lift ?? LiftSprite();
-                    var bl = RoomCoords.PixelToWorld(motor.Room, l.X, l.Y + Lifts.Box.height);
-                    v.transform.position = new Vector3(bl.x, bl.y, 0);
+                    if (Visuals.HollowItems.Piece("ascensor") is Sprite plat)
+                    {
+                        // La plataforma del Coliseo de Hollow Knight, en el hueco de 32 × 16 (pivote abajo en el centro).
+                        v.sprite = plat;
+                        var bc = RoomCoords.PixelToWorld(motor.Room, l.X + 16, l.Y + Lifts.Box.height);
+                        v.transform.position = new Vector3(bc.x, bc.y, 0);
+                    }
+                    else
+                    {
+                        v.sprite = Visuals.Atmosphere.Props?.Lift ?? LiftSprite();
+                        var bl = RoomCoords.PixelToWorld(motor.Room, l.X, l.Y + Lifts.Box.height);
+                        v.transform.position = new Vector3(bl.x, bl.y, 0);
+                    }
                     v.transform.localScale = Vector3.one;
                 }
             for (; n < liftViews.Count; n++)
