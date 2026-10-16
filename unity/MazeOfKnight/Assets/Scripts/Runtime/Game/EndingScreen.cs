@@ -35,6 +35,9 @@ namespace MazeOfKnight.Game
             BuildTape();
         }
 
+        // Para las capturas: a ese momento de una etapa.
+        public void DebugJump(int toStage, float f) { stage = toStage; stageStart = frame - f; }
+
         int Duration(int s) => s switch
         {
             0 => data.Frames("touchBaby", 40),
@@ -51,8 +54,11 @@ namespace MazeOfKnight.Game
             tape.Clear();
             float t = 0, y = 0;
             int step = Mathf.Max(1, data.epilogue.stepFramesMeasured), wait = Mathf.Max(1, data.epilogue.waitStepFramesMeasured);
-            foreach (var l in data.epilogue.lines)
+            foreach (var line in data.epilogue.lines)
             {
+                var l = line;
+                if (RemakeRules.SoloKnight && l.kind == "text" && SoloKnightLines.TryGetValue(l.text, out var other))
+                    l = new EpilogueLine { kind = l.kind, col = l.col, rows = l.rows, steps = l.steps, text = other };
                 tape.Add((t, l, y));
                 if (l.kind == "text" || l.kind == "blank") { y += 8 * l.rows; t += step * 8f * l.rows; }
                 else if (l.kind == "wait") t += wait * l.steps;
@@ -60,6 +66,17 @@ namespace MazeOfKnight.Game
             }
             epilogueEnd = t;
         }
+
+        // RemakeRules.SoloKnight: sin Aphrodite, Popolon no se casa con ella; las mismas líneas, con otro final (y las mismas
+        // filas, para que los tiempos del epílogo no cambien).
+        static readonly Dictionary<string, string> SoloKnightLines = new Dictionary<string, string>
+        {
+            ["THE KINGDOM WITH APHRODITE"] = "THE HOLLOW KINGDOM AS ITS",
+            ["AS HIS WIFE FOR THE REST OF"] = "KNIGHT FOR THE REST OF HIS",
+            ["THEIR LIVES.THIS LEGEND WILL"] = "DAYS.THIS LEGEND WILL BE",
+            ["BE TOLD AGAIN WHEN THEY ARE"] = "TOLD AGAIN WHEN THEY ARE",
+            ["APT TO LOSE BELIEF IN LOVE."] = "APT TO LOSE THEIR COURAGE.",
+        };
 
         // Píxeles de cinta recorridos en el frame f del epílogo.
         float Scrolled(float f)
@@ -144,7 +161,11 @@ namespace MazeOfKnight.Game
             if (f < 0) return;
             castleTex ??= Resources.Load<Texture2D>("Gfx/ending_castle");
             if (castleTex != null)
+            {
                 GUI.DrawTexture(R(0, 0, 256, 192), castleTex);   // capa de tiles del original (sacada de la VRAM)
+                // RemakeRules.SoloKnight: Aphrodite, a la derecha de Popolon, se tapa con el negro del arco de detrás.
+                if (RemakeRules.SoloKnight) Box(R(132, 97, 19, 15), Color.black);
+            }
             else
             {
                 // Sin los gráficos importados: marco de hojas y castillo (20 × 14 tiles) en cuadros.
@@ -172,7 +193,7 @@ namespace MazeOfKnight.Game
             if (castleTex == null)
             {
                 Box(R(96, 0x68, 16, 24), new Color(0.35f, 0.55f, 1f));
-                Box(R(144, 0x68, 16, 24), new Color(1f, 0.45f, 0.7f));
+                if (!RemakeRules.SoloKnight) Box(R(144, 0x68, 16, 24), new Color(1f, 0.45f, 0.7f));
             }
             float babyY = 0x6B;
             if (f >= p0 + p1) babyY = Mathf.Max(0x5F, 0x6B - (f - p0 - p1) / 4f);
@@ -183,7 +204,7 @@ namespace MazeOfKnight.Game
             {
                 int k = (int)(g3 / 64);
                 if (balloonSide < 0 || k != balloonSide >> 1) balloonSide = (k << 1) | rng.Next(2);
-                bool left = (balloonSide & 1) == 0;
+                bool left = (balloonSide & 1) == 0 || RemakeRules.SoloKnight;   // sin Aphrodite, solo habla Popolon
                 var b = data.castleScene.balloons;
                 GUI.Label(R(left ? 64 : 144, 0x50, 48, 12), left ? b[0] : (b.Length > 1 ? b[1] : "GREAT!"), big);
             }

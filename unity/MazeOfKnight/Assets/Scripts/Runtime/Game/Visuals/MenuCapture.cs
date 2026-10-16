@@ -43,6 +43,10 @@ namespace MazeOfKnight.Game.Visuals
             menu.Show(0);
             yield return new WaitForSeconds(0.5f);
             yield return Shot("menu_principal");
+            yield return new WaitForSeconds(2.5f);
+            float peak = 0;
+            for (int i = 0; i < 60; i++) { peak = Mathf.Max(peak, Sound.OutputLevel()); yield return null; }
+            Debug.Log($"[Capturas] sonido en el menú: {peak:0.0000} ({menu.MusicState}; listeners {FindObjectsByType<AudioListener>(FindObjectsSortMode.None).Length})");
             menu.Show(1);
             yield return new WaitForSeconds(0.5f);
             yield return Shot("menu_opciones");
@@ -60,6 +64,18 @@ namespace MazeOfKnight.Game.Visuals
             yield return Shot("menu_extras");
             AttractMode.Go(AttractMode.Mode.Game);
             yield return new WaitForSeconds(4f);
+            // Latencia: sin música, cuánto tarda el efecto de la espada (0x13) en salir por los altavoces.
+            Sound.Instance.MusicMuted = true;
+            yield return new WaitForSeconds(0.5f);
+            float t0 = Time.realtimeSinceStartup, heard = -1;
+            Sound.Effect(0x13);
+            while (Time.realtimeSinceStartup - t0 < 1f)
+            {
+                if (Sound.OutputLevel() > 0.005f) { heard = Time.realtimeSinceStartup - t0; break; }
+                yield return null;
+            }
+            Debug.Log($"[Capturas] la espada suena a los {heard * 1000:0} ms");
+            Sound.Instance.MusicMuted = false;
             var pause = FindAnyObjectByType<HollowPauseMenu>();
             if (pause != null) { pause.ShowNow(); yield return new WaitForSeconds(0.4f); yield return Shot("menu_pausa"); }
             if (pause != null) pause.HideNow();
@@ -119,6 +135,22 @@ namespace MazeOfKnight.Game.Visuals
                     hj.ShowToast(HuntersJournal.Of(0x27));
                     yield return new WaitForSeconds(0.8f);
                     yield return Shot("diario_aviso");
+                }
+            }
+            // El final: la escena del castillo y el epílogo.
+            var end = game != null ? game.GetComponent<EndingScreen>() : null;
+            var endJson = Resources.Load<TextAsset>("Ending");
+            if (end != null && endJson != null)
+            {
+                end.Begin(JsonUtility.FromJson<MazeOfKnight.Data.EndingData>(endJson.text), new Vector2(120, 120), new Vector2(128, 104));
+                end.DebugJump(3, 700);
+                yield return new WaitForSeconds(0.3f);
+                yield return Shot("final_castillo");
+                foreach (int f in new[] { 900, 1300, 1700 })
+                {
+                    end.DebugJump(4, f);
+                    yield return new WaitForSeconds(0.2f);
+                    yield return Shot($"final_epilogo_{f}");
                 }
             }
             Application.Quit();

@@ -30,6 +30,8 @@ import bancos  # noqa: E402
 import inventario  # noqa: E402
 import diario  # noqa: E402
 import cornifer  # noqa: E402
+import musica  # noqa: E402
+import iconos  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/personajes"
@@ -268,6 +270,8 @@ def main(argv):
     inventario.build(src)
     diario.build(src)
     cornifer.build(src)
+    musica.build(src)
+    iconos.build(src)
 
 
 if __name__ == "__main__":

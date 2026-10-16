@@ -31,6 +31,8 @@ namespace MazeOfKnight.Game
 
         // Volumen de lo que no es el chip (el tarareo de Cornifer): general por efectos.
         public static float EffectsVolume => Master * 0.05f * Effects / 10f;
+        // La música de Hollow Knight del menú (grabada, más fuerte que el chip): general por música.
+        public static float HollowMusicVolume => Master / 10f * Music / 10f * 0.8f;
 
         public static bool VSync { get => Get("vsync", 1) == 1; set => Set("vsync", value ? 1 : 0); }
         public static int FrameCap { get => Get("fps", 0); set => Set("fps", value); }

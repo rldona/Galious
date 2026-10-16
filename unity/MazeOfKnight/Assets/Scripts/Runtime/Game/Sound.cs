@@ -72,16 +72,34 @@ namespace MazeOfKnight.Game
                     }
                 }
             }
+            // Sin un AudioListener no se oye nada (la escena no tiene ninguno en la cámara): lo lleva este objeto, que dura
+            // toda la partida; los sonidos son todos 2D.
+            if (FindAnyObjectByType<AudioListener>() == null) gameObject.AddComponent<AudioListener>();
             rate = AudioSettings.outputSampleRate > 0 ? AudioSettings.outputSampleRate : 44100;
             psg = new Psg(rate);
             Silence();
-            var src = gameObject.AddComponent<AudioSource>();
-            src.clip = AudioClip.Create("PSG", rate, 1, rate, true, OnRead);
+            // El chip suena directamente en la salida (PsgOutput.OnAudioFilterRead), sin un clip de streaming: Unity lee esos
+            // por adelantado y el sonido llegaba con retardo (el de la espada se notaba).
+            var go = new GameObject("Salida del PSG");
+            go.transform.SetParent(transform, false);
+            var src = go.AddComponent<AudioSource>();
+            src.clip = AudioClip.Create("PSG", 1024, 1, rate, false);   // en silencio: la salida la escribe el filtro
             src.loop = true;
+            go.AddComponent<PsgOutput>().Sound = this;
             src.Play();
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }
+
+        // Nivel de lo que sale por los altavoces ahora (para las capturas: comprobar que suena).
+        public static float OutputLevel()
+        {
+            var buf = new float[1024];
+            AudioListener.GetOutputData(buf, 0);
+            float sum = 0;
+            foreach (var v in buf) sum += v * v;
+            return Mathf.Sqrt(sum / buf.Length);
+        }
 
         public void Music(int id, int then = -1)
         {
@@ -152,13 +170,15 @@ namespace MazeOfKnight.Game
             }
         }
 
-        void OnRead(float[] data)
+        // Rellena la salida (intercalada por canales) con el chip, 60 cuadros de registros por segundo.
+        internal void Fill(float[] data, int channels)
         {
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i += channels)
             {
                 sampleCounter += 60;
                 if (sampleCounter >= rate) { sampleCounter -= rate; Frame(); }
-                data[i] = psg.Sample() * Volume;
+                float v = psg.Sample() * Volume;
+                for (int c = 0; c < channels; c++) data[i + c] = v;
             }
         }
     }

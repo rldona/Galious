@@ -162,6 +162,8 @@ namespace MazeOfKnight.Game.Visuals
         Screen_ screen;
         int sel, quitSel;
         readonly OptionsMenu options = new OptionsMenu();
+        AudioSource music;
+        public string MusicState => music == null ? "sin fuente" : $"clip {(music.clip != null ? music.clip.name + " " + music.clip.loadState : "null")}, suena {music.isPlaying}, volumen {music.volume:0.00}, tiempo {music.time:0.00}, 3D {music.spatialBlend}, mute {music.mute}, oyente {AudioListener.volume} pausa {AudioListener.pause}";
         static bool noticeShown;            // el aviso de autoguardado, una vez al arrancar
         float t, leaving = -1;
         System.Action onLeave;
@@ -179,6 +181,12 @@ namespace MazeOfKnight.Game.Visuals
             for (int i = 0; i < 70; i++)
                 motes.Add(new Vector4((float)rng.NextDouble(), (float)rng.NextDouble(), 0.01f + (float)rng.NextDouble() * 0.03f, 1 + (float)rng.NextDouble() * 3));
             Sound.StopMusic();
+            // La música del menú de Hollow Knight (Assets/Art/Resources/Hollow/musica, de tools/hollow/musica.py).
+            music = gameObject.AddComponent<AudioSource>();
+            music.clip = Resources.Load<AudioClip>("Hollow/musica/titulo");
+            music.loop = true;
+            music.volume = 0;
+            if (music.clip != null) music.Play();
             Rebuild();
             if (!noticeShown && HollowMenus.Available) screen = Screen_.Notice;
             noticeShown = true;
@@ -213,6 +221,12 @@ namespace MazeOfKnight.Game.Visuals
         void Update()
         {
             t += Time.unscaledDeltaTime;
+            // La música entra despacio (tras el aviso) y se apaga al salir; sigue el volumen de música de Opciones.
+            if (music != null)
+            {
+                float fade = screen == Screen_.Notice ? 0 : leaving >= 0 ? Mathf.Clamp01(1 - leaving / 0.7f) : 1;
+                music.volume = Mathf.MoveTowards(music.volume, fade * GameSettings.HollowMusicVolume, Time.unscaledDeltaTime * (leaving >= 0 ? 2f : 0.4f));
+            }
             if (leaving >= 0)
             {
                 leaving += Time.unscaledDeltaTime;
