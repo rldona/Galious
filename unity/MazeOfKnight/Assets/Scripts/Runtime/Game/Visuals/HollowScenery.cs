@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using MazeOfKnight.Data;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -19,40 +20,89 @@ namespace MazeOfKnight.Game.Visuals
     {
         public const float Lip = 2f;                 // px que asoma el suelo por encima de donde se pisa
         public const float Overlap = 0.8f;           // cada pieza empieza al 80 % de la anterior
+        public const float TechoMax = 12f;           // px que cuelga un techo como mucho (lo largo, las estalactitas)
         // Capas, de atrás adelante (como Team Cherry): 4, el fondo lejano (un trozo de una sala de Hollow Knight, apagado);
         // 3, el degradado con niebla, rocas grandes y arcos y estatuas; 2, el juego (el sólido y sus bordes); 1, siluetas
         // negras por delante de los personajes, asomando por los bordes de la sala.
         public const int FarOrder = -13, ForeOrder = 30;
-        static readonly Color FarTint = new Color(0.42f, 0.47f, 0.6f);
-        static readonly Color BackTop = new Color(0.04f, 0.05f, 0.08f, 0.8f), BackLow = new Color(0.16f, 0.20f, 0.28f, 0.45f);
         static readonly Color Silhouette = new Color(0.008f, 0.008f, 0.014f);
-        static readonly Color Deep = new Color(0.17f, 0.21f, 0.30f, 0.85f);   // rocas del fondo, más lejos que lo de Far
         public static readonly Color Rock = new Color(0.02f, 0.02f, 0.03f);
-        static readonly Color Far = new Color(0.36f, 0.43f, 0.58f, 0.7f);
-        Sprite gradient;
 
-        readonly Dictionary<string, List<Sprite>> roles = new Dictionary<string, List<Sprite>>();
+        // Zona de Hollow Knight de cada mapa (su kit en Hollow/escenario/<zona>) y sus colores: el tinte del fondo lejano,
+        // el degradado (arriba, abajo con niebla), las rocas grandes del fondo (Deep) y los arcos y estatuas (Far).
+        public class Look
+        {
+            public string Zone;
+            public Color FarTint, BackTop, BackLow, Deep, Far;
+        }
+        static Look L(string zone, string farTint, string top, float topA, string low, float lowA, string deep, string far) => new Look
+        {
+            Zone = zone, FarTint = Hex(farTint, 1), BackTop = Hex(top, topA), BackLow = Hex(low, lowA), Deep = Hex(deep, 0.85f), Far = Hex(far, 0.7f),
+        };
+        static Color Hex(string h, float a) { ColorUtility.TryParseHtmlString(h, out var c); c.a = a; return c; }
+        // Índice 0 = castillo, 1–10 = mundos (el reparto acordado con el usuario el 16 de octubre de 2026). Sin su kit
+        // importado, una zona usa la de los Cruces.
+        public static readonly Look[] Looks =
+        {
+            L("cruces", "#6b7899", "#0a0d14", 0.8f, "#29334a", 0.45f, "#2b354d", "#5c6e94"),      // castillo
+            L("greenpath", "#7a9993", "#08100f", 0.8f, "#1f3d38", 0.45f, "#1f3833", "#527a73"),   // 1 cueva verde agua
+            L("canales", "#6b8a99", "#070d12", 0.8f, "#1f3542", 0.45f, "#1d313d", "#4f7385"),     // 2 arrecife
+            L("colmena", "#99876b", "#120d06", 0.8f, "#4a3a1f", 0.45f, "#3d301b", "#8a7449"),     // 3 guarida ámbar
+            L("cristal", "#8a7a99", "#0e0914", 0.8f, "#3a2a4d", 0.45f, "#30243f", "#73609a"),     // 4 cristal violeta
+            L("ciudad", "#6b7d99", "#070b14", 0.8f, "#1f2d4a", 0.45f, "#1d2840", "#4f6494"),      // 5 ruinas hundidas
+            L("fungicos", "#8a8a6b", "#0d0d07", 0.8f, "#3a3a1f", 0.45f, "#30301b", "#7a7a4f"),    // 6 bosque de hongos
+            L("abismo", "#5a6280", "#030408", 0.85f, "#141a2e", 0.45f, "#121726", "#3d4a73"),     // 7 abismo luminoso
+            L("nido", "#5a5a66", "#050506", 0.85f, "#1c1c24", 0.45f, "#18181f", "#474757"),       // 8 magma
+            L("confines", "#8c8c8c", "#0d0d0d", 0.8f, "#3a3a3a", 0.45f, "#2e2e2e", "#7a7a7a"),    // 9 osario
+            L("palacio", "#a3a3b3", "#0f0f14", 0.75f, "#4d4d5c", 0.45f, "#3d3d4a", "#9494a8"),    // 10 trono carmesí
+        };
+        public static Look LookFor(string mapName)
+        {
+            int i = mapName != null && mapName.StartsWith("world") && int.TryParse(mapName.Substring(5), out int w) ? w : 0;
+            return Looks[Mathf.Clamp(i, 0, Looks.Length - 1)];
+        }
+
+        Look look = Looks[0];
+        Dictionary<string, List<Sprite>> roles = new Dictionary<string, List<Sprite>>();
+        readonly Dictionary<string, Dictionary<string, List<Sprite>>> kits = new Dictionary<string, Dictionary<string, List<Sprite>>>();
+
+        // Cambia de zona (al construir un mapa): su kit, o el de los Cruces si no está importado.
+        public void UseMap(string mapName)
+        {
+            look = LookFor(mapName);
+            roles = Kit(look.Zone);
+            if (roles.Count == 0) roles = Kit(Looks[0].Zone);
+        }
+
+        Dictionary<string, List<Sprite>> Kit(string zone)
+        {
+            if (kits.TryGetValue(zone, out var k)) return k;
+            k = new Dictionary<string, List<Sprite>>();
+            foreach (var sp in Resources.LoadAll<Sprite>($"Hollow/escenario/{zone}"))
+            {
+                int cut = sp.name.IndexOf("__");
+                if (cut <= 0) continue;
+                string role = sp.name.Substring(0, cut);
+                if (!k.TryGetValue(role, out var list)) k[role] = list = new List<Sprite>();
+                list.Add(sp);
+            }
+            foreach (var list in k.Values) list.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
+            if (k.Count > 0) Debug.Log($"[HollowScenery] zona {zone}: {k.Values.Sum(l => l.Count)} piezas");
+            return kits[zone] = k;
+        }
+        Sprite gradient;
+        string gradientZone;
         readonly Dictionary<RoomModel, GameObject> built = new Dictionary<RoomModel, GameObject>();
         Material material;
         public TileBase FillTile { get; private set; }
 
         public static HollowScenery Load()
         {
-            var all = Resources.LoadAll<Sprite>("Hollow/escenario");
-            if (all.Length == 0) return null;
             var s = new HollowScenery();
-            foreach (var sp in all)
-            {
-                int cut = sp.name.IndexOf("__");
-                if (cut <= 0) continue;
-                string role = sp.name.Substring(0, cut);
-                if (!s.roles.TryGetValue(role, out var list)) s.roles[role] = list = new List<Sprite>();
-                list.Add(sp);
-            }
-            foreach (var list in s.roles.Values) list.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
+            if (s.Kit(Looks[0].Zone).Count == 0) return null;
+            s.UseMap(null);
             s.FillTile = SolidTile(Rock);
             s.material = Resources.Load<Material>("Materials/SpriteLit");
-            Debug.Log($"[HollowScenery] {all.Length} piezas de escenario");
             return s;
         }
 
@@ -100,13 +150,24 @@ namespace MazeOfKnight.Game.Visuals
             // Suelos: tramos con aire encima.
             for (int r = 0; r < RoomCoords.Rows; r++)
                 foreach (var (c0, c1) in Runs(c => S(c, r) && !S(c, r - 1)))
-                    Row(room, root.transform, rng, "suelo", c0 * 8, c1 * 8, OriginalPhysics.RoomTopPx + r * 8 - Lip, -4);
+                {
+                    float surface = OriginalPhysics.RoomTopPx + r * 8;
+                    Row(room, root.transform, rng, "suelo", c0 * 8, c1 * 8, surface - Lip, -4);
+                    // Adornos encima (hierba, huesos, bases de columna): uno de cada 5 casillas, de 12 px de alto como mucho.
+                    for (int c = c0; c < c1; c++)
+                        if (rng.Next(5) == 0 && Pick("detalle", rng) is Sprite d)
+                        {
+                            var size = SizePx(d);
+                            float k = Mathf.Min(1, 12f / size.y);
+                            Put(room, root.transform, d, c * 8 + 4 - size.x * k / 2, surface - Lip + 1 - size.y * k, k, rng.Next(2) == 0, -4, Color.white);
+                        }
+                }
             // Techos: tramos con aire debajo; alguna estalactita si quedan 5 filas libres.
             for (int r = 0; r < RoomCoords.Rows; r++)
                 foreach (var (c0, c1) in Runs(c => S(c, r) && !S(c, r + 1)))
                 {
                     float y = OriginalPhysics.RoomTopPx + (r + 1) * 8 - 3;
-                    Row(room, root.transform, rng, "techo", c0 * 8, c1 * 8, y, -5);
+                    Row(room, root.transform, rng, "techo", c0 * 8, c1 * 8, y, -5, TechoMax);
                     if (c1 - c0 >= 3 && rng.Next(3) == 0)
                     {
                         int c = rng.Next(c0 + 1, c1 - 1), free = 0;
@@ -177,7 +238,8 @@ namespace MazeOfKnight.Game.Visuals
         static Vector2 SizePx(Sprite sp) => sp.bounds.size * RoomCoords.PixelsPerUnit;
 
         // Una fila de piezas de x0 a x1 con su borde de arriba en y, solapadas, sin pasarse de los extremos más de 2 px.
-        void Row(RoomModel room, Transform parent, System.Random rng, string role, float x0, float x1, float y, int order)
+        // maxH: alto máximo (los techos de enredaderas de Greenpath son cortinas largas).
+        void Row(RoomModel room, Transform parent, System.Random rng, string role, float x0, float x1, float y, int order, float maxH = 999)
         {
             float x = x0 - 2, end = x1 + 2;
             int guard = 0;
@@ -186,9 +248,9 @@ namespace MazeOfKnight.Game.Visuals
                 var sp = Pick(role, rng);
                 if (sp == null) return;
                 var size = SizePx(sp);
-                float k = 1;
+                float k = Mathf.Min(1, maxH / size.y);
                 float span = end - x0 + 2;
-                if (size.x > span) k = Mathf.Max(0.5f, span / size.x);
+                if (size.x * k > span) k = Mathf.Max(0.5f * k, span / size.x);
                 float w = size.x * k;
                 float px = x + w > end ? end - w : x;
                 Put(room, parent, sp, px, y, k, rng.Next(2) == 0, order, Color.white);
@@ -235,13 +297,14 @@ namespace MazeOfKnight.Game.Visuals
         // Degradado de la sala: oscuro arriba y con niebla azulada abajo, como las cuevas de los Cruces.
         Sprite Gradient()
         {
-            if (gradient != null) return gradient;
+            if (gradient != null && gradientZone == look.Zone) return gradient;
+            gradientZone = look.Zone;
             const int h = 64;
             var tex = new Texture2D(1, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
             for (int y = 0; y < h; y++)
             {
                 float t = y / (float)(h - 1);                    // 0 abajo, 1 arriba
-                tex.SetPixel(0, y, Color.Lerp(BackLow, BackTop, Mathf.SmoothStep(0, 1, t)));
+                tex.SetPixel(0, y, Color.Lerp(look.BackLow, look.BackTop, Mathf.SmoothStep(0, 1, t)));
             }
             tex.Apply(false, true);
             // Del tamaño de la sala: 1 texel de ancho = 256 px, 64 de alto = 160 px.
@@ -298,7 +361,7 @@ namespace MazeOfKnight.Game.Visuals
                 f.transform.SetParent(parent, false);
                 f.sprite = far;
                 f.sortingOrder = FarOrder;
-                f.color = FarTint;
+                f.color = look.FarTint;
                 var c = RoomCoords.RoomOrigin(room) + RoomCoords.RoomSize / 2;
                 f.transform.position = new Vector3(c.x, c.y, 0);
                 float k = RoomCoords.RoomSize.x / far.bounds.size.x;
@@ -319,7 +382,7 @@ namespace MazeOfKnight.Game.Visuals
                 var size = SizePx(sp) * k;
                 float x = (i + (float)rng.NextDouble()) * 128 - size.x / 2;
                 float y = OriginalPhysics.RoomTopPx + 30 + (float)rng.NextDouble() * 90 - size.y / 2;
-                Put(room, parent, sp, x, y, k, rng.Next(2) == 0, -10, Deep);
+                Put(room, parent, sp, x, y, k, rng.Next(2) == 0, -10, look.Deep);
             }
             int n = 3 + rng.Next(2);
             for (int i = 0; i < n; i++)
@@ -333,7 +396,7 @@ namespace MazeOfKnight.Game.Visuals
                 float k = 0.55f + (float)rng.NextDouble() * 0.25f;
                 var size = SizePx(sp) * k;
                 float floor = OriginalPhysics.RoomTopPx + r * 8;
-                Put(room, parent, sp, c * 8 + 4 - size.x / 2, floor - size.y + 2, k, rng.Next(2) == 0, -9, Far);
+                Put(room, parent, sp, c * 8 + 4 - size.x / 2, floor - size.y + 2, k, rng.Next(2) == 0, -9, look.Far);
             }
         }
     }

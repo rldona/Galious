@@ -94,6 +94,7 @@ namespace MazeOfKnight.Game
             if (grid != null)
                 DestroyImmediate(grid.gameObject);
             Scenery?.Clear();
+            Scenery?.UseMap(map.mapName);
             grid = new GameObject($"{map.mapName} (salas)").AddComponent<Grid>();
             grid.transform.SetParent(transform, false);
             grid.cellSize = new Vector3(RoomCoords.TileSize, RoomCoords.TileSize, 0);
