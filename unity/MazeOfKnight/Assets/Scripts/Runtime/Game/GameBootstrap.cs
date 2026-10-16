@@ -136,6 +136,7 @@ namespace MazeOfKnight.Game
             };
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
+            hollowEnemies = Visuals.HollowEnemyArt.Load();
             Enemies.Hit += _ => player?.HitStop();
             Enemies.Killed += _ => player?.HitStop();
             menu = gameObject.AddComponent<InventoryMenu>();
@@ -1039,6 +1040,9 @@ namespace MazeOfKnight.Game
             }
         }
 
+        // Enemigos con el dibujo de Hollow Knight (Visuals/HollowEnemyArt), con cualquier estilo; null si no se ha importado.
+        Visuals.HollowEnemyArt hollowEnemies;
+
         void LateUpdate()
         {
             if (motor == null)
@@ -1073,6 +1077,7 @@ namespace MazeOfKnight.Game
             {
                 if (enemyViews[e] != null) Destroy(enemyViews[e].gameObject);
                 enemyViews.Remove(e);
+                hollowEnemies?.Forget(e);
             }
             foreach (var (e, sr) in enemyViews.Select(kv => (kv.Key, kv.Value)))
             {
@@ -1088,6 +1093,23 @@ namespace MazeOfKnight.Game
                 }
                 var (x0, y0, x1, y1) = e.DrawRect();
                 var bottomLeft = RoomCoords.PixelToWorld(e.Room, (int)x0, (int)y1);
+                var hk = hollowEnemies?.Frame(e, Time.deltaTime);
+                if (hk != null)
+                {
+                    // Dibujo de Hollow Knight: sin deformar, a K veces la altura de la caja, apoyado abajo en el centro
+                    // (los que andan) o en el centro (los que vuelan). Se gira con la escala (el material de contorno no
+                    // aplica flipX).
+                    var info = hollowEnemies.For(e);
+                    float boxH = Mathf.Max(1f, y1 - y0);
+                    float scale = boxH * 8f * info.K / Mathf.Max(1f, info.RefHeight);
+                    var at = bottomLeft + new Vector2((x1 - x0) / 2f, info.Feet ? 0 : boxH / 2f) / RoomCoords.PixelsPerUnit;
+                    sr.sprite = hk;
+                    sr.color = Color.white;
+                    sr.flipX = false;
+                    sr.transform.position = new Vector3(at.x, at.y, 0);
+                    sr.transform.localScale = new Vector3(e.FacingLeft ? -scale : scale, scale, 1);
+                    continue;
+                }
                 sr.transform.position = new Vector3(bottomLeft.x, bottomLeft.y, 0);
                 sr.transform.localScale = new Vector3((x1 - x0) / 16f, Mathf.Max(0.05f, (y1 - y0) / 16f), 1);
                 sr.flipX = e.FacingLeft;

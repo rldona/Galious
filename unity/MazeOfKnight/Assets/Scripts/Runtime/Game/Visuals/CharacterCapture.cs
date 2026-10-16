@@ -117,6 +117,17 @@ namespace MazeOfKnight.Game.Visuals
                     yield return new WaitForSeconds(0.6f);
                 }
             }
+            // Enemigos del castillo con su dibujo de Hollow Knight y las cajas: una sala por tipo.
+            HitboxOverlay.Show = true;
+            player.Demo = null;
+            foreach (int id in new[] { 2, 3, 4, 5, 6, 7, 9, 13, 18, 20, 25, 49 })
+            {
+                var r = game.World.Room(id);
+                if (r == null) continue;
+                game.Motor.Place(game.World, r, 128, 120);
+                yield return new WaitForSeconds(1.5f);
+                yield return Shot($"enemigos_sala_{id:000}");
+            }
             Application.Quit();
         }
     }

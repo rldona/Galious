@@ -90,7 +90,8 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
     - piedra golpeada: una nube de polvo y un destello pequeño; rota, una nube alargada, polvo que sube y esquirlas;
     - jugador herido: el rayo blanco y un destello con su raya;
     - puerta de mundo que se abre: polvo que sube del hueco.
-  - `-capturaPersonajes <carpeta>` en el compilado guarda capturas de los dos corriendo, atacando y saltando.
+  - Enemigos (`tools/hollow/enemigos.py` → `Assets/Art/Resources/Hollow/enemigos/` y `enemigos_centro/`, `Visuals/HollowEnemyArt`): cada tipo del original lleva una criatura de Hollow Knight con un papel parecido (la tabla `ENEMIES`: murciélago → Vengefly, esqueleto → Husk, caballero → Husk con escudo, brote → planta trampa, rodador → Baldur, murciélagos que se fusionan → Gruzzer, reptador → Crawlid, erizo → Tiktik, espíritu → Lumafly, fantasma → Folly, hechicero → Soul Twister, estatua → Moss Knight, bocas → Gulka, torretas → la del Mawlek, pinchos → los del Coliseo). El dibujo no se deforma: mide K veces la altura de la caja y se apoya abajo en el centro (los que andan) o en el centro (los que vuelan); puede sobresalir y ninguna colisión cambia. Anima «mover» mientras se mueve y «quieto» si no. Los tipos sin dibujo siguen como estaban.
+  - `-capturaPersonajes <carpeta>` en el compilado guarda capturas de los dos corriendo, atacando y saltando, de los efectos y de una sala del castillo por cada tipo de enemigo.
 - **Controles:**
   - ← → (o A D, o mando) andar;
   - ↑ saltar o subir escalera (también botón sur del mando);
