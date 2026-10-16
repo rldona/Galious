@@ -1747,15 +1747,19 @@ namespace MazeOfKnight.Game
             musicWanted = BackgroundMusic();
         }
 
+        static readonly string[] BossTracks = System.Linq.Enumerable.Range(0, 12).Select(i => "jefe" + i).ToArray();
+        static readonly string[] WorldTracks = System.Linq.Enumerable.Range(0, 11).Select(i => "mundo" + i).ToArray();
+
         // RemakeRules.HollowMusic: la pista de Hollow Knight (Visuals/HollowMusic) para la música de fondo que toca ahora.
         public string HollowTrack()
         {
             if (!RemakeRules.HollowMusic || motor == null || Busy || Bosses == null) return null;
             int want = BackgroundMusic();
             if (want == 0x8D) return "santuario";
-            if ((want == 0x90 || want == 0x81) && Bosses.Info != null) return $"jefe{Bosses.Info.id}";
+            // (Se pide en cada fotograma: los nombres, hechos una vez.)
+            if ((want == 0x90 || want == 0x81) && Bosses.Info != null) return BossTracks[Mathf.Clamp(Bosses.Info.id, 0, 11)];
             if (mapName == "castle") return "castillo";
-            return Inventory.CurrentWorld > 0 ? $"mundo{Inventory.CurrentWorld}" : "castillo";
+            return Inventory.CurrentWorld > 0 ? WorldTracks[Mathf.Clamp(Inventory.CurrentWorld, 0, 10)] : "castillo";
         }
 
         // Las canciones del original que son de fondo (en bucle): con la música de Hollow Knight, el chip las calla. La

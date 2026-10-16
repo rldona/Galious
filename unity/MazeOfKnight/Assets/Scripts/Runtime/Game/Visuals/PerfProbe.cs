@@ -62,6 +62,49 @@ namespace MazeOfKnight.Game.Visuals
             game.DebugGoTo("castle", 1);
             yield return new WaitForSecondsRealtime(0.5f);
             if (game.DebugOpenShrine("Ares")) { yield return new WaitForSecondsRealtime(0.5f); yield return Measure("santuario"); game.DebugShrineScreen.Close(); }
+            // Basura: bytes pedidos por fotograma en una sala con enemigos (lo que crece la memoria entre recolecciones), con
+            // todo y quitando cada componente que se actualiza o dibuja interfaz en cada fotograma, para ver de dónde sale.
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-basura") >= 0)
+            {
+                Application.targetFrameRate = 120;
+                game.DebugGoTo("castle", 74);
+                yield return new WaitForSecondsRealtime(1f);
+                var rate = new float[1];
+                yield return AllocRate(rate);
+                lines.Add($"basura con todo: {rate[0]:0} bytes por fotograma");
+                var all = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Where(m => m.enabled && m != this).ToList();
+                var gui = all.Where(m => Declares(m.GetType(), "OnGUI")).ToList();
+                var frame = all.Where(m => Declares(m.GetType(), "Update") || Declares(m.GetType(), "LateUpdate")).ToList();
+                foreach (var (label, group) in new[] { ("sin las que dibujan interfaz (OnGUI)", gui), ("sin las que se actualizan cada fotograma", frame), ("sin ninguna", all) })
+                {
+                    foreach (var m in group) m.enabled = false;
+                    yield return new WaitForSecondsRealtime(0.3f);
+                    yield return AllocRate(rate);
+                    foreach (var m in group) m.enabled = true;
+                    lines.Add($"   {label}: {rate[0]:0}  ({string.Join(", ", group.Select(m => m.GetType().Name).Distinct())})");
+                    yield return new WaitForSecondsRealtime(0.3f);
+                }
+                // Sin interfaz, quitando cada uno de los que se actualizan.
+                foreach (var o in gui) o.enabled = false;
+                foreach (var m in frame.Where(f => !gui.Contains(f)).GroupBy(f => f.GetType()).Select(g => g.First()))
+                {
+                    var same = frame.Where(f => f.GetType() == m.GetType()).ToList();
+                    foreach (var o in same) o.enabled = false;
+                    yield return new WaitForSecondsRealtime(0.2f);
+                    yield return AllocRate(rate);
+                    foreach (var o in same) o.enabled = true;
+                    lines.Add($"   sin interfaz y sin {m.GetType().Name}: {rate[0]:0}");
+                }
+                foreach (var m in gui)
+                {
+                    foreach (var o in gui) o.enabled = o == m;
+                    yield return new WaitForSecondsRealtime(0.2f);
+                    yield return AllocRate(rate);
+                    lines.Add($"   solo {m.GetType().Name} dibujando: {rate[0]:0}");
+                }
+                foreach (var m in gui) m.enabled = true;
+            }
+
             // Fluidez: el Caballero anda a la derecha 3 s en el suelo ancho de la sala 1 del castillo, a 60 y a 120 FPS, y se
             // mide cuánto avanza su dibujo en cada fotograma (a saltos: muchos fotogramas quietos y otros con el salto).
             foreach (int fps in new[] { 60, 120 })
@@ -91,6 +134,34 @@ namespace MazeOfKnight.Game.Visuals
             }
             File.WriteAllLines(Path.Combine(dir, "rendimiento.txt"), lines);
             Application.Quit();
+        }
+
+        static bool Declares(System.Type t, string method)
+        {
+            const System.Reflection.BindingFlags f = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public |
+                                                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+            for (; t != null && t != typeof(MonoBehaviour); t = t.BaseType)
+                if (t.GetMethod(method, f) != null) return true;
+            return false;
+        }
+
+        // Bytes por fotograma durante 2 s: lo que sube la memoria gestionada de un fotograma al siguiente (las bajadas son
+        // recolecciones y no cuentan).
+        static IEnumerator AllocRate(float[] result)
+        {
+            long last = System.GC.GetTotalMemory(false), sum = 0;
+            int frames = 0;
+            float t = 0;
+            while (t < 2f)
+            {
+                yield return null;
+                t += Time.unscaledDeltaTime;
+                long now = System.GC.GetTotalMemory(false);
+                if (now > last) sum += now - last;
+                last = now;
+                frames++;
+            }
+            result[0] = frames > 0 ? sum / (float)frames : 0;
         }
 
         IEnumerator Measure(string where)

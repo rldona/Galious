@@ -10,6 +10,9 @@ namespace MazeOfKnight.Game
         public PlayerController player;
         GUIStyle style;
 
+        // Sin la pasada de maquetación de IMGUI (no se usa GUILayout): era la mayor parte de la basura de cada fotograma.
+        void OnEnable() => useGUILayout = false;
+
         void OnGUI()
         {
             if (player == null || player.Motor == null || bootstrap.EndingRunning || bootstrap.AttractRunning)

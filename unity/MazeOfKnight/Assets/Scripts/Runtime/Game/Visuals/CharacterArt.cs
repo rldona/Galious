@@ -103,7 +103,15 @@ namespace MazeOfKnight.Game.Visuals
         static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "salto_subir", "estocada", "estocada_arriba", "estocada_abajo", "golpe", "muerte", "celebrar", "sentarse", "levantarse", "despertar", "curarse" };
 
         // La acción del espadazo según hacia dónde va (RemakeRules.HollowSlashes): estocada, estocada_arriba, estocada_abajo.
-        static string Slash(PlayerMotor m, string name) => m.SlashDir > 0 ? name + "_arriba" : m.SlashDir < 0 ? name + "_abajo" : name;
+        static string Slash(PlayerMotor m, string name) => m.SlashDir > 0 ? Join(name, "arriba") : m.SlashDir < 0 ? Join(name, "abajo") : name;
+
+        // Nombres de clip compuestos, guardados para no crear un texto nuevo en cada fotograma (era basura de memoria).
+        static readonly Dictionary<(string, string), string> joined = new Dictionary<(string, string), string>();
+        static string Join(string a, string b)
+        {
+            if (!joined.TryGetValue((a, b), out var s)) joined[(a, b)] = s = a + "_" + b;
+            return s;
+        }
         int lastAttackTicks;
         bool lastFacingLeft, facingKnown;
         string drawnAction;
@@ -112,7 +120,7 @@ namespace MazeOfKnight.Game.Visuals
 
         FrameClip DrawnClip(Character c, string action)
         {
-            string name = $"{Prefix(c)}_{action}";
+            string name = Join(Prefix(c), action);
             var clip = Drawn?.Clip(name);
             if (clip == null && DrawnOnly && action != "quieto" && action != "estela") return DrawnClip(c, "quieto");
             if (clip == null) return null;
@@ -208,7 +216,7 @@ namespace MazeOfKnight.Game.Visuals
             int shield = ShieldLevel?.Invoke() ?? 0;
             if (shield <= 0 || Drawn == null || anim.Clip == null || drawnAction == null) return null;
             string metal = shield == 1 ? "cobre" : shield == 2 ? "plata" : "oro";
-            var clip = Drawn.Clip($"{Prefix(m.Character)}_escudo_{metal}_{drawnAction}");
+            var clip = Drawn.Clip(Join(Join(Join(Prefix(m.Character), "escudo"), metal), drawnAction));
             if (clip == null || clip.Length == 0) return null;
             return clip.Frames[Math.Min(anim.Frame, clip.Length - 1)];
         }

@@ -183,9 +183,12 @@ namespace MazeOfKnight.Game.Visuals
             return (new Vector3(at.x, at.y, 0), new Vector3(e.FacingLeft ? -s : s, s, 1), Quaternion.identity);
         }
 
+        readonly Dictionary<(string, string), string> clipNames = new Dictionary<(string, string), string>();
+
         FrameClip Clip(Info info, string action, bool loop)
         {
-            var clip = lib.Clip($"{info.Key}_{action}");
+            if (!clipNames.TryGetValue((info.Key, action), out var name)) clipNames[(info.Key, action)] = name = info.Key + "_" + action;
+            var clip = lib.Clip(name);   // (el nombre, guardado: no crea un texto en cada fotograma)
             if (clip == null || clip.Length == 0) return null;
             if (fps.TryGetValue(clip.Name, out float f)) clip.Fps = f;
             clip.Loop = loop;

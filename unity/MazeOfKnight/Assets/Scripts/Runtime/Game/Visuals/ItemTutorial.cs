@@ -63,6 +63,9 @@ namespace MazeOfKnight.Game.Visuals
             crest = Resources.Load<Sprite>("Hollow/menu/remate");
         }
 
+        // Sin la pasada de maquetación de IMGUI (no se usa GUILayout): era la mayor parte de la basura de cada fotograma.
+        void OnEnable() => useGUILayout = false;
+
         void OnGUI()
         {
             if (!Open) return;

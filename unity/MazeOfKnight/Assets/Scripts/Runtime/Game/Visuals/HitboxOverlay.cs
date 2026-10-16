@@ -20,6 +20,9 @@ namespace MazeOfKnight.Game.Visuals
             if (RemakeRules.DebugKeys && Keyboard.current != null && Keyboard.current.f9Key.wasPressedThisFrame) Show = !Show;
         }
 
+        // Sin la pasada de maquetación de IMGUI (no se usa GUILayout): era la mayor parte de la basura de cada fotograma.
+        void OnEnable() => useGUILayout = false;
+
         void OnGUI()
         {
             if (!Show || game == null || game.Motor == null || game.AttractRunning || game.EndingRunning) return;
