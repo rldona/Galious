@@ -33,6 +33,8 @@ namespace MazeOfKnight.Game.Visuals
         int lastX, lastY;
         float walk, idle;
         RoomModel lastRoom;
+        const float MoveGrace = 2f / OriginalPhysics.TicksPerSecond;
+        float moving;
 
         public CharacterArt()
         {
@@ -207,7 +209,11 @@ namespace MazeOfKnight.Game.Visuals
             int dx = Math.Abs(m.X - lastX), dy = m.Y - lastY;
             lastX = m.X;
             lastY = m.Y;
-            var drawnSprite = DrawnFrame(m, dt, dx);
+            // El motor mueve al jugador 30 veces por segundo y la pantalla se pinta 60 o más: entre dos ticks no se ha
+            // movido y no por eso ha parado. Se sigue corriendo hasta 2 ticks sin moverse.
+            if (dx > 0 && dx < 20) moving = MoveGrace;
+            else moving = Math.Max(0, moving - dt);
+            var drawnSprite = DrawnFrame(m, dt, dx > 0 && dx < 20 || moving > 0 ? Math.Max(dx, 1) : 0);
             if (drawnSprite != null || DrawnOnly) return drawnSprite;
             var c = m.Character;
             int shield = ShieldLevel?.Invoke() ?? 0;

@@ -80,3 +80,13 @@ Original (docs/ending.md): la piedra del bebé sale de (0..3) + (0..7); con 10 (
 ## RemakeRules.NoRoomChangePause (activado)
 
 En el original, al cambiar de sala el juego se para 11 ticks (~0,37 s) mientras dibuja la sala nueva (medido con la demo 1; `OriginalPhysics.RoomChangePauseTicks`). Se nota como un parón. Con la regla activada el jugador sigue sin pausa. **Activado**: el usuario no quiere el parón. Las demos la llevan siempre, porque sin ella se desincronizan de la grabación.
+
+## Sensación de Hollow Knight: HitStop, CoyoteJump y JumpBuffer (desactivados)
+
+Tres técnicas de la guía «Hollow Knight por dentro» (en la carpeta de Hollow Knight decodificado), pasadas a los ticks del original (30 por segundo). No cambian la física medida: solo perdonan o marcan el tiempo. **F11** activa o quita las tres a la vez (`RemakeRules.HollowFeel`) para probarlas; por defecto se juega como el original.
+
+- **HitStop:** al acertar un golpe (enemigo herido o muerto), todo el juego se para 3 ticks (0,1 s; Hollow Knight, unos 0,11 s), también la animación del jugador. Las pulsaciones de esos ticks se guardan. No se aplica en las demos.
+- **CoyoteJump:** el original deja al jugador 4 ticks quieto en el aire al salir andando de un borde, sin poder hacer nada. Con la regla, una pulsación de ↑ en los 2 primeros salta como desde el suelo (sigue a la misma altura, así que el salto es idéntico). Hollow Knight da 0,04 s.
+- **JumpBuffer:** en el original, ↑ pulsado en el aire no hace nada al aterrizar. Con la regla, una pulsación nueva en los 2 últimos ticks en el aire salta en el primer tick en el suelo si ↑ sigue pulsado. Hollow Knight da 0,04 s.
+
+Tests: `HollowFeelTests` (desactivadas, el motor hace lo medido; activadas, los márgenes exactos).

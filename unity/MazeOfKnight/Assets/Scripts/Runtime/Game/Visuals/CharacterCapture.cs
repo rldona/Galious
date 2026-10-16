@@ -36,6 +36,22 @@ namespace MazeOfKnight.Game.Visuals
             while (!cond() && Time.time - t < 3f) yield return null;
         }
 
+        // Coloca al jugador, reproduce las teclas y hace la captura cuando se cumple la condición (y 'after' segundos).
+        IEnumerator Act(GameBootstrap game, PlayerController player, RoomModel room, int x, int y, DemoInputEntry[] keys,
+            System.Func<bool> when, string name, float after = 0)
+        {
+            player.Demo = null;
+            game.Motor.Place(game.World, room, x, y);
+            yield return new WaitForSeconds(0.3f);
+            var list = new System.Collections.Generic.List<DemoInputEntry>(keys) { new DemoInputEntry { keys = 0xFF } };
+            player.Demo = new DemoPlayer(new DemoInfo { inputs = list.ToArray() });
+            yield return Until(when);
+            if (after > 0) yield return new WaitForSeconds(after);
+            yield return Shot(name);
+            yield return Until(() => player.Demo == null || player.Demo.Finished);
+            player.Demo = null;
+        }
+
         IEnumerator Shot(string name)
         {
             ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"));
@@ -58,30 +74,48 @@ namespace MazeOfKnight.Game.Visuals
                 game.Motor.Place(game.World, room, x0, y0);
                 yield return new WaitForSeconds(0.8f);
                 yield return Shot($"{p}_0_quieto");
-                // Correr a la derecha, estocada, saltar, correr a la izquierda.
-                player.Demo = new DemoPlayer(new DemoInfo
-                {
-                    inputs = new[]
-                    {
-                        Keys(12, right: true), Keys(1, space: true), Keys(8), Keys(1, up: true), Keys(30),
-                        Keys(12, left: true), Keys(1, space: true), Keys(20), new DemoInputEntry { keys = 0xFF },
-                    },
-                });
-                float t0 = Time.time;
-                yield return Until(() => Time.time - t0 > 8 / 30f);
-                yield return Shot($"{p}_1_correr");
-                yield return Until(() => game.Motor.AttackTicks > 0);
-                yield return Shot($"{p}_2_estocada");
-                yield return Until(() => game.Motor.State == MotorState.Jump);
-                yield return new WaitForSeconds(0.1f);
-                yield return Shot($"{p}_3_salto_subir");
-                yield return Until(() => game.Motor.State == MotorState.Fall);
-                yield return new WaitForSeconds(0.1f);
-                yield return Shot($"{p}_4_salto_caer");
-                yield return Until(() => game.Motor.FacingLeft && game.Motor.AttackTicks > 0);
-                yield return Shot($"{p}_5_estocada_izquierda");
-                yield return Until(() => player.Demo == null || player.Demo.Finished);
+                // Cada acción, una demo corta desde el mismo sitio.
+                yield return Act(game, player, room, x0, y0, new[] { Keys(10, right: true), Keys(20) },
+                    () => game.Motor.X > x0 + 6, $"{p}_1_correr");
+                yield return Act(game, player, room, x0, y0, new[] { Keys(2, right: true), Keys(1, space: true), Keys(10) },
+                    () => game.Motor.AttackTicks >= 3, $"{p}_2_estocada");
+                yield return Act(game, player, room, x0, y0, new[] { Keys(2, left: true), Keys(1, space: true), Keys(10) },
+                    () => game.Motor.FacingLeft && game.Motor.AttackTicks >= 3, $"{p}_3_estocada_izquierda");
+                yield return Act(game, player, room, x0, y0, new[] { Keys(12, up: true), Keys(30) },
+                    () => game.Motor.State == MotorState.Jump, $"{p}_4_salto_subir", 0.1f);
+                yield return Act(game, player, room, x0, y0, new[] { Keys(12, up: true), Keys(30) },
+                    () => game.Motor.State == MotorState.Fall, $"{p}_5_salto_caer", 0.1f);
+                // Escalera de la sala 1 del castillo (x = 120): subir unos pasos.
+                yield return Act(game, player, room, 120, y0, new[] { Keys(24, up: true), Keys(10) },
+                    () => game.Motor.State == MotorState.Ladder && game.Motor.Y < y0 - 12, $"{p}_6_escalera");
+                // Cajas de colisión (F9): el dibujo tiene que estar sobre la caja del jugador y la de la espada.
+                HitboxOverlay.Show = true;
+                yield return Act(game, player, room, x0, y0, new[] { Keys(2, right: true), Keys(1, space: true), Keys(10) },
+                    () => game.Motor.AttackTicks >= 3, $"{p}_7_cajas_estocada");
+                yield return Act(game, player, room, x0, y0, new[] { Keys(2, left: true), Keys(10) },
+                    () => game.Motor.FacingLeft, $"{p}_8_cajas_quieto", 0.3f);
+                HitboxOverlay.Show = false;
+            }
+            // Efectos de Hollow Knight, uno al lado de otro, en dos momentos.
+            var fx = HitEffects.Hollow;
+            if (fx != null)
+            {
                 player.Demo = null;
+                game.Motor.Place(game.World, room, 16, y0);
+                yield return new WaitForSeconds(0.5f);
+                string[] names = { "raya", "destello", "abanico_a", "gotas", "chispas", "grieta", "destello_raya", "polvo_pared", "polvo_dash", "polvo_salto" };
+                foreach (float when in new[] { 0.04f, 0.1f })
+                {
+                    for (int i = 0; i < names.Length; i++)
+                    {
+                        var at = RoomCoords.PixelToWorld(room, 36 + i * 22, y0 - 40 - (i % 2) * 30);
+                        bool light = !names[i].StartsWith("polvo");
+                        fx.Play(names[i], at, 18, 18, names[i].Contains("_") && !names[i].StartsWith("abanico") && names[i] != "destello_raya" ? 0 : 0.4f, 0, false, light);
+                    }
+                    yield return new WaitForSeconds(when);
+                    yield return Shot($"efectos_{(int)(when * 100):00}");
+                    yield return new WaitForSeconds(0.6f);
+                }
             }
             Application.Quit();
         }

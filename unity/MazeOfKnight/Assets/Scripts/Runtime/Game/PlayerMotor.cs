@@ -207,7 +207,9 @@ namespace MazeOfKnight.Game
                       | (ulong)((landY + 1) & 511) << 30
                       | (ulong)(shoeLadder & 3) << 39
                       | (ulong)(JumpedFromShaft & 7) << 41
-                      | (ulong)(Stunned & 127) << 44;
+                      | (ulong)(Stunned & 127) << 44
+                      | (ulong)(coyoteLeft & 3) << 51
+                      | (ulong)(jumpBuffer & 3) << 53;
             return (a, b);
         }
 
@@ -231,6 +233,11 @@ namespace MazeOfKnight.Game
             upHeld = input.Up;
             downHeld = input.Down;
             LastInput = input;
+            // RemakeRules.JumpBuffer: una pulsación de ↑ en el aire se recuerda unos ticks.
+            bool airborne = State == MotorState.Jump || State == MotorState.Fall;
+            if (!RemakeRules.JumpBuffer || !airborne && State != MotorState.Ground) jumpBuffer = 0;
+            else if (airborne && upPressed) jumpBuffer = RemakeRules.JumpBufferTicks;
+            else if (airborne && jumpBuffer > 0) jumpBuffer--;
             var liquidBefore = Liquid;
             Liquid = LiquidAt();
             if (!InLiquid || liquidBefore != Liquid)
@@ -264,7 +271,7 @@ namespace MazeOfKnight.Game
                 case MotorState.Ground: TickGround(input, upPressed, downPressed); break;
                 case MotorState.JumpPrep: TickJumpPrep(input); break;
                 case MotorState.Jump: TickJump(input); break;
-                case MotorState.Fall: TickFall(input); break;
+                case MotorState.Fall: TickFall(input, upPressed); break;
                 case MotorState.Ladder:
                     TickLadder(input);
                     if (Shoes && State == MotorState.Ladder && (input.Up || input.Down) && ++shoeLadder % 4 == 0)
@@ -282,6 +289,9 @@ namespace MazeOfKnight.Game
         // escalera siguiente); hace falta una pulsación nueva.
         void TickGround(MotorInput input, bool upPressed, bool downPressed)
         {
+            // RemakeRules.JumpBuffer: la pulsación recordada del aire vale en el primer tick en el suelo, si ↑ sigue pulsado.
+            bool buffered = jumpBuffer > 0 && input.Up;
+            jumpBuffer = 0;
             if (AttackTicks > 0)
             {
                 // En el suelo se para mientras golpea.
@@ -307,16 +317,22 @@ namespace MazeOfKnight.Game
             }
             // El tick en que se procesa ↑ ya no anda (trazas de las demos: el original lee las teclas con un tick de
             // retraso, y lo que parecía "aún anda 2 px" era ese retraso; el retraso lo pone PlayerController).
-            if (upPressed)
+            if (upPressed || buffered)
             {
-                JumpedFromShaft = Lifts?.RidingShaft(Room.id) ?? 0;   // b03:A308
-                State = MotorState.JumpPrep;
-                prepTicks = 1;               // este tick ya cuenta como preparación
+                StartJump();
                 return;
             }
             MoveHorizontal(input, P.WalkSpeed + (Shoes && (shoeWalk = !shoeWalk) ? 1 : 0));
             if (!Supported())
                 StartLedgeFall();
+        }
+
+        void StartJump()
+        {
+            JumpedFromShaft = Lifts?.RidingShaft(Room.id) ?? 0;   // b03:A308
+            State = MotorState.JumpPrep;
+            prepTicks = 1;               // este tick ya cuenta como preparación
+            jumpBuffer = coyoteLeft = 0;
         }
 
         void TickJumpPrep(MotorInput input)
@@ -409,16 +425,22 @@ namespace MazeOfKnight.Game
         {
             StartFall(0, false);
             hoverTicks = P.LedgeHoverTicks;
+            coyoteLeft = RemakeRules.CoyoteJump ? RemakeRules.CoyoteTicks : 0;
         }
+
+        // RemakeRules.CoyoteJump: ticks que quedan para saltar tras salir de un borde; RemakeRules.JumpBuffer: ticks
+        // que se recuerda una pulsación de ↑ en el aire.
+        int coyoteLeft, jumpBuffer;
 
         void StartFall(int index, bool control)
         {
             State = MotorState.Fall;
             fallIndex = index;
             airControl = control;
+            coyoteLeft = 0;
         }
 
-        void TickFall(MotorInput input)
+        void TickFall(MotorInput input, bool upPressed)
         {
             if (OnLift)
             {
@@ -426,6 +448,17 @@ namespace MazeOfKnight.Game
                 State = MotorState.Ground;
                 hoverTicks = 0;
                 return;
+            }
+            if (coyoteLeft > 0)
+            {
+                // Aún quieto en el borde (sin haber bajado): salta como desde el suelo.
+                coyoteLeft--;
+                if (upPressed && hoverTicks > 0)
+                {
+                    hoverTicks = 0;
+                    StartJump();
+                    return;
+                }
             }
             if (hoverTicks > 0)
             {

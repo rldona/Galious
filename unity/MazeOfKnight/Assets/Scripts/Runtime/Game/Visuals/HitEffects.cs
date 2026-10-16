@@ -12,15 +12,20 @@ namespace MazeOfKnight.Game.Visuals
     //  - Enemigo muerto: estallido de chispas y una nube de esquirlas de su color.
     //  - Piedra golpeada: esquirlas de piedra; rota, una lluvia de trozos y polvo.
     //  - Golpe al jugador: chispas rojas y una sacudida más fuerte.
+    // Con los dos estilos: con los cuadros también, que si no un golpe a una piedra no se nota (Aphrodite le quita 1 de 15).
     public class HitEffects : MonoBehaviour
     {
         public static HitEffects Instance { get; private set; }
 
         ParticleSystem sparks, debris;
+        // Efectos de Hollow Knight (HollowFx): si están importados, sustituyen a las partículas.
+        HollowFx hk;
+        public static HollowFx Hollow => Instance != null ? Instance.hk : null;
 
         public void Init(Material additive, Material unlit, Sprite dot)
         {
             Instance = this;
+            hk = HollowFx.Create(transform, additive, unlit);
             sparks = NewSystem("Chispas", additive, dot, ParticleSystemRenderMode.Stretch, 16, 0f);
             debris = NewSystem("Esquirlas", unlit, dot, ParticleSystemRenderMode.Billboard, 14, 2.6f);
         }
@@ -104,26 +109,55 @@ namespace MazeOfKnight.Game.Visuals
 
         public static void EnemyHit(Enemy e, PlayerMotor m)
         {
-            if (Instance == null || e == null || !Atmosphere.Styled) return;
+            if (Instance == null || e == null) return;
             var at = ImpactPoint(e, m);
             bool boss = e is Boss;
-            Instance.Burst(Instance.sparks, at, boss ? 18 : 12, Color.white, new Color(1f, 0.85f, 0.35f), boss ? 7f : 6f, 110, Away(e, m), 0.14f, 0.28f);
             RoomCamera.Shake(boss ? 0.12f : 0.06f);
+            var hk = Instance.hk;
+            if (hk != null)
+            {
+                // Como el aguijón de Hollow Knight: la raya del tajo atravesando el punto de impacto, un destello en
+                // estrella y un abanico de chispas hacia el otro lado del enemigo.
+                float k = boss ? 1.4f : 1f;
+                bool left = Away(e, m) > 90;
+                hk.Play("raya", at, 30 * k, 42 * k, 0.12f, Random.Range(-12f, 12f), left);
+                hk.Play("destello", at, 12 * k, 24 * k, 0.1f, Random.Range(0f, 360f));
+                hk.Play("abanico_a", at, 20 * k, 28 * k, 0.16f, 0, left, vel: new Vector2(left ? -1.5f : 1.5f, 0));
+                return;
+            }
+            Instance.Burst(Instance.sparks, at, boss ? 18 : 12, Color.white, new Color(1f, 0.85f, 0.35f), boss ? 7f : 6f, 110, Away(e, m), 0.14f, 0.28f);
         }
 
         public static void Clink(Enemy e, PlayerMotor m)
         {
-            if (Instance == null || e == null || !Atmosphere.Styled) return;
+            if (Instance == null || e == null) return;
             var at = ImpactPoint(e, m);
-            Instance.Burst(Instance.sparks, at, 10, new Color(0.7f, 0.85f, 1f), Color.white, 5f, 70, Away(e, m) + 180, 0.12f, 0.22f);
             RoomCamera.Shake(0.03f);
+            if (Instance.hk != null)
+            {
+                // Metal contra metal: las chispas de Hollow Knight, de vuelta hacia el jugador.
+                Instance.hk.Play("chispas", at, 18, 18, 0, 0, Away(e, m) < 90);
+                return;
+            }
+            Instance.Burst(Instance.sparks, at, 10, new Color(0.7f, 0.85f, 1f), Color.white, 5f, 70, Away(e, m) + 180, 0.12f, 0.22f);
         }
 
         public static void EnemyKilled(Enemy e, Color tint)
         {
-            if (Instance == null || e == null || !Atmosphere.Styled) return;
+            if (Instance == null || e == null) return;
             var (x0, y0, x1, y1) = e.Box();
             var at = World(e.Room, (x0 + x1) / 2, (y0 + y1) / 2);
+            if (Instance.hk != null)
+            {
+                // Destello grande, gotas blancas y abanicos a los dos lados.
+                float k = e is Boss ? 1.6f : 1f;
+                Instance.hk.Play("destello", at, 20 * k, 40 * k, 0.18f, Random.Range(0f, 360f));
+                Instance.hk.Play("gotas", at, 18 * k, 30 * k, 0.3f, Random.Range(-20f, 20f));
+                Instance.hk.Play("abanico_a", at, 22 * k, 32 * k, 0.2f, 0, false, vel: new Vector2(1.5f, 0));
+                Instance.hk.Play("abanico_a", at, 22 * k, 32 * k, 0.2f, 0, true, vel: new Vector2(-1.5f, 0));
+                RoomCamera.Shake(e is Boss ? 0.3f : 0.08f);
+                return;
+            }
             Instance.Burst(Instance.sparks, at, 22, Color.white, new Color(1f, 0.8f, 0.4f), 7f, 360, 0, 0.16f, 0.4f);
             Instance.Burst(Instance.debris, at, 14, tint, Color.Lerp(tint, Color.black, 0.5f), 3.5f, 160, 90, 0.16f, 0.7f);
             RoomCamera.Shake(e is Boss ? 0.3f : 0.08f);
@@ -131,9 +165,27 @@ namespace MazeOfKnight.Game.Visuals
 
         public static void RockHit(RoomModel room, int x, int y, bool broken)
         {
-            if (Instance == null || !Atmosphere.Styled) return;
+            if (Instance == null) return;
             var at = World(room, x + 8, y + 8);
             var stone = new Color(0.62f, 0.63f, 0.68f);
+            if (Instance.hk != null)
+            {
+                // Polvo de Hollow Knight: una nube en cada golpe; rota, una nube alargada y polvo que sube, y esquirlas.
+                if (broken)
+                {
+                    Instance.hk.Play("polvo_dash", at, 34, 34, 0, 0, Random.value < 0.5f, light: false);
+                    Instance.hk.Play("polvo_salto", World(room, x + 8, y + 12), 24, 24, 0, 0, false, light: false);
+                    Instance.Burst(Instance.debris, at, 18, stone, new Color(0.35f, 0.36f, 0.4f), 4.5f, 200, 90, 0.2f, 0.8f);
+                    RoomCamera.Shake(0.1f);
+                }
+                else
+                {
+                    Instance.hk.Play("polvo_pared", at, 22, 22, 0, 0, Random.value < 0.5f, light: false);
+                    Instance.hk.Play("destello", at, 8, 14, 0.08f, Random.Range(0f, 360f));
+                    RoomCamera.Shake(0.03f);
+                }
+                return;
+            }
             if (broken)
             {
                 Instance.Burst(Instance.debris, at, 26, stone, new Color(0.35f, 0.36f, 0.4f), 4.5f, 200, 90, 0.22f, 0.9f);
@@ -151,8 +203,15 @@ namespace MazeOfKnight.Game.Visuals
         // Puerta de mundo que se abre (WorldDoors): polvo que cae del hueco a cada paso y un temblor pequeño.
         public static void DoorStep(RoomModel room, int doorX, int doorY, int openRows)
         {
-            if (Instance == null || room == null || !Atmosphere.Styled) return;
+            if (Instance == null || room == null) return;
             var dust = new Color(0.78f, 0.74f, 0.66f, 0.7f);
+            if (Instance.hk != null)
+            {
+                for (int k = 0; k < 2; k++)
+                    Instance.hk.Play("polvo_salto", World(room, doorX + 12 + k * 9, doorY + 24 - 8 * openRows), 14, 14, 0, 0, k == 1, light: false);
+                RoomCamera.Shake(0.04f);
+                return;
+            }
             for (int k = 0; k < 4; k++)
             {
                 var at = World(room, doorX + 9 + k * 4.5f, doorY + 24 - 8 * openRows);
@@ -163,8 +222,16 @@ namespace MazeOfKnight.Game.Visuals
 
         public static void PlayerHurt(PlayerMotor m)
         {
-            if (Instance == null || m == null || !Atmosphere.Styled) return;
+            if (Instance == null || m == null) return;
             var at = World(m.Room, m.X, m.Y - 8);
+            if (Instance.hk != null)
+            {
+                // El rayo blanco de Hollow Knight sobre el jugador y un destello con su raya.
+                Instance.hk.Play("grieta", at, 10, 10, 0, Random.Range(-15f, 15f));
+                Instance.hk.Play("destello_raya", at, 20, 30, 0.15f, Random.Range(0f, 360f));
+                RoomCamera.Shake(0.14f);
+                return;
+            }
             Instance.Burst(Instance.sparks, at, 14, new Color(1f, 0.35f, 0.3f), Color.white, 5.5f, 360, 0, 0.14f, 0.3f);
             RoomCamera.Shake(0.14f);
         }

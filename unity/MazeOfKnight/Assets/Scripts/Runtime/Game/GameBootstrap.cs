@@ -136,6 +136,8 @@ namespace MazeOfKnight.Game
             };
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
+            Enemies.Hit += _ => player?.HitStop();
+            Enemies.Killed += _ => player?.HitStop();
             menu = gameObject.AddComponent<InventoryMenu>();
             menu.game = this;
             var shrinesJson = Resources.Load<TextAsset>("Shrines");
@@ -362,7 +364,7 @@ namespace MazeOfKnight.Game
             }
             if (motor.AttackStartedThisTick)
             {
-                rocks.Strike(motor, World);
+                rocks.Strike(motor, World, Collected.Contains(WeaponSystem.ItemRing));
                 roomObjects.Strike(motor, Collected);
             }
             roomObjects.Tick(motor, Collected);
@@ -1432,6 +1434,12 @@ namespace MazeOfKnight.Game
             }
             if (UnityEngine.InputSystem.Keyboard.current?.f5Key.wasPressedThisFrame == true)
                 DebugOpenAllDoors();
+            // F11: sensación de Hollow Knight (RemakeRules: pausa al golpear, coyote time y búfer de salto).
+            if (UnityEngine.InputSystem.Keyboard.current?.f11Key.wasPressedThisFrame == true)
+            {
+                RemakeRules.HollowFeel = !RemakeRules.HollowFeel;
+                Say(RemakeRules.HollowFeel ? "Sensación Hollow Knight: pausa al golpear, coyote time y búfer de salto" : "Saltos y golpes del original");
+            }
             // Depuración: F2 lleva a la sala del jefe del mundo en el que estás.
             if (UnityEngine.InputSystem.Keyboard.current?.f2Key.wasPressedThisFrame == true && Inventory.CurrentWorld > 0 && !Bosses.Active)
                 DebugGoToBoss();

@@ -382,7 +382,7 @@ namespace MazeOfKnight.Tests
         [Test]
         public void PopolonBreaksARockInThreeHitsAphroditeInFifteen()
         {
-            foreach (var (character, hits) in new[] { (Character.Popolon, 3), (Character.Aphrodite, 15) })
+            foreach (var (character, ring, hits) in new[] { (Character.Popolon, false, 3), (Character.Aphrodite, false, 15), (Character.Aphrodite, true, 3) })
             {
                 // Piedra de 2 x 2 tiles sobre el suelo (fila 11), con el borde a 18 px del jugador.
                 var room = FlatRoom();
@@ -396,12 +396,45 @@ namespace MazeOfKnight.Tests
                 for (int i = 0; i < 40 && !rocks.All.First().broken; i++)
                 {
                     motor.Tick(new MotorInput { Attack = true });
-                    if (motor.AttackStartedThisTick) { presses++; rocks.Strike(motor, world); }
+                    if (motor.AttackStartedThisTick) { presses++; rocks.Strike(motor, world, ring); }
                     for (int k = 0; k < 4; k++) motor.Tick(new MotorInput());
                 }
-                Assert.AreEqual(hits, presses, character.ToString());
+                Assert.AreEqual(hits, presses, $"{character}{(ring ? " con el Ring" : "")}");
                 Assert.IsFalse(world.Solid(room, 64 + 18, 110), "el hueco de la piedra queda libre");
             }
+        }
+
+        [Test]
+        public void SwordHitsARockWhilePushingAgainstIt()
+        {
+            // Lo normal es pegarse a la piedra y golpear: andando contra ella, desde los dos lados y con los dos personajes,
+            // cada estocada tiene que darle.
+            foreach (var character in new[] { Character.Popolon, Character.Aphrodite })
+                foreach (bool fromLeft in new[] { true, false })
+                {
+                    var room = FlatRoom();
+                    room.rocks = new[] { new PointJson { x = 120, y = 104 } };
+                    for (int r = 9; r <= 10; r++)
+                        room.collision[r] = room.collision[r].Substring(0, 15) + "##" + room.collision[r].Substring(17);
+                    var world = new RoomWorld(new[] { room });
+                    var rocks = new Rocks("test", world, new HashSet<(string, int, int, int)>());
+                    var motor = new PlayerMotor(world, room, fromLeft ? 80 : 170, 120) { Character = character };
+                    var walk = new MotorInput { Right = fromLeft, Left = !fromLeft };
+                    for (int i = 0; i < 60; i++) motor.Tick(walk);
+                    int x = motor.X, presses = 0;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        var press = walk;
+                        press.Attack = true;
+                        motor.Tick(press);
+                        if (motor.AttackStartedThisTick) { presses++; rocks.Strike(motor, world); }
+                        for (int k = 0; k < 5; k++) motor.Tick(walk);
+                    }
+                    int damage = character == Character.Popolon ? OriginalPhysics.RockDamagePopolon : OriginalPhysics.RockDamageAphrodite;
+                    string what = $"{character} {(fromLeft ? "desde la izquierda" : "desde la derecha")}, x = {x}, {presses} estocadas";
+                    Assert.AreEqual(5, presses, what);
+                    Assert.AreEqual(System.Math.Max(0, OriginalPhysics.RockHp - 5 * damage), System.Math.Max(0, rocks.All.First().hp), what);
+                }
         }
 
         [Test]

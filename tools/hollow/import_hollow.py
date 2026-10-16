@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Importa los protagonistas de Hollow Knight como Popolon (el Caballero) y Aphrodite (Hornet).
+"""Importa los protagonistas de Hollow Knight como Popolon (el Caballero) y Aphrodite (Hornet), y sus efectos (efectos.py).
 
 Homenaje a Maze of Galious + Hollow Knight. El arte es de Team Cherry: se lee de la carpeta decodificada del usuario y
 los PNG salen a Assets/Art/Resources/Hollow/ (fuera de git, como lo derivado de la ROM). No se versiona ni se reparte.
@@ -10,18 +10,25 @@ Necesita Pillow (.venv/bin/pip install pillow).
 Cada fotograma sale con el nombre que entiende ArtLibrary (<personaje>_<accion>_<NN>[_golpe].png) en un lienzo fijo por
 personaje: los pies del personaje en reposo en el borde de abajo y su centro en el centro (el ArtImporter pone el pivote
 abajo en el centro) a 8 texels por píxel del original, mirando a la derecha (los de Hollow Knight miran a la izquierda).
-El Caballero mide 128 texels de alto en reposo: 16 px del original, justo lo que mide Popolon, así que va a su tamaño.
+El Caballero va a ×1,375: su cuerpo sin los cuernos mide 16 px, lo que el sprite de Popolon del original (22 px con ellos).
 """
 import csv
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageFilter
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import efectos  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/personajes"
 DEFAULT_SRC = Path.home() / "workspace/games/Hollow Knight Decodificado"
 ALPHA = 40   # opacidad mínima para medir
+# Acciones que se centran fotograma a fotograma por su centro de masas en vez de por las piernas del reposo: en la
+# escalera el motor alinea al jugador con su centro y el dibujo tiene que quedar en medio (la pose de Hornet agarrada
+# a la pared tiene el cuerpo ladeado).
+CENTERED = {"escalera"}
 
 # Acciones de CharacterArt: quieto, correr, girar, salto_preparar, salto_subir, salto_caer, escalera, estocada (con el
 # fotograma "golpe"), golpe (recibido), muerte; y estela (el tajo, encima del cuerpo, en el mismo lienzo).
@@ -30,7 +37,9 @@ CHARACTERS = {
     "popolon": {
         "collection": "Knight",
         "rest": "idle_still_020000",
-        "scale": 1.0,
+        # Sin los cuernos (34 de sus 128 texels en reposo), el cuerpo mide lo que el sprite de Popolon del original:
+        # 16 px. Con los cuernos, 22 px (antes iba a 1,0 y se veía más pequeño que el original).
+        "scale": 1.375,
         "actions": {
             "quieto": ("Knight", "Idle", None, 12, None),
             "correr": ("Knight", "Run", None, 12, None),     # 6 fotogramas de arranque y el bucle
@@ -38,7 +47,8 @@ CHARACTERS = {
             "salto_preparar": ("Knight", "Land", ["land0001"], 12, None),
             "salto_subir": ("Knight", "Airborne", lambda f: f.startswith("jump"), 16, None),
             "salto_caer": ("Knight", "Fall", None, 12, None),   # 3 de arranque y el bucle
-            "escalera": ("Knight", "Wall Slide", None, 12, None),
+            # Hollow Knight no tiene escaleras: el Caballero de espaldas, dando pasitos, de cuando entra por una puerta.
+            "escalera": ("Knight", "Enter", [f"into_door{n:04d}" for n in range(2, 10)], 12, None),
             "estocada": ("Knight", "Slash", ["slash_left_longer0000", "slash_left_longer0002", "slash_left_longer0003",
                                              "slash_left_longer0004", "slash_left_longer0005"], 24, 1),
             "estela": ("Knight", "SlashEffect", ["slashes_effect0001", "slashes_effect0002"], 24, None),
@@ -49,7 +59,9 @@ CHARACTERS = {
     "aphrodite": {
         "collection": "Hornet Boss Anim",
         "rest": "idle0000",
-        "scale": 0.75,   # Hornet mide 213 texels en reposo: a 160 (20 px), algo más alta que el Caballero, como en Hollow Knight
+        # Hornet mide 213 texels en reposo y el Caballero 128 (1,66 veces más). Con su proporción (37 px) era demasiado grande
+        # para las salas de Galious y con 24 px parecía de su tamaño: a 1,125 mide 240 texels (30 px), 1,36 veces el Caballero.
+        "scale": 1.125,
         "actions": {
             "quieto": ("Hornet Boss Anim", "Idle", None, 12, None),
             "correr": ("Hornet Boss Anim", "Run", None, 12, None),
@@ -57,13 +69,17 @@ CHARACTERS = {
             "salto_preparar": ("Hornet Boss Anim", "Jump Antic", ["hard_land0001", "jump0000"], 12, None),
             "salto_subir": ("Hornet Boss Anim", "Jump", ["jump0001", "jump0002", "jump0003", "jump0004", "jump0005"], 12, None),
             "salto_caer": ("Hornet Boss Anim", "Fall", None, 12, None),
-            "escalera": ("Hornet Boss Anim", "Idle", None, 12, None),
+            "escalera": ("Hornet Boss Anim", "Wall Impact", None, 12, None),   # se rehace abajo, en ida y vuelta
             "estocada": ("Hornet Boss Anim", "G Dash Antic Q", None, 24, None),   # se rehace abajo con la acometida
             "golpe": ("Hornet Boss Anim", "Stun", ["stun_ground0000", "stun_ground0001", "stun_ground0002"], 18, None),
             "muerte": ("Hornet Boss Anim", "Death Air", None, 10, None),
         },
         # La estocada de Hornet: el final de la preparación, la acometida con la aguja (golpe) y la recogida.
         "explicit": {
+            # Escalera: agarrada a la pared (Wall Impact), con las piernas colgando. Sus 4 fotogramas cambian poco: en ida
+            # y vuelta, para que se note al subir (avanzan con la altura, como en el original).
+            "escalera": ("Hornet Boss Anim", ["wall_impact0000", "wall_impact0001", "wall_impact0002", "wall_impact0003",
+                                              "wall_impact0002", "wall_impact0001"], 12, None),
             "estocada": ("Hornet Boss Anim", ["hornet_dash0005", "hornet_dash0006", "hornet_dash0007", "hornet_dash0008",
                                               "hornet_dash0010", "hornet_dash0012"], 24, 2),
         },
@@ -112,13 +128,28 @@ def opaque_bbox(im):
     return im.getchannel("A").point(lambda a: 255 if a > ALPHA else 0).getbbox()
 
 
+def mass_x(im):
+    """Centro del cuerpo: el de masas de la silueta adelgazada 4 texels por lado, que borra lo fino (la aguja de Hornet,
+    el aguijón del Caballero, las piernas) y deja la máscara y la capa."""
+    a = im.getchannel("A").point(lambda v: 255 if v > ALPHA else 0).filter(ImageFilter.MinFilter(9))
+    bb = a.getbbox()
+    xs = [x for y in range(bb[1], bb[3]) for x in range(bb[0], bb[2]) if a.getpixel((x, y))]
+    return sum(xs) / len(xs)
+
+
 def anchor(im):
-    """Pies (fila de abajo) y centro de lo que toca el suelo en la pose de reposo."""
+    """Pies (fila de abajo) y centro de las piernas en la pose de reposo.
+
+    Las piernas son lo que toca el suelo cerca del centro de masas del dibujo: así no cuenta la punta de la aguja de
+    Hornet, que en reposo apoya en el suelo a su izquierda (con ella, Hornet salía 8 px corrida de su caja).
+    """
     bb = opaque_bbox(im)
     feet = bb[3]
-    band = im.crop((0, feet - 12, im.width, feet))
-    b = opaque_bbox(band)
-    return (b[0] + b[2]) / 2, feet, feet - bb[1]
+    a = im.getchannel("A")
+    xs = [x for y in range(bb[1], bb[3]) for x in range(bb[0], bb[2]) if a.getpixel((x, y)) > ALPHA]
+    mass = sum(xs) / len(xs)
+    cols = [x for x in range(im.width) if abs(x - mass) <= 30 and any(a.getpixel((x, y)) > ALPHA for y in range(feet - 12, feet))]
+    return (min(cols) + max(cols)) / 2, feet, feet - bb[1]
 
 
 def build(src, name, spec):
@@ -126,6 +157,7 @@ def build(src, name, spec):
     rest = src / "hollow-knight-tk2d" / col / "sprites" / f"{spec['rest']}.png"
     rest_im = Image.open(rest).convert("RGBA")
     ax, feet, height = anchor(rest_im)
+    print(f"{name}: centro de las piernas x = {ax:.1f}, pies y = {feet} (lienzo {rest_im.size[0]}×{rest_im.size[1]})")
     canvas = rest_im.size
     s = spec["scale"]
 
@@ -165,7 +197,8 @@ def build(src, name, spec):
         for i, (n, p) in enumerate(frames):
             im = imgs[p]
             # Recorte en coordenadas del original: centro ax, pies en 'feet' (lo que quede por debajo se pierde).
-            box = (ax - half / s, feet - top / s, ax + half / s, feet)
+            cx = mass_x(im) if action in CENTERED else ax
+            box = (cx - half / s, feet - top / s, cx + half / s, feet)
             crop = im.crop(tuple(round(v) for v in box))
             if s != 1.0:
                 crop = crop.resize((w, h), Image.LANCZOS)
@@ -193,6 +226,7 @@ def main(argv):
     lines = [f"{k} {f} {loop}" for k, (f, loop) in sorted(fps.items())]
     (OUT / "fps.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"→ {OUT}")
+    efectos.build(src)
 
 
 if __name__ == "__main__":

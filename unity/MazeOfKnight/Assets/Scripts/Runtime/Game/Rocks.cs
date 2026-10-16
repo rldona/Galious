@@ -5,7 +5,7 @@ using P = MazeOfKnight.Game.OriginalPhysics;
 namespace MazeOfKnight.Game
 {
     // Piedras del castillo (docs/entities.md): bloque de 2 x 2 tiles en (x, y), 15 de vida. Cada golpe de
-    // espada quita 5 (Popolon) o 1 (Aphrodite). Rota, se vacía su hueco y queda a la vista el objeto que
+    // espada quita 5 (Popolon) o 1 (Aphrodite; 5 con el Ring). Rota, se vacía su hueco y queda a la vista el objeto que
     // hubiera debajo. Lo roto no vuelve (en el original, un bit por piedra); aquí dura la sesión.
     public class Rocks
     {
@@ -42,11 +42,12 @@ namespace MazeOfKnight.Game
 
         public IEnumerable<Rock> All => rocks;
 
-        // Un golpe de espada recién empezado: daña las piedras de la sala que toca.
-        public void Strike(PlayerMotor motor, RoomWorld world)
+        // Un golpe de espada recién empezado: daña las piedras de la sala que toca. Con el Ring (0x1F) Aphrodite quita lo
+        // mismo que Popolon (design bible, cap. 3 y 4: rompe en 3 golpes), igual que con las armas secundarias.
+        public void Strike(PlayerMotor motor, RoomWorld world, bool ring = false)
         {
             var (x0, x1, y0, y1) = motor.SwordRect();
-            int damage = motor.Character == Character.Popolon ? P.RockDamagePopolon : P.RockDamageAphrodite;
+            int damage = motor.Character == Character.Popolon || ring ? P.RockDamagePopolon : P.RockDamageAphrodite;
             foreach (var rock in rocks)
             {
                 if (rock.broken || rock.room != motor.Room)

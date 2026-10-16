@@ -29,6 +29,12 @@ namespace MazeOfKnight.Game
         public float HopPx;
         // Cambio de sala: el original deja de jugar mientras dibuja la sala nueva (estado 10).
         int roomPause;
+        // RemakeRules.HitStop: ticks que el juego se queda parado tras acertar un golpe.
+        int hitStop;
+        public void HitStop()
+        {
+            if (RemakeRules.HitStop && Demo == null) hitStop = Mathf.Max(hitStop, RemakeRules.HitStopTicks);
+        }
         public bool HopFlip;
 
         InputAction move, jump, attack, fire;
@@ -147,6 +153,7 @@ namespace MazeOfKnight.Game
             {
                 accumulator -= tick;
                 if (roomPause > 0) { roomPause--; continue; }
+                if (hitStop > 0) { hitStop--; continue; }   // las pulsaciones se guardan para cuando siga
                 Motor.Tick(delayed);
                 delayed = input;
                 attackLatch = upLatch = downLatch = false;
@@ -161,16 +168,27 @@ namespace MazeOfKnight.Game
             UpdateVisual();
         }
 
+        // La estela usa el material aditivo, cuyo shader no aplica flipX (Unity gira los sprites en el shader): se gira
+        // con la escala, alrededor de su pivote (los pies, en el tajo dibujado).
+        void FaceSlash(bool left)
+        {
+            Slash.flipX = false;
+            Slash.transform.localScale = new Vector3(left ? -1 : 1, 1, 1);
+        }
+
         void UpdateVisual()
         {
             // El sprite de 16 x 16 px tiene el pivote abajo en el centro: coincide con los pies del original.
             transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y) + new Vector2(0, HopPx / RoomCoords.PixelsPerUnit);
             if (body != null && placeholder == null) placeholder = body.sprite;
             // Sin fotograma (arte solo dibujado y sin clip): el cuadro provisional.
-            var frame = Art != null && body != null ? Art.Frame(Motor, Time.deltaTime) : null;
+            var frame = Art != null && body != null ? Art.Frame(Motor, hitStop > 0 ? 0 : Time.deltaTime) : null;
             if (frame != null)
             {
-                body.sprite = frame;
+                // La caja del jugador va de x − 6 a x + 6 (13 px, centro en x + 0,5): el dibujo, centrado en las piernas,
+                // se corre medio píxel para quedar en medio de ella (si no, queda medio píxel a la izquierda).
+                transform.position += new Vector3(0.5f / RoomCoords.PixelsPerUnit, 0, 0);
+                body.sprite = frame;   // (con el juego parado por un golpe, la animación también se para)
                 body.color = Color.white;
                 body.flipX = Motor.FacingLeft ^ HopFlip;
                 body.transform.localScale = Vector3.one;
@@ -199,7 +217,7 @@ namespace MazeOfKnight.Game
                     Slash.enabled = true;
                     Slash.sprite = drawnSlash;
                     Slash.transform.position = body.transform.position;
-                    Slash.flipX = Motor.FacingLeft;
+                    FaceSlash(Motor.FacingLeft);
                     Slash.color = Color.white;
                 }
                 else if (Slash != null)
@@ -212,7 +230,7 @@ namespace MazeOfKnight.Game
                         var (sx0, sx1, sy0, sy1) = Motor.SwordRect();
                         var at = RoomCoords.PixelToWorld(Motor.Room, (sx0 + sx1 + 1) / 2, (sy0 + sy1) / 2 + 1);
                         Slash.transform.position = new Vector3(at.x, at.y, 0);
-                        Slash.flipX = Motor.FacingLeft;
+                        FaceSlash(Motor.FacingLeft);
                         // Fuerte en el tick del golpe y se apaga al recoger la hoja.
                         float a = Motor.AttackTicks >= 4 ? 1f : Motor.AttackTicks == 3 ? 0.7f : Motor.AttackTicks == 2 ? 0.3f : 0f;
                         Slash.color = new Color(1, 1, 1, a);

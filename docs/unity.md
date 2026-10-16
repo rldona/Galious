@@ -80,9 +80,16 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
   python3 -m venv .venv && .venv/bin/pip install pillow
   .venv/bin/python -I tools/hollow/import_hollow.py "$HOME/workspace/games/Hollow Knight Decodificado"
   ```
-  - Escribe `Assets/Art/Resources/Hollow/personajes/` (fuera de git): un PNG por fotograma con el nombre de `ArtLibrary`, mirando a la derecha, con los pies abajo en el centro, a 8 texels por píxel, y `fps.txt` con la velocidad de cada clip y el fotograma donde empieza su bucle (el «Run» del Caballero tiene 6 de arranque y luego repite). El Caballero va a su tamaño (128 texels = 16 px, lo que mide Popolon) y Hornet a 0,75 (20 px).
-  - Qué animación de Hollow Knight hace cada acción está en `CHARACTERS` del script. La escalera usa el deslizamiento por pared del Caballero y el reposo de Hornet; Hollow Knight no tiene escaleras.
+  - Escribe `Assets/Art/Resources/Hollow/personajes/` (fuera de git): un PNG por fotograma con el nombre de `ArtLibrary`, mirando a la derecha, con los pies abajo en el centro, a 8 texels por píxel, y `fps.txt` con la velocidad de cada clip y el fotograma donde empieza su bucle (el «Run» del Caballero tiene 6 de arranque y luego repite). El Caballero va a ×1,375: su cuerpo sin los cuernos mide 16 px, lo que el sprite de Popolon del original (22 px con ellos). Hornet va a ×1,125 (30 px): 1,36 veces más alta que él, algo menos que en Hollow Knight (1,66), que era demasiado grande para estas salas. La escala de cada uno está en `CHARACTERS`.
+  - Qué animación de Hollow Knight hace cada acción está en `CHARACTERS` del script. Hollow Knight no tiene escaleras: el Caballero sube de espaldas con los fotogramas de entrar por una puerta y Hornet con los de agarrarse a una pared (Wall Impact), en ida y vuelta.
   - El arte es de Team Cherry: el compilado que lo lleva es solo para probar en local, no se reparte.
+  - Efectos (`tools/hollow/efectos.py` → `Assets/Art/Resources/Hollow/efectos/`, `Visuals/HollowFx`): las animaciones de chispas, grieta y polvo de Hollow Knight, y piezas sueltas del atlas de impactos de los enemigos (destello, raya del tajo, abanico de chispas, gotas), que el atlas trae sin recortes y se separan por manchas. `HitEffects` los usa en todos los golpes si están importados; si no, sigue con sus partículas:
+    - espada contra un enemigo: la raya del tajo, un destello en estrella y un abanico de chispas hacia el otro lado;
+    - enemigo muerto: destello grande, gotas y abanicos a los dos lados;
+    - escudo que para un golpe: las chispas de metal;
+    - piedra golpeada: una nube de polvo y un destello pequeño; rota, una nube alargada, polvo que sube y esquirlas;
+    - jugador herido: el rayo blanco y un destello con su raya;
+    - puerta de mundo que se abre: polvo que sube del hueco.
   - `-capturaPersonajes <carpeta>` en el compilado guarda capturas de los dos corriendo, atacando y saltando.
 - **Controles:**
   - ← → (o A D, o mando) andar;
@@ -94,6 +101,8 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
 ## Hecho en el prototipo
 - Puertas de mundo y salidas al castillo; espada y piedras; agua, lava y vitalidad; puertas con llave.
 - Puertas de mundo (`WorldDoors.cs`): empiezan cerradas; la Gran Llave del castillo desbloquea la del mundo 1 y la de cada jefe, la del mundo siguiente (la del 9 hace aparecer la del 10). Desbloqueada, se abre sola al ponerse delante, en 3 pasos de 6 ticks (el hueco se abre de abajo arriba, sonido 0x22) y gasta la llave; solo se entra con ella abierta. Se guardan en la partida. F5 (depuración) abre las puertas 1–9.
+- Cajas de colisión (F9): encendidas por defecto mientras se prueba la fusión con Hollow Knight; F9 las quita.
+- Sensación de Hollow Knight (`RemakeRules.HitStop`, `CoyoteJump`, `JumpBuffer`; design bible, cap. 11): F11 activa o quita las tres a la vez; por defecto, desactivadas.
 - Mecanismos de sala (`RoomObjects`): puertas giratorias (clases 3 y 4), muros que se cierran (5), paredes que se rompen (7) y escaleras extra que se retiran 60 s.
 - Enemigos (`Enemies/`): combate medido (daño por tipo, retroceso, invulnerabilidad, espada) y **los 53 tipos de las salas más sus 25 hijos** (proyectiles, la mosca que se divide, el murciélago grande 0x37 y el hada 0x4F), según las fichas de `enemy_ai.md`. Ficheros: `EnemyTypes.cs` (los 6 primeros), `EnemyWalkers.cs` (los que andan y saltan), `EnemyFlyers.cs` (voladores, deambuladores y trepamuros), `EnemyFixed.cs` (trampas y torretas) y `Projectiles.cs` (hijos). El disparo 0x3F del soldado paraliza 60 ticks (`PlayerMotor.Stunned`) y el soldado carga entonces contra el jugador.
   - Escudos (IX+2 bits 1 y 2): al esqueleto 0x25 y al caballero 0x0A solo se les hace daño por la espalda [C][O: sala 104, por delante 8 → 8, por detrás 8 → 5 con 3 espadazos]; los orbes 0x36, las cabezas 0x69, el rayo 0x06 y el 0x12 escondido hacen «clinc» y rebotan los proyectiles. Cajas de colisión por estado en todos los tipos que cambian de tamaño. Saltos entre pisos con las tablas 9ADF/9C68. Modo forzado de las cabezas 0x69 en el mundo 9, sala 0x19. El 0x19 da 1, 2, 4 o 4 de experiencia según su tamaño.
