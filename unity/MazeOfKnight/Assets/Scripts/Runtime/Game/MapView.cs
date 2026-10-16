@@ -288,9 +288,39 @@ namespace MazeOfKnight.Game
                         tm.SetTile(RoomCoords.Cell(room, c, r), tile);
         }
 
+        // Escalera de Hollow Knight (Assets/Art/Resources/Hollow/escalera, tools/hollow/objetos.py): el puntal del ascensor
+        // central en 4 baldosas, [fila par/impar, columna izquierda/derecha]. Null si no se ha importado.
+        TileBase[,] hollowLadder;
+        bool hollowLadderLoaded;
+        TileBase[,] HollowLadder()
+        {
+            if (hollowLadderLoaded) return hollowLadder;
+            hollowLadderLoaded = true;
+            var t = new TileBase[2, 2];
+            string[] rows = { "arriba", "abajo" }, cols = { "izq", "der" };
+            for (int r = 0; r < 2; r++)
+                for (int c = 0; c < 2; c++)
+                {
+                    var sp = Resources.Load<Sprite>($"Hollow/escalera/escalera_{rows[r]}_{cols[c]}");
+                    if (sp == null) return null;
+                    var tile = ScriptableObject.CreateInstance<Tile>();
+                    tile.sprite = sp;
+                    tile.colliderType = Tile.ColliderType.None;
+                    t[r, c] = tile;
+                }
+            return hollowLadder = t;
+        }
+
         TileBase TileAtCell(RoomWorld world, RoomModel room, int col, int row)
         {
             var cls = world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8);
+            if (cls == TileClass.Ladder && HollowLadder() is TileBase[,] hl)
+            {
+                // Columna derecha: la que tiene escalera a su izquierda (y no dos). Filas alternas: arriba y abajo del trozo.
+                bool right = world.TileAt(room, (col - 1) * 8, OriginalPhysics.RoomTopPx + row * 8) == TileClass.Ladder &&
+                             world.TileAt(room, (col - 2) * 8, OriginalPhysics.RoomTopPx + row * 8) != TileClass.Ladder;
+                return hl[row & 1, right ? 1 : 0];
+            }
             // Escalera de 2 tiles: la mitad derecha es la que tiene escalera a su izquierda.
             if (Style?.LadderRight != null && cls == TileClass.Ladder &&
                 world.TileAt(room, (col - 1) * 8, OriginalPhysics.RoomTopPx + row * 8) == TileClass.Ladder &&

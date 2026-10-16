@@ -97,6 +97,21 @@ def piece(src, col, clip, frame, box, top=False):
     return canvas
 
 
+# Escalera (2 casillas de ancho, tantas filas como tenga): el puntal del ascensor central de Hollow Knight, dos barras con
+# travesaños adornados. Un trozo cuadrado centrado en un travesaño (filas 9…251 de las 439), escalado igual en los dos
+# ejes a 16 × 16 px y partido en 4 baldosas de 8 × 8 que se alternan por filas (arriba/abajo) y columnas (izq./der.).
+LADDER = ("central_elev_strut", (0, 9, 242, 251))
+LADDER_OUT = OUT.parent / "escalera"
+
+
+def build_ladder(src):
+    LADDER_OUT.mkdir(parents=True, exist_ok=True)
+    im = Image.open(find(src, LADDER[0])).convert("RGBA").crop(LADDER[1]).resize((128, 128), Image.LANCZOS)
+    for r, rn in ((0, "arriba"), (1, "abajo")):
+        for c, cn in ((0, "izq"), (1, "der")):
+            im.crop((64 * c, 64 * r, 64 * c + 64, 64 * r + 64)).save(LADDER_OUT / f"escalera_{rn}_{cn}.png")
+
+
 def find(src, name):
     for base in (src / "hollow-knight-inventario", src / "hollow-knight-texturas"):
         hits = list(base.rglob(f"{name}.png"))
@@ -125,4 +140,5 @@ def build(src):
                 im.crop((0, box[1] - 64 * h, box[0], box[1])).save(OUT / f"{name}_{h}.png")
         else:
             im.save(OUT / f"{name}.png")
-    print(f"objetos: {len(ITEMS)} y {len(PIECES)} piezas de sala → {OUT}")
+    build_ladder(src)
+    print(f"objetos: {len(ITEMS)} y {len(PIECES)} piezas de sala, y la escalera → {OUT}")
