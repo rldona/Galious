@@ -19,7 +19,13 @@ namespace MazeOfKnight.Game.Visuals
     {
         public const float Lip = 2f;                 // px que asoma el suelo por encima de donde se pisa
         public const float Overlap = 0.8f;           // cada pieza empieza al 80 % de la anterior
-        static readonly Color BackTop = new Color(0.05f, 0.06f, 0.09f), BackLow = new Color(0.16f, 0.20f, 0.28f);
+        // Capas, de atrás adelante (como Team Cherry): 4, el fondo lejano (un trozo de una sala de Hollow Knight, apagado);
+        // 3, el degradado con niebla, rocas grandes y arcos y estatuas; 2, el juego (el sólido y sus bordes); 1, siluetas
+        // negras por delante de los personajes, asomando por los bordes de la sala.
+        public const int FarOrder = -13, ForeOrder = 30;
+        static readonly Color FarTint = new Color(0.42f, 0.47f, 0.6f);
+        static readonly Color BackTop = new Color(0.04f, 0.05f, 0.08f, 0.8f), BackLow = new Color(0.16f, 0.20f, 0.28f, 0.45f);
+        static readonly Color Silhouette = new Color(0.008f, 0.008f, 0.014f);
         static readonly Color Deep = new Color(0.17f, 0.21f, 0.30f, 0.85f);   // rocas del fondo, más lejos que lo de Far
         public static readonly Color Rock = new Color(0.02f, 0.02f, 0.03f);
         static readonly Color Far = new Color(0.36f, 0.43f, 0.58f, 0.7f);
@@ -108,6 +114,7 @@ namespace MazeOfKnight.Game.Visuals
                         if (free >= 5) Hang(room, root.transform, rng, (c * 8 + 4), y, free * 8 * 0.5f);
                     }
                 }
+            Foreground(room, root.transform, rng, S);
             // Paredes: tramos verticales con aire a un lado.
             for (int c = 0; c < RoomCoords.Cols; c++)
             {
@@ -241,10 +248,62 @@ namespace MazeOfKnight.Game.Visuals
             return gradient = Sprite.Create(tex, new Rect(0, 0, 1, h), new Vector2(0.5f, 0.5f), 1f / RoomCoords.RoomSize.x, 0, SpriteMeshType.FullRect);
         }
 
+        // Primer plano: 1 o 2 siluetas negras desde el borde de abajo y quizá 1 colgando del de arriba, más cerca (más
+        // grandes) que el juego. Asoman al aire como mucho Poke px desde el primer suelo (o techo) de su columna, y no
+        // salen de la sala (la de al lado se vería por debajo).
+        const float Poke = 10f, PokeUp = 18f;   // por abajo poco, que no tape a los que andan; colgando, más
+        void Foreground(RoomModel room, Transform parent, System.Random rng, System.Func<int, int, bool> solid)
+        {
+            float top = OriginalPhysics.RoomTopPx, bottom = top + RoomCoords.Rows * 8;
+            int below = 1 + rng.Next(2);
+            for (int i = 0; i < below; i++)
+            {
+                var sp = Pick("pp_abajo", rng);
+                if (sp == null) break;
+                int c = below == 1 ? rng.Next(4, RoomCoords.Cols - 4) : i == 0 ? rng.Next(0, 10) : rng.Next(RoomCoords.Cols - 10, RoomCoords.Cols);
+                int r = RoomCoords.Rows - 1;
+                while (r > 0 && solid(c, r)) r--;              // el aire más bajo de la columna
+                if (r < RoomCoords.Rows - 8) continue;           // suelo muy alto: taparía el juego
+                float floor = top + (r + 1) * 8;
+                float poke = 4 + (float)rng.NextDouble() * (Poke - 4);
+                float k = 1.5f + (float)rng.NextDouble() * 0.5f;
+                var size = SizePx(sp) * k;
+                if (size.y > bottom - (floor - poke)) { k *= (bottom - (floor - poke)) / size.y; size = SizePx(sp) * k; }
+                Put(room, parent, sp, c * 8 + 4 - size.x / 2, floor - poke, k, rng.Next(2) == 0, ForeOrder, Silhouette);
+            }
+            if (rng.Next(2) == 0 && Pick("pp_arriba", rng) is Sprite hang)
+            {
+                int c = rng.Next(0, RoomCoords.Cols);
+                int r = 0;
+                while (r < RoomCoords.Rows - 1 && solid(c, r)) r++;   // el aire más alto
+                if (r <= 6)
+                {
+                    float ceiling = top + r * 8;
+                    float poke = 8 + (float)rng.NextDouble() * (PokeUp - 8);
+                    float k = 1.4f + (float)rng.NextDouble() * 0.4f;
+                    var size = SizePx(hang) * k;
+                    if (size.y > ceiling + poke - top) { k *= (ceiling + poke - top) / size.y; size = SizePx(hang) * k; }
+                    Put(room, parent, hang, c * 8 + 4 - size.x / 2, ceiling + poke - size.y, k, rng.Next(2) == 0, ForeOrder, Silhouette);
+                }
+            }
+        }
+
         // Fondo: el degradado, 2 rocas grandes muy lejos y 3 o 4 piezas lejanas apagadas, apoyadas en un suelo de la sala
         // (o abajo), donde haya aire.
         void Background(RoomModel room, Transform parent, System.Random rng, System.Func<int, int, bool> solid)
         {
+            if (Pick("lejano", rng) is Sprite far)
+            {
+                var f = new GameObject(far.name).AddComponent<SpriteRenderer>();
+                f.transform.SetParent(parent, false);
+                f.sprite = far;
+                f.sortingOrder = FarOrder;
+                f.color = FarTint;
+                var c = RoomCoords.RoomOrigin(room) + RoomCoords.RoomSize / 2;
+                f.transform.position = new Vector3(c.x, c.y, 0);
+                float k = RoomCoords.RoomSize.x / far.bounds.size.x;
+                f.transform.localScale = new Vector3(rng.Next(2) == 0 ? -k : k, RoomCoords.RoomSize.y / far.bounds.size.y, 1);
+            }
             var g = new GameObject("Degradado").AddComponent<SpriteRenderer>();
             g.transform.SetParent(parent, false);
             g.sprite = Gradient();
