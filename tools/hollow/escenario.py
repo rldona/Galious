@@ -42,6 +42,7 @@ GG = "GG_Waterway.png"          # el del Palacio de los dioses, con las piezas d
 SLUICE = "Water_Sluice.png"
 HIVE = "Hive.png"
 ABYSS = "Abyss.png"
+DEEP = "Deepnest.png"
 
 
 def A(atlas, box, name):
@@ -234,6 +235,30 @@ KITS = {
                     A(ABYSS, (2608, 892, 2724, 992), "concha_b"), A(ABYSS, (1448, 1112, 1552, 1196), "concha_c"),
                     A(ABYSS, (716, 1232, 828, 1340), "concha_d"), A(ABYSS, (3044, 1616, 3184, 1720), "concha_e")],
     },
+    # Mundo 8 (magma; Hollow Knight no tiene volcán): el Nido Profundo, lo más oscuro y peligroso. Bordes de roca y de
+    # capullos por suelo, bordes que gotean y telarañas por techo, garras y colmillos colgando, capullos y raíces por
+    # pared; ovillos, telarañas y la puerta de la Ciudad de las Arañas al fondo; setas blancas sobre el suelo.
+    "nido": {
+        "suelo": [A(DEEP, (844, 40, 1168, 140), "borde_roca"), A(DEEP, (0, 168, 356, 276), "capullos_a"),
+                  A(DEEP, (544, 1168, 936, 1288), "capullos_b")],
+        "techo": [A(DEEP, (436, 1296, 928, 1464), "borde_goteando"), A(DEEP, (1660, 232, 1816, 480), "ovillo_colgando"),
+                  "atlas_Crossroads/roof_03"],   # la telaraña blanca, en todos los techos, era demasiado
+        "estalactita": [A(DEEP, (880, 260, 1024, 600), "garra_a"), A(DEEP, (580, 760, 724, 1172), "garra_b"),
+                        A(DEEP, (1556, 888, 1692, 1292), "garra_c"), A(DEEP, (1348, 1688, 1488, 2276), "colmillo")],
+        "pared_izq": [A(DEEP, (1512, 320, 1680, 588), "capullos_pared"), A(DEEP, (920, 1408, 1056, 1980), "raices")],
+        "masa": [A(DEEP, (464, 416, 736, 600), "nido_a"), A(DEEP, (1028, 404, 1308, 548), "nido_b"),
+                 A(DEEP, (0, 1080, 364, 1364), "racimo")],
+        "fondo": [A(DEEP, (1508, 1616, 1660, 1956), "puerta"), A(DEEP, (1336, 460, 1520, 692), "anillo"),
+                  A(DEEP, (1204, 984, 1460, 1208), "ovillo"), A(DEEP, (1140, 552, 1344, 788), "capullo"),
+                  A(DEEP, (160, 648, 408, 932), "telarana_a"), A(DEEP, (8, 612, 128, 1048), "telarana_b"),
+                  A(DEEP, (1748, 1736, 1940, 1976), "telarana_c"), A(DEEP, (872, 604, 1096, 860), "racimo_b")],
+        "pp_abajo": [A(DEEP, (668, 112, 948, 304), "loma"), A(DEEP, (248, 1664, 532, 1952), "bulto"),
+                     A(DEEP, (0, 1836, 424, 2116), "caparazon")],
+        "pp_arriba": [A(DEEP, (0, 368, 288, 600), "colgajo"), A(DEEP, (1256, 1400, 1432, 1744), "ovillo_grande"),
+                      A(DEEP, (880, 260, 1024, 600), "garra_a")],
+        "detalle": [A(DEEP, (1820, 52, 2004, 232), "setas_a"), A(DEEP, (1896, 924, 1960, 1096), "seta"),
+                    A(DEEP, (1836, 1284, 1968, 1468), "setas_b"), A(DEEP, (2016, 1816, 2076, 1896), "setas_c")],
+    },
 }
 
 
@@ -312,6 +337,10 @@ FAR = {
                          ("Abyss_03_b", 2380, 498), ("Abyss_21", 5691, 749), ("Abyss_03_c", 3947, 1463),
                          ("Abyss_03_c", 3792, 1263), ("Abyss_22", 1089, 931), ("Abyss_18", 5243, 996),
                          ("Abyss_Lighthouse_room", 707, 91)]),
+    "nido": ("Deepnest", [("Deepnest_40", 4870, 3844), ("Deepnest_10", 1543, 3674), ("Deepnest_02", 520, 250),
+                          ("Deepnest_Spider_Town", 260, 8349), ("Deepnest_34", 7599, 2277), ("Deepnest_44", 5072, 3224),
+                          ("Deepnest_38", 3922, 1287), ("Deepnest_01b", 2267, 3988), ("Deepnest_41", 783, 1082),
+                          ("Deepnest_14", 4167, 2094)]),
 }
 
 
