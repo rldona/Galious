@@ -100,7 +100,7 @@ namespace MazeOfKnight.Game.Visuals
         // Primer fotograma del bucle de cada clip (los anteriores son el arranque), si no es 0.
         public Dictionary<string, int> LoopStart;
         readonly FrameAnimator anim = new FrameAnimator();
-        static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "salto_subir", "estocada", "golpe", "muerte", "celebrar", "sentarse", "levantarse", "despertar" };
+        static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "salto_subir", "estocada", "golpe", "muerte", "celebrar", "sentarse", "levantarse", "despertar", "curarse" };
         int lastAttackTicks;
         bool lastFacingLeft, facingKnown;
         string drawnAction;

@@ -70,6 +70,13 @@ CHARACTERS = {
             "sentado": ("Knight", "Sit Idle", None, 12, None),
             "levantarse": ("Knight", "Wake", None, 16, None),          # se rehace abajo: del sentado al de pie
             "despertar": ("Knight", "Wake", None, 12, None),           # se rehace abajo: dormido en el banco y sentarse
+            # Concentrarse (RemakeRules.HollowSoul): agachado juntando el alma y el fogonazo al curarse.
+            "concentrar": ("Knight", "Focus", None, 12, None),
+            "curarse": ("Knight", "Focus Get Once", None, 18, None),
+            # Sus efectos de luz (Light Effects, en el mismo lienzo que el Caballero): la luz que sube mientras se concentra
+            # (aparece y luego en bucle) y el estallido al curarse. Los dibuja Visuals/FocusFx encima del cuerpo.
+            "efecto_concentrar": ("Light Effects", "Focus Effect", None, 20, None),
+            "efecto_cura": ("Light Effects", "Burst Effect", None, 20, None),
         },
         "explicit": {
             "levantarse": ("Knight", ["sit0003", "sit0004", "land0000", "land0001", "land0002"], 16, None),

@@ -39,7 +39,12 @@ namespace MazeOfKnight.Game
         }
         public bool HopFlip;
 
-        InputAction move, jump, attack, fire;
+        InputAction move, jump, attack, fire, focus;
+        // RemakeRules.HollowSoul: el botón de concentrarse, mantenido.
+        public bool FocusHeld => DebugHoldFocus || focus != null && focus.IsPressed() && Demo == null;
+        public bool DebugHoldFocus;          // para las capturas
+        // Concentrándose: no se mueve (como sentado).
+        public bool Focusing;
         bool fireLatch;
         // Arma secundaria (M): una pulsación nueva por disparo; el arranque la consume en su tick.
         public bool ConsumeFire() { bool f = fireLatch; fireLatch = false; return f; }
@@ -75,6 +80,10 @@ namespace MazeOfKnight.Game
             attack = new InputAction("Espada", InputActionType.Button);
             attack.AddBinding("<Keyboard>/space");
             attack.AddBinding("<Gamepad>/buttonWest");
+            focus = new InputAction("Concentrarse", InputActionType.Button);
+            focus.AddBinding("<Keyboard>/f");
+            focus.AddBinding("<Gamepad>/buttonEast");
+            focus.Enable();
             fire = new InputAction("Arma", InputActionType.Button);
             fire.AddBinding("<Keyboard>/m");
             fire.AddBinding("<Gamepad>/buttonNorth");
@@ -139,6 +148,12 @@ namespace MazeOfKnight.Game
             upWasDown = up;
             downWasDown = down;
             // Sentado en un banco: el jugador no se mueve; cualquier dirección, salto o espada lo levanta.
+            if (Focusing && !Seated)
+            {
+                upLatch = downLatch = attackLatch = false;
+                v = Vector2.zero;
+                up = down = false;
+            }
             if (Seated)
             {
                 if (v.x < -0.5f || v.x > 0.5f || upLatch || attack.WasPressedThisFrame()) WantsToStand = true;

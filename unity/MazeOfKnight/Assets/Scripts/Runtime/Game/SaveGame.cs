@@ -23,6 +23,7 @@ namespace MazeOfKnight.Game
         public int arrows, coins, keys, weapon, character;
         public int world10Door;              // E06E: dónde sale la puerta del mundo 10
         // RemakeRules.HollowBenches / HollowDeath: el último banco y la sombra (mapa vacío = ninguno).
+        public int soul;                     // RemakeRules.HollowSoul
         public string benchMap = "";
         public int benchRoom, benchX, benchY;
         public string shadeMap = "";

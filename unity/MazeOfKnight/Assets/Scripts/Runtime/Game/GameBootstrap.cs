@@ -136,6 +136,8 @@ namespace MazeOfKnight.Game
             };
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
+            // Alma: cada espadazo que acierta (el tick en que empieza el golpe; las armas no dan).
+            Enemies.Hit += _ => { if (RemakeRules.HollowSoul && motor != null && motor.AttackStartedThisTick) Soul.Gain(Inventory.Has(0x1B)); };
             Enemies.Killed += e => { if (e is global::MazeOfKnight.Game.Enemies.Shade s) RecoverShade(s); };
             Enemies.Spawned += KeepBenchClear;
             hollowEnemies = Visuals.HollowEnemyArt.Load();
@@ -145,6 +147,7 @@ namespace MazeOfKnight.Game
             if (RemakeRules.HollowTitle && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.HollowPauseMenu>().game = this;
             // El efecto de descansar en un banco.
             if (RemakeRules.HollowBenches) gameObject.AddComponent<Visuals.BenchRest>().game = this;
+            if (RemakeRules.HollowSoul) gameObject.AddComponent<Visuals.FocusFx>().game = this;
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
@@ -458,6 +461,8 @@ namespace MazeOfKnight.Game
         {
             int c = (int)motor.Character;
             Inventory.Experience[c] = 0;
+            Soul.Value = 0;                         // el alma se pierde al morir
+            Soul.Cancel();
             PendingVitality[0] = PendingVitality[1] = 0;
             liquidTicks = 0;
             Vitality[c] = MaxVitality[c];
@@ -549,9 +554,33 @@ namespace MazeOfKnight.Game
             Say("CASTLE");
         }
 
+        // ---------- alma y concentración (RemakeRules.HollowSoul) ----------
+
+        public readonly Soul Soul = new Soul();
+        float healPoseUntil;
+
+        void TickFocus()
+        {
+            if (!RemakeRules.HollowSoul || motor == null || player == null) return;
+            int c = (int)motor.Character;
+            bool able = motor.State == MotorState.Ground && motor.AttackTicks == 0 && HurtTicks == 0 && !player.Seated &&
+                        !motor.InLiquid && Vitality[c] + PendingVitality[c] < MaxVitality[c];
+            int healed = Soul.Tick(player.FocusHeld, able);
+            player.Focusing = Soul.Focusing;
+            if (healed > 0)
+            {
+                PendingVitality[c] = Mathf.Min(PendingVitality[c] + healed, MaxVitality[c] - Vitality[c]);
+                Sound.Effect(0x2E);
+                healPoseUntil = Time.time + 0.4f;
+            }
+            if (motor.Pose == null || motor.Pose == "concentrar" || motor.Pose == "curarse")
+                motor.Pose = Time.time < healPoseUntil ? "curarse" : Soul.Focusing ? "concentrar" : null;
+        }
+
         void AfterTick()
         {
             TickBench();
+            TickFocus();
             if (Enemies.Room != motor.Room)
             {
                 EnterEnemyRoom();
@@ -957,6 +986,7 @@ namespace MazeOfKnight.Game
                 openedDoors = SaveData.Pack(openedDoors), roomObjects = SaveData.Pack(roomObjectState),
                 firedEvents = SaveData.Pack(firedEvents),
             };
+            d.soul = Soul.Value;
             if (lastBench is Benches.Bench lb) { d.benchMap = lb.Map; d.benchRoom = lb.Room; d.benchX = lb.X; d.benchY = lb.Y; }
             if (!string.IsNullOrEmpty(shadeMap)) { d.shadeMap = shadeMap; d.shadeRoom = shadeRoom; d.shadeX = shadeX; d.shadeY = shadeY; d.shadeGeo = shadeGeo; }
             for (int c = 0; c < 2; c++) d.vitality[c] = Mathf.Clamp(Vitality[c] + PendingVitality[c], 0, MaxVitality[c]);
@@ -1007,6 +1037,7 @@ namespace MazeOfKnight.Game
             var room = World.Room(demeter?.exit.toRoom ?? startRoom);
             motor.Character = (Character)d.character;
             ApplySoloKnight();
+            Soul.Value = d.soul;
             shadeMap = d.shadeMap; shadeRoom = d.shadeRoom; shadeX = d.shadeX; shadeY = d.shadeY; shadeGeo = d.shadeGeo;
             if (RemakeRules.HollowBenches && !string.IsNullOrEmpty(d.benchMap) && maps.ContainsKey(d.benchMap))
             {
@@ -1078,6 +1109,7 @@ namespace MazeOfKnight.Game
         // Experiencia por muerte (BF27[tipo], ×2 con el Vase); a 48, se rellena la vitalidad.
         void GainExperience(Enemy e)
         {
+            if (RemakeRules.HollowSoul) return;      // el alma la sustituye
             int exp = e.ExperienceOverride ?? enemyCatalog?.Find(e.Type)?.experience ?? 0;
             if (exp <= 0) return;
             int c = (int)motor.Character;

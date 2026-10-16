@@ -59,6 +59,11 @@ namespace MazeOfKnight.Game
         // Morir otra vez antes pierde el de la sombra anterior.
         public static bool HollowDeath = true;            // activado: lo ha pedido el usuario
 
+        // Original: la experiencia (por enemigo muerto; a 48 rellena la vitalidad). Remake (lo pidió el usuario): el alma de
+        // Hollow Knight (Soul): cada espadazo que acierta la llena y concentrarse (F o el botón B del mando, quieto)
+        // gasta un tercio del orbe para curar 2 máscaras. El orbe del marcador muestra el alma.
+        public static bool HollowSoul = true;             // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

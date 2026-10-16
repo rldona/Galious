@@ -58,6 +58,23 @@ namespace MazeOfKnight.Game.Visuals
                 yield return Shot($"banco_{n:00}_{b.Map}_{b.Room}_sentado");
                 n++;
             }
+            // Concentrarse: con el alma llena y poca vida, mantener el botón.
+            var pc = FindAnyObjectByType<PlayerController>();
+            game.DebugGoTo("castle", 1);
+            yield return new WaitForSeconds(0.8f);
+            game.Soul.Value = Soul.Max;
+            game.Vitality[(int)game.Motor.Character] = 2;
+            pc.DebugHoldFocus = true;
+            yield return new WaitForSeconds(0.6f);
+            yield return Shot("alma_1_concentrando");
+            yield return new WaitUntil(() => game.Motor.Pose == "curarse");
+            yield return new WaitForSeconds(0.08f);
+            yield return Shot("alma_2_curandose");
+            yield return new WaitForSeconds(2.4f);
+            pc.DebugHoldFocus = false;
+            yield return new WaitForSeconds(1.0f);
+            yield return Shot("alma_3_despues");
+            Debug.Log($"[Capturas] alma {game.Soul.Value}, vitalidad {game.Vitality[(int)game.Motor.Character]}");
             // Morir con geo lejos del último banco: despertar en él y la sombra donde se murió.
             var last = all[all.Count - 1];
             foreach (var b in all) if (b.Map == "world01") { last = b; break; }

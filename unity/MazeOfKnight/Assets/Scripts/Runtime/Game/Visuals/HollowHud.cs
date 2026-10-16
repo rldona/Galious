@@ -23,7 +23,7 @@ namespace MazeOfKnight.Game.Visuals
         Sprite frame, maskEmpty, geo;
         Sprite maskFull;
         Sprite crest;
-        readonly Sprite[] soul = new Sprite[11];
+        readonly Sprite[,] soul = new Sprite[11, 6];      // [nivel, fotograma de la ola]
         readonly List<Sprite> maskBreak = new List<Sprite>();
         readonly Dictionary<(int, int), float> breaking = new Dictionary<(int, int), float>();   // (personaje, máscara) → inicio
         readonly Dictionary<(int, int), float> lastFill = new Dictionary<(int, int), float>();
@@ -41,7 +41,8 @@ namespace MazeOfKnight.Game.Visuals
             maskEmpty = Resources.Load<Sprite>("Hollow/hud/mascara_vacia");
             maskFull = Resources.Load<Sprite>("Hollow/hud/mascara_00");
             geo = Resources.Load<Sprite>("Hollow/hud/geo");
-            for (int k = 0; k <= 10; k++) soul[k] = Resources.Load<Sprite>($"Hollow/hud/alma_{k:00}");
+            for (int k = 0; k <= 10; k++)
+                for (int f = 0; f < 6; f++) soul[k, f] = Resources.Load<Sprite>($"Hollow/hud/alma_{k:00}_{f:00}");
             for (int i = 0; ; i++)
             {
                 var s = Resources.Load<Sprite>($"Hollow/hud/mascara_rota_{i:00}");
@@ -123,8 +124,10 @@ namespace MazeOfKnight.Game.Visuals
             Draw(frame, pad, pad, k);
             if (game.Inventory != null)
             {
-                int level = Mathf.Clamp(Mathf.RoundToInt(game.Inventory.Experience[me] / 48f * 10), 0, 10);
-                Draw(soul[level], pad, pad, k);
+                // El alma (RemakeRules.HollowSoul) o la experiencia del original.
+                float fill = RemakeRules.HollowSoul ? game.Soul.Value / (float)Soul.Max : game.Inventory.Experience[me] / 48f;
+                int level = Mathf.Clamp(Mathf.RoundToInt(fill * 10), 0, 10);
+                Draw(soul[level, (int)(Time.time * 10) % 6], pad, pad, k);
             }
 
             // Máscaras del que juega, a la derecha del orbe y bajo el trazo; las del otro, en pequeño, debajo. Se colocan por
