@@ -1,3 +1,4 @@
+using MazeOfKnight.Data;
 using System.Collections.Generic;
 using System.Linq;
 using MazeOfKnight.Game.Visuals;
@@ -457,31 +458,54 @@ namespace MazeOfKnight.Game
             for (int i = 0; i < all.Count; i++) if (System.Array.IndexOf(all[i].types, type) >= 0) journalSel = i;
         }
 
+        static Sprite benchPin, here;
+
         void DrawMapTab(Rect body)
         {
             float s = S;
             var inv = game.Inventory;
             int world = inv.CurrentWorld;
-            UiKit.Text(new Rect(body.x, body.y, body.width, 36 * s), world == 0 ? "El castillo" : $"Mundo {world}", 24, TextAnchor.MiddleCenter, UiKit.Bone, true);
-            var map = world > 0 ? inv.MapOf(world) : null;
-            if (world == 0 || map == null || !inv.Has(Inventory.Map))
+            string map = game.mapName;
+            string zone = HandMap.ZoneName(HollowScenery.LookFor(map).Zone);
+            UiKit.Text(new Rect(body.x, body.y - 6 * s, body.width, 36 * s), world == 0 ? "El castillo" : $"Mundo {world}", 26, TextAnchor.MiddleCenter, UiKit.Bone, true);
+            if (zone != "") UiKit.Text(new Rect(body.x, body.y + 26 * s, body.width, 26 * s), zone, 17, TextAnchor.MiddleCenter, UiKit.Dim, true);
+            var rw = game.WorldFor(map);
+            if (!RemakeRules.HollowMaps || rw == null) return;
+            bool inked = game.HasMapOf(world);
+            var tex = HandMap.Get(map, rw, game.VisitedRooms, inked);
+            var area = new Rect(body.x, body.y + 64 * s, body.width, body.height - 110 * s);
+            float k = Mathf.Min(area.width / tex.width, area.height / tex.height);
+            var r = new Rect(area.center.x - tex.width * k / 2, area.center.y - tex.height * k / 2, tex.width * k, tex.height * k);
+            GUI.DrawTexture(r, tex);
+            Rect At(RoomModel room, int x, int y, float size)
             {
-                UiKit.Text(new Rect(body.x, body.center.y - 30 * s, body.width, 60 * s),
-                    world == 0 ? "El castillo no tiene mapa." : "Aún no tienes el mapa de este mundo.", 20, TextAnchor.MiddleCenter, UiKit.Dim);
-                return;
+                var p = HandMap.Point(room, x, y) * k;
+                return new Rect(r.x + p.x - size / 2, r.y + p.y - size, size, size);
             }
-            int maxC = map.roomCells.Max(c => c.col) + 1, maxR = map.roomCells.Max(c => c.row) + 1;
-            float cw = Mathf.Min(body.width * 0.8f / maxC, (body.height - 80 * s) / maxR * 2), ch = cw / 2;
-            float ox = body.center.x - cw * maxC / 2, oy = body.y + 60 * s;
-            foreach (var c in map.roomCells)
+            // Bancos (en las salas que se ven) y la sala del jefe con la Lámpara.
+            benchPin ??= Resources.Load<Sprite>("Hollow/inventario/pin_banco");
+            here ??= Resources.Load<Sprite>("Hollow/hud/mascara_00");
+            foreach (var b in game.BenchesIn(map))
+                if ((inked || game.VisitedRooms.Contains((map, b.Room))) && rw.Room(b.Room) is RoomModel br)
+                    UiKit.Icon(At(br, b.X, b.Y, 26 * s), benchPin, 0.9f);
+            var wm = world > 0 ? inv.MapOf(world) : null;
+            if (inked && wm != null && inv.Has(Inventory.Lamp) && rw.Room(wm.bossRoom) is RoomModel boss)
             {
-                var r = new Rect(ox + c.col * cw + 2 * s, oy + c.row * ch + 2 * s, cw - 4 * s, ch - 4 * s);
-                bool here = c.room == game.Motor.Room.id, boss = inv.Has(Inventory.Lamp) && c.room == map.bossRoom;
-                UiKit.Box(r, new Color(0.85f, 0.83f, 0.78f, here ? 0.5f : 0.14f));
-                UiKit.Frame(r, boss ? new Color(0.4f, 0.6f, 1f) : here ? UiKit.Gold : new Color(0.9f, 0.88f, 0.82f, 0.7f), Mathf.Max(1, s * (here || boss ? 2 : 1)));
+                var bp = At(boss, 128, 120, 18 * s);
+                UiKit.Box(bp, new Color(0.9f, 0.3f, 0.25f, 0.85f));
             }
-            UiKit.Text(new Rect(body.x, body.yMax - 30 * s, body.width, 30 * s),
-                inv.Has(Inventory.Lamp) ? "Dorado: estás aquí    Azul: el jefe" : "Dorado: estás aquí", 15, TextAnchor.MiddleCenter, UiKit.Dim);
+            // Dónde estás: la máscara del Caballero, que late.
+            var m = game.Motor;
+            if (m?.Room != null)
+            {
+                float size = (34 + 4 * Mathf.Sin(Time.unscaledTime * 4)) * s;
+                if (here != null) UiKit.Icon(At(m.Room, m.X, m.Y, size), here);
+                else UiKit.Box(At(m.Room, m.X, m.Y, 10 * s), UiKit.Gold);
+            }
+            string foot = world == 0 ? "Nadie ha cartografiado el castillo: es tu boceto."
+                : inked ? (inv.Has(Inventory.Lamp) ? "El mapa de Cornifer. La marca roja es el jefe." : "El mapa de Cornifer.")
+                : "Un boceto de lo que has recorrido. Cornifer vende el mapa de este mundo.";
+            UiKit.Text(new Rect(body.x, body.yMax - 34 * s, body.width, 30 * s), foot, 16, TextAnchor.MiddleCenter, UiKit.Dim);
         }
     }
 }

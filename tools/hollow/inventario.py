@@ -8,6 +8,7 @@ Sale a Assets/Art/Resources/Hollow/inventario/ (fuera de git, como el resto del 
   - flecha_pestana.png: la flecha de los lados para cambiar de pestaña (LT/RT);
   - nuevo.png: el punto que marca lo nuevo;
   - luz.png: el halo de las láminas de tutorial;
+  - pin_banco.png: el banco en el mapa;
   - lamina_separador.png: la línea con filigrana de las láminas (prompt_divider);
   - lamina_amuletos.png: el dibujo del Caballero en el banco con los amuletos (Charms_prompt).
 """
@@ -26,6 +27,7 @@ PIECES = {
     "flecha_pestana": "hollow-knight-inventario/_compartidos/RT_LT_arrow.png",
     "nuevo": "hollow-knight-inventario/Charms/new_item_orb.png",
     "luz": "hollow-knight-inventario/_compartidos/light_effect_v02.png",
+    "pin_banco": "hollow-knight-inventario/Map Key/pin_bench.png",
     "lamina_separador": "hollow-knight-texturas/interfaz/prompt_divider.png",
     "lamina_amuletos": "hollow-knight-texturas/interfaz/Charms_prompt.png",
 }

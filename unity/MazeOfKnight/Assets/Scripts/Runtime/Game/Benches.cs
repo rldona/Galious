@@ -107,8 +107,8 @@ namespace MazeOfKnight.Game
             return null;
         }
 
-        // Un suelo de 4 casillas con 3 filas de aire encima, lo más cerca del centro de la sala.
-        public static (int x, int y)? Spot(RoomWorld world, RoomModel room, int margin = Margin)
+        // Un suelo de 'tiles' casillas (4, un banco) con 'air' filas de aire encima (3), lo más cerca del centro de la sala.
+        public static (int x, int y)? Spot(RoomWorld world, RoomModel room, int margin = Margin, int tiles = 4, int air = 3)
         {
             bool Air(int c, int r) => world.TileAt(room, c * 8, P.RoomTopPx + r * 8) == TileClass.Empty;
             bool Floor(int c, int r) => world.TileAt(room, c * 8, P.RoomTopPx + r * 8) == TileClass.Solid && !Rock(c, r);
@@ -142,25 +142,28 @@ namespace MazeOfKnight.Game
             {
                 // Lejos de donde aparecen los enemigos de la sala.
                 foreach (var e in room.spawns)
-                    if (System.Math.Abs(e.x + 8 - (c0 * 8 + 16)) < ClearX + 16 && System.Math.Abs(e.y + 8 - (P.RoomTopPx + r * 8 - 8)) < ClearY)
+                    if (System.Math.Abs(e.x + 8 - (c0 * 8 + tiles * 4)) < ClearX + tiles * 4 && System.Math.Abs(e.y + 8 - (P.RoomTopPx + r * 8 - 8)) < ClearY)
                         return false;
-                for (int c = c0 - margin; c < c0 + 4 + margin; c++)
+                for (int c = c0 - margin; c < c0 + tiles + margin; c++)
                     for (int rr = r - 4; rr < r; rr++)
                         if (busy.Contains((c, rr))) return false;
-                for (int c = c0; c < c0 + 4; c++)
+                for (int c = c0; c < c0 + tiles; c++)
                     if (busy.Contains((c, r)) || busy.Contains((c, r + 1))) return false;
                 return true;
             }
             (int, int)? best = null;
             int bestD = int.MaxValue;
-            for (int r = 3; r < RoomCoords.Rows; r++)
-                for (int c = 1; c + 4 <= RoomCoords.Cols - 1; c++)
+            for (int r = air; r < RoomCoords.Rows; r++)
+                for (int c = 1; c + tiles <= RoomCoords.Cols - 1; c++)
                 {
                     bool ok = true;
-                    for (int i = 0; i < 4 && ok; i++)
-                        ok = Floor(c + i, r) && Air(c + i, r - 1) && Air(c + i, r - 2) && Air(c + i, r - 3);
+                    for (int i = 0; i < tiles && ok; i++)
+                    {
+                        ok = Floor(c + i, r);
+                        for (int a = 1; a <= air && ok; a++) ok = Air(c + i, r - a);
+                    }
                     if (!ok || !Clear(c, r)) continue;
-                    int cx = c * 8 + 16, d = System.Math.Abs(cx - 128) + System.Math.Abs(r - 12) * 4;
+                    int cx = c * 8 + tiles * 4, d = System.Math.Abs(cx - 128) + System.Math.Abs(r - 12) * 4;
                     if (d < bestD) { bestD = d; best = (cx, P.RoomTopPx + r * 8); }
                 }
             return best;

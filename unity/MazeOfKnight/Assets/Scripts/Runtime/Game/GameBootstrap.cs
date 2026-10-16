@@ -9,7 +9,7 @@ namespace MazeOfKnight.Game
     // Partida: carga los mapas importados (Resources/Maps), dibuja el actual, coloca al jugador y gestiona el
     // paso entre el castillo y los mundos, las piedras y los objetos que quedan a la vista.
     // Empieza donde el original: castillo, sala 1, x = 192, y = 120, con Popolon.
-    public class GameBootstrap : MonoBehaviour
+    public partial class GameBootstrap : MonoBehaviour
     {
         public string mapName = "castle";
         public int startRoom = 1;
@@ -155,6 +155,7 @@ namespace MazeOfKnight.Game
             if (RemakeRules.HollowSoul) gameObject.AddComponent<Visuals.FocusFx>().game = this;
             if (RemakeRules.HollowCharms && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.ItemTutorial>().game = this;
             if (RemakeRules.HollowJournal && Visuals.HuntersJournal.Available) gameObject.AddComponent<Visuals.HuntersJournal>().game = this;
+            if (RemakeRules.HollowMaps && Visuals.CorniferView.Available) (CorniferView = gameObject.AddComponent<Visuals.CorniferView>()).game = this;
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
@@ -216,7 +217,7 @@ namespace MazeOfKnight.Game
         Visuals.HollowMainMenu mainMenu;
         public bool AttractRunning => attract != null && attract.Running || mainMenu != null && mainMenu.Running;
         // Algún menú abierto (inventario o santuario): el de pausa no se abre encima.
-        public bool MenuOpen => GetComponent<InventoryMenu>() is InventoryMenu im && (im.Open || im.JustClosed) || GetComponent<Visuals.ItemTutorial>()?.Open == true || shrineScreen != null && shrineScreen.Open;
+        public bool MenuOpen => GetComponent<InventoryMenu>() is InventoryMenu im && (im.Open || im.JustClosed) || GetComponent<Visuals.ItemTutorial>()?.Open == true || CorniferView != null && CorniferView.Talking || shrineScreen != null && shrineScreen.Open;
         // Presentación, demo o final: ni menú ni teclas de depuración.
         public bool Busy => AttractRunning || player != null && player.Demo != null || EndingRunning;
         public bool skipAttract;     // para probar en el editor: empieza directamente la partida
@@ -312,6 +313,7 @@ namespace MazeOfKnight.Game
             foreach (var (m, id) in firedEvents)
                 if (m == name) ApplyEvent(id);
             ShowBenches();
+            CorniferView?.UseMap();
         }
 
         // ---------- bancos y muerte como en Hollow Knight (RemakeRules.HollowBenches, HollowDeath) ----------
@@ -342,8 +344,7 @@ namespace MazeOfKnight.Game
             get
             {
                 if (benches != null) return benches;
-                var worlds = maps.ToDictionary(kv => kv.Key, kv => new RoomWorld(kv.Value.rooms.Select(r => r.room)));
-                return benches = new Benches(worlds, startRoom, w => Bosses?.InfoFor(w)?.room ?? -1);
+                return benches = new Benches(AllWorlds, startRoom, w => Bosses?.InfoFor(w)?.room ?? -1);
             }
         }
 
@@ -405,6 +406,15 @@ namespace MazeOfKnight.Game
             if (!RemakeRules.HollowBenches || e == null || e.Room == null || e.Parent != null || e.Marked) return;
             if (e is global::MazeOfKnight.Game.Enemies.Boss || e is global::MazeOfKnight.Game.Enemies.Shade ||
                 e is global::MazeOfKnight.Game.Enemies.LootDrop || e is global::MazeOfKnight.Game.Enemies.DeathExplosion) return;
+            if (RemakeRules.HollowMaps && CorniferList.In(Inventory.CurrentWorld, e.Room.id) is Cornifers.Spot cs)
+            {
+                var (cx0, cy0, cx1, cy1) = e.Box();
+                if (System.Math.Abs((cx0 + cx1) / 2 - cs.X) < Benches.ClearX + Cornifers.Width * 4 && System.Math.Abs((cy0 + cy1) / 2 - (cs.Y - 8)) < Benches.ClearY)
+                {
+                    e.Alive = false;
+                    return;
+                }
+            }
             foreach (var b in BenchList.In(mapName, e.Room.id))
             {
                 var (x0, y0, x1, y1) = e.Box();
@@ -587,6 +597,7 @@ namespace MazeOfKnight.Game
         void AfterTick()
         {
             TickBench();
+            TickCornifer();
             TickFocus();
             if (Enemies.Room != motor.Room)
             {
@@ -1003,6 +1014,9 @@ namespace MazeOfKnight.Game
             d.charms = new List<int>(Inventory.OwnedCharms);
             d.tutorials = new List<int>(SeenTutorials);
             d.journal = Journal.Pack();
+            d.visited = SaveData.Pack(VisitedRooms);
+            d.corniferMet = CorniferMet;
+            d.corniferGreeted = new List<int>(CorniferGreeted);
             if (lastBench is Benches.Bench lb) { d.benchMap = lb.Map; d.benchRoom = lb.Room; d.benchX = lb.X; d.benchY = lb.Y; }
             if (!string.IsNullOrEmpty(shadeMap)) { d.shadeMap = shadeMap; d.shadeRoom = shadeRoom; d.shadeX = shadeX; d.shadeY = shadeY; d.shadeGeo = shadeGeo; }
             for (int c = 0; c < 2; c++) d.vitality[c] = Mathf.Clamp(Vitality[c] + PendingVitality[c], 0, MaxVitality[c]);
@@ -1019,6 +1033,11 @@ namespace MazeOfKnight.Game
             Collected.AddRange(d.items);
             Inventory.AdoptCharms(d.charms);
             Journal.Restore(d.journal);
+            VisitedRooms.Clear();
+            SaveData.Unpack(d.visited, VisitedRooms);
+            CorniferMet = d.corniferMet;
+            CorniferGreeted.Clear();
+            CorniferGreeted.UnionWith(d.corniferGreeted);
             SeenTutorials.Clear();
             SeenTutorials.UnionWith(d.tutorials);
             foreach (var t in Collected) SeenTutorials.Add(Inventory.CharmOf(t));

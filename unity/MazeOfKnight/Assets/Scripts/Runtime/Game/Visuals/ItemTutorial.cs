@@ -41,7 +41,7 @@ namespace MazeOfKnight.Game.Visuals
             if (game == null) return;
             if (!Open)
             {
-                if (pending.Count > 0 && game.Motor != null && !game.Busy) Show(pending.Dequeue());
+                if (pending.Count > 0 && game.Motor != null && !game.Busy && !game.MenuOpen) Show(pending.Dequeue());
                 return;
             }
             if (Time.unscaledTime - shownAt < MinSeconds) return;

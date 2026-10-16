@@ -29,7 +29,7 @@ namespace MazeOfKnight.EditorTools
         static bool FeetPivot(string path)
         {
             string folder = Path.GetFileName(Path.GetDirectoryName(path)).ToLowerInvariant();
-            return folder is "personajes" or "enemigos" or "jefes" or "objetos_sala" or "bancos";
+            return folder is "personajes" or "enemigos" or "jefes" or "objetos_sala" or "bancos" or "cornifer";
         }
 
         void OnPreprocessTexture()

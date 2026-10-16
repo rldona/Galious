@@ -94,6 +94,39 @@ namespace MazeOfKnight.Game.Visuals
             yield return new WaitForSeconds(1.5f);
             yield return Shot("muerte_3_sombra");
             Debug.Log($"[Capturas] geo tras morir: {game.Coins}");
+            // Cornifer en cada mundo, su pregunta, y el mapa del mundo 1 a lápiz y entintado.
+            if (RemakeRules.HollowMaps && game.CorniferView != null)
+            {
+                Debug.Log("[Capturas] Cornifer: " + string.Join(", ", System.Linq.Enumerable.Select(game.CorniferList.All,
+                    c => $"mundo {c.World} sala {c.Room} a {c.Distance} salas")));
+                foreach (var c in game.CorniferList.All)
+                {
+                    game.DebugGoToCornifer(c.World);
+                    yield return new WaitForSeconds(0.8f);
+                    yield return Shot($"cornifer_{c.World}");
+                }
+                game.DebugGoToCornifer(1);
+                yield return new WaitForSeconds(0.6f);
+                game.Coins = 200;
+                game.CorniferView.DebugPrompt(1);
+                yield return new WaitForSeconds(0.5f);
+                yield return Shot("cornifer_pregunta");
+                game.CorniferView.Talk(1);
+                yield return new WaitForSeconds(0.5f);
+                yield return Shot("cornifer_habla");
+                game.CorniferView.DebugClose();
+                var inv = game.GetComponent<InventoryMenu>();
+                foreach (int room in new[] { 1, 2, 3, 4, 5, 6 }) game.VisitedRooms.Add(("world01", room));
+                inv.ShowTab(2);
+                yield return new WaitForSeconds(0.4f);
+                yield return Shot("mapa_boceto");
+                inv.Toggle();
+                game.BuyMap(1);
+                inv.ShowTab(2);
+                yield return new WaitForSeconds(0.4f);
+                yield return Shot("mapa_entintado");
+                inv.Toggle();
+            }
             Application.Quit();
         }
     }

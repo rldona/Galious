@@ -76,6 +76,12 @@ namespace MazeOfKnight.Game
         // jefes, 1), las notas del cazador. Pestaña Diario del inventario. No cambia nada del juego.
         public static bool HollowJournal = true;          // activado: lo ha pedido el usuario
 
+        // Original: el mapa de cada mundo es un objeto escondido (0x0A) y el menú pinta una cuadrícula de salas. Remake (lo
+        // pidió el usuario): como en Hollow Knight, Cornifer (Cornifers) vende el mapa de cada mundo (1–9) por geo, y el
+        // mapa del menú está dibujado a mano desde la colisión de cada sala: sin el mapa, un boceto a lápiz de las salas
+        // visitadas; con él (comprado o encontrado), el mapa entintado entero, con los bancos y dónde estás.
+        public static bool HollowMaps = true;             // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks
