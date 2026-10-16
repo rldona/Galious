@@ -41,6 +41,7 @@ KIT = "hollow-knight-crossroads"
 GG = "GG_Waterway.png"          # el del Palacio de los dioses, con las piezas de los Canales
 SLUICE = "Water_Sluice.png"
 HIVE = "Hive.png"
+ABYSS = "Abyss.png"
 
 
 def A(atlas, box, name):
@@ -187,7 +188,7 @@ KITS = {
         "detalle": ["otras/ruins_breakable_watcher_statue_0000_watcher_statue_debris_01", "otras/ruin_add_pillarend",
                     "otras/ruins_breakable_watcher_statue_0003_watcher_statue_base"],
     },
-    # Mundo 6 (bosque de hongos): los Páramos Fúngicos. Setas de puntos por suelo y techo, máscaras de hongo y muros que
+    # Mundo 6 (bosque de hongos): los Páramos Fúngicos. Setas de puntos por suelo y techo, mascaras de hongo y muros que
     # se rompen por pared; setas grandes, tallos y montones de setas al fondo y como siluetas.
     "fungicos": {
         "suelo": ["atlas_Fung/fungd_mush_01_0001_a", "otras/fungus_crubmle_floor", "otras/shroom_charm_plinth_0001_floor",
@@ -204,6 +205,34 @@ KITS = {
         "pp_arriba": ["atlas_Fung/fung_roof_mush_01_0001_a", "otras/fung_mask_02", "otras/giraffe_masks_0001_fung_new_0133_Layer-236"],
         "detalle": ["atlas_Fung/mush_010000", "atlas_Fung/mush_020000", "atlas_Fung/mush_050000",
                     "atlas_Fung/fungd_mush_09_0004_a"],
+    },
+    # Mundo 7 (abismo luminoso): el Abismo. Bordes de concha por suelo, cortinas negras que gotean por techo, columnas
+    # de concha por pared; caparazones, conchas en espiral y la reja del faro al fondo; mascaras de los recipientes
+    # vacíos tiradas por el suelo.
+    "abismo": {
+        "suelo": [A(ABYSS, (2288, 880, 2556, 996), "borde_a"), A(ABYSS, (2508, 996, 2756, 1060), "borde_b"),
+                  A(ABYSS, (2836, 1136, 3084, 1200), "borde_c"), A(ABYSS, (1156, 1908, 1552, 2048), "borde_d"),
+                  A(ABYSS, (2332, 1988, 2588, 2048), "borde_e")],
+        "techo": [A(ABYSS, (2220, 648, 2304, 904), "cortina_a"), A(ABYSS, (2660, 1056, 2744, 1308), "cortina_b"),
+                  A(ABYSS, (3044, 1792, 3132, 2048), "cortina_c"), A(ABYSS, (620, 1676, 708, 1940), "cortina_d")],
+        "estalactita": [A(ABYSS, (1504, 1204, 1588, 1452), "goteo_a"), A(ABYSS, (3144, 1780, 3228, 2048), "goteo_b"),
+                        A(ABYSS, (1864, 448, 1944, 704), "goteo_c")],
+        "pared_izq": [A(ABYSS, (2088, 444, 2216, 700), "columna_a"), A(ABYSS, (2820, 968, 2908, 1132), "columna_b"),
+                      A(ABYSS, (2924, 1792, 3040, 2048), "columna_c"), A(ABYSS, (852, 1244, 1152, 2048), "columna_d")],
+        "masa": [A(ABYSS, (4, 660, 784, 1028), "caparazon_a"), A(ABYSS, (1144, 1484, 1688, 1868), "caparazon_b"),
+                 A(ABYSS, (1748, 700, 2004, 964), "flor")],
+        "fondo": [A(ABYSS, (560, 172, 820, 432), "espiral_a"), A(ABYSS, (816, 260, 1096, 476), "espiral_b"),
+                  A(ABYSS, (0, 380, 316, 652), "concha"), A(ABYSS, (788, 484, 1100, 920), "caparazon_c"),
+                  A(ABYSS, (0, 1620, 224, 1972), "reja"), A(ABYSS, (2068, 1668, 2360, 1848), "cupula"),
+                  A(ABYSS, (1204, 1248, 1500, 1480), "cascara")],
+        "pp_abajo": [A(ABYSS, (1288, 180, 1576, 376), "roca"), A(ABYSS, (3232, 1924, 3520, 2048), "loma"),
+                     A(ABYSS, (2068, 1668, 2360, 1848), "cupula")],
+        "pp_arriba": [A(ABYSS, (2604, 1316, 2796, 1500), "garra"), A(ABYSS, (2492, 1372, 2636, 1628), "puas"),
+                      A(ABYSS, (2660, 1056, 2744, 1308), "cortina_b")],
+        # Las máscaras blancas de los recipientes parecen caballeros: una, entre conchas pequeñas.
+        "detalle": [A(ABYSS, (856, 124, 972, 256), "mascara"), A(ABYSS, (2268, 536, 2412, 620), "concha_a"),
+                    A(ABYSS, (2608, 892, 2724, 992), "concha_b"), A(ABYSS, (1448, 1112, 1552, 1196), "concha_c"),
+                    A(ABYSS, (716, 1232, 828, 1340), "concha_d"), A(ABYSS, (3044, 1616, 3184, 1720), "concha_e")],
     },
 }
 
@@ -279,6 +308,10 @@ FAR = {
                              ("Fungus2_10", 3927, 3400), ("Fungus2_28", 4893, 1017), ("Fungus2_20", 2148, 1081),
                              ("Fungus2_11", 1824, 3489), ("Fungus2_14", 6723, 888), ("Fungus2_18", 2774, 3610),
                              ("Fungus2_23", 3344, 2587)]),
+    "abismo": ("Abyss", [("Abyss_02", 7966, 1347), ("Abyss_02", 8751, 1764), ("Abyss_03", 3681, 819),
+                         ("Abyss_03_b", 2380, 498), ("Abyss_21", 5691, 749), ("Abyss_03_c", 3947, 1463),
+                         ("Abyss_03_c", 3792, 1263), ("Abyss_22", 1089, 931), ("Abyss_18", 5243, 996),
+                         ("Abyss_Lighthouse_room", 707, 91)]),
 }
 
 
