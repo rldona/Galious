@@ -169,7 +169,7 @@ namespace MazeOfKnight.Game.Visuals
                 yield return Shot($"enemigos_sala_{id:000}");
             }
             // Objetos en salas del castillo (Bible, Earrings, monedas, Pitcher) con su icono de Hollow Knight.
-            foreach (int id in new[] { 11, 13, 18, 19 })
+            foreach (int id in new[] { 11, 13, 18, 19, 16, 40, 77 })
             {
                 var r = game.World.Room(id);
                 if (r == null) continue;
@@ -196,7 +196,7 @@ namespace MazeOfKnight.Game.Visuals
             // Enemigos de los diez mundos: las salas que juntan todos sus tipos.
             var worldRooms = new[]
             {
-                new[] { 8, 11 }, new[] { 12, 8, 5 }, new[] { 6, 9, 8, 11, 14 }, new[] { 2, 3, 5, 6 }, new[] { 2, 5, 6, 12 },
+                new[] { 7, 8, 11 }, new[] { 12, 8, 5 }, new[] { 6, 9, 8, 11, 14 }, new[] { 2, 3, 5, 6 }, new[] { 2, 5, 6, 12 },
                 new[] { 2, 5, 9, 11 }, new[] { 6, 12, 19, 16 }, new[] { 6, 3, 20 }, new[] { 2, 6, 7, 11, 14, 26 }, new[] { 3, 6 },
             };
             for (int w = 1; w <= 10; w++)

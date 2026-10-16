@@ -116,6 +116,12 @@ namespace MazeOfKnight.Game
             shownKeyDoors[(room, x, y)] = height;
             Fill(front, room, x, y, 1, 3, null);
             Fill(keyDoors, room, x, y, 1, 3, null);
+            // Con la verja de Hollow Knight: lo que se ve de ella mientras sube (sus 'height' casillas de abajo, arriba).
+            if (Visuals.HollowItems.Piece("puerta_llave_3") != null)
+            {
+                Piece(("llave", room, x, y), room, x + 4, y + 8 * height, height > 0 ? Visuals.HollowItems.Piece($"puerta_llave_{height}") : null, -3);
+                return;
+            }
             if (Style?.KeyDoor != null) FillPattern(keyDoors, room, x, y, Style.KeyDoor, height);
             else Fill(keyDoors, room, x, y, 1, height, keyDoor);
         }
@@ -150,6 +156,16 @@ namespace MazeOfKnight.Game
         public void ShowDoor(RoomModel room, int x, int y, int openRows)
         {
             shownDoors[(room, x, y)] = openRows;
+            // Con la puerta de jefe de Hollow Knight en el hueco (2 × 2 entre las jambas): entera cerrada, rompiéndose a
+            // medio abrir y nada abierta. El marco, el de siempre (abierto).
+            if (Visuals.HollowItems.Piece("puerta_mundo_cerrada") != null)
+            {
+                if (Style?.Door != null) FillPattern(doorsLayer, room, x, y, Style.Door, 3);
+                else Fill(doorsLayer, room, x, y, 4, 3, door);
+                var gate = openRows >= 2 ? null : Visuals.HollowItems.Piece(openRows == 1 ? "puerta_mundo_media" : "puerta_mundo_cerrada");
+                Piece(("mundo", room, x, y), room, x + 16, y + 24, gate, -7);
+                return;
+            }
             if (Style?.Door != null)
             {
                 var pattern = openRows >= 2 ? Style.Door : openRows == 1 ? Style.DoorHalf : Style.DoorClosed;
@@ -183,6 +199,11 @@ namespace MazeOfKnight.Game
         public void ShowRevolvingDoor(RoomModel room, int x, int y)
         {
             shownRevolving.Add((room, x, y));
+            if (Visuals.HollowItems.Piece("puerta_giratoria") is Sprite rev)
+            {
+                Piece(("giratoria", room, x, y), room, x + 4, y + 24, rev, -3);
+                return;
+            }
             if (Style?.Revolving != null) FillPattern(keyDoors, room, x, y, Style.Revolving, 3);
             else Fill(keyDoors, room, x, y, 1, 3, revolvingDoor);
         }
@@ -203,8 +224,38 @@ namespace MazeOfKnight.Game
             int col0 = x >> 3, row0 = (y - OriginalPhysics.RoomTopPx) >> 3;
             if (lastWorld != null && Style != null)
                 RedrawCells(lastWorld, room, col0, row0, 2, 2);
+            // Con la roca de geo de Hollow Knight.
+            if (Visuals.HollowItems.Piece("roca") is Sprite geo)
+            {
+                Fill(rocks, room, x, y, 2, 2, null);
+                Fill(front, room, x, y, 2, 2, null);   // sin la baldosa sólida debajo (la piedra es la roca)
+                Piece(("roca", room, x, y), room, x + 8, y + 16, visible ? geo : null, -4);
+                return;
+            }
             if (visible && Style?.Rock != null) FillPattern(rocks, room, x, y, Style.Rock, 2);
             else Fill(rocks, room, x, y, 2, 2, visible ? rock : null);
+        }
+
+        // Piezas de Hollow Knight (Visuals/HollowItems.Piece) como sprites encima del mapa: una por sitio, con el pivote abajo
+        // en el centro en (px, py), píxeles del original. Sin sprite, se esconde. Cuelgan de la rejilla del mapa: al
+        // reconstruirlo desaparecen y se vuelven a crear.
+        readonly Dictionary<(string, RoomModel, int, int), SpriteRenderer> pieces = new Dictionary<(string, RoomModel, int, int), SpriteRenderer>();
+
+        void Piece((string, RoomModel, int, int) key, RoomModel room, float px, float py, Sprite sprite, int order)
+        {
+            if (!pieces.TryGetValue(key, out var sr) || sr == null)
+            {
+                if (sprite == null) return;
+                sr = new GameObject($"Pieza {key.Item1} ({room.id}: {key.Item3}, {key.Item4})").AddComponent<SpriteRenderer>();
+                sr.transform.SetParent(grid != null ? grid.transform : transform, false);
+                pieces[key] = sr;
+            }
+            sr.enabled = sprite != null;
+            if (sprite == null) return;
+            sr.sprite = sprite;
+            sr.sortingOrder = order;
+            var at = RoomCoords.PixelToWorld(room, 0, 0) + new Vector2(px, -py) / RoomCoords.PixelsPerUnit;
+            sr.transform.position = new Vector3(at.x, at.y, 0);
         }
 
         // Dibujo de varias celdas: las 'rowsShown' filas de arriba del patrón.

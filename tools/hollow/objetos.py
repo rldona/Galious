@@ -65,6 +65,35 @@ ITEMS = {
 }
 
 
+# Piezas de la sala (tk2d: colección, clip, fotograma), ajustadas sin deformar a su hueco en texels (8 por píxel), con
+# los pies abajo en el centro:
+#   - piedra rompible (2 × 2 casillas): la roca de geo, que también se golpea hasta romperla y esconde cosas;
+#   - puerta con llave (columna de 1 × 3 que se abre hacia arriba): la verja del Archivo; se guardan sus 3, 2 y 1 casillas de
+#     abajo, que son lo que se ve mientras sube;
+#   - puerta giratoria (1 × 3): la puerta de hueso;
+#   - puerta de mundo (el hueco de 2 × 2 entre las jambas): la puerta de jefe, entera (cerrada) y rompiéndose (a medio abrir).
+PIECES = {
+    "roca": ("Geo Rocks Extra", "Idle 1", 0, (128, 128)),
+    "puerta_llave": ("Battle Gate Archive Anim", "Closed", 0, (64, 192)),   # la de peaje era casi negra: no se veía
+    "puerta_giratoria": ("Switches and gates", "Bone Gate Closed", 0, (64, 192)),
+    "puerta_mundo_cerrada": ("Boss Door Anim", "Idle", 0, (128, 128)),
+    "puerta_mundo_media": ("Boss Door Anim", "Break", 4, (128, 128)),
+}
+
+
+def piece(src, col, clip, frame, box):
+    import csv
+    rows = [r for r in csv.DictReader(open(src / "hollow-knight-tk2d" / col / "clip_frames.csv", encoding="utf-8")) if r["clip"] == clip]
+    im = Image.open(src / "hollow-knight-tk2d" / col / rows[min(frame, len(rows) - 1)]["archivo_png"]).convert("RGBA")
+    im = im.crop(im.getchannel("A").point(lambda a: 255 if a > 20 else 0).getbbox())
+    s = min(box[0] / im.width, box[1] / im.height)
+    im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+    # En un lienzo del tamaño del hueco, abajo en el centro (así el pivote de los pies es el del hueco).
+    canvas = Image.new("RGBA", box, (0, 0, 0, 0))
+    canvas.paste(im, ((box[0] - im.width) // 2, box[1] - im.height), im)
+    return canvas
+
+
 def find(src, name):
     for base in (src / "hollow-knight-inventario", src / "hollow-knight-texturas"):
         hits = list(base.rglob(f"{name}.png"))
@@ -85,4 +114,12 @@ def build(src):
         s = SIZE / max(im.size)
         im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
         im.save(OUT / f"objeto{t:02x}.png")
-    print(f"objetos: {len(ITEMS)} → {OUT}")
+    for name, (col, clip, frame, box) in PIECES.items():
+        im = piece(src, col, clip, frame, box)
+        if name == "puerta_llave":
+            # Lo que se ve de la puerta mientras sube: sus h casillas de abajo.
+            for h in (1, 2, 3):
+                im.crop((0, box[1] - 64 * h, box[0], box[1])).save(OUT / f"{name}_{h}.png")
+        else:
+            im.save(OUT / f"{name}.png")
+    print(f"objetos: {len(ITEMS)} y {len(PIECES)} piezas de sala → {OUT}")

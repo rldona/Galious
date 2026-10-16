@@ -26,6 +26,20 @@ namespace MazeOfKnight.Game.Visuals
 
         public static Sprite Icon(int type) => Load().TryGetValue(type, out var s) ? s : null;
 
+        // Piezas de la sala (roca, puerta_llave_1..3, puerta_giratoria, puerta_mundo_cerrada, puerta_mundo_media), con el
+        // pivote abajo en el centro de su hueco.
+        static Dictionary<string, Sprite> pieces;
+        public static Sprite Piece(string name)
+        {
+            if (pieces == null)
+            {
+                pieces = new Dictionary<string, Sprite>();
+                foreach (var s in Resources.LoadAll<Sprite>("Hollow/objetos_sala"))
+                    if (!s.name.StartsWith("objeto")) pieces[s.name] = s;
+            }
+            return pieces.TryGetValue(name, out var p) ? p : null;
+        }
+
         // Botín que sueltan los enemigos (0x5D flechas, 0x5E monedas, 0x5F llaves): el icono de su recurso.
         public static Sprite Loot(int lootType) => lootType switch
         {
