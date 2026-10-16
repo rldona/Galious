@@ -37,6 +37,13 @@ namespace MazeOfKnight.Game
         public static bool LavaRespawn = true;            // activado: lo ha pedido el usuario
         public const int LavaDamage = 2;
 
+        // Galious: The Hollow Kingdom (16 de octubre de 2026): solo el Caballero (Popolon). Original: dos personajes, Popolon y
+        // Aphrodite, que se cambian en el menú y se pasan las vidas. Remake: Aphrodite no está; Popolon se queda con su vida
+        // de reserva y nada la resucita. Nada del juego la exige: Popolon entra en el mundo 5 sin la Conch Shell y en el 7
+        // con el Necklace (de la tienda), y su única ventaja, el agua, ya no hace daño con HollowSwim. Su código y sus
+        // medidas se conservan (las pruebas del original la usan).
+        public static bool SoloKnight = true;             // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

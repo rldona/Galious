@@ -190,7 +190,7 @@ namespace MazeOfKnight.Game.Visuals
             if (roomsOnly) { yield return Rooms(game, player); Application.Quit(); yield break; }
             var room = game.Motor.Room;
             int x0 = game.Motor.X, y0 = game.Motor.Y;
-            foreach (var c in new[] { Character.Popolon, Character.Aphrodite })
+            foreach (var c in RemakeRules.SoloKnight ? new[] { Character.Popolon } : new[] { Character.Popolon, Character.Aphrodite })
             {
                 string p = c == Character.Popolon ? "popolon" : "aphrodite";
                 game.Motor.Character = c;

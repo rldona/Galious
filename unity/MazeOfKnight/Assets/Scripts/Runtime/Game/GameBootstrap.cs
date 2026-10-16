@@ -181,6 +181,7 @@ namespace MazeOfKnight.Game
                 UnityEngine.InputSystem.Keyboard.current.onTextInput += OnTextInput;
             LoadMap(mapName);
             motor = new PlayerMotor(World, World.Room(startRoom), startX, startY) { Character = startCharacter };
+            ApplySoloKnight();
             var liftsJson = Resources.Load<TextAsset>("Lifts");
             Lifts = new LiftSystem(liftsJson != null ? JsonUtility.FromJson<LiftsData>(liftsJson.text) : null) { InCastle = mapName == "castle" };
             motor.Lifts = Lifts;
@@ -783,6 +784,7 @@ namespace MazeOfKnight.Game
             var demeter = shrines.shrines.FirstOrDefault(s => s.map == "castle" && s.kind == "password");
             var room = World.Room(demeter?.exit.toRoom ?? startRoom);
             motor.Character = (Character)d.character;
+            ApplySoloKnight();
             motor.Place(World, room, demeter?.exit.x ?? startX, demeter?.exit.y ?? startY);
             Say("Partida cargada");
             return true;
@@ -797,7 +799,7 @@ namespace MazeOfKnight.Game
         // Al cerrar el menú: el personaje elegido pasa a ser el activo y el arma elegida, la de M.
         public void ApplyMenu(Character character, int weapon)
         {
-            motor.Character = character;
+            if (!RemakeRules.SoloKnight) motor.Character = character;
             if (weapon > 0) SelectedWeapon = weapon;
         }
 
@@ -1374,7 +1376,7 @@ namespace MazeOfKnight.Game
             PendingVitality[0] = PendingVitality[1] = 0;
             liquidTicks = 0;
             if (Lives[c] > 0) Lives[c]--;
-            else if (Lives[o] > 0) { Lives[o]--; motor.Character = (Character)o; c = o; }
+            else if (!RemakeRules.SoloKnight && Lives[o] > 0) { Lives[o]--; motor.Character = (Character)o; c = o; }
             else { StartGameOver(); return; }
             Sound.Effect(0x2B);
             Jingle(0x95);
@@ -1398,6 +1400,18 @@ namespace MazeOfKnight.Game
             else
                 motor.Place(World, World.Room(startRoom), startX, startY);
             Say(motor.Character == (Character)c ? "Vida perdida" : $"Vida perdida: juega {motor.Character}");
+        }
+
+        // RemakeRules.SoloKnight: juega el Caballero (Popolon), que se queda la vida de reserva de Aphrodite; a ella no la
+        // resucita la Muerte.
+        void ApplySoloKnight()
+        {
+            if (!RemakeRules.SoloKnight || motor == null) return;
+            int p = (int)Character.Popolon, a = (int)Character.Aphrodite;
+            motor.Character = Character.Popolon;
+            Lives[p] += Lives[a];
+            Lives[a] = 0;
+            ResurrectionCredit[a] = 0;
         }
 
         // Estado 7: GAME OVER unos 7 s y vuelta al logo.

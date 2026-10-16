@@ -71,7 +71,8 @@ namespace MazeOfKnight.Game
             int dx = kb.leftArrowKey.wasPressedThisFrame ? -1 : kb.rightArrowKey.wasPressedThisFrame ? 1 : 0;
             if (dx != 0)
             {
-                if (row == 0)
+                if (row == 0 && RemakeRules.SoloKnight) { }   // solo el Caballero: nada que elegir
+                else if (row == 0)
                 {
                     var other = character == Character.Popolon ? Character.Aphrodite : Character.Popolon;
                     string why = game.Lives[(int)other] <= 0 ? $"{other} no tiene vidas"
@@ -125,11 +126,14 @@ namespace MazeOfKnight.Game
             Box(R(0, 32, 256, 160), new Color(0, 0, 0, 0.92f));
             // Retratos (fila de personaje).
             // El retrato solo sale si ese personaje tiene vidas.
-            if (game.Lives[1] > 0) Box(R(96, 40, 16, 24), new Color(0.35f, 0.55f, 1f));
-            if (game.Lives[0] > 0) Box(R(144, 40, 16, 24), new Color(1f, 0.45f, 0.7f));
-            GUI.Label(R(80, 64, 48, 8), $"Popolon x{game.Lives[1]}", small);
-            GUI.Label(R(128, 64, 48, 8), $"Aphrodite x{game.Lives[0]}", small);
-            if (row != 0 || blink)
+            if (game.Lives[1] > 0 || RemakeRules.SoloKnight) Box(R(RemakeRules.SoloKnight ? 120 : 96, 40, 16, 24), new Color(0.35f, 0.55f, 1f));
+            GUI.Label(R(RemakeRules.SoloKnight ? 104 : 80, 64, 48, 8), $"Popolon x{game.Lives[1]}", small);
+            if (!RemakeRules.SoloKnight)
+            {
+                if (game.Lives[0] > 0) Box(R(144, 40, 16, 24), new Color(1f, 0.45f, 0.7f));
+                GUI.Label(R(128, 64, 48, 8), $"Aphrodite x{game.Lives[0]}", small);
+            }
+            if (!RemakeRules.SoloKnight && (row != 0 || blink))
                 Frame(R(character == Character.Popolon ? 94 : 142, 38, 20, 28), Color.yellow);
 
             GUI.Label(R(112, 70, 40, 10), "ITEM", label);
@@ -189,13 +193,14 @@ namespace MazeOfKnight.Game
 
             // Retratos: solo si ese personaje tiene vidas.
             int shield = game.Inventory.ShieldLevel;
-            foreach (var (c, x) in new[] { (Character.Popolon, 96f), (Character.Aphrodite, 144f) })
+            var portraits = RemakeRules.SoloKnight ? new[] { (Character.Popolon, 120f) } : new[] { (Character.Popolon, 96f), (Character.Aphrodite, 144f) };
+            foreach (var (c, x) in portraits)
             {
-                bool alive = game.Lives[(int)c] > 0;
+                bool alive = game.Lives[(int)c] > 0 || RemakeRules.SoloKnight;
                 if (chars != null) Visuals.UiKit.Icon(R(x - 4, 38, 24, 26), chars.Get(c, Visuals.CharacterArt.Anim.Idle, 0, shield), alive ? 1 : 0.25f, false, Visuals.CharacterArt.PortraitCrop);
                 T(R(x - 16, 64, 48, 8), $"{c} ×{game.Lives[(int)c]}", 4.4f, TextAnchor.MiddleCenter, alive ? Visuals.UiKit.Bone : Visuals.UiKit.Dim);
             }
-            if (row != 0 || blink)
+            if (!RemakeRules.SoloKnight && (row != 0 || blink))
                 Visuals.UiKit.Frame(R(character == Character.Popolon ? 90 : 138, 38, 28, 34), Visuals.UiKit.Gold, Mathf.Max(1, scale * 0.6f));
 
             T(R(96, 70, 64, 10), "ITEM", 6, TextAnchor.MiddleCenter, Visuals.UiKit.Bone, true);

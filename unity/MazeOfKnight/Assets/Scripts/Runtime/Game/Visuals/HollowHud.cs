@@ -135,10 +135,14 @@ namespace MazeOfKnight.Game.Visuals
             UiKit.Text(new Rect(maskX + nMe * step + 6 * s, maskY + 4 * s, 300 * s, 20 * s),
                 $"{m.Character.ToString().ToUpperInvariant()}  ×{game.Lives[me]}", 14, TextAnchor.UpperLeft, UiKit.Bone, true);
             float otherY = maskY + Rows(me) * row + 6 * s;
-            Masks(other, maskX - 32 * ks, otherY - 37 * ks, ks, stepS, rowS);
-            int nOther = Mathf.Min(PerRow, Mathf.CeilToInt(game.MaxVitality[other] / (float)UnitsPerMask));
-            UiKit.Text(new Rect(maskX + nOther * stepS + 6 * s, otherY - 3 * s, 220 * s, 18 * s),
-                $"{(Character)other}  ×{game.Lives[other]}", 12, TextAnchor.UpperLeft, UiKit.Dim);
+            // El otro personaje, en pequeño (con RemakeRules.SoloKnight no hay otro).
+            if (!RemakeRules.SoloKnight)
+            {
+                Masks(other, maskX - 32 * ks, otherY - 37 * ks, ks, stepS, rowS);
+                int nOther = Mathf.Min(PerRow, Mathf.CeilToInt(game.MaxVitality[other] / (float)UnitsPerMask));
+                UiKit.Text(new Rect(maskX + nOther * stepS + 6 * s, otherY - 3 * s, 220 * s, 18 * s),
+                    $"{(Character)other}  ×{game.Lives[other]}", 12, TextAnchor.UpperLeft, UiKit.Dim);
+            }
 
             // Geo (monedas), flechas y llaves, y el arma elegida.
             float icon = 24 * s, rx = Screen.width - pad;
