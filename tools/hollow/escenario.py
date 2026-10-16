@@ -166,6 +166,27 @@ KITS = {
         "pp_arriba": ["atlas_Crossroads/roof_FG_rock_08_0004_02", "atlas_Crossroads/roof_FG_rock_07_0003_03"],
         "detalle": ["otras/mine_crystal_08", "otras/mines_additions_02_0010_a"],   # sin los rosas brillantes de la cima
     },
+    # Mundo 5 (ruinas hundidas): la Ciudad de las Lágrimas. Plataformas adornadas y suelos de casa, arcos de puente
+    # colgando, muros finos y pilares oscuros; ventanales, edificios, agujas, la estatua del vigilante y estanterías al
+    # fondo; escombros y cojines como siluetas delante.
+    "ciudad": {
+        "suelo": ["otras/ruind_plat_float_01", "otras/ruind_plat_float_01_wide", "otras/ruind_plat_float_01_superwide",
+                  "otras/ruinhouse_floor", "otras/ruins_additions_0035_a", "otras/ruins_additions_0036_a"],
+        "techo": ["otras/ruind_bridge_roof_arch_01", "otras/ruind_bridge_base_arch_02", "otras/ruind_bridge_base_01",
+                  "atlas_Crossroads/roof_03"],
+        "estalactita": ["otras/ruins_additions_0038_a", "atlas_Crossroads/roof_FG_rock_08_0000_06"],
+        "pared_izq": ["otras/ruind_wall_02", "otras/ruind_wall_03", "otras/ruins_dark pillar"],
+        "masa": ["otras/ruin_house_brick", "otras/ruin house brick2", "otras/ruins_bg_building_mid"],
+        "fondo": ["otras/ruind_window_01", "otras/ruind_window_03", "otras/ruind_window_04", "otras/ruind_dressing_window_01",
+                  "otras/ruins_bg_building_mid", "otras/ruins_resting_extra_bits_0084_Layer-186",
+                  "otras/ruins_resting_extra_bits_0098_Layer-198", "otras/ruins_fancy_shelf_0000_2",
+                  "otras/ruins_breakable_watcher_statue_0004_watcher_statue_01", "otras/ruind_arch_04"],
+        "pp_abajo": ["otras/ruins_resting_extra_bits_0044_Layer-146", "otras/ruins_resting_extra_bits_0045_Layer-147",
+                     "otras/ruins_red_FG_cushions_0000_v", "otras/ruins_red_FG_cushions_0001_v"],
+        "pp_arriba": ["otras/ruins_additions_0002_a", "otras/ruins_additions_0019_a", "otras/ruind_bridge_roof_arch_01"],
+        "detalle": ["otras/ruins_breakable_watcher_statue_0000_watcher_statue_debris_01", "otras/ruin_add_pillarend",
+                    "otras/ruins_breakable_watcher_statue_0003_watcher_statue_base"],
+    },
 }
 
 
@@ -197,7 +218,7 @@ def build(src):
                 if bb:
                     im = im.crop(bb)
                 im = im.resize((max(1, round(im.width * SCALE)), max(1, round(im.height * SCALE))), Image.LANCZOS)
-                label = name[2] if isinstance(name, tuple) else Path(name).name
+                label = (name[2] if isinstance(name, tuple) else Path(name).name).replace(" ", "_")
                 im.save(out / f"{role}__{label}.png")
                 n += 1
         far = build_far(src, zone, out)
@@ -232,6 +253,10 @@ FAR = {
     "cristal": ("Mines", [("Mines_02", 6027, 2711), ("Mines_06", 7727, 997), ("Mines_30", 5899, 937), ("Mines_31", 5297, 1999),
                           ("Mines_17", 1276, 783), ("Mines_10", 7115, 1127), ("Mines_13", 8706, 1822),
                           ("Mines_01", 374, 1263), ("Mines_18", 1654, 1338), ("Mines_29", 1830, 3322)]),
+    "ciudad": ("Ruins1", [("Ruins1_09", 277, 1214), ("Ruins1_23", 2616, 2730), ("Ruins1_24", 749, 1448),
+                          ("Ruins1_27", 5916, 2708), ("Ruins1_24", 664, 812), ("Ruins1_18", 7433, 1679),
+                          ("Ruins1_06", 6011, 2096), ("Ruins1_01", 1219, 540), ("Ruins1_18", 9694, 1493),
+                          ("Ruins1_03", 3160, 4513)]),
 }
 
 
