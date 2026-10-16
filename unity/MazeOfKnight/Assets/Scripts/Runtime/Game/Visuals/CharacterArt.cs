@@ -100,7 +100,10 @@ namespace MazeOfKnight.Game.Visuals
         // Primer fotograma del bucle de cada clip (los anteriores son el arranque), si no es 0.
         public Dictionary<string, int> LoopStart;
         readonly FrameAnimator anim = new FrameAnimator();
-        static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "salto_subir", "estocada", "golpe", "muerte", "celebrar", "sentarse", "levantarse", "despertar", "curarse" };
+        static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "salto_subir", "estocada", "estocada_arriba", "estocada_abajo", "golpe", "muerte", "celebrar", "sentarse", "levantarse", "despertar", "curarse" };
+
+        // La acción del espadazo según hacia dónde va (RemakeRules.HollowSlashes): estocada, estocada_arriba, estocada_abajo.
+        static string Slash(PlayerMotor m, string name) => m.SlashDir > 0 ? name + "_arriba" : m.SlashDir < 0 ? name + "_abajo" : name;
         int lastAttackTicks;
         bool lastFacingLeft, facingKnown;
         string drawnAction;
@@ -124,7 +127,7 @@ namespace MazeOfKnight.Game.Visuals
         {
             if (m.State == MotorState.Knockback || m.Stunned > 0) return "golpe";
             if (m.Pose != null) return m.Pose;
-            if (m.AttackTicks > 0) return "estocada";
+            if (m.AttackTicks > 0) return Slash(m, "estocada");
             switch (m.State)
             {
                 case MotorState.Ladder: return "escalera";
@@ -146,6 +149,8 @@ namespace MazeOfKnight.Game.Visuals
             string action = Action(m, dx);
             // Sin dibujo de nadar (Hornet): corre o se queda quieta, flotando.
             if (action is "nadar" or "nadar_quieto" && DrawnClip(c, action) == null) action = action == "nadar" ? "correr" : "quieto";
+            // Sin dibujo del espadazo hacia arriba o abajo (Hornet): el de siempre.
+            if (action is "estocada_arriba" or "estocada_abajo" && DrawnClip(c, action) == null) action = "estocada";
             bool grounded = action is "correr" or "quieto" or "nadar" or "nadar_quieto";
             bool newAttack = m.AttackTicks > 0 && lastAttackTicks == 0;
             lastAttackTicks = m.AttackTicks;
@@ -153,17 +158,18 @@ namespace MazeOfKnight.Game.Visuals
             facingKnown = true;
             lastFacingLeft = m.FacingLeft;
 
-            if (newAttack && DrawnClip(c, "estocada") is var hit && hit != null)
+            string slashName = DrawnClip(c, Slash(m, "estocada")) != null ? Slash(m, "estocada") : "estocada";
+            if (newAttack && DrawnClip(c, slashName) is var hit && hit != null)
             {
                 anim.PlayAt(hit, Math.Max(0, hit.TagFrame("golpe")));
-                drawnAction = "estocada";
+                drawnAction = slashName;
             }
             else if (turned && DrawnClip(c, "girar") is var turn && turn != null)
             {
                 anim.Play(turn, true);
                 drawnAction = "girar";
             }
-            else if (grounded && drawnAction is "estocada" or "girar" && anim.Clip != null && !anim.Finished)
+            else if (grounded && drawnAction is "estocada" or "estocada_arriba" or "estocada_abajo" or "girar" && anim.Clip != null && !anim.Finished)
             {
                 // Se termina de ver la acción de una vez.
             }
@@ -189,6 +195,7 @@ namespace MazeOfKnight.Game.Visuals
         public Sprite DrawnSlash(PlayerMotor m)
         {
             if (m.AttackTicks <= 1) return null;
+            if (m.SlashDir != 0) return null;   // los tajos de arriba y abajo los pone PlayerController (Hollow/tajos)
             var clip = DrawnClip(m.Character, "estela");
             if (clip == null || clip.Length == 0) return null;
             return clip.Frames[Math.Min(clip.Length - 1, m.AttackTicks >= 3 ? 0 : 1)];

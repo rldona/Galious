@@ -7,8 +7,9 @@ using UnityEngine.InputSystem.Controls;
 namespace MazeOfKnight.Game
 {
     // Los botones del juego, con teclado y con mando, que se pueden cambiar en Opciones (Mando y Teclado, como en Hollow
-    // Knight; se guardan en PlayerPrefs). Moverse va siempre con las flechas, el stick izquierdo o la cruceta, y ↑ también
-    // salta con el teclado, como en el original; Pausa es Esc o Start. Cada botón es una InputAction con su tecla y su
+    // Knight; se guardan en PlayerPrefs). Moverse y apuntar van siempre con las flechas, el stick izquierdo o la cruceta;
+    // con RemakeRules.HollowSlashes se salta con Saltar (Z, A) y ↑ apunta; sin ella ↑ salta, como en el original. Pausa
+    // es Esc o Start. Cada botón es una InputAction con su tecla y su
     // botón del mando; PlayerController y GameBootstrap las leen de aquí.
     public static class Controls
     {
@@ -19,7 +20,7 @@ namespace MazeOfKnight.Game
 
         public static readonly Def[] All =
         {
-            new Def { Id = "saltar", Name = "Saltar", Key = null, Pad = "<Gamepad>/buttonSouth" },
+            new Def { Id = "saltar", Name = "Saltar", Key = "<Keyboard>/z", Pad = "<Gamepad>/buttonSouth" },
             new Def { Id = "espada", Name = "Atacar", Key = "<Keyboard>/space", Pad = "<Gamepad>/buttonWest" },
             new Def { Id = "concentrar", Name = "Concentrarse", Key = "<Keyboard>/f", Pad = "<Gamepad>/buttonEast" },
             new Def { Id = "arma", Name = "Arma", Key = "<Keyboard>/m", Pad = "<Gamepad>/buttonNorth" },

@@ -31,6 +31,7 @@ import inventario  # noqa: E402
 import diario  # noqa: E402
 import cornifer  # noqa: E402
 import musica  # noqa: E402
+import tajos  # noqa: E402
 import iconos  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
@@ -64,6 +65,12 @@ CHARACTERS = {
             "estocada": ("Knight", "Slash", ["slash_left_longer0000", "slash_left_longer0002", "slash_left_longer0003",
                                              "slash_left_longer0004", "slash_left_longer0005"], 24, 1),
             "estela": ("Knight", "SlashEffect", ["slashes_effect0001", "slashes_effect0002"], 24, None),
+            # Espadazos hacia arriba y hacia abajo (RemakeRules.HollowSlashes) y sus tajos.
+            "estocada_arriba": ("Knight", "UpSlash", ["up_slash0000", "up_slash0001", "up_slash0002", "up_slash0003",
+                                                      "up_slash0004"], 24, 1),
+            "estocada_abajo": ("Knight", "DownSlash", ["down_slash_v02000", "down_slash_v02001", "down_slash_v02002",
+                                                       "down_slash_v02003", "down_slash_v02004"], 24, 1),
+            # (Sus tajos van en otro lienzo de Hollow Knight: los saca tajos.py como sprites sueltos.)
             "golpe": ("Knight", "Recoil", None, 24, None),
             "muerte": ("Knight", "Death", None, 10, None),
             # Nadando en la superficie del agua (RemakeRules.HollowSwim). Hornet no nada en Hollow Knight: sin estos, corre
@@ -271,6 +278,7 @@ def main(argv):
     diario.build(src)
     cornifer.build(src)
     musica.build(src)
+    tajos.build(src)
     iconos.build(src)
 
 

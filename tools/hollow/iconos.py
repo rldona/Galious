@@ -121,6 +121,19 @@ def redraw(cells):
     return out
 
 
+def centered(icon, size=128, fill=118):
+    """El dibujo recortado a lo que tiene y centrado en el hueco, lo más grande que quepa (muchos iconos del original
+    no llenan su cuadro ni están en medio)."""
+    bb = icon.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+    if bb:
+        icon = icon.crop(bb)
+    k = fill / max(icon.size)
+    icon = icon.resize((max(1, round(icon.width * k)), max(1, round(icon.height * k))), Image.LANCZOS)
+    out = Image.new("RGBA", (size, size))
+    out.alpha_composite(icon, ((size - icon.width) // 2, (size - icon.height) // 2))
+    return out
+
+
 def build(src=None):
     from galious_rom import Rom
     try:
@@ -130,9 +143,7 @@ def build(src=None):
         return
     OUT.mkdir(parents=True, exist_ok=True)
     for t in range(0x07, 0x2D):
-        im = Image.new("RGBA", (128, 128))
-        im.alpha_composite(redraw(original(rom, t)), ((128 - SIZE) // 2, 128 - SIZE))
-        im.save(OUT / f"objeto{t:02X}.png")
+        centered(redraw(original(rom, t))).save(OUT / f"objeto{t:02X}.png")
     print(f"iconos: {0x2D - 0x07} objetos del original al estilo de Hollow Knight → {OUT}")
 
 

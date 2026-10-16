@@ -141,6 +141,13 @@ namespace MazeOfKnight.Game.Visuals
         }
 
         // El separador con filigrana bajo un título de pantalla.
+        // Alto de la filigrana con ese ancho.
+        public static float DividerHeight(float width)
+        {
+            Load();
+            return divider != null ? width * divider.rect.height / divider.rect.width : 0;
+        }
+
         public static void Divider(float cx, float y, float width, float alpha = 1)
         {
             Load();
@@ -165,6 +172,7 @@ namespace MazeOfKnight.Game.Visuals
         AudioSource music;
         public string MusicState => music == null ? "sin fuente" : $"clip {(music.clip != null ? music.clip.name + " " + music.clip.loadState : "null")}, suena {music.isPlaying}, volumen {music.volume:0.00}, tiempo {music.time:0.00}, 3D {music.spatialBlend}, mute {music.mute}, oyente {AudioListener.volume} pausa {AudioListener.pause}";
         static bool noticeShown;            // el aviso de autoguardado, una vez al arrancar
+        bool quitting;
         float t, leaving = -1;
         System.Action onLeave;
         Sprite background, fog;
@@ -230,6 +238,14 @@ namespace MazeOfKnight.Game.Visuals
             if (leaving >= 0)
             {
                 leaving += Time.unscaledDeltaTime;
+                if (leaving >= 0.7f && quitting)
+                {
+                    // Al salir del juego: todo en negro (la cámara tampoco pinta) hasta que se cierra la ventana.
+                    if (Camera.main != null) { Camera.main.cullingMask = 0; Camera.main.clearFlags = CameraClearFlags.SolidColor; Camera.main.backgroundColor = Color.black; }
+                    onLeave?.Invoke();
+                    onLeave = null;
+                    return;
+                }
                 if (leaving >= 0.7f) { Running = false; onLeave?.Invoke(); onLeave = null; }
                 return;
             }
@@ -259,7 +275,7 @@ namespace MazeOfKnight.Game.Visuals
                 case Screen_.Quit:
                     if (HollowMenus.Up || HollowMenus.Down || HollowMenus.Left || HollowMenus.Right) quitSel = 1 - quitSel;
                     if (HollowMenus.Back || HollowMenus.Accept && quitSel == 1) screen = Screen_.Main;
-                    else if (HollowMenus.Accept) Leave(() => { Application.Quit(); });
+                    else if (HollowMenus.Accept) { quitting = true; Leave(() => { Application.Quit(); }); }
                     break;
                 case Screen_.Extras:
                     if (HollowMenus.Accept || HollowMenus.Back) screen = Screen_.Main;
@@ -324,13 +340,13 @@ namespace MazeOfKnight.Game.Visuals
                     break;
                 case Screen_.Quit:
                     UiKit.Text(new Rect(0, y0 - 10 * s, W, 40 * s), "¿Salir del juego?", 30, TextAnchor.MiddleCenter, UiKit.Bone, true, alpha);
-                    HollowMenus.Divider(W / 2, y0 + 30 * s, 320 * s, alpha);
-                    HollowMenus.List(new[] { "Sí", "No" }, quitSel, W / 2, y0 + 70 * s, 46, 26, alpha);
+                    HollowMenus.Divider(W / 2, y0 + 44 * s, 320 * s, alpha);
+                    HollowMenus.List(new[] { "Sí", "No" }, quitSel, W / 2, y0 + 44 * s + HollowMenus.DividerHeight(320 * s) + 20 * s, 46, 26, alpha);
                     break;
                 case Screen_.Extras:
                     UiKit.Text(new Rect(0, y0 - 10 * s, W, 40 * s), "Extras", 30, TextAnchor.MiddleCenter, UiKit.Bone, true, alpha);
-                    HollowMenus.Divider(W / 2, y0 + 30 * s, 320 * s, alpha);
-                    UiKit.Text(new Rect(W / 2 - 360 * s, y0 + 70 * s, 720 * s, 220 * s),
+                    HollowMenus.Divider(W / 2, y0 + 44 * s, 320 * s, alpha);
+                    UiKit.Text(new Rect(W / 2 - 360 * s, y0 + 44 * s + HollowMenus.DividerHeight(320 * s) + 20 * s, 720 * s, 220 * s),
                         "Un homenaje a Knightmare II: The Maze of Galious (Konami, 1987), con sus salas, sus reglas y sus jefes, " +
                         "y a Hollow Knight (Team Cherry, 2017), con su arte, su música y su forma de jugar.\n\n" +
                         "Galious, Popolon y el reino de Grecia son de Konami. El Caballero, Hallownest y su arte son de Team Cherry.",
@@ -358,10 +374,12 @@ namespace MazeOfKnight.Game.Visuals
             GUI.DrawTexture(new Rect(W / 2 - 110 * s, H * 0.36f - 110 * s, 220 * s, 220 * s), HollowMenus.Blob);
             GUI.color = old;
             if (crest != null) UiKit.Icon(new Rect(W / 2 - 40 * s, H * 0.36f - 55 * s, 80 * s, 110 * s), crest, a * pulse);
+            // El texto, en medio de las dos filigranas.
+            float dh = HollowMenus.DividerHeight(360 * s), top = H * 0.52f + dh, bottom = H * 0.72f;
             HollowMenus.Divider(W / 2, H * 0.52f, 360 * s, a);
-            UiKit.Text(new Rect(W / 2 - 420 * s, H * 0.58f, 840 * s, 90 * s),
+            UiKit.Text(new Rect(W / 2 - 420 * s, top, 840 * s, bottom - top),
                 "Este juego guarda automáticamente al descansar en los bancos.\nNo cierres el juego mientras aparezca este símbolo.",
-                21, TextAnchor.UpperCenter, UiKit.Bone, false, a);
+                21, TextAnchor.MiddleCenter, UiKit.Bone, false, a);
             HollowMenus.Divider(W / 2, H * 0.72f, 360 * s, a);
         }
     }

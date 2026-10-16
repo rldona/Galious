@@ -63,6 +63,7 @@ namespace MazeOfKnight.Game.Visuals
                 case Page.Pad:
                 case Page.Keys:
                     bool pad = Current == Page.Pad;
+                    if (pad) Add("Vibración", YesNo(GameSettings.Vibration));
                     foreach (var d in Controls.All)
                         if ((pad ? d.Pad : d.Key) != null)
                             Add(d.Name, listening == d.Id ? "· · ·" : Controls.Label(Controls.PathOf(d.Id, pad)));
@@ -130,6 +131,12 @@ namespace MazeOfKnight.Game.Visuals
                 case Page.Pad:
                 case Page.Keys:
                     bool pad = Current == Page.Pad;
+                    if (label == "Vibración" && (accept || dx != 0))
+                    {
+                        GameSettings.Vibration = !GameSettings.Vibration;
+                        if (GameSettings.Vibration) Rumble.Pulse(0.4f, 0.6f, 0.2f);
+                        break;
+                    }
                     if (!accept) break;
                     if (label == "Restablecer") { Controls.Reset(pad); break; }
                     foreach (var d in Controls.All)
@@ -157,8 +164,8 @@ namespace MazeOfKnight.Game.Visuals
         {
             float s = UiKit.Scale;
             UiKit.Text(new Rect(cx - 400 * s, y - 10 * s, 800 * s, 40 * s), Title, 30, TextAnchor.MiddleCenter, UiKit.Bone, true, alpha);
-            HollowMenus.Divider(cx, y + 30 * s, 320 * s, alpha);
-            y += 70 * s;
+            HollowMenus.Divider(cx, y + 44 * s, 320 * s, alpha);
+            y += 44 * s + HollowMenus.DividerHeight(320 * s) + 24 * s;
             if (Current == Page.Brightness) { DrawBrightness(cx, y, alpha); y += 300 * s; }
             if (Current == Page.Pad) { DrawPad(cx, y, alpha); y += 250 * s; }
             var rows = Rows();

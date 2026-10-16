@@ -37,6 +37,7 @@ namespace MazeOfKnight.Game
         public static bool VSync { get => Get("vsync", 1) == 1; set => Set("vsync", value ? 1 : 0); }
         public static int FrameCap { get => Get("fps", 0); set => Set("fps", value); }
         public static int Brightness { get => Get("brillo", 50); set => Set("brillo", Mathf.Clamp(value, 0, 100)); }
+        public static bool Vibration { get => Get("vibracion", 1) == 1; set => Set("vibracion", value ? 1 : 0); }
 
         public static bool FullScreen
         {

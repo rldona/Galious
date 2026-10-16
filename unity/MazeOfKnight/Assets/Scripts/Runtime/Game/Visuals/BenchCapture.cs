@@ -127,6 +127,27 @@ namespace MazeOfKnight.Game.Visuals
                 yield return Shot("mapa_entintado");
                 inv.Toggle();
             }
+            // RemakeRules.HollowSlashes: el espadazo hacia arriba de pie y hacia abajo en el aire.
+            if (RemakeRules.HollowSlashes)
+            {
+                var bench = game.DebugBenches[0];
+                game.DebugGoToBench(bench);
+                yield return new WaitForSeconds(0.6f);
+                for (int i = 0; i < 10 && game.Motor.AttackTicks > 0; i++) game.Motor.Tick(new MotorInput());
+                game.Motor.Tick(new MotorInput());
+                game.Motor.Tick(new MotorInput { Attack = true, AimUp = true });
+                Debug.Log($"[Capturas] espadazo: dir {game.Motor.SlashDir}, ticks {game.Motor.AttackTicks}, {game.Motor.State}, pausa {game.player.Paused}, pose {game.Motor.Pose}, sentado {game.player.Seated}");
+                yield return null;
+                yield return Shot("espadazo_arriba");
+                yield return new WaitForSeconds(0.6f);
+                game.Motor.Place(game.World, game.Motor.Room, game.Motor.X, game.Motor.Y - 40);
+                for (int i = 0; i < 10 && game.Motor.AttackTicks > 0; i++) game.Motor.Tick(new MotorInput());
+                game.Motor.Tick(new MotorInput());
+                game.Motor.Tick(new MotorInput { Attack = true, AimDown = true });
+                Debug.Log($"[Capturas] espadazo abajo: dir {game.Motor.SlashDir}, ticks {game.Motor.AttackTicks}, {game.Motor.State}, pausa {game.player.Paused}, menú {game.MenuOpen}");
+                yield return null;
+                yield return Shot("espadazo_abajo");
+            }
             Application.Quit();
         }
     }

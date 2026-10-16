@@ -10,6 +10,8 @@ namespace MazeOfKnight.Game
     public struct MotorInput
     {
         public bool Left, Right, Up, Down, Attack;
+        // RemakeRules.HollowSlashes: hacia dónde se apunta (↑ / ↓ mantenidos) para el espadazo.
+        public bool AimUp, AimDown;
         // Pulsaciones nuevas ocurridas desde el tick anterior, aunque entre medias se soltara la tecla (la entrada se lee
         // en cada fotograma de Unity y el motor va a 30 ticks/s: sin esto se pierde el que suelta y vuelve a pulsar
         // entre dos ticks).
@@ -274,6 +276,7 @@ namespace MazeOfKnight.Game
             {
                 AttackTicks = P.SwordTicks;
                 AttackStartedThisTick = true;
+                SlashDir = !RemakeRules.HollowSlashes ? 0 : input.AimUp ? 1 : airborne && input.AimDown ? -1 : 0;
             }
 
             if (landY >= 0)
@@ -561,9 +564,34 @@ namespace MazeOfKnight.Game
 
         // Zona de la espada en píxeles de la sala (incluidos los extremos).
         public (int x0, int x1, int y0, int y1) SwordRect() =>
-            FacingLeft
+            SlashDir > 0 ? (X - RemakeRules.SlashHalf, X + RemakeRules.SlashHalf, Y - P.HeadHeight - RemakeRules.SlashReach, Y - P.HeadHeight + 2)
+            : SlashDir < 0 ? (X - RemakeRules.SlashHalf, X + RemakeRules.SlashHalf, Y - 2, Y + RemakeRules.SlashReach)
+            : FacingLeft
                 ? (X - P.SwordReach, X - P.SwordFrom, Y - P.SwordTop, Y - P.SwordBottom)
                 : (X + P.SwordFrom, X + P.SwordReach, Y - P.SwordTop, Y - P.SwordBottom);
+
+        // RemakeRules.HollowSlashes: dirección del último espadazo (1 arriba, −1 abajo, 0 delante).
+        public int SlashDir { get; private set; }
+
+        // El espadazo hacia abajo acertó: rebota hacia arriba, como en Hollow Knight.
+        public void Bounce()
+        {
+            if (State != MotorState.Jump && State != MotorState.Fall) return;
+            State = MotorState.Jump;
+            riseIndex = RemakeRules.BounceRise;
+            apexTicks = 0;
+            cutDone = true;          // no se corta al soltar el salto
+            hitWall = false;
+        }
+
+        // ↑ engancharía una escalera aquí (para que ↑ suba escaleras aunque ya no salte).
+        public bool LadderAbove()
+        {
+            int col = X >> 3, py = Y - 1;
+            bool at(int c) => world.Ladder(Room, c * 8, py);
+            int left = at(col - 1) && at(col) ? col - 1 : at(col) && at(col + 1) ? col : -1;
+            return left >= 0 && System.Math.Abs(left * 8 + 8 - X) <= 4;
+        }
 
         void TickKnockback()
         {

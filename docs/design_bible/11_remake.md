@@ -109,6 +109,14 @@ En el original el mapa de cada mundo es un objeto escondido (0x0A) y el menú pi
 
 No cambia ninguna regla del juego. Todo se puede jugar con mando: moverse con el stick o la cruceta, A saltar, X atacar, B concentrarse, Y el arma, LB la Biblia (Ctrl en el teclado), Select el inventario, Start la pausa y RB un **selector de letras** para escribir las palabras que en el original se teclean (las de los jefes y UMBRELLA con la Daga; `Visuals/WordPad`). Los botones se cambian en Opciones (`Controls`, en PlayerPrefs); moverse, ↑ para saltar con el teclado, Esc y Start son fijos. Los menús responden también al stick. **Opciones**, como las de Hollow Knight (`GameSettings`, `Visuals/OptionsMenu`): Audio (volumen general, sonido y música de 0 a 10; la música y los efectos salen del mismo chip y el efecto ocupa el canal C, que mientras suena va con el volumen de los efectos: con los dos al máximo suena como el original), Vídeo (resolución, pantalla completa, sincronía vertical, límite de fotogramas), Brillo (exposición del posproceso, con una escena de muestra), Mando (el dibujo del mando de Hollow Knight y sus botones) y Teclado. Salir del juego y salir al menú principal piden confirmación. Al arrancar, el aviso de Hollow Knight de que el juego guarda solo (en los bancos). Test: `ControlsTests`.
 
+## RemakeRules.HollowSlashes (activado)
+
+En el original la espada solo golpea hacia delante y ↑ salta. El usuario pidió los espadazos de Hollow Knight: con ↑ pulsado el golpe va hacia arriba (de pie o en el aire) y con ↓ en el aire hacia abajo; el de abajo que acierta (enemigo, escudo o piedra) hace rebotar al Caballero hacia arriba, como el "pogo" de Hollow Knight. Para apuntar arriba sin saltar, saltar pasa a su propio botón (A en el mando y Z en el teclado, cambiables en Opciones) y ↑ solo apunta y sube escaleras (si hay una justo encima, ↑ la coge, como antes). Las cajas del golpe: 10 px a cada lado del centro y 16 de alto, encima de la cabeza o debajo de los pies; las paredes que se rompen solo se golpean de frente. Dibujo: UpSlash y DownSlash del Caballero y sus tajos. Test: `PlayerMotorTests.HollowSlashesGoUpOnTheGroundDownInTheAirAndBounce`.
+
+## Sonidos de golpe y vibración
+
+Con la espada (o un arma) suenan los efectos del original al acertar: 0x1E al enemigo, 0x27 al jefe, 0x20 al morir y 0x1D al chocar con un escudo; antes no sonaba nada al golpear enemigos. Con mando, vibración como en Hollow Knight (`Rumble`, se quita en Opciones > Mando): pulsos al golpear enemigos, piedras, paredes o escudos, al matar, al recibir daño y al curarse, y un zumbido que crece mientras se concentra.
+
 ## Música del menú principal
 
 El menú principal suena con el tema del título de Hollow Knight (Title, importado en local por `tools/hollow/musica.py`), que entra tras el aviso y se apaga al salir, con el volumen de música de Opciones. La música de la partida sigue siendo la del original.

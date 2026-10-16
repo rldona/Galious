@@ -114,7 +114,10 @@ namespace MazeOfKnight.Game
             Enemies.Spawned += ShowEnemy;
             Enemies.HasItem = t => Collected.Contains(t);
             Enemies.Killed += e => { if (enemyViews.TryGetValue(e, out var v)) v.enabled = false; Say("Enemigo derrotado"); };
-            Enemies.Clinked += _ => Say("Clinc");
+            Enemies.Clinked += _ => { strikeHits++; Sound.Effect(0x1D); Rumble.Pulse(0.2f, 0.5f, 0.08f); Say("Clinc"); };
+            // Golpes con la espada o las armas (docs/player.md): 0x1E al enemigo, 0x27 al jefe y 0x20 al morir.
+            Enemies.Hit += e => { if (motor != null && motor.AttackStartedThisTick) strikeHits++; if (e.Hp > 0) { Sound.Effect(e is global::MazeOfKnight.Game.Enemies.Boss ? 0x27 : 0x1E); Rumble.Pulse(0.3f, 0.6f, 0.1f); } };
+            Enemies.Killed += _ => { Sound.Effect(0x20); Rumble.Pulse(0.45f, 0.75f, 0.14f); };
             var weaponsJson = Resources.Load<TextAsset>("Weapons");
             Weapons = new WeaponSystem(weaponsJson != null ? JsonUtility.FromJson<WeaponsData>(weaponsJson.text) : null);
             Weapons.Spawned += ShowProjectile;
@@ -285,7 +288,7 @@ namespace MazeOfKnight.Game
             World = new RoomWorld(map.rooms.Select(r => r.room));
             rocks = new Rocks(name, World, brokenRocks);
             rocks.Broken += OnRockBroken;
-            rocks.Hit += r => { Visuals.HitEffects.RockHit(r.room, r.x, r.y, r.hp <= 0); Sound.Effect(0x1E); Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}"); };
+            rocks.Hit += r => { strikeHits++; Visuals.HitEffects.RockHit(r.room, r.x, r.y, r.hp <= 0); Sound.Effect(0x1E); Rumble.Pulse(0.35f, 0.5f, 0.1f); Say($"Piedra: {Mathf.Max(r.hp, 0)}/{OriginalPhysics.RockHp}"); };
             keyDoors = new KeyDoors(name, World, openedDoors);
             keyDoors.Changed += d => mapView.ShowKeyDoor(d.room, d.x, d.y, d.height);
             keyDoors.Opened += d => { Sound.Effect(d.cls == 1 ? 0x22 : 0x21); Say(d.cls == 1 ? "Puerta abierta (se cerrará detrás)" : "Puerta abierta"); };
@@ -496,7 +499,7 @@ namespace MazeOfKnight.Game
                 if (bench.Map != mapName) GoToMap(bench.Map);
                 motor.Place(World, World.Room(bench.Room), bench.X, bench.Y);
                 player.Seated = true;
-                SetPose("despertar", 0.8f, "sentado");
+                SetPose("sentado");
             }
             else
                 motor.Place(World, World.Room(startRoom), startX, startY);
@@ -585,10 +588,13 @@ namespace MazeOfKnight.Game
                         !motor.InLiquid && Vitality[c] + PendingVitality[c] < MaxVitality[c];
             int healed = Soul.Tick(player.FocusHeld, able);
             player.Focusing = Soul.Focusing;
+            // Concentrándose: un zumbido que crece hasta curar.
+            if (Soul.Focusing) Rumble.Hold(0.05f + 0.25f * Soul.FocusProgress, 0.1f + 0.2f * Soul.FocusProgress);
             if (healed > 0)
             {
                 PendingVitality[c] = Mathf.Min(PendingVitality[c] + healed, MaxVitality[c] - Vitality[c]);
                 Sound.Effect(0x2E);
+                Rumble.Pulse(0.6f, 0.8f, 0.22f);
                 healPoseUntil = Time.time + 0.4f;
             }
             if (motor.Pose == null || motor.Pose == "concentrar" || motor.Pose == "curarse")
@@ -634,7 +640,9 @@ namespace MazeOfKnight.Game
             if (motor.AttackStartedThisTick)
             {
                 Sound.Effect(0x13);
+                int before = strikeHits;
                 Enemies.Strike(motor, Collected);
+                strikeHitThisSwing = strikeHits != before;
             }
             if (player.ConsumeFire() && !AttractRunning)
                 FireWeapon();
@@ -649,8 +657,13 @@ namespace MazeOfKnight.Game
             }
             if (motor.AttackStartedThisTick)
             {
+                int before = strikeHits;
                 rocks.Strike(motor, World, Collected.Contains(WeaponSystem.ItemRing));
+                if (strikeHits != before) strikeHitThisSwing = true;
+                if (SwordTouchesWall()) Rumble.Pulse(0.15f, 0.35f, 0.07f);
                 roomObjects.Strike(motor, Collected);
+                // RemakeRules.HollowSlashes: el espadazo hacia abajo que acierta hace rebotar.
+                if (motor.SlashDir < 0 && strikeHitThisSwing) motor.Bounce();
             }
             roomObjects.Tick(motor, Collected);
             int keysBefore = Keys;
@@ -752,6 +765,19 @@ namespace MazeOfKnight.Game
         // Solo para las capturas automáticas (Visuals/CharacterCapture): que no se acabe la partida mientras se espera.
         public bool DebugInvulnerable;
 
+        int strikeHits;              // aciertos de la espada (enemigos, escudos, piedras), para el rebote
+        bool strikeHitThisSwing;
+
+        // La espada toca roca al empezar el golpe (para la vibración de chocar con la pared).
+        bool SwordTouchesWall()
+        {
+            var (x0, x1, y0, y1) = motor.SwordRect();
+            for (int y = y0; y < y1; y += 4)
+                for (int x = x0; x <= x1; x += 4)
+                    if (x >= 0 && x < 256 && World.Solid(motor.Room, x, y)) return true;
+            return false;
+        }
+
         void Hurt(int damage, int dir, string message)
         {
             if (HurtTicks > 0 || DebugInvulnerable)
@@ -759,6 +785,7 @@ namespace MazeOfKnight.Game
             // Sentado en un banco (RemakeRules.HollowBenches) no se recibe daño: los que andan pueden llegar hasta él.
             if (player != null && player.Seated)
                 return;
+            Rumble.Pulse(0.7f, 0.9f, 0.25f);
             int c = (int)motor.Character;
             PendingVitality[c] -= damage;
             if (Vitality[c] + PendingVitality[c] < 6) Sound.Effect(0x2A);   // aviso de vitalidad baja (b03:B3DC)
@@ -1088,7 +1115,7 @@ namespace MazeOfKnight.Game
                 if (d.benchMap != "castle") GoToMap(d.benchMap);
                 motor.Place(World, World.Room(d.benchRoom), d.benchX, d.benchY);
                 player.Seated = true;
-                SetPose("despertar", 0.8f, "sentado");
+                SetPose("sentado");          // directamente sentado (lo pidió el usuario: el despertar se veía de pie)
                 Say("Partida cargada");
                 return true;
             }

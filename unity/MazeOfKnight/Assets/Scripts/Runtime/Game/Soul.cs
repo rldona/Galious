@@ -11,6 +11,7 @@ namespace MazeOfKnight.Game
         public int Value;
         public int FocusTick { get; private set; }     // ticks concentrándose (0 = no)
         public bool Focusing => FocusTick > 0;
+        public float FocusProgress => FocusTick / (float)FocusTicks;   // 0 → 1 hasta curar
 
         public void Gain(bool vase) => Value = System.Math.Min(Max, Value + (vase ? HitGain * 2 : HitGain));
 

@@ -504,6 +504,42 @@ namespace MazeOfKnight.Tests
         // RemakeRules.HollowSwim: cae al agua y se queda flotando con los pies SwimDepth px bajo la superficie (y = 128);
         // nada a la mitad de velocidad y salta como fuera del agua (42 px con Aphrodite, sin la lentitud del líquido).
         [Test]
+        public void HollowSlashesGoUpOnTheGroundDownInTheAirAndBounce()
+        {
+            bool before = RemakeRules.HollowSlashes;
+            RemakeRules.HollowSlashes = true;
+            try
+            {
+                var room = FlatRoom();
+                int floor = OriginalPhysics.RoomTopPx + 11 * 8;
+                var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 120, floor);
+                motor.Tick(new MotorInput { Attack = true, AimUp = true });
+                Assert.AreEqual(1, motor.SlashDir, "de pie, con ↑: hacia arriba");
+                Assert.AreEqual(MotorState.Ground, motor.State, "y no salta");
+                var (_, _, y0, y1) = motor.SwordRect();
+                Assert.Less(y1, floor - OriginalPhysics.HeadHeight + 3, "por encima de la cabeza");
+                for (int t = 0; t < 8; t++) motor.Tick(new MotorInput());
+                // ↓ en el suelo no cambia el golpe: hacia delante.
+                motor.Tick(new MotorInput { Attack = true, AimDown = true });
+                Assert.AreEqual(0, motor.SlashDir);
+                for (int t = 0; t < 8; t++) motor.Tick(new MotorInput());
+                // En el aire, con ↓: hacia abajo, y al acertar rebota.
+                motor.Place(new RoomWorld(new[] { room }), room, 120, floor - 40);
+                motor.Tick(new MotorInput());
+                Assert.AreEqual(MotorState.Fall, motor.State);
+                motor.Tick(new MotorInput { Attack = true, AimDown = true });
+                Assert.AreEqual(-1, motor.SlashDir);
+                var (_, _, dy0, _) = motor.SwordRect();
+                Assert.GreaterOrEqual(dy0, motor.Y - 2, "por debajo de los pies");
+                int yBefore = motor.Y;
+                motor.Bounce();
+                for (int t = 0; t < 3; t++) motor.Tick(new MotorInput());
+                Assert.Less(motor.Y, yBefore, "rebota hacia arriba");
+            }
+            finally { RemakeRules.HollowSlashes = before; }
+        }
+
+        [Test]
         public void HollowSwimFloatsSwimsAndJumpsOut()
         {
             bool before = RemakeRules.HollowSwim;

@@ -53,6 +53,9 @@ namespace MazeOfKnight.Game.Visuals
         // Colisión de la sala (RoomWorld.Solid): para apoyar en el suelo a los que andan.
         public System.Func<RoomModel, int, int, bool> Solid;
         public const int FloorReach = 6;
+        // Claves que, sin suelo debajo y con techo encima, se pintan colgando (del revés).
+        static readonly HashSet<string> Hanging = new HashSet<string> { "pinchos" };
+        readonly HashSet<(int, int)> loggedHanging = new HashSet<(int, int)>();
 
         HollowEnemyArt(ArtLibrary lib) => this.lib = lib;
 
@@ -147,14 +150,25 @@ namespace MazeOfKnight.Game.Visuals
             // Los que andan, con los pies en el suelo: el primer suelo bajo el centro de la caja, dentro de ella o hasta
             // FloorReach px por debajo (la caja del original puede bajar del suelo o quedarse por encima, como la del Bony
             // Dragon, 3 px). Si no hay (salta o cae), el borde de abajo de la caja.
+            bool hanging = false;
             if (info.Feet && Solid != null)
             {
                 int x = Mathf.RoundToInt((cx0 + cx1) / 2f);
+                bool floor = false;
                 for (int y = Mathf.RoundToInt((cy0 + cy1) / 2f); y < cy1 + FloorReach; y++)
-                    if (Solid(e.Room, x, y)) { feet = y; break; }
+                    if (Solid(e.Room, x, y)) { feet = y; floor = true; break; }
+                // Los que cuelgan del techo (los pinchos que salen hacia abajo): sin suelo debajo y con techo encima, del
+                // revés y pegados al techo.
+                if (!floor && Hanging.Contains(info.Key))
+                    for (int y = Mathf.RoundToInt((cy0 + cy1) / 2f); y > cy0 - FloorReach; y--)
+                        if (Solid(e.Room, x, y)) { feet = y + 1; hanging = true; break; }
             }
             var at = RoomCoords.PixelToWorld(e.Room, 0, 0) +
                      new Vector2((cx0 + cx1) / 2f, -(info.Feet ? feet : (cy0 + cy1) / 2f)) / RoomCoords.PixelsPerUnit;
+            if (hanging && loggedHanging.Add((e.Room.id, (int)e.X)))
+                Debug.Log($"[HollowEnemyArt] {info.Key} colgando del techo en la sala {e.Room.id} ({e.X:0}, techo y = {feet:0})");
+            if (hanging)
+                return (new Vector3(at.x, at.y, 0), new Vector3(e.FacingLeft ? -s : s, -s, 1), Quaternion.identity);
             if (info.Spin is float spin && states.TryGetValue(e, out var st))
                 return (new Vector3(at.x, at.y, 0), new Vector3(s, s, 1), Quaternion.Euler(0, 0, st.Angle - spin));
             return (new Vector3(at.x, at.y, 0), new Vector3(e.FacingLeft ? -s : s, s, 1), Quaternion.identity);

@@ -33,12 +33,15 @@ namespace MazeOfKnight.Game.Visuals
             string k = $"{map}|{inked}|{count}";
             if (tex != null && key == k) return tex;
             key = k;
+            // Solo el trozo con salas dibujadas (las visitadas, o todas con el mapa): así se ve grande y en medio.
             int minX = int.MaxValue, maxX = int.MinValue, minY = int.MaxValue, maxY = int.MinValue;
             foreach (var r in world.Rooms)
             {
+                if (!inked && !visited.Contains((map, r.id))) continue;
                 minX = Mathf.Min(minX, r.gridX); maxX = Mathf.Max(maxX, r.gridX);
                 minY = Mathf.Min(minY, r.gridY); maxY = Mathf.Max(maxY, r.gridY);
             }
+            if (minX > maxX) { minX = maxX = minY = maxY = 0; }
             MinX = minX; MaxY = maxY;
             int w = (maxX - minX + 1) * RoomW, h = (maxY - minY + 1) * RoomH;
             if (tex == null || tex.width != w || tex.height != h)

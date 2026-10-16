@@ -129,7 +129,12 @@ namespace MazeOfKnight.Game
                 return;
             }
             var v = move.ReadValue<Vector2>();
-            bool up = v.y > 0.5f || jump.IsPressed(), down = v.y < -0.5f;
+            bool aimUp = v.y > 0.5f, aimDown = v.y < -0.5f;
+            // RemakeRules.HollowSlashes: ↑ apunta (y sube escaleras) y se salta con Saltar; si no, ↑ salta, como el original.
+            bool up = RemakeRules.HollowSlashes
+                ? jump.IsPressed() || aimUp && (Motor.State == MotorState.Ladder || Motor.LadderAbove())
+                : aimUp || jump.IsPressed();
+            bool down = aimDown;
             if (up && !upWasDown) upLatch = true;
             if (down && !downWasDown) downLatch = true;
             upWasDown = up;
@@ -157,6 +162,8 @@ namespace MazeOfKnight.Game
                 UpPressed = upLatch,
                 DownPressed = downLatch,
                 Attack = attack.IsPressed() || attackLatch,
+                AimUp = aimUp,
+                AimDown = aimDown,
             };
             accumulator += Time.deltaTime;
             float tick = 1f / OriginalPhysics.TicksPerSecond;
@@ -186,6 +193,21 @@ namespace MazeOfKnight.Game
         {
             Slash.flipX = false;
             Slash.transform.localScale = new Vector3(left ? -1 : 1, 1, 1);
+        }
+
+        static Sprite[,] tajos;
+        static Sprite Tajo(int dir, int frame)
+        {
+            if (tajos == null)
+            {
+                tajos = new Sprite[2, 2];
+                for (int f = 0; f < 2; f++)
+                {
+                    tajos[0, f] = Resources.Load<Sprite>($"Hollow/tajos/tajo_arriba_{f:00}");
+                    tajos[1, f] = Resources.Load<Sprite>($"Hollow/tajos/tajo_abajo_{f:00}");
+                }
+            }
+            return tajos[dir > 0 ? 0 : 1, frame];
         }
 
         void UpdateVisual()
@@ -223,6 +245,18 @@ namespace MazeOfKnight.Game
                 else if (shieldOverlay != null) shieldOverlay.enabled = false;
                 var drawnSlash = Slash != null ? Art.DrawnSlash(Motor) : null;
                 if (Slash != null && slashDefault == null && drawnSlash == null) slashDefault = Slash.sprite;
+                // RemakeRules.HollowSlashes: el tajo de arriba o abajo de Hollow Knight, en medio de la zona que golpea.
+                if (Slash != null && Motor.SlashDir != 0 && Motor.AttackTicks > 1 && Tajo(Motor.SlashDir, Motor.AttackTicks >= 3 ? 0 : 1) is Sprite tajo)
+                {
+                    var (tx0, tx1, ty0, ty1) = Motor.SwordRect();
+                    var at = RoomCoords.PixelToWorld(Motor.Room, (tx0 + tx1 + 1) / 2, (ty0 + ty1) / 2);
+                    Slash.enabled = true;
+                    Slash.sprite = tajo;
+                    Slash.transform.position = new Vector3(at.x, at.y, 0);
+                    FaceSlash(Motor.FacingLeft);
+                    Slash.color = Color.white;
+                    return;
+                }
                 if (drawnSlash != null)
                 {
                     // El tajo dibujado va en el lienzo del cuerpo: mismo sitio y mismo pivote.

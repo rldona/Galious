@@ -82,6 +82,15 @@ namespace MazeOfKnight.Game
         // visitadas; con él (comprado o encontrado), el mapa entintado entero, con los bancos y dónde estás.
         public static bool HollowMaps = true;             // activado: lo ha pedido el usuario
 
+        // Original: la espada solo golpea hacia delante y ↑ salta. Remake (lo pidió el usuario): como en Hollow Knight,
+        // con ↑ pulsado el espadazo va hacia arriba (de pie o en el aire) y con ↓ en el aire hacia abajo; si el de abajo
+        // acierta (enemigo, piedra, escudo o pinchos) el Caballero rebota hacia arriba. Para poder apuntar arriba sin
+        // saltar, saltar va con su propio botón (A en el mando, Z en el teclado, Controls) y ↑ solo apunta y sube
+        // escaleras. Cajas del golpe: SlashHalf a cada lado del centro y SlashReach de alto.
+        public static bool HollowSlashes = true;          // activado: lo ha pedido el usuario
+        public const int SlashHalf = 10, SlashReach = 16;
+        public const int BounceRise = 5;                  // entrada de OriginalPhysics.RiseTable desde la que rebota
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

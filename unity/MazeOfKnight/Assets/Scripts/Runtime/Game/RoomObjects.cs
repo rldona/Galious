@@ -178,6 +178,7 @@ namespace MazeOfKnight.Game
         {
             if (motor.Character == Character.Aphrodite && !collected.Contains(ItemPendant))
                 return;
+            if (motor.SlashDir != 0) return;   // RemakeRules.HollowSlashes: hacia arriba o abajo no golpea la pared de delante
             foreach (var b in breakables)
             {
                 if (b.broken || b.room != motor.Room || motor.Y <= b.y || motor.Y > b.y + 24)

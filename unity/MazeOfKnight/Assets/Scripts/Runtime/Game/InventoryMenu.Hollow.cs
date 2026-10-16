@@ -278,11 +278,14 @@ namespace MazeOfKnight.Game
                 UiKit.Text(new Rect(r.x, r.yMax - 70 * s, r.width, 60 * s), e.Use, 16, TextAnchor.LowerCenter, UiKit.Gold);
         }
 
+        // Una celda: el hueco del amuleto, más pequeño que el objeto, y el objeto encima, centrado.
         void Cell(Rect r, int type, float alpha = 1, bool emptySlot = false)
         {
-            if (emptySlot && slot != null) UiKit.Icon(r, slot, 0.8f);
-            if (type != 0) UiKit.Icon(new Rect(r.x + r.width * 0.12f, r.y + r.height * 0.12f, r.width * 0.76f, r.height * 0.76f), IconOf(Shown(type)), alpha);
+            if (emptySlot && slot != null) UiKit.Icon(Inset(r, 0.72f), slot, 0.7f);
+            if (type != 0) UiKit.Icon(Inset(r, 0.96f), IconOf(Shown(type)), alpha);
         }
+
+        static Rect Inset(Rect r, float k) => new Rect(r.center.x - r.width * k / 2, r.center.y - r.height * k / 2, r.width * k, r.height * k);
 
         void DrawInventory(Rect body)
         {
@@ -474,7 +477,8 @@ namespace MazeOfKnight.Game
             bool inked = game.HasMapOf(world);
             var tex = HandMap.Get(map, rw, game.VisitedRooms, inked);
             var area = new Rect(body.x, body.y + 64 * s, body.width, body.height - 110 * s);
-            float k = Mathf.Min(area.width / tex.width, area.height / tex.height);
+            // Lo más grande que quepa, sin que una sala pase de un tercio del ancho (con pocas salas visitadas).
+            float k = Mathf.Min(Mathf.Min(area.width / tex.width, area.height / tex.height), area.width / 3f / HandMap.RoomW);
             var r = new Rect(area.center.x - tex.width * k / 2, area.center.y - tex.height * k / 2, tex.width * k, tex.height * k);
             GUI.DrawTexture(r, tex);
             Rect At(RoomModel room, int x, int y, float size)
