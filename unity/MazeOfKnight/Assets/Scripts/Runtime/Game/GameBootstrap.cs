@@ -121,6 +121,7 @@ namespace MazeOfKnight.Game
             Weapons.PlayerHit += (damage, dir) => Hurt(Inventory.ReduceDamage(damage), dir, $"-{damage} (mina)");
             var itemsJson = Resources.Load<TextAsset>("Items");
             Inventory = new Inventory(itemsJson != null ? JsonUtility.FromJson<ItemsData>(itemsJson.text) : null, Collected);
+            Inventory.BossesDefeated = () => Bosses != null ? Bosses.Defeated.Count : 0;
             Doors = new WorldDoors(Inventory.UnlockedDoors, Inventory.OpenedDoors);
             Doors.Stage += (w, rows) =>
             {
@@ -148,6 +149,7 @@ namespace MazeOfKnight.Game
             // El efecto de descansar en un banco.
             if (RemakeRules.HollowBenches) gameObject.AddComponent<Visuals.BenchRest>().game = this;
             if (RemakeRules.HollowSoul) gameObject.AddComponent<Visuals.FocusFx>().game = this;
+            if (RemakeRules.HollowCharms && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.ItemTutorial>().game = this;
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
@@ -209,7 +211,7 @@ namespace MazeOfKnight.Game
         Visuals.HollowMainMenu mainMenu;
         public bool AttractRunning => attract != null && attract.Running || mainMenu != null && mainMenu.Running;
         // Algún menú abierto (inventario o santuario): el de pausa no se abre encima.
-        public bool MenuOpen => GetComponent<InventoryMenu>()?.Open == true || shrineScreen != null && shrineScreen.Open;
+        public bool MenuOpen => GetComponent<InventoryMenu>() is InventoryMenu im && (im.Open || im.JustClosed) || GetComponent<Visuals.ItemTutorial>()?.Open == true || shrineScreen != null && shrineScreen.Open;
         // Presentación, demo o final: ni menú ni teclas de depuración.
         public bool Busy => AttractRunning || player != null && player.Demo != null || EndingRunning;
         public bool skipAttract;     // para probar en el editor: empieza directamente la partida
@@ -644,7 +646,7 @@ namespace MazeOfKnight.Game
             TickSteppingStones();
             if (mapName == "castle")
             {
-                var spot = castleItems.Tick(motor, firedEvents.Contains((mapName, motor.Room.id)), Bosses.Defeated.Contains, Collected.Contains);
+                var spot = castleItems.Tick(motor, firedEvents.Contains((mapName, motor.Room.id)), Bosses.Defeated.Contains, Inventory.Owns);
                 if (spot != null) { SpawnItem(motor.Room, spot.Value.Type, spot.Value.X, spot.Value.Y); Sound.Effect(0x2E); Say("¡Ha aparecido algo!"); }
             }
             for (int i = looseItems.Count - 1; i >= 0; i--)
@@ -656,6 +658,7 @@ namespace MazeOfKnight.Game
                     motor.Y - OriginalPhysics.HeadHeight > iy + 15 || motor.Y <= iy)
                     continue;
                 Inventory.Add(type);
+                Learn(type);
                 Destroy(go);
                 looseItems.RemoveAt(i);
                 Jingle(0x85);
@@ -673,6 +676,7 @@ namespace MazeOfKnight.Game
                     continue;
                 takenItems.Add((mapName, room.id));
                 Inventory.Add(room.item.type);
+                Learn(room.item.type);
                 if (SelectedWeapon == 0 && room.item.type >= 1 && room.item.type <= 6)
                     SelectedWeapon = room.item.type;
                 if (room.item.type == Inventory.GreatKey)
@@ -835,6 +839,7 @@ namespace MazeOfKnight.Game
                     Destroy(keyView);
                     keyView = null;
                     Inventory.Add(Inventory.GreatKey);
+                    Learn(Inventory.GreatKey);
                     Doors.KeyTaken(Inventory.CurrentWorld);
                     if (Inventory.GreatKeyBoost(Vitality, MaxVitality, motor.Character))
                         Say($"Gran Llave: vitalidad máxima {MaxVitality[(int)motor.Character]}");
@@ -894,13 +899,13 @@ namespace MazeOfKnight.Game
                 if (s.state == 16)
                     enter = downPressed && motor.State == MotorState.Ground && motor.Room.id == s.room
                             && motor.X >= e.xMin && motor.X <= e.xMax && motor.Y >= e.yMin && motor.Y <= e.yMax
-                            && (e.needsItem == 0 || Inventory.Has(e.needsItem))
+                            && (e.needsItem == 0 || Inventory.Owns(e.needsItem))
                             && !rocks.All.Any(r => !r.broken && r.room == motor.Room && r.x == e.godX && r.y == e.godY);
                 else
                     enter = motor.Room.id == e.fromRoom && motor.Y < e.exitBelowY && System.Math.Abs(motor.X - e.x) <= 8
                             && World.Ladder(motor.Room, e.x, OriginalPhysics.RoomTopPx + 2);
                 if (!enter) continue;
-                if (s.state == 16 && s.entry.needsItem != 0 && !Inventory.Has(s.entry.needsItem)) return false;
+                if (s.state == 16 && s.entry.needsItem != 0 && !Inventory.Owns(s.entry.needsItem)) return false;
                 var visit = new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys, Lives, ResurrectionCredit, motor.Character);
                 musicWanted = 0x8D;
                 SetPaused(true);
@@ -923,6 +928,9 @@ namespace MazeOfKnight.Game
         public void LeaveShrine(ShrineVisit v)
         {
             Arrows = v.Arrows; Coins = v.Coins; Keys = v.Keys;
+            // Lo comprado: su lámina al salir.
+            foreach (var t in new List<int>(Collected)) if (!SeenTutorials.Contains(Inventory.CharmOf(t))) Learn(t);
+            foreach (var t in new List<int>(Inventory.OwnedCharms)) if (!SeenTutorials.Contains(Inventory.CharmOf(t))) Learn(t);
             if (v.Revived)
             {
                 // El otro personaje recupera 1 vida, la vitalidad al máximo y la experiencia a 0 (suena 0x30).
@@ -987,6 +995,8 @@ namespace MazeOfKnight.Game
                 firedEvents = SaveData.Pack(firedEvents),
             };
             d.soul = Soul.Value;
+            d.charms = new List<int>(Inventory.OwnedCharms);
+            d.tutorials = new List<int>(SeenTutorials);
             if (lastBench is Benches.Bench lb) { d.benchMap = lb.Map; d.benchRoom = lb.Room; d.benchX = lb.X; d.benchY = lb.Y; }
             if (!string.IsNullOrEmpty(shadeMap)) { d.shadeMap = shadeMap; d.shadeRoom = shadeRoom; d.shadeX = shadeX; d.shadeY = shadeY; d.shadeGeo = shadeGeo; }
             for (int c = 0; c < 2; c++) d.vitality[c] = Mathf.Clamp(Vitality[c] + PendingVitality[c], 0, MaxVitality[c]);
@@ -1001,6 +1011,11 @@ namespace MazeOfKnight.Game
             if (d == null) return false;
             Collected.Clear();
             Collected.AddRange(d.items);
+            Inventory.AdoptCharms(d.charms);
+            SeenTutorials.Clear();
+            SeenTutorials.UnionWith(d.tutorials);
+            foreach (var t in Collected) SeenTutorials.Add(Inventory.CharmOf(t));
+            foreach (var t in d.charms) SeenTutorials.Add(Inventory.CharmOf(t));
             Inventory.RestoreWorldItems(d.worldItems);
             Inventory.OpenedDoors.Clear();
             foreach (var w in d.openedWorlds) Inventory.OpenedDoors.Add(w);
@@ -1056,6 +1071,18 @@ namespace MazeOfKnight.Game
         }
 
         // ---------- inventario ----------
+
+        // Láminas de tutorial (Visuals/ItemTutorial): la primera vez que se recoge cada objeto (no los recursos).
+        public readonly HashSet<int> SeenTutorials = new HashSet<int>();
+        public event System.Action<int> Learned;
+
+        public void Learn(int type)
+        {
+            if (type < 1 || type > 0x2C) return;
+            if (SeenTutorials.Add(Inventory.CharmOf(type)) || type == 0x2B || type == 0x2C) Learned?.Invoke(type);
+        }
+
+        public bool Seated => player != null && player.Seated;
 
         public bool CanOpenMenu => motor != null && !Busy && !shrineScreen.Open && motor.State != MotorState.Knockback && motor.State != MotorState.Carried && motor.Stunned == 0;
 

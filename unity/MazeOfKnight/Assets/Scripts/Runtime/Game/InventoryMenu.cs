@@ -9,7 +9,7 @@ namespace MazeOfKnight.Game
     // (↑ ↓); ← → cambia de personaje o de arma; F1 cierra y aplica. Return usa el Angel Ring; 1–9, el Ala (en el
     // castillo). Se dibuja sobre la pantalla del original, de 256 × 192 px. [I] Los iconos son provisionales: cuadros
     // con el nombre abreviado.
-    public class InventoryMenu : MonoBehaviour
+    public partial class InventoryMenu : MonoBehaviour
     {
         public GameBootstrap game;
         public bool Open { get; private set; }
@@ -23,6 +23,7 @@ namespace MazeOfKnight.Game
 
         public void Toggle()
         {
+            if (UseHollow) { if (!Open) HollowOpen(); else HollowClose(); return; }
             if (!Open) OpenMenu();
             else CloseMenu();
         }
@@ -60,6 +61,7 @@ namespace MazeOfKnight.Game
         {
             var kb = Keyboard.current;
             if (kb == null || game == null || game.Inventory == null) return;
+            if (UseHollow) { HollowUpdate(); return; }
             if (kb.f1Key.wasPressedThisFrame || kb.iKey.wasPressedThisFrame && !game.TypingWord || Gamepad.current?.startButton.wasPressedThisFrame == true)
             {
                 Toggle();
@@ -104,6 +106,7 @@ namespace MazeOfKnight.Game
         void OnGUI()
         {
             if (!Open) return;
+            if (UseHollow) { HollowGUI(); return; }
             white ??= Texture2D.whiteTexture;
             float scale = Mathf.Min(Screen.width / 256f, Screen.height / 192f);
             float ox = (Screen.width - 256 * scale) / 2, oy = (Screen.height - 192 * scale) / 2;

@@ -48,6 +48,38 @@ namespace MazeOfKnight.Game.Visuals
             yield return new WaitForSeconds(4f);
             var pause = FindAnyObjectByType<HollowPauseMenu>();
             if (pause != null) { pause.ShowNow(); yield return new WaitForSeconds(0.4f); yield return Shot("menu_pausa"); }
+            if (pause != null) pause.HideNow();
+            // Inventario, amuletos y una lámina, con objetos de prueba.
+            var game = FindAnyObjectByType<GameBootstrap>();
+            var inv = game != null ? game.GetComponent<InventoryMenu>() : null;
+            if (inv != null && RemakeRules.HollowCharms)
+            {
+                foreach (int t in new[] { 1, 2, 3, 5, 0x0D, 0x13, 0x15, 0x16, 0x20, 0x27, 0x2A, 0x0E, 0x11, 0x19, 0x1B, 0x25, 0x28, 0x2B })
+                    game.Inventory.Add(t);
+                game.SelectedWeapon = 1;
+                game.Arrows = 120; game.Coins = 340; game.Keys = 3;
+                yield return new WaitForSeconds(0.3f);
+                inv.ShowTab(0);
+                yield return new WaitForSeconds(0.4f);
+                yield return Shot("inventario");
+                inv.ShowTab(1);
+                yield return new WaitForSeconds(0.4f);
+                yield return Shot("amuletos");
+                inv.ShowTab(2);
+                yield return new WaitForSeconds(0.4f);
+                yield return Shot("mapa");
+                inv.Toggle();
+                var tut = game.GetComponent<ItemTutorial>();
+                if (tut != null)
+                {
+                    tut.ShowNow(0x15);
+                    yield return new WaitForSeconds(1.2f);
+                    yield return Shot("lamina_objeto");
+                    tut.ShowNow(0x19);
+                    yield return new WaitForSeconds(1.2f);
+                    yield return Shot("lamina_amuleto");
+                }
+            }
             Application.Quit();
         }
     }

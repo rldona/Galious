@@ -119,7 +119,7 @@ namespace MazeOfKnight.Game
             }
             var item = Cursor >= 0 ? ItemAt(Cursor) : null;
             if (item == null || Sold.Contains(Cursor)) return false;
-            if (item.rule == "shield" && inventory.ShieldLevel < item.needsShield) { Refused = true; return false; }
+            if (item.rule == "shield" && inventory.OwnedShieldLevel < item.needsShield) { Refused = true; return false; }
             if (Coins < item.price)
             {
                 Refused = true;

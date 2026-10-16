@@ -24,6 +24,30 @@ namespace MazeOfKnight.Game
         public readonly HashSet<int> OpenedDoors = new HashSet<int>();     // mundos cuya puerta se ha abierto (WorldDoors, Ala)
         public readonly HashSet<int> UnlockedDoors = new HashSet<int>();   // desbloqueadas con la Gran Llave y sin abrir
 
+        // RemakeRules.HollowCharms: los amuletos y lo que cuestan en muescas. Los escudos son uno (0x28), del nivel del mejor.
+        public static readonly IReadOnlyDictionary<int, int> CharmCost = new Dictionary<int, int>
+        {
+            [0x0E] = 1, [0x0F] = 1, [0x17] = 1, [0x22] = 1, [0x24] = 1,   // corona, casco, armadura, triángulo, jarra
+            [0x11] = 2,                                                  // botas
+            [0x19] = 3,                                                  // sombrero casco: la mitad de daño
+            [0x1A] = 1,                                                  // lámpara
+            [0x1B] = 2,                                                  // jarrón: el doble de alma
+            [0x1D] = 1, [0x1E] = 1,                                      // pendientes, pulsera
+            [0x21] = 1,                                                  // arpa
+            [0x25] = 2,                                                  // sable
+            [0x28] = 2,                                                  // escudo
+        };
+        public const int StartNotches = 3;
+        public static int CharmOf(int type) => type == 0x2B || type == 0x2C ? 0x28 : type;
+        public static bool IsCharm(int type) => RemakeRules.HollowCharms && CharmCost.ContainsKey(CharmOf(type));
+        public static int CostOf(int charm) => CharmCost.TryGetValue(CharmOf(charm), out int c) ? c : 0;
+
+        // Los amuletos que se tienen (tipos tal cual, con los tres escudos); los equipados están además en Active.
+        public readonly HashSet<int> OwnedCharms = new HashSet<int>();
+        // Muescas: 3 más una por jefe vencido (GameBootstrap lo enlaza con BossFight.Defeated).
+        public Func<int> BossesDefeated = () => 0;
+        public int Notches => StartNotches + BossesDefeated();
+
         public Inventory(ItemsData data, List<int> active)
         {
             Data = data ?? new ItemsData();
@@ -31,6 +55,37 @@ namespace MazeOfKnight.Game
         }
 
         public bool Has(int type) => Active.Contains(type);
+
+        // Lo tiene, aunque sea un amuleto sin equipar.
+        public bool Owns(int type) => Active.Contains(type) || OwnedCharms.Contains(type);
+
+        public bool Equipped(int charm) => charm == 0x28 ? Active.Exists(t => CharmOf(t) == 0x28) : Active.Contains(charm);
+        public bool OwnsCharm(int charm) => charm == 0x28 ? OwnedShieldLevel > 0 : OwnedCharms.Contains(charm);
+
+        public int NotchesUsed => CharmCost.Keys.Where(Equipped).Sum(c => CharmCost[c]);
+
+        // Equipar un amuleto que se tiene si le caben las muescas.
+        public bool Equip(int charm)
+        {
+            charm = CharmOf(charm);
+            if (!OwnsCharm(charm) || Equipped(charm) || NotchesUsed + CostOf(charm) > Notches) return false;
+            foreach (int t in OwnedCharms) if (CharmOf(t) == charm && !Active.Contains(t)) Active.Add(t);
+            return true;
+        }
+
+        public bool Unequip(int charm)
+        {
+            charm = CharmOf(charm);
+            return Active.RemoveAll(t => CharmOf(t) == charm) > 0;
+        }
+
+        // Partida guardada antigua o sin amuletos: los que estén en Active cuentan como tenidos (y equipados).
+        public void AdoptCharms(IEnumerable<int> owned)
+        {
+            OwnedCharms.Clear();
+            foreach (var t in owned) if (IsCharm(t)) OwnedCharms.Add(t);
+            foreach (var t in Active) if (IsCharm(t)) OwnedCharms.Add(t);
+        }
 
         bool PerWorld(int type) => type >= HolyWater && type <= Map;
 
@@ -41,6 +96,14 @@ namespace MazeOfKnight.Game
             {
                 if (!worldItems.TryGetValue(CurrentWorld, out var set)) worldItems[CurrentWorld] = set = new HashSet<int>();
                 set.Add(type);
+            }
+            if (IsCharm(type))
+            {
+                // Un amuleto: se equipa solo si ya lo está (otro escudo) o le caben las muescas.
+                if (!OwnedCharms.Add(type)) return false;
+                if (Equipped(CharmOf(type))) { if (!Active.Contains(type)) Active.Add(type); }
+                else Equip(type);
+                return true;
             }
             if (Active.Contains(type)) return false;
             Active.Add(type);
@@ -94,6 +157,10 @@ namespace MazeOfKnight.Game
         }
 
         public int ShieldLevel => Owned.Where(i => i.effect.kind == "shield").Select(i => i.effect.level).DefaultIfEmpty(0).Max();
+
+        // El mejor escudo que se tiene, aunque no esté equipado (las tiendas de los santuarios lo miran).
+        public int OwnedShieldLevel => Active.Concat(OwnedCharms).Select(Data.Get).Where(i => i != null && i.effect.kind == "shield")
+            .Select(i => i.effect.level).DefaultIfEmpty(0).Max();
 
         // Experiencia por muerte (×2 con el Vase). Al llegar a 48 se restan 48 y se rellena la vitalidad: true.
         public bool AddExperience(Character c, int amount)

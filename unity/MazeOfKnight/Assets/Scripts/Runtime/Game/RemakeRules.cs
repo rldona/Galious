@@ -64,6 +64,13 @@ namespace MazeOfKnight.Game
         // gasta un tercio del orbe para curar 2 máscaras. El orbe del marcador muestra el alma.
         public static bool HollowSoul = true;             // activado: lo ha pedido el usuario
 
+        // Original: cada objeto hace efecto desde que se recoge. Remake (amuletos de Hollow Knight, lo pidió el usuario): los
+        // objetos pasivos de combate (Inventory.CharmCost: coronas, cascos, botas, jarrón, escudos…) son amuletos que
+        // cuestan muescas y solo hacen efecto equipados; se cambian sentado en un banco. Muescas: 3 más una por jefe
+        // vencido (Inventory.Notches). Al recoger uno se equipa solo si caben sus muescas. Llaves, pases de mundo, el mapa y
+        // los objetos de progreso siguen activos siempre.
+        public static bool HollowCharms = true;           // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

@@ -352,6 +352,7 @@ namespace MazeOfKnight.Game.Visuals
 
         // Para las capturas: abierto ya.
         public void ShowNow() { Open = true; options = false; sel = 0; game.SetPaused(true); }
+        public void HideNow() => Close();
 
         void Close()
         {
