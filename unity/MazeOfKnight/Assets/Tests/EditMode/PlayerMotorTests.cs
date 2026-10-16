@@ -493,6 +493,51 @@ namespace MazeOfKnight.Tests
 
         // ---------- agua y lava (docs/player.md) ----------
 
+        // Las medidas del original, sin RemakeRules.HollowSwim.
+        static void WithoutSwim(System.Action test)
+        {
+            bool before = RemakeRules.HollowSwim;
+            RemakeRules.HollowSwim = false;
+            try { test(); } finally { RemakeRules.HollowSwim = before; }
+        }
+
+        // RemakeRules.HollowSwim: cae al agua y se queda flotando con los pies SwimDepth px bajo la superficie (y = 128);
+        // nada a la mitad de velocidad y salta como fuera del agua (42 px con Aphrodite, sin la lentitud del líquido).
+        [Test]
+        public void HollowSwimFloatsSwimsAndJumpsOut()
+        {
+            bool before = RemakeRules.HollowSwim;
+            RemakeRules.HollowSwim = true;
+            try
+            {
+                var room = WaterRoom();
+                int surface = OriginalPhysics.RoomTopPx + 12 * 8, floatY = surface + RemakeRules.SwimDepth;
+                var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 104);
+                for (int t = 0; t < 60; t++) motor.Tick(new MotorInput());
+                Assert.AreEqual(floatY, motor.Y, "flota");
+                Assert.IsTrue(motor.Swimming);
+                int x0 = motor.X;
+                for (int t = 0; t < 20; t++) motor.Tick(new MotorInput { Right = true });
+                Assert.AreEqual(x0 + 20, motor.X, "nada a la mitad de velocidad");
+                Assert.AreEqual(floatY, motor.Y);
+                motor.Character = Character.Aphrodite;
+                int top = motor.Y, ticksToTop = 0;
+                for (int t = 0; t < 60; t++)
+                {
+                    motor.Tick(new MotorInput { Up = t < 2 });
+                    if (motor.Y < top) { top = motor.Y; ticksToTop = t; }
+                }
+                Assert.AreEqual(floatY - 42, top, "el salto de fuera del agua");
+                Assert.Less(ticksToTop, 20, "sin la lentitud del líquido");
+                Assert.AreEqual(floatY, motor.Y, "vuelve a flotar");
+                // Desde el fondo sube a flotar.
+                motor.Place(room, 120, 184);
+                for (int t = 0; t < 80; t++) motor.Tick(new MotorInput());
+                Assert.AreEqual(floatY, motor.Y, "sube desde el fondo");
+            }
+            finally { RemakeRules.HollowSwim = before; }
+        }
+
         // Castillo, sala 137: agua en las filas 12-18 y suelo en la 19 (y = 184).
         static RoomModel WaterRoom(char liquid = '~')
         {
@@ -503,7 +548,7 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
-        public void SinkingInWaterIsOneAndAHalfPixelsPerTick()
+        public void SinkingInWaterIsOneAndAHalfPixelsPerTick() => WithoutSwim(() =>
         {
             var room = WaterRoom();
             var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 104);
@@ -521,20 +566,20 @@ namespace MazeOfKnight.Tests
             Assert.AreEqual(12, b - a);
             Assert.AreEqual(184, ys.Last(), "se para en el fondo");
             Assert.AreEqual(MotorState.Ground, motor.State);
-        }
+        });
 
         [Test]
-        public void WalkingInWaterIsHalfSpeed()
+        public void WalkingInWaterIsHalfSpeed() => WithoutSwim(() =>
         {
             var room = WaterRoom();
             var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 184);
             for (int t = 0; t < 20; t++)
                 motor.Tick(new MotorInput { Right = true });
             Assert.AreEqual(80 + 20, motor.X);
-        }
+        });
 
         [Test]
-        public void AphroditeJumpInWaterIsSlowButSameHeight()
+        public void AphroditeJumpInWaterIsSlowButSameHeight() => WithoutSwim(() =>
         {
             var room = WaterRoom();
             var motor = new PlayerMotor(new RoomWorld(new[] { room }), room, 80, 184) { Character = Character.Aphrodite };
@@ -546,7 +591,7 @@ namespace MazeOfKnight.Tests
             }
             Assert.AreEqual(184 - 42, top, "42 px, como fuera del agua");
             Assert.Greater(ticksToTop, 35, "medido: unos 40 ticks para subir");
-        }
+        });
 
         [Test]
         public void LavaFloorStopsAt184()

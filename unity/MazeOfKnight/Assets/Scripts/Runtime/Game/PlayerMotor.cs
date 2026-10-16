@@ -41,6 +41,21 @@ namespace MazeOfKnight.Game
         // Líquidos: 1/4 de velocidad vertical y 1/2 horizontal, con fracciones en 1/256 de píxel.
         public TileClass Liquid { get; private set; }
         public bool InLiquid => Liquid == TileClass.Water || Liquid == TileClass.Lava;
+        // RemakeRules.HollowSwim: en el agua, flota en la superficie.
+        bool Swim => RemakeRules.HollowSwim && Liquid == TileClass.Water;
+        // Nadando: flotando en la superficie (para el dibujo).
+        public bool Swimming => Swim && State == MotorState.Ground && Y == FloatY();
+        // Lo que va 4 veces más lento en el líquido (con HollowSwim, el agua ya no frena saltos ni caídas).
+        bool SlowLiquid => InLiquid && !Swim;
+
+        // Altura de los pies flotando: la superficie del agua de la columna del jugador más SwimDepth.
+        int FloatY()
+        {
+            int py = world.TileAt(Room, X, Y) == TileClass.Water ? Y : Y - 1;
+            while (py - 8 >= P.RoomTopPx && world.TileAt(Room, X, py - 8) == TileClass.Water) py -= 8;
+            int surface = P.RoomTopPx + ((py - P.RoomTopPx) >> 3 << 3);
+            return surface + RemakeRules.SwimDepth;
+        }
         int vAcc, hAcc, liquidSub;
 
         // Retroceso tras un golpe (E500 = 4).
@@ -242,6 +257,9 @@ namespace MazeOfKnight.Game
             Liquid = LiquidAt();
             if (!InLiquid || liquidBefore != Liquid)
                 vAcc = hAcc = liquidSub = 0;
+            // Nadando por debajo de la superficie: sube a flotar, 1 px por tick.
+            if (Swim && State == MotorState.Ground && Y > FloatY() && !HeadBlocked(Y - 1))
+                Y--;
 
             // Espada: una pulsación nueva fuera de un golpe y fuera de la escalera; dura 4 ticks.
             bool pressed = input.Attack && !attackHeld;
@@ -597,11 +615,11 @@ namespace MazeOfKnight.Game
         }
 
         // En el líquido, las tablas avanzan una entrada cada 4 ticks.
-        bool LiquidStep() => !InLiquid || (++liquidSub % P.LiquidTimeScale) == 0;
+        bool LiquidStep() => !SlowLiquid || (++liquidSub % P.LiquidTimeScale) == 0;
 
         int ScaleVertical(int dy)
         {
-            if (!InLiquid)
+            if (!SlowLiquid)
                 return dy;
             vAcc += dy * 256 / P.LiquidTimeScale;
             int move = vAcc / 256;
@@ -681,6 +699,8 @@ namespace MazeOfKnight.Game
                 return true;
             if (InLiquid && Y >= P.LiquidFloorY)
                 return true;                 // en el líquido no se baja de y = 184
+            if (Swim && Y >= FloatY())
+                return true;                 // RemakeRules.HollowSwim: flota
             if (((Y - P.RoomTopPx) & 7) != 0)
                 return false;
             return SolidUnderFeet() || (LadderPairAt(X, Y) && !LadderPairAt(X, Y - 1));

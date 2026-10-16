@@ -37,6 +37,8 @@ namespace MazeOfKnight.Game.Visuals
         }
 
         readonly List<Surface> surfaces = new List<Surface>();
+        readonly List<SpriteRenderer> bodies = new List<SpriteRenderer>();
+        Sprite[] waterGrad, lavaGrad;   // [d − 1]: las d filas de arriba del degradado (d = 1…LiquidDepths)
         readonly List<Blob> blobs = new List<Blob>();
         readonly List<Particle> live = new List<Particle>();
         readonly Stack<SpriteRenderer> pool = new Stack<SpriteRenderer>();
@@ -46,6 +48,13 @@ namespace MazeOfKnight.Game.Visuals
         readonly List<(float x, float top, float y)> drips = new List<(float, float, float)>();
         float spawnTimer;
         bool wasIn;
+
+        // Salpicadura pedida desde fuera (al caer en la lava el jugador vuelve a tierra antes de que se vea aquí).
+        public static System.Action<RoomModel, int, bool> Splashed;
+
+        // Orden de dibujo: el líquido va por delante de personajes y enemigos (translúcido, como en Hollow Knight: el
+        // Caballero nadando queda medio dentro), y por detrás de las siluetas del primer plano (30).
+        const int BodyOrder = 20, BubbleOrder = 21, LineOrder = 22, BlobOrder = 23, FxOrder = 24;
 
         public static bool Available => Resources.Load<Sprite>(Folder + "/superficie_00") != null;
 
@@ -58,9 +67,10 @@ namespace MazeOfKnight.Game.Visuals
             if (add != null) additive = new Material(add) { name = "Líquidos (aditivo)" };
             normal = Resources.Load<Material>("Materials/SpriteLit");
             Debug.Log($"[HollowLiquids] {lib.Count} clips");
+            Splashed = (room, x, lava) => { if (room == shown) Splash(room, x, lava); };
         }
 
-        void OnDestroy() { if (root != null) Destroy(root.gameObject); }
+        void OnDestroy() { if (root != null) Destroy(root.gameObject); Splashed = null; }
 
         static Vector2 W(RoomModel room, float x, float y) =>
             RoomCoords.RoomOrigin(room) + new Vector2(x / RoomCoords.PixelsPerUnit, (RoomCoords.Rows * 8 - (y - RoomCoords.RoomTopPixel)) / RoomCoords.PixelsPerUnit);
@@ -92,6 +102,8 @@ namespace MazeOfKnight.Game.Visuals
         void Rebuild(RoomModel room)
         {
             foreach (var s in surfaces) Release(s.sr);
+            foreach (var b in bodies) Release(b);
+            bodies.Clear();
             foreach (var b in blobs) Release(b.sr);
             foreach (var p in live) Release(p.sr);
             surfaces.Clear(); blobs.Clear(); live.Clear(); runs.Clear(); drips.Clear();
@@ -108,6 +120,7 @@ namespace MazeOfKnight.Game.Visuals
                     float x0 = c0 * 8, x1 = c * 8, y = OriginalPhysics.RoomTopPx + r * 8;
                     bool lava = t == TileClass.Lava;
                     runs.Add((x0, x1, y, lava));
+                    Body(room, c0, c, r, t);
                     // La línea de la superficie, una pieza tras otra, estirada para cubrir el tramo exacto.
                     var sp = lib.Clip("superficie")?.Frames[0];
                     float pw = WidthPx(sp);
@@ -115,7 +128,7 @@ namespace MazeOfKnight.Game.Visuals
                     float k = (x1 - x0) / (n * pw);
                     for (int i = 0; i < n; i++)
                     {
-                        var sr = Get("superficie", -2, true);
+                        var sr = Get("superficie", LineOrder, true);
                         sr.color = lava ? LavaLine : WaterLine;
                         var at = W(room, x0 + (i + 0.5f) * pw * k, y + 0.5f);
                         sr.transform.position = new Vector3(at.x, at.y, 0);
@@ -126,7 +139,7 @@ namespace MazeOfKnight.Game.Visuals
                         for (float bx = x0 + 6; bx < x1 - 6; bx += 20 + rng.Next(20))
                         {
                             string name = rng.Next(3) switch { 0 => "globulo_a", 1 => "globulo_b", _ => "globulo_c" };
-                            var sr = Get(name, -3, false);
+                            var sr = Get(name, BlobOrder, false);
                             float w = name == "globulo_a" ? 9 + rng.Next(5) : 4 + rng.Next(3);
                             float s = w / WidthPx(sr.sprite);
                             sr.transform.localScale = new Vector3(s, s, 1);
@@ -141,6 +154,44 @@ namespace MazeOfKnight.Game.Visuals
                             if (rr >= 0 && r - rr > 2) drips.Add((cc * 8 + 4, OriginalPhysics.RoomTopPx + (rr + 1) * 8, y));
                         }
                 }
+            }
+        }
+
+        // Degradado del cuerpo, 1 texel por px del original: de la superficie (arriba) a LiquidDepths filas.
+        Sprite[] Gradient(bool lava)
+        {
+            int h = HollowScenery.LiquidDepths * 8;
+            var tex = new Texture2D(1, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+            for (int y = 0; y < h; y++) tex.SetPixel(0, y, HollowScenery.LiquidColor(lava, (h - 1 - y) / (float)(h - 1)));
+            tex.Apply(false, true);
+            var sprites = new Sprite[HollowScenery.LiquidDepths];
+            for (int d = 1; d <= sprites.Length; d++)
+                sprites[d - 1] = Sprite.Create(tex, new Rect(0, h - d * 8, 1, d * 8), new Vector2(0.5f, 1f), RoomCoords.PixelsPerUnit, 0, SpriteMeshType.FullRect);
+            return sprites;
+        }
+
+        // El cuerpo bajo un tramo de superficie: por columnas con la misma profundidad (hasta LiquidDepths filas), un trozo
+        // del degradado de ese alto.
+        void Body(RoomModel room, int c0, int c1, int r, TileClass t)
+        {
+            bool lava = t == TileClass.Lava;
+            var grad = lava ? (lavaGrad ??= Gradient(true)) : (waterGrad ??= Gradient(false));
+            int Depth(int c) { int d = 0; while (d < HollowScenery.LiquidDepths && At(room, c, r + d) == t) d++; return d; }
+            int a = c0;
+            while (a < c1)
+            {
+                int d = Depth(a), b = a + 1;
+                while (b < c1 && Depth(b) == d) b++;
+                if (d > 0)
+                {
+                    var sr = Get("superficie", BodyOrder, false);
+                    sr.sprite = grad[d - 1];
+                    var at = W(room, (a + b) * 4f, OriginalPhysics.RoomTopPx + r * 8);
+                    sr.transform.position = new Vector3(at.x, at.y, 0);
+                    sr.transform.localScale = new Vector3((b - a) * 8, 1, 1);
+                    bodies.Add(sr);
+                }
+                a = b;
             }
         }
 
@@ -171,7 +222,7 @@ namespace MazeOfKnight.Game.Visuals
             foreach (var r in runs)
                 if (x >= r.x0 - 4 && x <= r.x1 + 4 && (float.IsNaN(best) || Mathf.Abs(r.y - game.Motor.Y) < Mathf.Abs(best - game.Motor.Y))) best = r.y;
             if (float.IsNaN(best)) return;
-            Spawn(room, "salpicadura", new Vector2(x, best - 5), Vector2.zero, 0, 22, lava ? LavaLine : Color.white, true, 9, true);
+            Spawn(room, "salpicadura", new Vector2(x, best - 5), Vector2.zero, 0, 22, lava ? LavaLine : Color.white, true, FxOrder, true);
         }
 
         void LateUpdate()
@@ -216,28 +267,28 @@ namespace MazeOfKnight.Game.Visuals
                     {
                         // Burbuja que sube desde dentro y estalla en la superficie.
                         var p = new Vector2(x, run.y + Random.Range(6f, 20f));
-                        Spawn(room, "burbuja", p, new Vector2(0, -Random.Range(8f, 14f)), 6, Random.Range(2.5f, 4.5f), LavaBubble, true, -3);
+                        Spawn(room, "burbuja", p, new Vector2(0, -Random.Range(8f, 14f)), 6, Random.Range(2.5f, 4.5f), LavaBubble, true, BubbleOrder);
                         live[live.Count - 1].surfaceY = run.y;
                         live[live.Count - 1].lava = true;
                     }
                     else if (roll < 0.7f)
                         Spawn(room, "ascua", new Vector2(x, run.y), new Vector2(Random.Range(-3f, 3f), -Random.Range(10f, 22f)),
-                            Random.Range(1.2f, 2.2f), Random.Range(1.5f, 2.5f), new Color(1f, 0.6f, 0.2f, 1f), true, 10);
+                            Random.Range(1.2f, 2.2f), Random.Range(1.5f, 2.5f), new Color(1f, 0.6f, 0.2f, 1f), true, FxOrder);
                     else if (roll < 0.85f)
                         Spawn(room, "humo", new Vector2(x, run.y - 4), new Vector2(Random.Range(-2f, 2f), -Random.Range(3f, 6f)),
-                            Random.Range(2.5f, 3.5f), Random.Range(14f, 22f), new Color(1f, 0.45f, 0.2f, 0.18f), false, 10);
+                            Random.Range(2.5f, 3.5f), Random.Range(14f, 22f), new Color(1f, 0.45f, 0.2f, 0.18f), false, FxOrder);
                     else if (roll < 0.9f)
-                        Spawn(room, "vapor", new Vector2(x, run.y - 12), Vector2.zero, 0, 7, new Color(1f, 0.55f, 0.25f, 0.6f), true, 10, true);
+                        Spawn(room, "vapor", new Vector2(x, run.y - 12), Vector2.zero, 0, 7, new Color(1f, 0.55f, 0.25f, 0.6f), true, FxOrder, true);
                 }
                 else if (Random.value < 0.3f)
                     Spawn(room, "niebla", new Vector2(x, run.y - Random.Range(2f, 6f)), new Vector2(Random.Range(-3f, 3f), 0),
-                        Random.Range(4f, 6f), Random.Range(25f, 40f), new Color(0.75f, 0.85f, 1f, 0.12f), false, 10);
+                        Random.Range(4f, 6f), Random.Range(25f, 40f), new Color(0.75f, 0.85f, 1f, 0.12f), false, FxOrder);
             }
             // Gotas del techo sobre el agua, de vez en cuando.
             if (drips.Count > 0 && Random.value < dt * 0.6f)
             {
                 var d = drips[Random.Range(0, drips.Count)];
-                Spawn(room, "gota_cae", new Vector2(d.x, d.top + 2), new Vector2(0, 40), 10, 1.6f, new Color(0.8f, 0.9f, 1f, 0.9f), true, 9);
+                Spawn(room, "gota_cae", new Vector2(d.x, d.top + 2), new Vector2(0, 40), 10, 1.6f, new Color(0.8f, 0.9f, 1f, 0.9f), true, FxOrder);
                 live[live.Count - 1].surfaceY = d.y;
                 live[live.Count - 1].drip = true;
             }
@@ -254,8 +305,8 @@ namespace MazeOfKnight.Game.Visuals
                 bool reached = !float.IsNaN(p.surfaceY) && (p.drip ? p.pos.y >= p.surfaceY : p.pos.y <= p.surfaceY);
                 if (reached)
                 {
-                    if (p.drip) Spawn(room, "salpicadura", new Vector2(p.pos.x, p.surfaceY - 3), Vector2.zero, 0, 9, new Color(1, 1, 1, 0.8f), true, 9, true);
-                    else Spawn(room, "burbuja_estalla", new Vector2(p.pos.x, p.surfaceY - 1), Vector2.zero, 0.25f, 6, LavaBubble, true, 9, true);
+                    if (p.drip) Spawn(room, "salpicadura", new Vector2(p.pos.x, p.surfaceY - 3), Vector2.zero, 0, 9, new Color(1, 1, 1, 0.8f), true, FxOrder, true);
+                    else Spawn(room, "burbuja_estalla", new Vector2(p.pos.x, p.surfaceY - 1), Vector2.zero, 0.25f, 6, LavaBubble, true, FxOrder, true);
                     Release(p.sr); live.RemoveAt(i); continue;
                 }
                 if (p.clip != null)

@@ -85,6 +85,14 @@ En el original, al cambiar de sala el juego se para 11 ticks (~0,37 s) mientras 
 
 En el original (docs/boss_ai.md) el Bony Dragon, jefe del mundo 1, lanza 3 huesos en parábola cada 16..47 ticks mientras pasea y en la cima de cada salto. Con el arte de Hollow Knight es el False Knight, y el usuario pidió que se comporte como él (16 de octubre de 2026): en esos momentos (no en la cima del salto, sí al caer de él) se para y da con la maza hacia el jugador. Los huesos no salen; lo que hace daño (2, por los 3 huesos de 1) es la bola de la maza donde golpea el suelo, `Enemies.MaceHead`: de 45 a 64 px por delante del centro de su caja y 19 px de alto, solo en los ticks 12..19 de los 30 del golpe (los fotogramas en que la bola baja y toca el suelo). No se le puede golpear. **Activado.** Test: `BossTests.BonyDragonSwingsTheMaceInsteadOfThrowingBones` (con y sin la regla).
 
+## RemakeRules.HollowSwim (activado)
+
+En el original, en el agua (como en la lava) el jugador se hunde despacio hasta el fondo (y = 184) y todo va 4 veces más lento; anda a la mitad de velocidad y salta igual de alto pero muy despacio (docs/player.md). El usuario pidió que se nade como en Hollow Knight (16 de octubre de 2026): en el agua el jugador flota en la superficie con los pies `SwimDepth` (8) px por debajo, nada a izquierda y derecha a la mitad de velocidad y salta y cae a la velocidad de fuera del agua; si entra por debajo de la superficie, sube 1 px por tick. El Caballero usa las animaciones de nado de Hollow Knight (Surface Swim y Surface Idle); Hornet no tiene, así que corre o se queda quieta flotando. El agua no quita vida, como en Hollow Knight (en el original, 1 cada 4 ticks; Aphrodite, 1 cada 255): el usuario lo pidió así. El agua se pinta por delante de los personajes, translúcida, para que se vean medio dentro. **Activado.** Test: `PlayerMotorTests.HollowSwimFloatsSwimsAndJumpsOut`; los tests del agua del original la desactivan.
+
+## RemakeRules.LavaRespawn (activado)
+
+En el original la lava quita 1 de vitalidad cada 4 ticks mientras se está dentro y el jugador se hunde hasta el fondo. El usuario pidió que se comporte como los peligros de Hollow Knight: tocarla es como chocar con un enemigo (`LavaDamage`, 2, con su invulnerabilidad y su parpadeo) y el jugador vuelve al último sitio de suelo firme desde el que cayó (el borde de la plataforma o el punto donde saltó), aunque esté en otra sala. **Activado.** Comprobado con `-capturaSalas` (mundo 8, sala 16); el registro dice adónde vuelve (`[Lava]`).
+
 ## Sensación de Hollow Knight: HitStop, CoyoteJump y JumpBuffer (desactivados)
 
 Tres técnicas de la guía «Hollow Knight por dentro» (en la carpeta de Hollow Knight decodificado), pasadas a los ticks del original (30 por segundo). No cambian la física medida: solo perdonan o marcan el tiempo. **F11** activa o quita las tres a la vez (`RemakeRules.HollowFeel`) para probarlas; por defecto se juega como el original.

@@ -1236,8 +1236,29 @@ namespace MazeOfKnight.Game
         }
 
         // Agua y lava (docs/player.md): 1 de vitalidad cada 4 ticks; Aphrodite en el agua, cada 255.
+        // RemakeRules.LavaRespawn: el último sitio de suelo firme (fuera de líquidos y ascensores), al que se vuelve al caer
+        // en la lava.
+        RoomModel safeRoom;
+        int safeX, safeY;
+
         void LiquidDamage()
         {
+            if (motor.State == MotorState.Ground && !motor.InLiquid && !motor.OnLift)
+            {
+                safeRoom = motor.Room; safeX = motor.X; safeY = motor.Y;
+            }
+            if (RemakeRules.LavaRespawn && motor.Liquid == TileClass.Lava && safeRoom != null)
+            {
+                Sound.Effect(0x24);
+                Visuals.HollowLiquids.Splashed?.Invoke(motor.Room, motor.X, true);
+                Hurt(RemakeRules.LavaDamage, 0, $"-{RemakeRules.LavaDamage} (lava)");
+                motor.Place(World, safeRoom, safeX, safeY);
+                Debug.Log($"[Lava] vuelve a la sala {safeRoom.id} ({safeX}, {safeY})");
+                HurtTicks = Mathf.Max(HurtTicks, OriginalPhysics.HurtInvulnerableTicks);
+                liquidTicks = 0;
+                wasInLiquid = false;
+                return;
+            }
             if (!motor.InLiquid)
             {
                 liquidTicks = 0;
@@ -1245,6 +1266,8 @@ namespace MazeOfKnight.Game
                 return;
             }
             if (!wasInLiquid) { wasInLiquid = true; Sound.Effect(0x24); }   // entrar en el agua (b03:B063)
+            // RemakeRules.HollowSwim: nadando, el agua no hace daño (como en Hollow Knight).
+            if (RemakeRules.HollowSwim && motor.Liquid == TileClass.Water) { liquidTicks = 0; return; }
             bool aphroditeInWater = motor.Character == Character.Aphrodite && motor.Liquid == TileClass.Water;
             int every = aphroditeInWater ? OriginalPhysics.AphroditeWaterDamageTicks : OriginalPhysics.LiquidDamageTicks;
             if (++liquidTicks < every)

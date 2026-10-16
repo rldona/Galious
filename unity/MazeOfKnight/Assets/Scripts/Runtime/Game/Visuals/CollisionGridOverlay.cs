@@ -40,7 +40,7 @@ namespace MazeOfKnight.Game.Visuals
             if (!on) return;
             if (grid == null)
             {
-                grid = NewRenderer("Rejilla de colisión", 4);   // encima del escenario, debajo de objetos y personajes
+                grid = NewRenderer("Rejilla de colisión", 25);  // encima del escenario y del agua y la lava (20…24)
                 playerBox = NewRenderer("Caja del jugador", 999);
                 playerBox.sprite = BoxSprite();
             }

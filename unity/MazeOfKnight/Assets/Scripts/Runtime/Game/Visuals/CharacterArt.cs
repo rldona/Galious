@@ -131,6 +131,7 @@ namespace MazeOfKnight.Game.Visuals
                 case MotorState.Jump: return "salto_subir";
                 case MotorState.Fall: return "salto_caer";
             }
+            if (m.Swimming) return dx > 0 && dx < 20 ? "nadar" : "nadar_quieto";
             return dx > 0 && dx < 20 || m.State == MotorState.Carried ? "correr" : "quieto";
         }
 
@@ -142,7 +143,9 @@ namespace MazeOfKnight.Game.Visuals
             if (Drawn == null || Drawn.Count == 0) return null;
             var c = m.Character;
             string action = Action(m, dx);
-            bool grounded = action is "correr" or "quieto";
+            // Sin dibujo de nadar (Hornet): corre o se queda quieta, flotando.
+            if (action is "nadar" or "nadar_quieto" && DrawnClip(c, action) == null) action = action == "nadar" ? "correr" : "quieto";
+            bool grounded = action is "correr" or "quieto" or "nadar" or "nadar_quieto";
             bool newAttack = m.AttackTicks > 0 && lastAttackTicks == 0;
             lastAttackTicks = m.AttackTicks;
             bool turned = facingKnown && m.FacingLeft != lastFacingLeft && grounded;

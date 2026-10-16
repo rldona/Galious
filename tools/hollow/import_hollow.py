@@ -59,6 +59,10 @@ CHARACTERS = {
             "estela": ("Knight", "SlashEffect", ["slashes_effect0001", "slashes_effect0002"], 24, None),
             "golpe": ("Knight", "Recoil", None, 24, None),
             "muerte": ("Knight", "Death", None, 10, None),
+            # Nadando en la superficie del agua (RemakeRules.HollowSwim). Hornet no nada en Hollow Knight: sin estos, corre
+            # o se queda quieta flotando.
+            "nadar": ("Knight", "Surface Swim", None, 12, None),
+            "nadar_quieto": ("Knight", "Surface Idle", lambda f: f.startswith("water_surface_idle"), 12, None),
         },
     },
     "aphrodite": {

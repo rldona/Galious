@@ -131,17 +131,43 @@ namespace MazeOfKnight.Game.Visuals
                 CollisionGridOverlay.Show = HitboxOverlay.Show = false;
                 yield return new WaitForSeconds(0.1f);
                 yield return Shot($"sala_m{roomsWorld:00}_{id:000}");
+                // Con agua o lava: el jugador cae en ella desde encima de la superficie (nadando; de la lava, vuelve al
+                // suelo de antes) y otra foto.
+                foreach (var liquid in new[] { TileClass.Water, TileClass.Lava })
+                    if (Surface(game.World, room, liquid) is (int lx, int ly))
+                    {
+                        player.Demo = new DemoPlayer(new DemoInfo { inputs = new[] { Keys(70), Keys(30, right: true), new DemoInputEntry { keys = 0xFF } } });
+                        game.Motor.Place(game.World, room, lx, ly - 12);
+                        yield return new WaitForSeconds(liquid == TileClass.Water ? 2.6f : 1.4f);
+                        yield return Shot($"sala_m{roomsWorld:00}_{id:000}_{(liquid == TileClass.Water ? "nadar" : "lava")}");
+                        player.Demo = null;
+                        game.Motor.Place(game.World, room, x, y);
+                        yield return new WaitForSeconds(0.4f);
+                    }
                 CollisionGridOverlay.Show = HitboxOverlay.Show = true;
             }
+        }
+
+        // La superficie de un líquido con aire encima (la primera desde la izquierda): x en el centro de la casilla, y.
+        static (int, int)? Surface(RoomWorld world, RoomModel room, TileClass liquid)
+        {
+            for (int r = 2; r < RoomCoords.Rows; r++)
+                for (int c = 2; c < RoomCoords.Cols - 2; c++)
+                    if (world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8) == liquid &&
+                        world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + (r - 1) * 8) == TileClass.Empty &&
+                        world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + (r - 2) * 8) == TileClass.Empty)
+                        return (c * 8 + 4, OriginalPhysics.RoomTopPx + r * 8);
+            return null;
         }
 
         // Un sitio de pie: aire en 2 × 2 celdas con suelo debajo, empezando por abajo a la izquierda.
         static (int x, int y) Spot(RoomWorld world, RoomModel room)
         {
             bool Air(int c, int r) => world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8) is TileClass.Empty or TileClass.Ladder;
+            bool Floor(int c, int r) => world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8) == TileClass.Solid;   // no un líquido
             for (int r = RoomCoords.Rows - 2; r >= 2; r--)
                 for (int c = 2; c < RoomCoords.Cols - 2; c++)
-                    if (Air(c, r) && Air(c + 1, r) && Air(c, r - 1) && Air(c + 1, r - 1) && !Air(c, r + 1) && !Air(c + 1, r + 1))
+                    if (Air(c, r) && Air(c + 1, r) && Air(c, r - 1) && Air(c + 1, r - 1) && Floor(c, r + 1) && Floor(c + 1, r + 1))
                         return (c * 8 + 8, OriginalPhysics.RoomTopPx + r * 8 + 8);
             return (128, 120);
         }

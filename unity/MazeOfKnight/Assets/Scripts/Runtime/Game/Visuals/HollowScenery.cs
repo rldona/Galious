@@ -98,11 +98,20 @@ namespace MazeOfKnight.Game.Visuals
         readonly Dictionary<RoomModel, GameObject> built = new Dictionary<RoomModel, GameObject>();
         Material material;
         public TileBase FillTile { get; private set; }
-        // Cuerpo del agua y de la lava (HollowLiquids pone la superficie y lo que se mueve), por profundidad: la fila de
-        // arriba más clara y cada una más oscura hasta la cuarta.
+        // Cuerpo del agua y de la lava: de la superficie a LiquidDepths filas, un degradado continuo de Top a Deep (lo pinta
+        // HollowLiquids, sin bandas); más abajo, Deep (estos tiles). Sin HollowLiquids, un tono por fila.
         public const int LiquidDepths = 4;
+        public static readonly Color WaterTopColor = new Color(0.22f, 0.36f, 0.55f, 0.6f), WaterDeep = new Color(0.03f, 0.06f, 0.13f, 0.85f);
+        public static readonly Color LavaTopColor = new Color(1f, 0.52f, 0.14f, 0.95f), LavaDeep = new Color(0.3f, 0.04f, 0.03f, 0.97f);
+        public static Color LiquidColor(bool isLava, float t) => isLava
+            ? Color.Lerp(LavaTopColor, LavaDeep, Mathf.Sqrt(Mathf.Clamp01(t)))
+            : Color.Lerp(WaterTopColor, WaterDeep, Mathf.Clamp01(t));
         TileBase[] water, lava;
-        public TileBase Liquid(bool isLava, int depth) => (isLava ? lava : water)[Mathf.Clamp(depth, 0, LiquidDepths - 1)];
+        public TileBase Liquid(bool isLava, int depth)
+        {
+            if (depth < LiquidDepths && HollowLiquids.Available) return null;   // el degradado de HollowLiquids
+            return (isLava ? lava : water)[Mathf.Clamp(depth, 0, LiquidDepths - 1)];
+        }
 
         public static HollowScenery Load()
         {
@@ -115,8 +124,8 @@ namespace MazeOfKnight.Game.Visuals
             for (int d = 0; d < LiquidDepths; d++)
             {
                 float t = d / (float)(LiquidDepths - 1);
-                s.water[d] = SolidTile(Color.Lerp(new Color(0.22f, 0.36f, 0.55f, 0.6f), new Color(0.03f, 0.06f, 0.13f, 0.85f), t));
-                s.lava[d] = SolidTile(Color.Lerp(new Color(1f, 0.52f, 0.14f, 0.95f), new Color(0.3f, 0.04f, 0.03f, 0.97f), Mathf.Sqrt(t)));
+                s.water[d] = SolidTile(LiquidColor(false, t));
+                s.lava[d] = SolidTile(LiquidColor(true, t));
             }
             s.material = Resources.Load<Material>("Materials/SpriteLit");
             return s;

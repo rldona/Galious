@@ -23,6 +23,20 @@ namespace MazeOfKnight.Game
         // de la maza donde golpea el suelo (Enemies.MaceHead).
         public static bool FalseKnightMace = true;        // activado: lo ha pedido el usuario
 
+        // Original: en el agua (y en la lava) se hunde despacio hasta el fondo y todo va 4 veces más lento. Remake (petición
+        // del usuario del 16 de octubre de 2026, como en Hollow Knight): en el agua el jugador flota en la superficie con
+        // los pies SwimDepth px por debajo y nada a izquierda y derecha (a la mitad de velocidad, como el original en el
+        // agua); salta y cae con la velocidad de fuera. Si entra por debajo de la superficie, sube 1 px por tick. El agua
+        // no quita vida (en el original, 1 cada 4 ticks; Aphrodite, cada 255): el usuario lo pidió así.
+        public static bool HollowSwim = true;             // activado: lo ha pedido el usuario
+        public const int SwimDepth = 8;
+
+        // Original: la lava quita 1 de vitalidad cada 4 ticks mientras se está dentro (y se hunde hasta el fondo). Remake
+        // (petición del usuario, como los peligros de Hollow Knight): tocarla es como chocar con un enemigo (LavaDamage,
+        // con su invulnerabilidad) y el jugador vuelve al último sitio de suelo firme desde el que cayó.
+        public static bool LavaRespawn = true;            // activado: lo ha pedido el usuario
+        public const int LavaDamage = 2;
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks
