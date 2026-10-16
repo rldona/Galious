@@ -44,6 +44,12 @@ namespace MazeOfKnight.Game
         // medidas se conservan (las pruebas del original la usan).
         public static bool SoloKnight = true;             // activado: lo ha pedido el usuario
 
+        // Original: al encender, el logo de Konami, el título, la historia y las demos en bucle (docs/attract.md). Remake
+        // (petición del usuario: "no aporta nada"): un menú principal como el de Hollow Knight (Visuals/HollowMainMenu),
+        // con Continuar, Nueva partida, Opciones, Extras y Salir, y un menú de pausa (Esc o Start) desde el que se vuelve a
+        // él. Sin el arte del menú importado, el ciclo del original.
+        public static bool HollowTitle = true;            // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

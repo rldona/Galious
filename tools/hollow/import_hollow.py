@@ -25,6 +25,7 @@ import objetos  # noqa: E402
 import hud  # noqa: E402
 import escenario  # noqa: E402
 import liquidos  # noqa: E402
+import menu  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/personajes"
@@ -241,6 +242,7 @@ def main(argv):
     hud.build(src)
     escenario.build(src)
     liquidos.build(src)
+    menu.build(src)
 
 
 if __name__ == "__main__":

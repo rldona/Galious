@@ -40,7 +40,9 @@ namespace MazeOfKnight.Game
 
         void Update()
         {
-            if (UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true)
+            // Con el menú de pausa (RemakeRules.HollowTitle), Esc lo abre; sin él, sale del juego.
+            if (!(RemakeRules.HollowTitle && Visuals.HollowMenus.Available) &&
+                UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true)
                 Application.Quit();
         }
     }

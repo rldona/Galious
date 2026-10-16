@@ -139,6 +139,9 @@ namespace MazeOfKnight.Game
             hollowEnemies = Visuals.HollowEnemyArt.Load();
             // Marcador de Hollow Knight (con los dos estilos), si se ha importado.
             if (Visuals.HollowHud.Available) gameObject.AddComponent<Visuals.HollowHud>().game = this;
+            // Menú de pausa (Esc o Start) con salida al menú principal.
+            if (RemakeRules.HollowTitle && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.HollowPauseMenu>().game = this;
+            Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
             if (hollowEnemies != null)
@@ -196,7 +199,10 @@ namespace MazeOfKnight.Game
         // ---------- presentación, demo o partida (docs/attract.md) ----------
 
         AttractScreen attract;
-        public bool AttractRunning => attract != null && attract.Running;
+        Visuals.HollowMainMenu mainMenu;
+        public bool AttractRunning => attract != null && attract.Running || mainMenu != null && mainMenu.Running;
+        // Algún menú abierto (inventario o santuario): el de pausa no se abre encima.
+        public bool MenuOpen => GetComponent<InventoryMenu>()?.Open == true || shrineScreen != null && shrineScreen.Open;
         // Presentación, demo o final: ni menú ni teclas de depuración.
         public bool Busy => AttractRunning || player != null && player.Demo != null || EndingRunning;
         public bool skipAttract;     // para probar en el editor: empieza directamente la partida
@@ -223,6 +229,11 @@ namespace MazeOfKnight.Game
             {
                 case AttractMode.Mode.Attract:
                     SetPaused(true);
+                    if (RemakeRules.HollowTitle && Visuals.HollowMenus.Available)
+                    {
+                        mainMenu = gameObject.AddComponent<Visuals.HollowMainMenu>();
+                        break;
+                    }
                     attract = gameObject.AddComponent<AttractScreen>();
                     attract.Begin(data);
                     break;

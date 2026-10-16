@@ -20,8 +20,20 @@ namespace MazeOfKnight.Game.Visuals
         // Escala de la interfaz: 1 a 800 px de alto.
         public static float Scale => Mathf.Max(0.6f, Screen.height / 800f);
 
-        public static Font Title => title != null ? title : title = Font.CreateDynamicFontFromOSFont(new[] { "Optima", "Palatino", "Georgia" }, 32);
-        public static Font Body => body != null ? body : body = Font.CreateDynamicFontFromOSFont(new[] { "Palatino", "Georgia", "Optima" }, 24);
+        // La fuente de Hollow Knight (Perpetua, Assets/Art/Resources/Hollow/fuentes, fuera de git) si se ha importado; si no,
+        // las del sistema.
+        static Font hollowFont;
+        static bool hollowFontLoaded;
+        static Font HollowFont
+        {
+            get
+            {
+                if (!hollowFontLoaded) { hollowFontLoaded = true; hollowFont = Resources.Load<Font>("Hollow/fuentes/Perpetua"); }
+                return hollowFont;
+            }
+        }
+        public static Font Title => HollowFont ?? (title != null ? title : title = Font.CreateDynamicFontFromOSFont(new[] { "Optima", "Palatino", "Georgia" }, 32));
+        public static Font Body => HollowFont ?? (body != null ? body : body = Font.CreateDynamicFontFromOSFont(new[] { "Palatino", "Georgia", "Optima" }, 24));
 
         static Texture2D White
         {
