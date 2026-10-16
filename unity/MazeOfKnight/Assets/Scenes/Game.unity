@@ -437,7 +437,7 @@ MonoBehaviour:
   game: {fileID: 415598779}
   player: {fileID: 1195094662}
   mapView: {fileID: 415598780}
-  styled: 1
+  styled: 0
 --- !u!114 &818914611
 MonoBehaviour:
   m_ObjectHideFlags: 0

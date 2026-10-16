@@ -75,6 +75,15 @@ La colisión ya estaba validada en openMSX: 91/91 caídas (ver [world_maps.md](w
   ```
 - **Compilado para macOS:** menú **Maze of Knight → Compilar para macOS**, o en batch con `-executeMethod MazeOfKnight.EditorTools.GameBuild.BuildMac -quit`. Sale en `unity/MazeOfKnight/Builds/MazeOfKnight.app`.
   - Lleva dentro las salas de la ROM: es para probar en local y no se versiona.
+- **Fusión con Hollow Knight (desde el 16 de octubre de 2026):** el juego arranca con los cuadros provisionales (F7 sigue poniendo el estilo del remake; el arte dibujado está en la rama `arte-dibujado`). Los protagonistas son el Caballero (Popolon) y Hornet (Aphrodite), sacados de la carpeta de Hollow Knight decodificado:
+  ```bash
+  python3 -m venv .venv && .venv/bin/pip install pillow
+  .venv/bin/python -I tools/hollow/import_hollow.py "$HOME/workspace/games/Hollow Knight Decodificado"
+  ```
+  - Escribe `Assets/Art/Resources/Hollow/personajes/` (fuera de git): un PNG por fotograma con el nombre de `ArtLibrary`, mirando a la derecha, con los pies abajo en el centro, a 8 texels por píxel, y `fps.txt` con la velocidad de cada clip y el fotograma donde empieza su bucle (el «Run» del Caballero tiene 6 de arranque y luego repite). El Caballero va a su tamaño (128 texels = 16 px, lo que mide Popolon) y Hornet a 0,75 (20 px).
+  - Qué animación de Hollow Knight hace cada acción está en `CHARACTERS` del script. La escalera usa el deslizamiento por pared del Caballero y el reposo de Hornet; Hollow Knight no tiene escaleras.
+  - El arte es de Team Cherry: el compilado que lo lleva es solo para probar en local, no se reparte.
+  - `-capturaPersonajes <carpeta>` en el compilado guarda capturas de los dos corriendo, atacando y saltando.
 - **Controles:**
   - ← → (o A D, o mando) andar;
   - ↑ saltar o subir escalera (también botón sur del mando);

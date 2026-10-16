@@ -13,10 +13,16 @@ namespace MazeOfKnight.EditorTools
     public class ArtImporter : AssetPostprocessor
     {
         public const string Root = "Assets/Art/Resources/Dibujado/";
+        // Arte de Hollow Knight importado con tools/hollow/import_hollow.py (fuera de git): mismas reglas.
+        public const string HollowRoot = "Assets/Art/Resources/Hollow/";
         public const float TexelsPerPixel = 8f;
         public const float PixelsPerUnit = TexelsPerPixel * Data.RoomCoords.PixelsPerUnit;   // 128
 
-        static bool Ours(string path) => path.Replace('\\', '/').StartsWith(Root) && path.EndsWith(".png");
+        static bool Ours(string path)
+        {
+            path = path.Replace('\\', '/');
+            return (path.StartsWith(Root) || path.StartsWith(HollowRoot)) && path.EndsWith(".png");
+        }
         static bool IsNormal(string path) => Path.GetFileNameWithoutExtension(path).EndsWith("_n");
 
         // Carpetas cuyo pivote va en los pies.

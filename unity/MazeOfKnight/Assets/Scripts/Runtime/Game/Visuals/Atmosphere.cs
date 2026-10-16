@@ -30,7 +30,8 @@ namespace MazeOfKnight.Game.Visuals
         public GameBootstrap game;
         public PlayerController player;
         public MapView mapView;
-        public bool styled = true;
+        // Arranca con los cuadros provisionales (16 de octubre de 2026: se vuelve a ellos para la fusión con Hollow Knight).
+        public bool styled = false;
 
         // Material de personajes (contorno + destello); null con el estilo quitado o sin el shader.
         public static Material CharacterMaterial { get; private set; }
@@ -87,6 +88,7 @@ namespace MazeOfKnight.Game.Visuals
         Material unlit, additive, defaultSprite;
         Sprite dot, shaft, white;
         CharacterArt characters;
+        CharacterArt hollow;     // protagonistas de Hollow Knight (tools/hollow), con cualquier estilo; null si no están
         SpriteRenderer slash;
         readonly Dictionary<(Theme, ShapePainter.Depth, int), Sprite> layerCache = new Dictionary<(Theme, ShapePainter.Depth, int), Sprite>();
         readonly Dictionary<int, Sprite> fogCache = new Dictionary<int, Sprite>();
@@ -110,6 +112,8 @@ namespace MazeOfKnight.Game.Visuals
 
         void Awake()
         {
+            hollow = LoadHollow();
+            if (hollow != null && player != null) player.Art = hollow;
             cam = GetComponent<Camera>();
             if (cam == null) cam = Camera.main;
             roomCamera = cam != null ? cam.GetComponent<RoomCamera>() : null;
@@ -462,6 +466,28 @@ namespace MazeOfKnight.Game.Visuals
             volume.sharedProfile = profile;
         }
 
+        // El Caballero como Popolon y Hornet como Aphrodite (Assets/Art/Resources/Hollow, fuera de git; los importa
+        // tools/hollow/import_hollow.py desde la carpeta de Hollow Knight decodificado). Null si no se han importado.
+        public static CharacterArt LoadHollow()
+        {
+            var lib = ArtLibrary.Load("Hollow");
+            if (lib.Count == 0) return null;
+            var fps = new Dictionary<string, float>();
+            var loops = new Dictionary<string, int>();
+            var txt = Resources.Load<TextAsset>("Hollow/personajes/fps");
+            if (txt != null)
+                foreach (var line in txt.text.Split('\n'))
+                {
+                    // <clip> <fps> [<primer fotograma del bucle>]
+                    var parts = line.Trim().Split(' ');
+                    if (parts.Length >= 2 && float.TryParse(parts[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float f))
+                        fps[parts[0]] = f;
+                    if (parts.Length >= 3 && int.TryParse(parts[2], out int loop) && loop > 0) loops[parts[0]] = loop;
+                }
+            Debug.Log($"[Atmosphere] Hollow Knight: {lib.Count} clips");
+            return new CharacterArt { Drawn = lib, DrawnOnly = true, Fps = fps, LoopStart = loops };
+        }
+
         // ---------- estado ----------
 
         void Apply(bool on)
@@ -488,7 +514,7 @@ namespace MazeOfKnight.Game.Visuals
             {
                 Outline(player.body);
                 Outline(player.sword);
-                player.Art = on ? characters : null;
+                player.Art = hollow ?? (on ? characters : null);
                 EnemyArt = on ? enemyArt : null;
                 Props = on ? props : null;
                 Characters = on ? characters : null;

@@ -16,3 +16,7 @@ __pycache__/
 # Estado local de Claude Code
 .claude/
 
+
+# Arte de Hollow Knight (Team Cherry) importado con tools/hollow/: solo en local, no se versiona ni se reparte.
+unity/MazeOfKnight/Assets/Art/Resources/Hollow/
+unity/MazeOfKnight/Assets/Art/Resources/Hollow.meta

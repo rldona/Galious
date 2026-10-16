@@ -15,7 +15,7 @@ namespace MazeOfKnight.Game
         public Visuals.CharacterArt Art;
         public SpriteRenderer Slash;
         SpriteRenderer shieldOverlay;        // capa del escudo dibujado (CharacterArt.DrawnShield)
-        Sprite placeholder;
+        Sprite placeholder, slashDefault;
         public Color popolonColor = new Color(0.35f, 0.55f, 1f);
         public Color aphroditeColor = new Color(1f, 0.45f, 0.7f);
 
@@ -166,9 +166,11 @@ namespace MazeOfKnight.Game
             // El sprite de 16 x 16 px tiene el pivote abajo en el centro: coincide con los pies del original.
             transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y) + new Vector2(0, HopPx / RoomCoords.PixelsPerUnit);
             if (body != null && placeholder == null) placeholder = body.sprite;
-            if (Art != null && body != null)
+            // Sin fotograma (arte solo dibujado y sin clip): el cuadro provisional.
+            var frame = Art != null && body != null ? Art.Frame(Motor, Time.deltaTime) : null;
+            if (frame != null)
             {
-                body.sprite = Art.Frame(Motor, Time.deltaTime);
+                body.sprite = frame;
                 body.color = Color.white;
                 body.flipX = Motor.FacingLeft ^ HopFlip;
                 body.transform.localScale = Vector3.one;
@@ -189,8 +191,20 @@ namespace MazeOfKnight.Game
                     shieldOverlay.sharedMaterial = body.sharedMaterial;
                 }
                 else if (shieldOverlay != null) shieldOverlay.enabled = false;
-                if (Slash != null)
+                var drawnSlash = Slash != null ? Art.DrawnSlash(Motor) : null;
+                if (Slash != null && slashDefault == null && drawnSlash == null) slashDefault = Slash.sprite;
+                if (drawnSlash != null)
                 {
+                    // El tajo dibujado va en el lienzo del cuerpo: mismo sitio y mismo pivote.
+                    Slash.enabled = true;
+                    Slash.sprite = drawnSlash;
+                    Slash.transform.position = body.transform.position;
+                    Slash.flipX = Motor.FacingLeft;
+                    Slash.color = Color.white;
+                }
+                else if (Slash != null)
+                {
+                    if (slashDefault != null) Slash.sprite = slashDefault;
                     // Estela de la estocada sobre la zona que golpea (x + 8 … x + 18, y − 7 … y − 4).
                     Slash.enabled = Motor.AttackTicks > 0;
                     if (Slash.enabled)

@@ -24,6 +24,26 @@ namespace MazeOfKnight.Tests
         }
 
         [Test]
+        public void LoopSectionPlaysStartOnceThenLoops()
+        {
+            // Como el "Run" del Caballero: 13 fotogramas, el bucle empieza en el 6.
+            var clip = Clip(13, true);
+            clip.LoopStart = 6;
+            var a = new FrameAnimator();
+            var seen = new List<int>();
+            a.FrameEntered += (_, f) => seen.Add(f);
+            a.Play(clip);
+            for (int i = 0; i < 20; i++) a.Tick(1f / 24f);
+            CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 6, 7, 8, 9, 10, 11, 12, 6 }, seen);
+            // Muchas vueltas después sigue dentro del bucle, sin volver al arranque.
+            a.Tick(5000f);
+            Assert.GreaterOrEqual(a.Frame, 6);
+            int before = a.Frame;
+            a.Tick(1f / 24f);
+            Assert.AreEqual(before == 12 ? 6 : before + 1, a.Frame);
+        }
+
+        [Test]
         public void LoopWrapsAndNonLoopStopsAtLastFrame()
         {
             var loop = new FrameAnimator();

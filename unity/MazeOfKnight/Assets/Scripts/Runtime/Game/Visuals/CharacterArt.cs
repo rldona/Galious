@@ -90,8 +90,15 @@ namespace MazeOfKnight.Game.Visuals
         // <accion> quieto, correr, girar, salto_preparar, salto_subir, salto_caer, escalera, estocada (fotograma
         // "golpe" en el tick del golpe), golpe (recibido), muerte y celebrar. Si falta uno, se usa el generado.
         public ArtLibrary Drawn;
+        // Solo el arte dibujado (los protagonistas de Hollow Knight, tools/hollow): sin clip para una acción se usa el de
+        // quieto, y si tampoco hay, Frame devuelve null y el jugador se ve como el cuadro provisional.
+        public bool DrawnOnly;
+        // Fotogramas por segundo de cada clip (<personaje>_<accion>), si no son los 24 de siempre.
+        public Dictionary<string, float> Fps;
+        // Primer fotograma del bucle de cada clip (los anteriores son el arranque), si no es 0.
+        public Dictionary<string, int> LoopStart;
         readonly FrameAnimator anim = new FrameAnimator();
-        static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "estocada", "golpe", "muerte", "celebrar" };
+        static readonly HashSet<string> OneShot = new HashSet<string> { "girar", "salto_preparar", "salto_subir", "estocada", "golpe", "muerte", "celebrar" };
         int lastAttackTicks;
         bool lastFacingLeft, facingKnown;
         string drawnAction;
@@ -100,8 +107,13 @@ namespace MazeOfKnight.Game.Visuals
 
         FrameClip DrawnClip(Character c, string action)
         {
-            var clip = Drawn?.Clip($"{Prefix(c)}_{action}");
-            if (clip != null && OneShot.Contains(action)) clip.Loop = false;
+            string name = $"{Prefix(c)}_{action}";
+            var clip = Drawn?.Clip(name);
+            if (clip == null && DrawnOnly && action != "quieto" && action != "estela") return DrawnClip(c, "quieto");
+            if (clip == null) return null;
+            if (OneShot.Contains(action)) clip.Loop = false;
+            if (Fps != null && Fps.TryGetValue(name, out float fps)) clip.Fps = fps;
+            if (LoopStart != null && LoopStart.TryGetValue(name, out int start)) clip.LoopStart = start;
             return clip;
         }
 
@@ -166,6 +178,16 @@ namespace MazeOfKnight.Game.Visuals
             return anim.Current;
         }
 
+        // El tajo dibujado (<personaje>_estela) en el mismo lienzo que el cuerpo: fuerte en el tick del golpe y apagándose
+        // al recoger la hoja; null si no hay o no se está atacando.
+        public Sprite DrawnSlash(PlayerMotor m)
+        {
+            if (m.AttackTicks <= 1) return null;
+            var clip = DrawnClip(m.Character, "estela");
+            if (clip == null || clip.Length == 0) return null;
+            return clip.Frames[Math.Min(clip.Length - 1, m.AttackTicks >= 3 ? 0 : 1)];
+        }
+
         // Capa del escudo dibujada aparte (<personaje>_escudo_<cobre|plata|oro>_<accion>), en el mismo fotograma que el
         // cuerpo; null si no hay escudo o no está dibujada.
         public Sprite DrawnShield(PlayerMotor m)
@@ -186,7 +208,7 @@ namespace MazeOfKnight.Game.Visuals
             lastX = m.X;
             lastY = m.Y;
             var drawnSprite = DrawnFrame(m, dt, dx);
-            if (drawnSprite != null) return drawnSprite;
+            if (drawnSprite != null || DrawnOnly) return drawnSprite;
             var c = m.Character;
             int shield = ShieldLevel?.Invoke() ?? 0;
             if (m.State == MotorState.Knockback || m.Stunned > 0) return Get(c, Anim.Hurt, 0, shield);

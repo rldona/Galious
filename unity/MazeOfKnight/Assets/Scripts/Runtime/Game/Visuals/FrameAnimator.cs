@@ -13,6 +13,9 @@ namespace MazeOfKnight.Game.Visuals
         public Sprite[] Frames = Array.Empty<Sprite>();
         public float Fps = FrameAnimator.DefaultFps;
         public bool Loop = true;
+        // Bucle parcial (como el "Run" de Hollow Knight): los fotogramas antes de LoopStart son el arranque y se ven una
+        // vez; el bucle repite de LoopStart al final.
+        public int LoopStart;
         public string[] Tags;                 // null o una por fotograma (null = sin etiqueta)
 
         public int Length => Frames?.Length ?? 0;
@@ -65,6 +68,14 @@ namespace MazeOfKnight.Game.Visuals
             FrameEntered?.Invoke(clip, frame);
         }
 
+        static int LoopStartOf(FrameClip c) => Mathf.Clamp(c.LoopStart, 0, Math.Max(0, c.Length - 1));
+
+        int LoopFrame(int abs)
+        {
+            int start = LoopStartOf(Clip);
+            return abs < start ? abs : start + (abs - start) % (Clip.Length - start);
+        }
+
         public void Stop()
         {
             Clip = null;
@@ -84,16 +95,17 @@ namespace MazeOfKnight.Game.Visuals
             while (absolute < target)
             {
                 absolute++;
-                Frame = Clip.Loop ? absolute % n : absolute;
+                Frame = Clip.Loop ? LoopFrame(absolute) : absolute;
                 FrameEntered?.Invoke(Clip, Frame);
             }
             if (!Clip.Loop && Time > Clip.Duration) Time = Clip.Duration;
-            // Que el tiempo no crezca sin fin en los bucles largos.
+            // Que el tiempo no crezca sin fin en los bucles largos (se quitan vueltas enteras del bucle, tras el arranque).
+            int start = LoopStartOf(Clip), span = n - start;
             if (Clip.Loop && absolute >= n * 1000)
             {
-                int laps = absolute / n;
-                absolute -= laps * n;
-                Time -= laps * Clip.Duration;
+                int laps = (absolute - start) / span - 1;
+                absolute -= laps * span;
+                Time -= laps * span / Clip.Fps;
             }
         }
     }

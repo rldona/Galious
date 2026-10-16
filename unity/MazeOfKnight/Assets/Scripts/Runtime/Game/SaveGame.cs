@@ -26,13 +26,30 @@ namespace MazeOfKnight.Game
             roomObjects = new List<string>(), firedEvents = new List<string>();
 
         public static string Path => System.IO.Path.Combine(Application.persistentDataPath, "partida.json");
-        public static bool Exists => File.Exists(Path);
+        public static bool Exists => File.Exists(Path) || File.Exists(Path + ".new");
 
-        public void Write() => File.WriteAllText(Path, JsonUtility.ToJson(this, true));
+        public void Write() => WriteAtomic(Path, JsonUtility.ToJson(this, true));
+
+        // Escribe primero <fichero>.new y luego lo pone en su sitio de una vez (como el user1.dat.new de Hollow Knight):
+        // si el juego se cierra a mitad, queda la partida anterior entera, nunca una a medias.
+        public static void WriteAtomic(string path, string text)
+        {
+            string tmp = path + ".new";
+            File.WriteAllText(tmp, text);
+            if (File.Exists(path)) File.Replace(tmp, path, null);
+            else File.Move(tmp, path);
+        }
+
+        // Lee la partida; si el cierre llegó justo antes de ponerla en su sitio, se queda la .new (ya estaba completa).
+        public static string ReadAtomic(string path)
+        {
+            if (!File.Exists(path) && File.Exists(path + ".new")) File.Move(path + ".new", path);
+            return File.Exists(path) ? File.ReadAllText(path) : null;
+        }
 
         public static SaveData Read()
         {
-            try { return Exists ? JsonUtility.FromJson<SaveData>(File.ReadAllText(Path)) : null; }
+            try { var text = ReadAtomic(Path); return text != null ? JsonUtility.FromJson<SaveData>(text) : null; }
             catch (Exception e) { Debug.LogWarning($"No se pudo leer la partida: {e.Message}"); return null; }
         }
 
