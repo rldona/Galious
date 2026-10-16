@@ -10,6 +10,13 @@ namespace MazeOfKnight.Game.Visuals
         const float Fps = 12;
         static readonly Dictionary<int, Sprite[]> clips = new Dictionary<int, Sprite[]>();
 
+        // Solo aspecto: cuántos píxeles más arriba de su caja se pintan. Las flechas (1 y 2) salen en el original a 4 px del
+        // suelo (y − 8 alineada a 8, caja de y + 2 a y + 5) y, con el caballero de Hollow Knight (unos 22 px de alto), se
+        // verían rodando por el suelo: se pintan a media altura del personaje (los pies − 11). La caja no se mueve, así que
+        // siguen dando a los bichos bajos como en el original. El fuego y la mina sí van por el suelo.
+        public const int ArrowLift = 7;
+        public static int Lift(int weapon) => weapon == 1 || weapon == 2 ? ArrowLift : 0;
+
         public static Sprite Frame(int weapon, int ageTicks)
         {
             if (!clips.TryGetValue(weapon, out var frames))

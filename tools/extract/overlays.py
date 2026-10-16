@@ -84,7 +84,10 @@ def stamps(rom, e041, room, ent, castle):
             out.append((d['x'] // 8, d['y'] // 8, DOOR))
         g = castle['gods'].get(str(room))
         if g:
-            out.append((g['x'] // 8, g['y'] // 8, SIGN_DEMETER if g['type'] == 1 else ROCK))
+            # Donde no hay piedra encima (salas 72 y 143) la VRAM muestra el cartel 8D 93 / 8E 94, que no es pared: el
+            # sello de piedra en la 143 (Ares) dejaba la casilla del dios maciza y su tienda sin entrada.
+            covered = any(r['x'] == g['x'] and r['y'] == g['y'] for r in rocks(rom, e041, room))
+            out.append((g['x'] // 8, g['y'] // 8, SIGN_DEMETER if g['type'] == 1 or not covered else ROCK))
     for s in ent['spawns']:
         if s['type'] in SPAWN_TILES:
             out.append((s['x'] // 8, s['y'] // 8, SPAWN_TILES[s['type']]))

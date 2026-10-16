@@ -249,6 +249,7 @@ namespace MazeOfKnight.Game.Enemies
         {
             Invulnerable = true;
             GrowsDown = !Solid(ctx, X, Y + 16);
+            ArtSizeFrom(ctx, GrowsDown ? CeilingBoxes : FloorBoxes);
             timer = ctx.Rand(1, 256);
             Apply(ctx, 0);
         }
@@ -353,7 +354,11 @@ namespace MazeOfKnight.Game.Enemies
         static readonly int[] StepBoxes = { 0x26, 0x27, 0x28, 0x29, 0x29, 0x29, 0x28, 0x27, 0x26 };
         int step = -1, timer;
 
-        public override void Init(EnemyContext ctx) => Hide(ctx);
+        public override void Init(EnemyContext ctx)
+        {
+            ArtSizeFrom(ctx, StepBoxes);
+            Hide(ctx);
+        }
 
         void Hide(EnemyContext ctx)
         {

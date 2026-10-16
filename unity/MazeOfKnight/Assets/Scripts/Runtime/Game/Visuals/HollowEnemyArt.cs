@@ -10,7 +10,8 @@ namespace MazeOfKnight.Game.Visuals
     // enemigos_centro, fuera de git; los importa tools/hollow/enemigos.py con su tabla de equivalencias). Solo aspecto:
     //   - el dibujo se apoya en su caja de contacto original (abajo en el centro los que andan, en el centro los que
     //     vuelan) y se escala igual en los dos ejes, sin deformarlo: su cuerpo pasa de la caja como mucho K veces, por
-    //     arriba y por los lados (la escala es la menor de las dos). Ninguna colisión cambia;
+    //     arriba y por los lados (la escala es la menor de las dos). La escala se fija al aparecer y no cambia con las
+    //     cajas de cada pose (solo cambian los fotogramas). Ninguna colisión cambia;
     //   - acciones: "atacar" cuando lanza algo (Enemy.Parent de lo que crea), "girar" al darse la vuelta, "mover" si se
     //     ha movido hace poco y si no "quieto"; al morir deja su animación de muerte donde estaba ("morir");
     //   - los proyectiles alargados (spin) apuntan hacia donde vuelan.
@@ -30,7 +31,7 @@ namespace MazeOfKnight.Game.Visuals
         {
             public FrameAnimator Anim = new FrameAnimator();
             public float LastX, LastY, Moved = -10, Angle;
-            public float SizeW, SizeH;       // jefes: la caja de contacto de su primera aparición (la suya cambia con cada pose)
+            public float SizeW, SizeH;       // tamaño fijo del dibujo, el de su aparición (la caja cambia con cada pose)
             public bool LastLeft, Known;
             public string OneShot;           // "atacar" o "girar" mientras se ven
         }
@@ -138,12 +139,20 @@ namespace MazeOfKnight.Game.Visuals
                 cx1 = wx1;
             }
             float w = cx1 - cx0, h = cy1 - cy0;
-            // Los jefes cambian de caja con cada pose del original: el tamaño, con la primera (si no, palpitaría).
-            if (e is Boss && states.TryGetValue(e, out var bs))
+            // El tamaño del dibujo no sigue a la caja: en el original cambia con cada pose (andar, encogerse, los pasos de
+            // los pinchos que crecen, las poses de los jefes) y el sprite se estiraría y encogería como una goma. Se fija
+            // al aparecer: su forma completa (Enemy.ArtSize, los que crecen), la caja sin recortar por Grow, o la unión de
+            // cajas de los jefes y de los de OnWeapon. Cambia de pose solo con sus fotogramas.
+            if (states.TryGetValue(e, out var st0))
             {
-                if (bs.SizeW <= 0) { bs.SizeW = w; bs.SizeH = h; }
-                w = bs.SizeW;
-                h = bs.SizeH;
+                if (st0.SizeW <= 0)
+                {
+                    var (fw, fh) = e.ArtSize ?? (e is Boss || info.OnWeapon ? (w, h) : e.FullSize());
+                    st0.SizeW = Mathf.Max(1, fw);
+                    st0.SizeH = Mathf.Max(1, fh);
+                }
+                w = st0.SizeW;
+                h = st0.SizeH;
             }
             float s = Scale(info, w, h);
             float feet = cy1;
@@ -236,15 +245,15 @@ namespace MazeOfKnight.Game.Visuals
         {
             var info = For(e);
             var clip = info != null ? Clip(info, "morir", false) : null;
-            states.Remove(e);
-            if (clip == null || e.Room == null) return;
+            if (clip == null || e.Room == null) { states.Remove(e); return; }
             if (corpseRoot == null) corpseRoot = new GameObject("Muertes de Hollow Knight").transform;
             var go = new GameObject($"Muerte {info.Key}");
             go.transform.SetParent(corpseRoot, false);
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sortingOrder = sortingOrder;
             if (material != null) sr.sharedMaterial = material;
-            var (pos, scale, rot) = Place(e, info);
+            var (pos, scale, rot) = Place(e, info);      // con su tamaño de siempre
+            states.Remove(e);
             go.transform.SetPositionAndRotation(pos, rot);
             go.transform.localScale = scale;
             var c = new Corpse { Sr = sr, Left = 0.6f };

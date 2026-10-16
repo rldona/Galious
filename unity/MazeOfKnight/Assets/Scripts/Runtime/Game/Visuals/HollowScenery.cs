@@ -161,6 +161,11 @@ namespace MazeOfKnight.Game.Visuals
             return true;
         }
 
+        // Sitios donde no van adornos sobre el suelo (x, y del suelo en píxeles del original): delante de las puertas de
+        // los mundos, de las entradas a los santuarios, de los bancos, de Cornifer y de las lápidas (GameBootstrap.Decor;
+        // un cuenco se quedaba siempre en la entrada).
+        public static System.Func<RoomModel, float, float, bool> Reserved;
+
         // Rehace el escenario de una sala (al construir el mapa y cuando cambia su colisión).
         public void BuildRoom(RoomWorld world, RoomModel room, Transform parent)
         {
@@ -180,7 +185,7 @@ namespace MazeOfKnight.Game.Visuals
                     Row(room, root.transform, rng, "suelo", c0 * 8, c1 * 8, surface - Lip, -4, SueloMax);
                     // Adornos encima (hierba, huesos, tarros): uno de cada Look.DetailEvery casillas, de 12 px de alto como mucho.
                     for (int c = c0; c < c1; c++)
-                        if (rng.Next(look.DetailEvery) == 0 && Pick("detalle", rng) is Sprite d)
+                        if (rng.Next(look.DetailEvery) == 0 && Pick("detalle", rng) is Sprite d && Reserved?.Invoke(room, c * 8 + 4, surface) != true)
                         {
                             var size = SizePx(d);
                             float k = Mathf.Min(1, 12f / size.y);

@@ -13,10 +13,11 @@ from PIL import Image
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/armas"
 
-# arma → (colección, clip, largo en px, mira a la izquierda en Hollow Knight)
+# arma → (colección, clip, largo en px, mira a la izquierda en Hollow Knight). Ball y Ball Lv2 ya miran a la derecha
+# (la cara delante y la estela detrás, a la izquierda): no se voltean.
 WEAPONS = {
-    1: ("Spells Anim", "Ball", 22, True),
-    2: ("Spells Anim", "Ball Lv2", 26, True),
+    1: ("Spells Anim", "Ball", 22, False),
+    2: ("Spells Anim", "Ball Lv2", 26, False),
     3: ("Flameball Anim", "Idle", 14, True),
     4: ("Flameball Anim", "Idle", 14, True),
     5: ("Generic Glob Anim", "Wobble", 14, False),

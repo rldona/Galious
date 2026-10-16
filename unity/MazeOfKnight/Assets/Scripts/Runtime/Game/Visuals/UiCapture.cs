@@ -91,11 +91,13 @@ namespace MazeOfKnight.Game.Visuals
                     ScreenCapture.CaptureScreenshot(Path.Combine(dir, "puerta_2_abierta.png"));
                     yield return new WaitForSeconds(0.3f);
                 }
-                // Santuario (tienda de Ares, castillo).
-                if (game.DebugOpenShrine("Ares"))
+                // Santuarios: uno de cada dios (la tienda de Ares, la primera).
+                foreach (var god in new[] { "Ares", "Hephaestus", "Demeter", "Asclepius", "Death", "Athena" })
                 {
+                    game.GetComponent<ItemTutorial>()?.HideNow();   // sin láminas de tutorial pendientes encima
+                    if (!game.DebugOpenShrine(god)) continue;
                     yield return new WaitForSeconds(0.8f);
-                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, "interfaz_santuario.png"));
+                    ScreenCapture.CaptureScreenshot(Path.Combine(dir, god == "Ares" ? "interfaz_santuario.png" : $"interfaz_santuario_{god.ToLowerInvariant()}.png"));
                     yield return new WaitForSeconds(0.5f);
                     game.GetComponent<ShrineScreen>()?.Close();
                     yield return new WaitForSeconds(0.5f);

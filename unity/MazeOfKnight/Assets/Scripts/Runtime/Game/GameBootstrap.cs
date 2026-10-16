@@ -149,6 +149,7 @@ namespace MazeOfKnight.Game
             Enemies.Killed += e => { if (e is global::MazeOfKnight.Game.Enemies.Shade s) RecoverShade(s); };
             Enemies.Spawned += KeepBenchClear;
             hollowEnemies = Visuals.HollowEnemyArt.Load();
+            Visuals.HollowScenery.Reserved = DecorReserved;
             // Marcador de Hollow Knight (con los dos estilos), si se ha importado.
             if (Visuals.HollowHud.Available) gameObject.AddComponent<Visuals.HollowHud>().game = this;
             // Menú de pausa (Esc o Start) con salida al menú principal.
@@ -344,6 +345,22 @@ namespace MazeOfKnight.Game
             {
                 var b = BenchList.At(mapName, motor.Room.id, motor.X, motor.Y);
                 return b is Benches.Bench bench ? RoomCoords.PixelToWorld(motor.Room, bench.X, bench.Y - 34) : Vector2.zero;
+            }
+        }
+
+        // HollowHud: delante de una puerta de mundo del castillo, lo que se escribe en el centro de la pantalla: "↓ Entrar" si está abierta y, si
+        // no, que hace falta la Gran Llave (lo pidió el usuario: sin el sello el hueco parece abierto). Null si no toca.
+        public string DoorHint
+        {
+            get
+            {
+                if (mapName != "castle" || motor == null || motor.Room == null || motor.State != MotorState.Ground || Busy) return null;
+                var r = motor.Room;
+                if (r.doorWorld <= 0 || r.door == null || motor.Y != r.door.y + 0x18 || motor.X < r.door.x - 8 || motor.X > r.door.x + 40)
+                    return null;
+                if (Doors.IsOpen(r.doorWorld)) return "↓  Entrar";
+                if (Doors.Unlocked.Contains(r.doorWorld) || Doors.OpeningWorld == r.doorWorld) return null;   // se abre sola al llegar
+                return "Cerrada · hace falta la Gran Llave";
             }
         }
 
@@ -959,7 +976,8 @@ namespace MazeOfKnight.Game
                 SetPaused(true);
                 if (s.state == 16)
                 {
-                    // Castillo (estado 16): centrado en godX + 8, suena 0x82 y se hunde 16 px en 64 frames; luego el dios.
+                    // Castillo (estado 16): centrado en godX + 8, suena 0x82 y se hunde 16 px en 64 frames; luego el dios
+                    // (con el arte de Hollow Knight, un fundido a negro: Sink).
                     Sound.PlayMusic(0x82, 0x8D);
                     StartCoroutine(Sink(true, () => shrineScreen.Show(visit)));
                 }
@@ -1004,8 +1022,25 @@ namespace MazeOfKnight.Game
         }
 
         // Hundirse (o subir) 16 px en 64 frames (design bible, cap. 8: sinkPixels, sinkFrames).
+        // Fundido a negro (0…1) que pinta HollowHud encima de todo.
+        public float ScreenFade;
+
         System.Collections.IEnumerator Sink(bool down, System.Action then)
         {
+            if (Visuals.HollowHud.Available)
+            {
+                // Como en Hollow Knight: sin hundirse en el suelo (se veía al Caballero por encima de la piedra), la
+                // pantalla funde a negro al entrar y vuelve de negro al salir, con el Caballero de pie en su sitio.
+                const float seconds = 0.45f;
+                for (float t = 0; t < seconds; t += Time.unscaledDeltaTime)
+                {
+                    ScreenFade = down ? t / seconds : 1 - t / seconds;
+                    yield return null;
+                }
+                ScreenFade = 0;
+                then();
+                yield break;
+            }
             int px = shrines.rules.sinkPixels > 0 ? shrines.rules.sinkPixels : 16, frames = shrines.rules.sinkFrames > 0 ? shrines.rules.sinkFrames : 64;
             for (float f = 0; f < frames; f += Time.deltaTime * 60f)
             {
@@ -1455,9 +1490,10 @@ namespace MazeOfKnight.Game
                 var weaponArt = Visuals.Atmosphere.EnemyArt;
                 if (Visuals.HollowWeapons.Frame(p.Id, p.Age) is Sprite hk && !p.Exploding)
                 {
-                    // El proyectil de Hollow Knight, a su tamaño, en el centro de la caja y mirando hacia donde va.
+                    // El proyectil de Hollow Knight, a su tamaño, en el centro de la caja (las flechas, a media altura del caballero) y
+                    // mirando hacia donde va.
                     sr.sprite = hk;
-                    var c = RoomCoords.PixelToWorld(Weapons.Room ?? motor.Room, (int)((x0 + x1) / 2), (int)((y0 + y1) / 2));
+                    var c = RoomCoords.PixelToWorld(Weapons.Room ?? motor.Room, (int)((x0 + x1) / 2), (int)((y0 + y1) / 2) - Visuals.HollowWeapons.Lift(p.Id));
                     sr.transform.position = new Vector3(c.x, c.y, 0);
                     sr.transform.localScale = new Vector3(p.Dir < 0 ? -1 : 1, 1, 1);
                     sr.flipX = false;

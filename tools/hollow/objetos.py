@@ -97,19 +97,52 @@ def piece(src, col, clip, frame, box, top=False):
     return canvas
 
 
-# Escalera (2 casillas de ancho, tantas filas como tenga): el puntal del ascensor central de Hollow Knight, dos barras con
-# travesaños adornados. Un trozo cuadrado centrado en un travesaño (filas 9…251 de las 439), escalado igual en los dos
-# ejes a 16 × 16 px y partido en 4 baldosas de 8 × 8 que se alternan por filas (arriba/abajo) y columnas (izq./der.).
-LADDER = ("central_elev_strut", (0, 9, 242, 251))
+# Escalera (2 casillas de ancho, tantas filas como tenga): Hollow Knight no tiene escaleras de mano, así que se montan
+# con sus piezas (las dos que eligió el usuario de las maquetas): "cadenas", dos cadenas (col_NPC_chain, dos eslabones
+# por baldosa: su periodo son 59 texels) con travesaños de hierro; "adorno", dos cadenas de campanas (chain_01) con
+# travesaños; y "hierro", dos barras con un peldaño cada 4 px (metal_additions_pole). MapView elige por mapa. Cada una es un cuadrado de 16 × 16 px (128 texels)
+# que se repite, partido en 4 baldosas de 8 × 8 que se alternan por filas (arriba/abajo) y columnas (izq./der.).
 LADDER_OUT = OUT.parent / "escalera"
+
+
+def ladder_tiles(src):
+    def piece(name):
+        im = Image.open(find(src, name)).convert("RGBA")
+        return im.crop(im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox())
+    pole = piece("metal_additions_pole")
+    rung = lambda w, h: pole.rotate(90, expand=True).resize((w, h), Image.LANCZOS)
+    chain = piece("col_NPC_chain").crop((0, 20, 23, 138)).resize((25, 128), Image.LANCZOS)
+    chains = Image.new("RGBA", (128, 128))
+    for y in (25, 89):
+        chains.alpha_composite(rung(104, 14), (12, y))
+    for x in (6, 97):
+        chains.alpha_composite(chain, (x, 0))
+    bars = Image.new("RGBA", (128, 128))
+    for y in range(12, 128, 32):
+        bars.alpha_composite(rung(108, 10), (10, y))
+    rail = pole.resize((14, pole.height * 14 // pole.width), Image.LANCZOS)
+    rail = rail.crop((0, rail.height // 2 - 64, 14, rail.height // 2 + 64))
+    for x in (8, 106):
+        bars.alpha_composite(rail, (x, 0))
+    # "adorno": las cadenas de campanas (chain_01; periodo de 47 texels, una campana) con travesaños de hierro.
+    bell = piece("chain_01").crop((0, 128, 52, 175)).resize((34, 32), Image.LANCZOS)
+    bells = Image.new("RGBA", (128, 128))
+    for y in (22, 86):
+        bells.alpha_composite(rung(104, 12), (12, y))
+    for x in (2, 92):
+        for y in range(0, 128, 32):
+            bells.alpha_composite(bell, (x, y))
+    return {"cadenas": chains, "hierro": bars, "adorno": bells}
 
 
 def build_ladder(src):
     LADDER_OUT.mkdir(parents=True, exist_ok=True)
-    im = Image.open(find(src, LADDER[0])).convert("RGBA").crop(LADDER[1]).resize((128, 128), Image.LANCZOS)
-    for r, rn in ((0, "arriba"), (1, "abajo")):
-        for c, cn in ((0, "izq"), (1, "der")):
-            im.crop((64 * c, 64 * r, 64 * c + 64, 64 * r + 64)).save(LADDER_OUT / f"escalera_{rn}_{cn}.png")
+    for old in LADDER_OUT.glob("*.png"):
+        old.unlink()
+    for variant, im in ladder_tiles(src).items():
+        for r, rn in ((0, "arriba"), (1, "abajo")):
+            for c, cn in ((0, "izq"), (1, "der")):
+                im.crop((64 * c, 64 * r, 64 * c + 64, 64 * r + 64)).save(LADDER_OUT / f"escalera_{variant}_{rn}_{cn}.png")
 
 
 def find(src, name):

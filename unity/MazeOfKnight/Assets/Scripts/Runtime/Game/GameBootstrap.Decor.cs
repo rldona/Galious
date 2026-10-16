@@ -8,7 +8,8 @@ namespace MazeOfKnight.Game
 {
     // Decorados que en el original son baldosas del fondo y el escenario de Hollow Knight no pinta (solo dibuja la
     // colisión): las lápidas de cada mundo (la de la palabra del jefe, una tablilla que brilla), las entradas a los
-    // santuarios del castillo (cuando no las tapa una piedra) y el marco de las puertas de los mundos. Sprites de
+    // santuarios del castillo (cuando no las tapa una piedra; las tiendas, una cueva de la zona) y el marco de las
+    // puertas de los mundos. Sprites de
     // Assets/Art/Resources/Hollow/decorados (tools/hollow/decorados.py), con los pies abajo en el centro.
     public partial class GameBootstrap
     {
@@ -35,6 +36,25 @@ namespace MazeOfKnight.Game
             return go;
         }
 
+        // Suelo que se deja libre de adornos del escenario (Visuals.HollowScenery.Reserved): (x, y) en píxeles del original,
+        // y la del suelo. Las puertas de los mundos y las entradas, con margen a los lados; bancos, Cornifer y lápidas.
+        bool DecorReserved(RoomModel room, float x, float y)
+        {
+            bool Near(float x0, float x1, float floor) => x >= x0 && x <= x1 && Mathf.Abs(y - floor) <= 8;
+            if (room.doorWorld > 0 && room.door != null && Near(room.door.x - 12, room.door.x + 44, room.door.y + 24)) return true;
+            foreach (var s in shrines.shrines)
+                if (s.map == mapName && s.room == room.id && s.entry.how == "down" && Near(s.entry.godX - 16, s.entry.godX + 32, s.entry.godY + 16))
+                    return true;
+            foreach (var b in BenchList.In(mapName, room.id))
+                if (Near(b.X - 28, b.X + 28, b.Y)) return true;
+            if (RemakeRules.HollowMaps && mapName != "castle" && CorniferList.In(Inventory.CurrentWorld, room.id) is Cornifers.Spot c && Near(c.X - 24, c.X + 24, c.Y))
+                return true;
+            int e041 = maps.TryGetValue(mapName, out var md) ? md.e041 : -1;
+            foreach (var t in Weapons.Data.magnifier.tombstones)
+                if (t.e041 == e041 && t.room == room.id && Near(t.x - 8, t.x + 24, t.y + 16)) return true;
+            return false;
+        }
+
         void ShowDecor()
         {
             foreach (var go in decorViews) if (go != null) Destroy(go);
@@ -53,20 +73,51 @@ namespace MazeOfKnight.Game
             foreach (var s in shrines.shrines)
             {
                 if (s.map != mapName || s.entry.how != "down" || !(World.Room(s.room) is RoomModel room)) continue;
-                var door = Place(room, Decor(s.kind == "shop" ? "puerta_tienda" : "puerta_santuario"), s.entry.godX + 8, s.entry.godY + 16, 2,
+                // Las tiendas, una boca de cueva, la de la zona de Hollow Knight del mapa si la hay (lo pidió el usuario).
+                var sprite = s.kind == "shop"
+                    ? Decor("puerta_tienda_" + Visuals.HollowScenery.LookFor(mapName).Zone) ?? Decor("puerta_tienda")
+                    : Decor("puerta_santuario");
+                var door = Place(room, sprite, s.entry.godX + 8, s.entry.godY + 16, 2,
                     $"Entrada al santuario (sala {s.room})");
                 shrineDoorViews[(s.room, s.entry.godX, s.entry.godY)] = door;
             }
             UpdateShrineDoors();
             // Marco de las puertas de los mundos: la puerta ocupa 4 × 3 casillas desde (door.x, door.y), con la de jefe de
-            // Hollow Knight en el hueco del centro (MapView.ShowDoor); a los lados, columnas, y encima, un arco.
+            // Hollow Knight en el hueco del centro (MapView.ShowDoor); alrededor, una fachada de Hollow Knight según el
+            // mundo (tools/hollow/decorados.py; sin ella, columnas a los lados y un arco encima).
             foreach (var room in World.Rooms)
             {
                 if (room.doorWorld <= 0 || room.door == null) continue;
                 int x = room.door.x, y = room.door.y;
-                Place(room, Decor("columna"), x + 3, y + 24, 2, $"Columna (mundo {room.doorWorld})");
-                Place(room, Decor("columna"), x + 29, y + 24, 2, $"Columna (mundo {room.doorWorld})", true);
-                Place(room, Decor("arco"), x + 16, y + 6, 2, $"Arco (mundo {room.doorWorld})");
+                if ((Decor($"puerta_mundo_{room.doorWorld}") ?? Decor("puerta_mundo")) is Sprite frame)
+                    // La fachada del mundo al que lleva (o la de los Creyentes), apoyada en el suelo de la puerta, con el
+                    // hueco en el del original y detrás del sello.
+                {
+                    var go = Place(room, frame, x + 16, y + 24, -9, $"Puerta (mundo {room.doorWorld})");   // por debajo del sello (−7)
+                    // Que quepa entre el suelo y el techo (si no, el techo la corta): el aire sobre el centro de la puerta.
+                    int free = 0;
+                    while (free < 160 && !World.Solid(room, x + 16, y + 23 - free) && !World.Solid(room, x + 4, y + 23 - free) &&
+                           !World.Solid(room, x + 28, y + 23 - free)) free++;
+                    float tall = frame.bounds.size.y * go.transform.localScale.y * RoomCoords.PixelsPerUnit;   // px del original
+                    if (tall > free + 4 && tall > 0) go.transform.localScale *= Mathf.Max(0.5f, (free + 4) / tall);
+                    // Estandartes de entrada a los lados de la fachada, de pie en el suelo (si no hay pared ahí), delante de ella.
+                    float half = frame.bounds.size.x * go.transform.localScale.x * RoomCoords.PixelsPerUnit / 2;
+                    if (Decor("estandarte") is Sprite banner)
+                        foreach (int side in new[] { -1, 1 })
+                        {
+                            int bx = x + 16 + side * Mathf.RoundToInt(half + 4);
+                            if (bx < 4 || bx > 252 || World.Solid(room, bx, y + 12) || !World.Solid(room, bx, y + 24)) continue;
+                            var b = Place(room, banner, bx, y + 24, -8, $"Estandarte (mundo {room.doorWorld})", side > 0);
+                            float bt = banner.bounds.size.y * b.transform.localScale.y * RoomCoords.PixelsPerUnit;
+                            if (bt > free + 4 && bt > 0) b.transform.localScale *= Mathf.Max(0.5f, (free + 4) / bt);
+                        }
+                }
+                else
+                {
+                    Place(room, Decor("columna"), x + 3, y + 24, 2, $"Columna (mundo {room.doorWorld})");
+                    Place(room, Decor("columna"), x + 29, y + 24, 2, $"Columna (mundo {room.doorWorld})", true);
+                    Place(room, Decor("arco"), x + 16, y + 6, 2, $"Arco (mundo {room.doorWorld})");
+                }
                 DoorLight(room, x + 16, y + 12);
             }
         }

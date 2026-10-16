@@ -269,6 +269,28 @@ namespace MazeOfKnight.Game.Enemies
 
         public bool GrowsDown;           // cuelga del techo (crece hacia abajo)
 
+        // Solo aspecto: el tamaño (w, h) de su forma completa, para los que crecen o encogen (pinchos, brotes, los que
+        // salen del suelo), que dibuja su sprite siempre a ese tamaño y no a la caja de cada momento. Null: la primera caja.
+        public (float w, float h)? ArtSize;
+
+        // ArtSize de las cajas de la tabla que usa (la mayor en ancho y en alto). Sin tabla, nada.
+        protected void ArtSizeFrom(EnemyContext ctx, params int[] boxes)
+        {
+            var t = ctx.Boxes;
+            if (t == null) return;
+            float w = 0, h = 0;
+            foreach (int i in boxes)
+                if (i >= 0 && i < t.Count) { w = Math.Max(w, t[i].w + 1); h = Math.Max(h, t[i].h + 1); }
+            if (w > 0) ArtSize = (w, h);
+        }
+
+        // Caja de ahora sin recortar por Grow (la forma completa de esta pose).
+        public (float w, float h) FullSize()
+        {
+            var b = FacingLeft && LeftBox != null ? LeftBox : HitBox;
+            return b != null ? (b.w + 1, b.h + 1) : (Width, Height);
+        }
+
         // Índice de la caja actual en la tabla (IX+11), −1 si es la física o una calculada.
         public int BoxIndex = -1;
 

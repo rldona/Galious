@@ -112,6 +112,14 @@ namespace MazeOfKnight.Game.Visuals
 
         void OnGUI()
         {
+            Body();
+            // El fundido a negro de entrar y salir de un santuario (GameBootstrap.ScreenFade), encima de todo.
+            if (game != null && game.ScreenFade > 0)
+                UiKit.Box(new Rect(0, 0, Screen.width, Screen.height), new Color(0, 0, 0, game.ScreenFade));
+        }
+
+        void Body()
+        {
             if (!Active || game == null || game.Motor == null || game.AttractRunning || game.EndingRunning) return;
             if (menu == null) menu = game.GetComponent<InventoryMenu>();
             if (shrine == null) shrine = game.GetComponent<ShrineScreen>();
@@ -182,6 +190,16 @@ namespace MazeOfKnight.Game.Visuals
             else if (bosses != null && bosses.Listening)
                 UiKit.Text(new Rect(0, Screen.height - pad - 30 * s, Screen.width, 26 * s), "Escribe la palabra de la lápida", 15, TextAnchor.MiddleCenter, UiKit.Dim);
 
+            // Delante de una puerta de mundo: "Entrar" o que está cerrada y hace falta la Gran Llave. En el centro de la pantalla
+            // (encima de la puerta suele estar el techo; lo pidió el usuario).
+            if (game.DoorHint is string hint)
+            {
+                var hr = new Rect(Screen.width * 0.3f, (Screen.height - 42 * s) / 2, Screen.width * 0.4f, 42 * s);
+                UiKit.Shade(hr, 0.6f);
+                UiKit.Text(hr, hint, 20, TextAnchor.MiddleCenter, UiKit.Bone, true);
+                // A los lados, las flechas de filigrana blanca de los menús (lo pidió el usuario).
+                HollowMenus.Arrows(hr.center.x, hr.center.y, hint, 20);
+            }
             // Junto a un banco: "Descansar", como en Hollow Knight; al guardar, la cresta abajo a la derecha.
             if (game.NearBench && Camera.main != null)
             {

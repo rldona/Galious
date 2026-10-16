@@ -179,7 +179,10 @@ namespace MazeOfKnight.Game
                 if (Resources.Load<Sprite>("Hollow/decorados/arco") != null) { }
                 else if (Style?.Door != null) FillPattern(doorsLayer, room, x, y, Style.Door, 3);
                 else Fill(doorsLayer, room, x, y, 4, 3, door);
-                var gate = openRows >= 2 ? null : Visuals.HollowItems.Piece(openRows == 1 ? "puerta_mundo_media" : "puerta_mundo_cerrada");
+                // Con la fachada de Hollow Knight (decorados/puerta_mundo) el hueco se deja abierto: el sello parecía una piedra
+                // y no se veía que es una entrada (lo pidió el usuario). Se sigue sin poder pasar hasta que se abre.
+                bool facade = Resources.Load<Sprite>("Hollow/decorados/puerta_mundo") != null;
+                var gate = openRows >= 2 || facade ? null : Visuals.HollowItems.Piece(openRows == 1 ? "puerta_mundo_media" : "puerta_mundo_cerrada");
                 Piece(("mundo", room, x, y), room, x + 16, y + 24, gate, -7);
                 return;
             }
@@ -306,27 +309,30 @@ namespace MazeOfKnight.Game
                         tm.SetTile(RoomCoords.Cell(room, c, r), tile);
         }
 
-        // Escalera de Hollow Knight (Assets/Art/Resources/Hollow/escalera, tools/hollow/objetos.py): el puntal del ascensor
-        // central en 4 baldosas, [fila par/impar, columna izquierda/derecha]. Null si no se ha importado.
-        TileBase[,] hollowLadder;
-        bool hollowLadderLoaded;
+        // Escalera de Hollow Knight (Assets/Art/Resources/Hollow/escalera, tools/hollow/objetos.py) en 4 baldosas, [fila
+        // par/impar, columna izquierda/derecha], de las tres que eligió el usuario: en el castillo, barras de hierro; en
+        // los mundos construidos (Canales, Ciudad, Confines, Palacio: 2, 5, 9 y 10), cadenas de campanas; en las cuevas,
+        // cadenas con travesaños. Null si no se ha importado.
+        public static string LadderVariant(string map) =>
+            map == "castle" ? "hierro" : map is "world02" or "world05" or "world09" or "world10" ? "adorno" : "cadenas";
+        readonly Dictionary<string, TileBase[,]> hollowLadders = new Dictionary<string, TileBase[,]>();
         TileBase[,] HollowLadder()
         {
-            if (hollowLadderLoaded) return hollowLadder;
-            hollowLadderLoaded = true;
+            string variant = LadderVariant(lastMap != null ? lastMap.mapName : null);
+            if (hollowLadders.TryGetValue(variant, out var cached)) return cached;
             var t = new TileBase[2, 2];
             string[] rows = { "arriba", "abajo" }, cols = { "izq", "der" };
-            for (int r = 0; r < 2; r++)
+            for (int r = 0; r < 2 && t != null; r++)
                 for (int c = 0; c < 2; c++)
                 {
-                    var sp = Resources.Load<Sprite>($"Hollow/escalera/escalera_{rows[r]}_{cols[c]}");
-                    if (sp == null) return null;
+                    var sp = Resources.Load<Sprite>($"Hollow/escalera/escalera_{variant}_{rows[r]}_{cols[c]}");
+                    if (sp == null) { t = null; break; }
                     var tile = ScriptableObject.CreateInstance<Tile>();
                     tile.sprite = sp;
                     tile.colliderType = Tile.ColliderType.None;
                     t[r, c] = tile;
                 }
-            return hollowLadder = t;
+            return hollowLadders[variant] = t;
         }
 
         TileBase TileAtCell(RoomWorld world, RoomModel room, int col, int row)

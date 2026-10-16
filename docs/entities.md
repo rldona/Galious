@@ -50,10 +50,7 @@ Al cargar la sala, el banco 1 pinta sobre el mapa de nombres, en este orden: esc
 | Objetos 1, 2, 3, 4, 0x13 | columna 1×3: `C5` · `C6 C7 C8` · `CF` · `D0 D1 D2` · `CF` |
 | Objetos 7, 0x17, 0x27, 0x37 | pasadizo 4×3 (`F0`) |
 
-**Validación** [O]: el mapa de nombres previsto (disposición + superposiciones) coincide tile a tile con la VRAM en **298 de 311 salas**. Las diferencias restantes:
-- Castillo, sala 143: un cartel 8D 93 / 8E 94 donde la tabla de dioses da otro sello.
-
-Con los eventos de sala (sección siguiente) y el destello de las armas secundarias, quedan **310 de 311** salas idénticas.
+**Validación** [O]: el mapa de nombres previsto (disposición + superposiciones) coincide tile a tile con la VRAM en **298 de 311 salas**. Con los eventos de sala (sección siguiente) y el destello de las armas secundarias, **310 de 311**. La que faltaba, la sala 143 del castillo (tienda de Ares), lleva el cartel 8D 93 / 8E 94 aunque su dios no sea Demeter: el cartel sale donde la casilla del dios no tiene piedra encima (salas 72 y 143) y el sello de piedra BA–BD donde sí. Con esa regla, **311 de 311**. El sello de piedra es pared (≥ BA), así que con la regla anterior la tienda de la sala 143 no tenía dónde ponerse de pie para entrar.
 
 Con las superposiciones, el render se parece a las capturas en un 99,1 % en el castillo y un 98,2–99,0 % en los mundos. En la sala del jefe se queda en el 94 %, porque carga gráficos propios para los tiles del emblema.
 

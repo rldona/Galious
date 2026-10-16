@@ -144,6 +144,14 @@ namespace MazeOfKnight.Game.Visuals
                         game.Motor.Place(game.World, room, x, y);
                         yield return new WaitForSeconds(0.4f);
                     }
+                // Con puerta de mundo: el jugador delante, con el rótulo (cerrada o "Entrar").
+                if (roomsWorld == 0 && room.doorWorld > 0 && room.door != null)
+                {
+                    game.Motor.Place(game.World, room, room.door.x + 16, room.door.y + 0x18);
+                    yield return new WaitForSeconds(0.4f);
+                    yield return Shot($"sala_m{roomsWorld:00}_{id:000}_puerta");
+                    game.Motor.Place(game.World, room, x, y);
+                }
                 CollisionGridOverlay.Show = HitboxOverlay.Show = true;
             }
         }

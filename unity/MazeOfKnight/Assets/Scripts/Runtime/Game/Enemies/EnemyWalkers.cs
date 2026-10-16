@@ -567,7 +567,11 @@ namespace MazeOfKnight.Game.Enemies
             }
         }
 
-        public override void Init(EnemyContext ctx) => Hide(ctx);
+        public override void Init(EnemyContext ctx)
+        {
+            ArtSizeFrom(ctx, 0x16);
+            Hide(ctx);
+        }
 
         void Hide(EnemyContext ctx) { phase = 0; timer = ctx.Rand(128, 191); Visible = Harmful = Hittable = false; }
 

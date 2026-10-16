@@ -13,6 +13,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/musica"
+LOUDNESS = -14            # LUFS de todas las pistas (lo pidió el usuario: la música se oía muy baja frente a los efectos)
 
 TRACKS = {
     "titulo": ["Title"],
@@ -48,7 +49,10 @@ def build(src):
         inputs = []
         for p in parts:
             inputs += ["-i", str(src / "hollow-knight-audio/musica" / f"{p}.m4a")]
-        mix = ["-filter_complex", f"amix=inputs={len(parts)}:duration=longest:normalize=0"] if len(parts) > 1 else []
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, *mix, "-c:a", "libmp3lame", "-b:a", "160k", str(out)],
+        # Las pistas de Hollow Knight vienen muy bajas (−25 a −29 dB de media) y quedaban por debajo de los efectos del chip:
+        # se normalizan a LOUDNESS LUFS (con los picos a −1,5 dB) después de mezclar las capas.
+        norm = f"loudnorm=I={LOUDNESS}:TP=-1.5:LRA=11"
+        mix = ["-filter_complex", f"amix=inputs={len(parts)}:duration=longest:normalize=0,{norm}"] if len(parts) > 1 else ["-af", norm]
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, *mix, "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "160k", str(out)],
                        check=True)
     print(f"música: {len(TRACKS)} pistas → {OUT}")

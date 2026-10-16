@@ -5,14 +5,14 @@ namespace MazeOfKnight.Game
 {
     // Pantalla de un santuario (estado 16 en el castillo, 14 en los mundos; docs/design_bible/08_santuarios.md):
     // nombre y retrato del dios, ventana de texto (filas 4–10) y, en las tiendas, tres huecos con su precio y la mano
-    // debajo del elegido. ← → eligen, espacio compra o responde, ↓ sale. El juego queda en pausa.
+    // debajo del elegido. ← → eligen, espacio compra o responde, ↓ sale (también con mando: cruceta o stick, A y B). El
+    // juego queda en pausa. Con el arte de Hollow Knight, DrawHollow.
     // [I] Sin gráficos del original: cuadros y texto. Sin la animación de bajar al santuario.
     public class ShrineScreen : MonoBehaviour
     {
         public GameBootstrap game;
         public ShrineVisit Visit { get; private set; }
         GUIStyle text, small;
-        bool downHeld = true;
         float autoExit;
 
         public bool Open => Visit != null;
@@ -29,33 +29,36 @@ namespace MazeOfKnight.Game
         public void Show(ShrineVisit visit)
         {
             Visit = visit;
-            downHeld = true;          // el ↓ con el que se ha entrado no cuenta para salir
+            shownAt = Time.unscaledTime;   // el ↓ con el que se ha entrado no cuenta para salir
         }
+
+        float shownAt;
 
         void Update()
         {
             if (Visit == null) return;
-            var kb = Keyboard.current;
-            if (kb == null) return;
-            bool down = kb.downArrowKey.isPressed || kb.sKey.isPressed;
             if (Visit.AutoExitFrames > 0)
             {
                 // La Muerte ya ha respondido: se sale sola a los 180 frames y ↓ no hace nada.
-                autoExit += Time.deltaTime * 60f;
+                autoExit += Time.unscaledDeltaTime * 60f;
                 if (autoExit >= Visit.AutoExitFrames) { var w = Visit; Visit = null; autoExit = 0; game.LeaveShrine(w); }
                 return;
             }
-            if (down && !downHeld)
+            // Con teclado y con mando (Visuals/HollowMenus): ← → eligen (cruceta o stick), Aceptar (A, Espacio, Intro o Z)
+            // compra o responde, y ↓ (como en el original), B o Esc salen. El ↓ o el stick con que se ha entrado no cuentan.
+            var kb = Keyboard.current;
+            bool settled = Time.unscaledTime - shownAt > 0.35f;
+            bool exit = settled && (Visuals.HollowMenus.Down || Visuals.HollowMenus.Back);
+            if (exit)
             {
                 var v = Visit;
                 Visit = null;
                 game.LeaveShrine(v);
                 return;
             }
-            downHeld = down;
-            if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame) { Visit.Move(-1); Sound.Effect(0x2C); }
-            if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame) { Visit.Move(1); Sound.Effect(0x2C); }
-            if (kb.spaceKey.wasPressedThisFrame)
+            if (Visuals.HollowMenus.Left || kb != null && kb.aKey.wasPressedThisFrame) { Visit.Move(-1); Sound.Effect(0x2C); }
+            if (Visuals.HollowMenus.Right || kb != null && kb.dKey.wasPressedThisFrame) { Visit.Move(1); Sound.Effect(0x2C); }
+            if (settled && Visuals.HollowMenus.Accept)
             {
                 if (Visit.Confirm()) { Sound.Effect(0x2D); game.Say("Comprado"); }
                 else if (Visit.Refused) Sound.Effect(0x2F);
@@ -75,6 +78,11 @@ namespace MazeOfKnight.Game
             text.fontSize = Mathf.Max(10, (int)(6.5f * scale));
             small.fontSize = Mathf.Max(8, (int)(5f * scale));
             var s = Visit.Shrine;
+            if (Visuals.HollowMenus.Available)
+            {
+                DrawHollow();
+                return;
+            }
             if (Visuals.Atmosphere.Styled)
             {
                 {
@@ -159,6 +167,108 @@ namespace MazeOfKnight.Game
             T(R(0, 184, 256, 8),
                 $"flechas {Visit.Arrows:000}   monedas {Visit.Coins:000}   llaves {Visit.Keys:000}     ← → elegir   Espacio {(s.kind == "shop" ? "comprar" : "aceptar")}   ↓ salir",
                 4.2f, TextAnchor.MiddleCenter, Visuals.UiKit.Dim);
+        }
+
+        // Como en Hollow Knight (Galious: The Hollow Kingdom): el dios lo hace un personaje de Hollow Knight (tools/hollow/
+        // dioses.py) a la izquierda, con un halo; a la derecha su nombre con la filigrana, lo que dice en castellano
+        // (ShrineTexts) y, en las tiendas, los tres objetos con su icono, su nombre y su precio en geo, las flechas de los
+        // menús en el elegido y su descripción debajo. Abajo, lo que se lleva y los botones.
+        void DrawHollow()
+        {
+            var sh = Visit.Shrine;
+            float s = Visuals.UiKit.Scale, W = Screen.width, H = Screen.height;
+            GUI.depth = -9;
+            Visuals.UiKit.Box(new Rect(0, 0, W, H), new Color(0.01f, 0.01f, 0.02f, 0.985f));
+            // El dios, de pie y respirando.
+            var frames = GodFrames(sh.god);
+            float px = W * 0.26f, feet = H * 0.80f;
+            var old = GUI.color;
+            GUI.color = new Color(0.75f, 0.8f, 1f, 0.22f);
+            GUI.DrawTexture(new Rect(px - 260 * s, feet - 520 * s, 520 * s, 520 * s), Visuals.HollowMenus.Blob);
+            GUI.color = old;
+            if (frames.Length > 0)
+            {
+                var sp = frames[(int)(Time.unscaledTime * 10) % frames.Length];
+                // Todos del mismo alto en pantalla (Sly es diminuto y Grimm muy alto en Hollow Knight); el más ancho, que quepa.
+                float k = H * 0.42f / frames[0].rect.height;
+                k = Mathf.Min(k, W * 0.36f / frames[0].rect.width);
+                float w = sp.rect.width * k, h = sp.rect.height * k;
+                Visuals.UiKit.Icon(new Rect(px - w / 2, feet - h, w, h), sp);
+            }
+            // Nombre y lo que dice.
+            float cx = W * 0.64f, cw = Mathf.Min(W * 0.5f, 760 * s), x0 = cx - cw / 2;
+            float y = H * 0.12f;
+            Visuals.UiKit.Text(new Rect(x0, y, cw, 50 * s), ShrineTexts.God(sh.god).ToUpperInvariant(), 38, TextAnchor.MiddleCenter, Visuals.UiKit.Bone, true);
+            Visuals.HollowMenus.Divider(cx, y + 54 * s, 260 * s);
+            y += 54 * s + Visuals.HollowMenus.DividerHeight(260 * s) + 18 * s;
+            Visuals.UiKit.Text(new Rect(x0, y, cw, 110 * s), ShrineTexts.Spanish(Visit.Text), 22, TextAnchor.UpperCenter, Visuals.UiKit.Bone);
+            y += 120 * s;
+            if (Visit.AskYesNo)
+            {
+                // Sí y No, uno al lado del otro (← → como en el original).
+                foreach (var (label, on, ox) in new[] { ("Sí", Visit.Yes, -110f), ("No", !Visit.Yes, 110f) })
+                {
+                    var r = new Rect(cx + ox * s - 100 * s, y, 200 * s, 40 * s);
+                    Visuals.UiKit.Text(r, label, 26, TextAnchor.MiddleCenter, on ? Visuals.UiKit.Bone : Visuals.UiKit.Dim, true);
+                    if (on) Visuals.HollowMenus.Arrows(r.center.x, r.center.y, label, 26);
+                }
+            }
+            if (sh.kind == "shop")
+            {
+                float cell = cw / 3;
+                for (int slot = 0; slot < 3; slot++)
+                {
+                    var item = Visit.ItemAt(slot);
+                    if (item == null) continue;
+                    float ccx = x0 + cell * (slot + 0.5f);
+                    bool sold = Visit.Sold.Contains(slot), on = Visit.Cursor == slot;
+                    float a = sold ? 0.3f : 1f;
+                    if (on)
+                    {
+                        old = GUI.color;
+                        GUI.color = new Color(1, 0.95f, 0.8f, 0.12f);
+                        GUI.DrawTexture(new Rect(ccx - 90 * s, y - 20 * s, 180 * s, 200 * s), Visuals.HollowMenus.Blob);
+                        GUI.color = old;
+                    }
+                    if (Visuals.HollowItems.Icon(item.type) is Sprite icon)
+                        Visuals.UiKit.Icon(new Rect(ccx - 44 * s, y, 88 * s, 88 * s), icon, a);
+                    string name = sold ? "Vendido" : ShrineTexts.Item(item.type);
+                    var nr = new Rect(ccx - cell / 2, y + 96 * s, cell, 30 * s);
+                    Visuals.UiKit.Text(nr, name, 19, TextAnchor.MiddleCenter, on ? Visuals.UiKit.Bone : Visuals.UiKit.Dim, true, a);
+                    if (on && !sold) Visuals.HollowMenus.Arrows(nr.center.x, nr.center.y, name, 19);
+                    Visuals.UiKit.Text(new Rect(ccx - cell / 2, y + 128 * s, cell, 26 * s), $"{item.price} geo", 18, TextAnchor.MiddleCenter, Visuals.UiKit.Gold, true, a);
+                }
+                if (Visit.Cursor >= 0 && Visit.ItemAt(Visit.Cursor) is MazeOfKnight.Data.ShrineItem sel)
+                    Visuals.UiKit.Text(new Rect(x0, y + 172 * s, cw, 70 * s), ShrineTexts.ItemText(sel.type), 17, TextAnchor.UpperCenter, Visuals.UiKit.Dim);
+            }
+            // Lo que se lleva y los botones.
+            float by = H - 64 * s;
+            float ix = W / 2 - 330 * s;
+            foreach (var (type, n) in new[] { (0x2E, Visit.Coins), (0x2D, Visit.Arrows), (0x2F, Visit.Keys) })
+            {
+                if (Visuals.HollowItems.Icon(type) is Sprite ic) Visuals.UiKit.Icon(new Rect(ix, by, 30 * s, 30 * s), ic);
+                Visuals.UiKit.Text(new Rect(ix + 36 * s, by, 80 * s, 30 * s), n.ToString(), 19, TextAnchor.MiddleLeft, Visuals.UiKit.Bone, true);
+                ix += 110 * s;
+            }
+            string accept = sh.kind == "shop" ? "Comprar" : "Aceptar";
+            Visuals.UiKit.Text(new Rect(W / 2, by, 330 * s, 30 * s), Visit.AutoExitFrames > 0 ? "" : $"{accept}  A · Espacio     Salir  B · Esc · ↓",
+                15, TextAnchor.MiddleRight, Visuals.UiKit.Dim);
+        }
+
+        static readonly System.Collections.Generic.Dictionary<string, Sprite[]> godFrames = new System.Collections.Generic.Dictionary<string, Sprite[]>();
+
+        // Los fotogramas del personaje de Hollow Knight que hace de ese dios (vacío si no se ha importado).
+        static Sprite[] GodFrames(string god)
+        {
+            if (godFrames.TryGetValue(god, out var f)) return f;
+            var l = new System.Collections.Generic.List<Sprite>();
+            for (int i = 0; ; i++)
+            {
+                var sp = Resources.Load<Sprite>($"Hollow/dioses/{god.ToLowerInvariant()}_{i:00}");
+                if (sp == null) break;
+                l.Add(sp);
+            }
+            return godFrames[god] = l.ToArray();
         }
 
         static void Box(Rect r, Color c)
