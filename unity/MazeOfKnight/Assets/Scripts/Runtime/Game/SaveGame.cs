@@ -26,6 +26,7 @@ namespace MazeOfKnight.Game
         public int soul;                     // RemakeRules.HollowSoul
         public List<int> charms = new List<int>();      // RemakeRules.HollowCharms: los que se tienen (equipados: en items)
         public List<int> tutorials = new List<int>();   // láminas ya vistas
+        public List<int> journal = new List<int>();     // RemakeRules.HollowJournal: tipo * 65536 + derrotas
         public string benchMap = "";
         public int benchRoom, benchX, benchY;
         public string shadeMap = "";

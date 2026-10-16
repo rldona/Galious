@@ -68,6 +68,17 @@ namespace MazeOfKnight.Game.Visuals
                 inv.ShowTab(2);
                 yield return new WaitForSeconds(0.4f);
                 yield return Shot("mapa");
+                if (HuntersJournal.Available)
+                {
+                    foreach (int t in new[] { 0x0E, 0x0E, 0x25, 0x0A, 0x18, 0x101 }) game.Journal.Killed(t);
+                    for (int i = 0; i < 9; i++) game.Journal.Killed(0x0E);
+                    inv.ShowJournal(0x0E);
+                    yield return new WaitForSeconds(0.4f);
+                    yield return Shot("diario");
+                    inv.ShowJournal(0x25);
+                    yield return new WaitForSeconds(0.4f);
+                    yield return Shot("diario_sin_notas");
+                }
                 inv.Toggle();
                 var tut = game.GetComponent<ItemTutorial>();
                 if (tut != null)
@@ -78,6 +89,14 @@ namespace MazeOfKnight.Game.Visuals
                     tut.ShowNow(0x19);
                     yield return new WaitForSeconds(1.2f);
                     yield return Shot("lamina_amuleto");
+                    tut.HideNow();
+                }
+                var hj = game.GetComponent<HuntersJournal>();
+                if (hj != null)
+                {
+                    hj.ShowToast(HuntersJournal.Of(0x27));
+                    yield return new WaitForSeconds(0.8f);
+                    yield return Shot("diario_aviso");
                 }
             }
             Application.Quit();

@@ -25,6 +25,7 @@ namespace MazeOfKnight.Game.Visuals
 
         // Para las capturas.
         public void ShowNow(int t) { pending.Clear(); Show(t); }
+        public void HideNow() { pending.Clear(); Open = false; game.SetPaused(false); }
 
         void Show(int t)
         {

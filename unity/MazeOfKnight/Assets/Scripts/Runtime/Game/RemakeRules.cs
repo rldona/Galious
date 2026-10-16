@@ -71,6 +71,11 @@ namespace MazeOfKnight.Game
         // los objetos de progreso siguen activos siempre.
         public static bool HollowCharms = true;           // activado: lo ha pedido el usuario
 
+        // Original: no hay registro de enemigos. Remake (lo pidió el usuario): el diario del cazador de Hollow Knight
+        // (Journal): una entrada por criatura con su retrato, cuántas se han derrotado y, a partir de Journal.NotesAt (los
+        // jefes, 1), las notas del cazador. Pestaña Diario del inventario. No cambia nada del juego.
+        public static bool HollowJournal = true;          // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

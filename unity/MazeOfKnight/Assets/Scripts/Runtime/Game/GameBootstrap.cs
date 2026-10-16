@@ -137,6 +137,10 @@ namespace MazeOfKnight.Game
             };
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
+            // Diario del cazador: las derrotas y, las invulnerables, al verlas (la sombra del jugador no cuenta).
+            Enemies.Killed += e => { if (!Busy && e.Type != global::MazeOfKnight.Game.Enemies.Shade.TypeId) Journal.Killed(e.Type); };
+            Enemies.BossDefeated += b => { if (!Busy) Journal.Killed(b.Type); };
+            Enemies.Spawned += e => { if (!Busy && e.Invulnerable) Journal.Seen(e.Type); };
             // Alma: cada espadazo que acierta (el tick en que empieza el golpe; las armas no dan).
             Enemies.Hit += _ => { if (RemakeRules.HollowSoul && motor != null && motor.AttackStartedThisTick) Soul.Gain(Inventory.Has(0x1B)); };
             Enemies.Killed += e => { if (e is global::MazeOfKnight.Game.Enemies.Shade s) RecoverShade(s); };
@@ -150,6 +154,7 @@ namespace MazeOfKnight.Game
             if (RemakeRules.HollowBenches) gameObject.AddComponent<Visuals.BenchRest>().game = this;
             if (RemakeRules.HollowSoul) gameObject.AddComponent<Visuals.FocusFx>().game = this;
             if (RemakeRules.HollowCharms && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.ItemTutorial>().game = this;
+            if (RemakeRules.HollowJournal && Visuals.HuntersJournal.Available) gameObject.AddComponent<Visuals.HuntersJournal>().game = this;
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
@@ -997,6 +1002,7 @@ namespace MazeOfKnight.Game
             d.soul = Soul.Value;
             d.charms = new List<int>(Inventory.OwnedCharms);
             d.tutorials = new List<int>(SeenTutorials);
+            d.journal = Journal.Pack();
             if (lastBench is Benches.Bench lb) { d.benchMap = lb.Map; d.benchRoom = lb.Room; d.benchX = lb.X; d.benchY = lb.Y; }
             if (!string.IsNullOrEmpty(shadeMap)) { d.shadeMap = shadeMap; d.shadeRoom = shadeRoom; d.shadeX = shadeX; d.shadeY = shadeY; d.shadeGeo = shadeGeo; }
             for (int c = 0; c < 2; c++) d.vitality[c] = Mathf.Clamp(Vitality[c] + PendingVitality[c], 0, MaxVitality[c]);
@@ -1012,6 +1018,7 @@ namespace MazeOfKnight.Game
             Collected.Clear();
             Collected.AddRange(d.items);
             Inventory.AdoptCharms(d.charms);
+            Journal.Restore(d.journal);
             SeenTutorials.Clear();
             SeenTutorials.UnionWith(d.tutorials);
             foreach (var t in Collected) SeenTutorials.Add(Inventory.CharmOf(t));
@@ -1074,6 +1081,7 @@ namespace MazeOfKnight.Game
 
         // Láminas de tutorial (Visuals/ItemTutorial): la primera vez que se recoge cada objeto (no los recursos).
         public readonly HashSet<int> SeenTutorials = new HashSet<int>();
+        public readonly Journal Journal = new Journal();
         public event System.Action<int> Learned;
 
         public void Learn(int type)

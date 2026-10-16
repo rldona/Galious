@@ -267,6 +267,8 @@ namespace MazeOfKnight.Game.Enemies
             enemies.RemoveAll(e => !e.Alive);
         }
 
+        public bool IsInvulnerable(int type) => catalog.TryGetValue(type, out var info) && info.invulnerable;
+
         public int ImmuneItem(Enemy e) => catalog.TryGetValue(e.Type, out var info) ? info.immuneItem : 0;
 
         // Enemigo que toca al jugador (caja del jugador: x − 8 … x + 7, y − 16 … y − 1), o null.

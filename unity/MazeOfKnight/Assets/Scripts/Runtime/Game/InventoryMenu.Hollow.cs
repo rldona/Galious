@@ -17,14 +17,17 @@ namespace MazeOfKnight.Game
     // Se abre y se cierra con I, Tab o F1 (Select en el mando); Esc o B también cierran.
     public partial class InventoryMenu
     {
-        enum Tab { Inventory, Charms, Map }
-        static readonly string[] TabNames = { "Inventario", "Amuletos", "Mapa" };
+        enum Tab { Inventory, Charms, Map, Journal }
+        static readonly string[] TabNames = { "Inventario", "Amuletos", "Mapa", "Diario" };
+        static int Tabs => RemakeRules.HollowJournal && HuntersJournal.Available ? 4 : 3;
         static readonly int[] CharmOrder = { 0x0E, 0x0F, 0x17, 0x22, 0x24, 0x11, 0x19, 0x1A, 0x1B, 0x1D, 0x1E, 0x21, 0x25, 0x28 };
 
         Tab tab;
         int sel;                       // índice en las celdas de la pestaña
         int wingWorld;                 // > 0: eligiendo el mundo del Ala
         int closedFrame = -10;
+        int journalSel, journalTop;
+        const int JournalRows = 11;
         float openedAt;
         string notice;
         float noticeUntil;
@@ -94,12 +97,19 @@ namespace MazeOfKnight.Game
                    : Pressed(Key.E, g => g.rightShoulder) || Pressed(Key.E, g => g.rightTrigger) ? 1 : 0;
             if (dt != 0 && wingWorld == 0)
             {
-                tab = (Tab)(((int)tab + dt + 3) % 3);
+                tab = (Tab)(((int)tab + dt + Tabs) % Tabs);
                 sel = 0;
                 return;
             }
             if (wingWorld > 0) { TickWing(); return; }
             int dx = HollowMenus.Left ? -1 : HollowMenus.Right ? 1 : 0, dy = HollowMenus.Up ? -1 : HollowMenus.Down ? 1 : 0;
+            if (tab == Tab.Journal)
+            {
+                int n = HuntersJournal.Entries.Count;
+                if (n > 0 && dy != 0) journalSel = (journalSel + dy + n) % n;
+                if (n > 0 && dx != 0) journalSel = Mathf.Clamp(journalSel + dx * JournalRows, 0, n - 1);
+                return;
+            }
             if ((dx != 0 || dy != 0) && cells.Count > 0) sel = Step(sel, dx, dy);
             // Ala desde el teclado, como en el original.
             var kb = Keyboard.current;
@@ -194,6 +204,7 @@ namespace MazeOfKnight.Game
                 case Tab.Inventory: DrawInventory(body); break;
                 case Tab.Charms: DrawCharms(body); break;
                 case Tab.Map: DrawMapTab(body); break;
+                case Tab.Journal: DrawJournal(body); break;
             }
             if (sel >= cells.Count) sel = Mathf.Max(0, cells.Count - 1);
             if (cells.Count > 0) DrawCursor(cells[sel].r);
@@ -216,8 +227,8 @@ namespace MazeOfKnight.Game
             float ay = area.y + area.height / 2 - ah / 2;
             UiKit.Icon(new Rect(area.x - aw - 4 * s, ay, aw, ah), tabArrow, 0.85f, true);
             UiKit.Icon(new Rect(area.xMax + 4 * s, ay, aw, ah), tabArrow, 0.85f);
-            UiKit.Text(new Rect(area.x, area.y + 8 * s, 300 * s, 30 * s), "◂ " + TabNames[(t + 2) % 3], 17, TextAnchor.MiddleLeft, UiKit.Dim, true);
-            UiKit.Text(new Rect(area.xMax - 300 * s, area.y + 8 * s, 300 * s, 30 * s), TabNames[(t + 1) % 3] + " ▸", 17, TextAnchor.MiddleRight, UiKit.Dim, true);
+            UiKit.Text(new Rect(area.x, area.y + 8 * s, 300 * s, 30 * s), "◂ " + TabNames[(t + Tabs - 1) % Tabs], 17, TextAnchor.MiddleLeft, UiKit.Dim, true);
+            UiKit.Text(new Rect(area.xMax - 300 * s, area.y + 8 * s, 300 * s, 30 * s), TabNames[(t + 1) % Tabs] + " ▸", 17, TextAnchor.MiddleRight, UiKit.Dim, true);
         }
 
         // El cursor de Hollow Knight: cuatro esquinas que laten alrededor de la celda.
@@ -376,6 +387,74 @@ namespace MazeOfKnight.Game
                 game.Seated ? "Aceptar: equipar o quitar" : "Siéntate en un banco para cambiar los amuletos", 16, TextAnchor.MiddleLeft,
                 game.Seated ? UiKit.Gold : UiKit.Dim);
             if (sel < cells.Count) DrawDetails(right, cells[sel].type, true);
+        }
+
+        // Diario del cazador: la lista de criaturas a la izquierda (las que no se conocen, sin nombre) y la elegida a la
+        // derecha con su retrato, sus derrotas, su descripción y, a partir de las necesarias, las notas del cazador.
+        void DrawJournal(Rect body)
+        {
+            float s = S;
+            var all = HuntersJournal.Entries;
+            if (all.Count == 0) return;
+            var jr = game.Journal;
+            int known = 0;
+            foreach (var e in all) if (jr.Known(e.types)) known++;
+            var left = new Rect(body.x, body.y, body.width * 0.3f, body.height);
+            var right = new Rect(left.xMax + 50 * s, body.y, body.xMax - left.xMax - 50 * s, body.height);
+            UiKit.Text(new Rect(left.x, left.y - 6 * s, left.width, 30 * s), $"Encontradas  {known} / {all.Count}", 18, TextAnchor.MiddleCenter, UiKit.Dim, true);
+            UiKit.Icon(new Rect(left.x + left.width * 0.15f, left.y + 24 * s, left.width * 0.7f, 18 * s), HuntersJournal.Symbol, 0.7f);
+            journalSel = Mathf.Clamp(journalSel, 0, all.Count - 1);
+            if (journalSel < journalTop) journalTop = journalSel;
+            if (journalSel >= journalTop + JournalRows) journalTop = journalSel - JournalRows + 1;
+            float rowH = (left.height - 100 * s) / JournalRows, y = left.y + 52 * s;
+            for (int i = journalTop; i < Mathf.Min(all.Count, journalTop + JournalRows); i++, y += rowH)
+            {
+                var e = all[i];
+                bool k = jr.Known(e.types), on = i == journalSel;
+                var r = new Rect(left.x, y, left.width, rowH);
+                if (on) UiKit.Box(new Rect(r.x - 8 * s, r.y + 2 * s, r.width + 16 * s, r.height - 4 * s), new Color(1, 1, 1, 0.07f));
+                if (k) UiKit.Icon(new Rect(r.x, r.y + 4 * s, rowH - 8 * s, rowH - 8 * s), HuntersJournal.Portrait(e), on ? 1 : 0.7f);
+                UiKit.Text(new Rect(r.x + rowH + 4 * s, r.y, r.width - rowH, rowH), k ? e.name : "· · ·", 18, TextAnchor.MiddleLeft,
+                    on ? UiKit.Bone : UiKit.Dim, true);
+                if (on) DrawCursor(new Rect(r.x + 2 * s, r.y + 6 * s, rowH - 12 * s, rowH - 12 * s));
+            }
+            if (journalTop > 0) UiKit.Text(new Rect(left.x, left.y + 38 * s, left.width, 20 * s), "▲", 12, TextAnchor.MiddleCenter, UiKit.Dim);
+            if (journalTop + JournalRows < all.Count) UiKit.Text(new Rect(left.x, y, left.width, 20 * s), "▼", 12, TextAnchor.MiddleCenter, UiKit.Dim);
+
+            var cur = all[journalSel];
+            if (!jr.Known(cur.types))
+            {
+                UiKit.Text(new Rect(right.x, right.center.y - 40 * s, right.width, 80 * s), "Aún no has encontrado esta criatura.", 20, TextAnchor.MiddleCenter, UiKit.Dim);
+                return;
+            }
+            float py = right.y;
+            var portrait = HuntersJournal.Portrait(cur);
+            float ph = 230 * s;
+            UiKit.Icon(new Rect(right.center.x - ph * 0.6f, py, ph * 1.2f, ph), portrait);
+            py += ph + 10 * s;
+            UiKit.Text(new Rect(right.x, py, right.width, 40 * s), cur.name, 28, TextAnchor.MiddleCenter, UiKit.Bone, true);
+            py += 42 * s;
+            int kills = jr.Kills(cur.types);
+            bool canKill = false;
+            foreach (int t in cur.types) if (!(game.Enemies?.IsInvulnerable(t) ?? false)) canKill = true;
+            UiKit.Text(new Rect(right.x, py, right.width, 26 * s), canKill ? $"Derrotados: {kills}" : "No se puede derrotar", 17, TextAnchor.MiddleCenter, UiKit.Dim, true);
+            py += 30 * s;
+            HollowMenus.Divider(right.center.x, py, 220 * s, 0.8f);
+            py += 34 * s;
+            UiKit.Text(new Rect(right.x, py, right.width, 70 * s), cur.desc, 17, TextAnchor.UpperCenter, UiKit.Bone);
+            py += 66 * s;
+            int need = HuntersJournal.NotesAt(cur) - kills;
+            string notes = !canKill || need <= 0 ? cur.notes : $"Derrota {need} más para leer las notas del cazador.";
+            UiKit.Text(new Rect(right.x, py, right.width, right.yMax - py), notes, 16, TextAnchor.UpperCenter,
+                !canKill || need <= 0 ? new Color(0.78f, 0.76f, 0.7f) : UiKit.Dim, false);
+        }
+
+        // Para las capturas: la entrada de ese tipo.
+        public void ShowJournal(int type)
+        {
+            ShowTab((int)Tab.Journal);
+            var all = HuntersJournal.Entries;
+            for (int i = 0; i < all.Count; i++) if (System.Array.IndexOf(all[i].types, type) >= 0) journalSel = i;
         }
 
         void DrawMapTab(Rect body)
