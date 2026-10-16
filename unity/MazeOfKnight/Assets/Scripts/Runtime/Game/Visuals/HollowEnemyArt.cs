@@ -52,6 +52,7 @@ namespace MazeOfKnight.Game.Visuals
         public int Count => byType.Count;
         // Colisión de la sala (RoomWorld.Solid): para apoyar en el suelo a los que andan.
         public System.Func<RoomModel, int, int, bool> Solid;
+        public const int FloorReach = 6;
 
         HollowEnemyArt(ArtLibrary lib) => this.lib = lib;
 
@@ -143,12 +144,13 @@ namespace MazeOfKnight.Game.Visuals
             }
             float s = Scale(info, w, h);
             float feet = cy1;
-            // Los que andan, con los pies en el suelo: si bajo el centro de la caja hay suelo dentro de ella (la caja
-            // del original puede bajar de él, como la de los jefes), ahí. Si no, el borde de abajo de la caja.
+            // Los que andan, con los pies en el suelo: el primer suelo bajo el centro de la caja, dentro de ella o hasta
+            // FloorReach px por debajo (la caja del original puede bajar del suelo o quedarse por encima, como la del Bony
+            // Dragon, 3 px). Si no hay (salta o cae), el borde de abajo de la caja.
             if (info.Feet && Solid != null)
             {
                 int x = Mathf.RoundToInt((cx0 + cx1) / 2f);
-                for (int y = Mathf.RoundToInt((cy0 + cy1) / 2f); y < cy1; y++)
+                for (int y = Mathf.RoundToInt((cy0 + cy1) / 2f); y < cy1 + FloorReach; y++)
                     if (Solid(e.Room, x, y)) { feet = y; break; }
             }
             var at = RoomCoords.PixelToWorld(e.Room, 0, 0) +

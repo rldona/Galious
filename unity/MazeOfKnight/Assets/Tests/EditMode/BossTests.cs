@@ -88,6 +88,51 @@ namespace MazeOfKnight.Tests
             Assert.IsFalse(b.Vulnerable(5), "mina no");
         }
 
+        // Remake (RemakeRules.FalseKnightMace): el False Knight da con la maza en vez de lanzar huesos; la bola hace daño
+        // solo cuando golpea el suelo, delante de él. Sin la regla, los huesos del original.
+        [Test]
+        public void BonyDragonSwingsTheMaceInsteadOfThrowingBones()
+        {
+            bool before = RemakeRules.FalseKnightMace;
+            try
+            {
+                foreach (bool mace in new[] { true, false })
+                {
+                    RemakeRules.FalseKnightMace = mace;
+                    var (fight, sys, _, _, motor) = Setup(1);
+                    var boss = Summon(fight, sys);
+                    bool bones = false, maceSeen = false, maceHurts = false, inFront = true;
+                    for (int t = 0; t < 300; t++)
+                    {
+                        sys.Tick();
+                        foreach (var e in sys.Enemies.Where(e => e.Alive))
+                        {
+                            if (e is Bone) bones = true;
+                            if (e is MaceHead m)
+                            {
+                                maceSeen = true;
+                                if (m.Harmful) maceHurts = true;
+                                float cx = (boss.ContactRects().Min(r => r.x0) + boss.ContactRects().Max(r => r.x1)) / 2;
+                                if (boss.FacingLeft ? m.X + m.Width > cx : m.X < cx) inFront = false;
+                            }
+                        }
+                    }
+                    if (mace)
+                    {
+                        Assert.IsFalse(bones, "sin huesos");
+                        Assert.IsTrue(maceSeen && maceHurts, "la maza golpea");
+                        Assert.IsTrue(inFront, "por delante");
+                    }
+                    else
+                    {
+                        Assert.IsTrue(bones, "los huesos del original");
+                        Assert.IsFalse(maceSeen);
+                    }
+                }
+            }
+            finally { RemakeRules.FalseKnightMace = before; }
+        }
+
         [Test]
         public void SeaAnemoneOnlyWhenOpenAndGaliousOnlyWithTheCross()
         {

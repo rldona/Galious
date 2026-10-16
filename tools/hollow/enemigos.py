@@ -4,7 +4,8 @@ Cada enemigo del original lleva el dibujo de una criatura de Hollow Knight con u
 de Hollow Knight que haga lo mismo. Sale a Assets/Art/Resources/Hollow/enemigos/ (los que andan: pivote en los pies) y
 .../enemigos_centro/ (los que vuelan, cuelgan o vuelan como proyectil: pivote en el centro), fuera de git como el resto
 del arte de Team Cherry:
-  - <clave>_<accion>_NN.png, mirando a la derecha (los de Hollow Knight miran a la izquierda), a 8 texels por píxel;
+  - <clave>_<accion>_NN.png, mirando a la derecha (los de Hollow Knight miran a la izquierda; los que no, faces="derecha"),
+    a 8 texels por píxel;
   - enemigos/info.txt: qué tipos del original usan cada clave, su anclaje, cuánto puede pasar el cuerpo de su caja de
     contacto original (k, el mismo por arriba y por los lados), el alto y el ancho del cuerpo en reposo, si gira con su
     velocidad (proyectiles alargados), y los fps de cada clip.
@@ -185,8 +186,10 @@ ENEMIES = {
 
     # ---------- jefes (tipo 0x100 + id del jefe) y lo que crean ----------
     # Bony Dragon (pasea, salta y lanza 3 huesos en parábola): el False Knight, que salta y aplasta.
-    "jefe_bony_dragon": dict(types=[0x101], col="False Knight", anchor="pies", k=1.3,
-                             clips={"quieto": "Idle", "mover": "Run", "atacar": ["Attack Antic", "Attack"]}),
+    # Con RemakeRules.FalseKnightMace no lanza huesos: da con la maza delante y la bola hace daño donde cae (atacar,
+    # con la maza en el suelo durante Attack Recover). El False Knight de Hollow Knight mira a la derecha (no se voltea).
+    "jefe_bony_dragon": dict(types=[0x101], col="False Knight", anchor="pies", k=1.3, faces="derecha",
+                             clips={"quieto": "Idle", "mover": "Run", "atacar": ["Attack Antic", "Attack", "Attack Recover"]}),
     # Elusive Dragon (asoma por los lados a 5 alturas, llamarada, se esconde): los Mantis Lords, que llegan por la pared.
     # Su caja de contacto es todo el cuello que sale de la pared: se apoya en la zona que recibe golpes (la cabeza).
     "jefe_elusive_dragon": dict(types=[0x102], col="Mantis Lords Anim", anchor="centro", k=1.5, on_weapon=True,
@@ -356,7 +359,10 @@ def build(src):
             box = (cx - half, cy - up - 2, cx + half, cy) if feet_anchor else (cx - half, cy - v, cx + half, cy + v)
             box = tuple(round(x) for x in box)
             for i, f in enumerate(fr):
-                f.crop(box).transpose(Image.FLIP_LEFT_RIGHT).save(folder / f"{key}_{a}_{i:02d}.png")
+                f = f.crop(box)
+                if spec.get("faces") != "derecha":
+                    f = f.transpose(Image.FLIP_LEFT_RIGHT)
+                f.save(folder / f"{key}_{a}_{i:02d}.png")
             info.append(f"clip {key}_{a} {fps}")
             made.append(f"{a} {len(fr)}")
         types = ",".join(f"{t:02X}" for t in spec["types"])

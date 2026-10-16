@@ -34,6 +34,7 @@ namespace MazeOfKnight.Game.Visuals
         void OnGUI()
         {
             if (game == null || game.Motor == null || !Atmosphere.Styled || game.AttractRunning || game.EndingRunning) return;
+            if (HollowHud.Active) return;   // el marcador de Hollow Knight lo sustituye
             // El menú de objetos y los santuarios tapan la pantalla: ya enseñan lo suyo.
             if (menu == null) menu = game.GetComponent<InventoryMenu>();
             if (shrine == null) shrine = game.GetComponent<ShrineScreen>();

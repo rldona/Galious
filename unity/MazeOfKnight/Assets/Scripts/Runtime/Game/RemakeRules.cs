@@ -17,6 +17,12 @@ namespace MazeOfKnight.Game
         // demo 1). Remake: se sigue sin pausa. Las demos la llevan siempre.
         public static bool NoRoomChangePause = true;      // activado: el usuario prefiere no tener el parón
 
+        // Original: el Bony Dragon (jefe del mundo 1) lanza 3 huesos en parábola andando y en la cima de cada salto. Remake
+        // (con el False Knight de Hollow Knight, petición del usuario del 16 de octubre de 2026): en esos momentos da con la
+        // maza delante, hacia el jugador; al caer de un salto, también. Los huesos no salen y lo que hace daño es la bola
+        // de la maza donde golpea el suelo (Enemies.MaceHead).
+        public static bool FalseKnightMace = true;        // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

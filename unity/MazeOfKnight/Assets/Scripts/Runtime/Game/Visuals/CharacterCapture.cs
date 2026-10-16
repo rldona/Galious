@@ -83,10 +83,15 @@ namespace MazeOfKnight.Game.Visuals
                     yield return new WaitForSeconds(0.12f);
                 }
                 Debug.Log($"[Capturas] mundo {w}: tras la palabra, fase {game.Bosses.Current}");
-                yield return new WaitForSeconds(6.5f);
-                yield return Shot($"jefe_mundo{w:00}_a");
-                yield return new WaitForSeconds(1.5f);
-                yield return Shot($"jefe_mundo{w:00}_b");
+                yield return new WaitForSeconds(4.5f);
+                // Una serie de 16 (4 s), con la caja de contacto del jefe en el registro (para ver si pisa el suelo).
+                for (int i = 0; i < 16; i++)
+                {
+                    var b = game.Bosses.Boss;
+                    if (b != null) Debug.Log($"[Capturas] mundo {w} foto {i}: caja {HollowEnemyArt.ContactBox(b)}");
+                    yield return Shot($"jefe_mundo{w:00}_{(char)('a' + i)}");
+                    yield return new WaitForSeconds(0.25f);
+                }
             }
         }
 

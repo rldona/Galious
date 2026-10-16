@@ -81,6 +81,10 @@ Original (docs/ending.md): la piedra del bebé sale de (0..3) + (0..7); con 10 (
 
 En el original, al cambiar de sala el juego se para 11 ticks (~0,37 s) mientras dibuja la sala nueva (medido con la demo 1; `OriginalPhysics.RoomChangePauseTicks`). Se nota como un parón. Con la regla activada el jugador sigue sin pausa. **Activado**: el usuario no quiere el parón. Las demos la llevan siempre, porque sin ella se desincronizan de la grabación.
 
+## RemakeRules.FalseKnightMace (activado)
+
+En el original (docs/boss_ai.md) el Bony Dragon, jefe del mundo 1, lanza 3 huesos en parábola cada 16..47 ticks mientras pasea y en la cima de cada salto. Con el arte de Hollow Knight es el False Knight, y el usuario pidió que se comporte como él (16 de octubre de 2026): en esos momentos (no en la cima del salto, sí al caer de él) se para y da con la maza hacia el jugador. Los huesos no salen; lo que hace daño (2, por los 3 huesos de 1) es la bola de la maza donde golpea el suelo, `Enemies.MaceHead`: de 45 a 64 px por delante del centro de su caja y 19 px de alto, solo en los ticks 12..19 de los 30 del golpe (los fotogramas en que la bola baja y toca el suelo). No se le puede golpear. **Activado.** Test: `BossTests.BonyDragonSwingsTheMaceInsteadOfThrowingBones` (con y sin la regla).
+
 ## Sensación de Hollow Knight: HitStop, CoyoteJump y JumpBuffer (desactivados)
 
 Tres técnicas de la guía «Hollow Knight por dentro» (en la carpeta de Hollow Knight decodificado), pasadas a los ticks del original (30 por segundo). No cambian la física medida: solo perdonan o marcan el tiempo. **F11** activa o quita las tres a la vez (`RemakeRules.HollowFeel`) para probarlas; por defecto se juega como el original.

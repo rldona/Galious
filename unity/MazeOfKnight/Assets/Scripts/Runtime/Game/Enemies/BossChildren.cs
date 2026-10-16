@@ -48,6 +48,52 @@ namespace MazeOfKnight.Game.Enemies
         }
     }
 
+    // Remake (RemakeRules.FalseKnightMace): la bola de la maza del False Knight (el Bony Dragon) cuando golpea el suelo.
+    // Nace al empezar el golpe y sigue al jefe; solo hace daño en los ticks de la animación en que la bola baja y toca el
+    // suelo (fotogramas 5 y 6 de "atacar", a 12 por segundo). Ni se puede golpear ni se pinta: la bola es la del dibujo
+    // del jefe. Su sitio sale de ese fotograma con la escala del jefe en el juego (×1,13): la bola va de 45 a 64 px por
+    // delante del centro de su caja y mide 19 px de alto, apoyada en el suelo.
+    public class MaceHead : Enemy
+    {
+        public const int TypeId = 0x1F0;                  // fuera de los tipos del original
+        public const int Ticks = 30;                      // la animación entera (12 fotogramas)
+        public const int HitFrom = 12, HitTo = 19;
+        public const int Near = 45, Far = 64, Size = 19;
+        public const int MaceDamage = 2;                  // por los 3 huesos de 1 que sustituye
+        int age;
+
+        public override void Init(EnemyContext ctx)
+        {
+            Hittable = false;
+            Invulnerable = true;
+            Harmful = false;
+            Damage = MaceDamage;
+            Width = Far - Near;
+            Height = Size;
+            Follow(ctx);
+        }
+
+        public override void Tick(EnemyContext ctx)
+        {
+            if (!(Parent is BonyDragon boss) || !boss.Alive || ++age >= Ticks) { Alive = false; return; }
+            Harmful = age >= HitFrom && age <= HitTo;
+            Follow(ctx);
+        }
+
+        // Delante del jefe, en el suelo que haya bajo su caja.
+        void Follow(EnemyContext ctx)
+        {
+            if (Parent == null) return;
+            float x0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+            foreach (var (a, _, c, d) in Parent.ContactRects()) { x0 = Math.Min(x0, a); x1 = Math.Max(x1, c); y1 = Math.Max(y1, d); }
+            float cx = (x0 + x1) / 2, ground = y1;
+            for (int y = (int)y1; y < y1 + 16; y++)
+                if (Solid(ctx, cx, y)) { ground = y; break; }
+            X = Parent.FacingLeft ? cx - Far : cx + Near;
+            Y = ground - Size;
+        }
+    }
+
     // 0x57: llamarada en fila de tiles (Elusive Dragon, King Dragon, Donra). Crece 8 px por tick: B = 0 hacia la
     // derecha (x fija), B = 1 y 2 hacia la izquierda (el extremo derecho fijo). Vive 12 ticks (B = 0, 1) u 8 (B = 2).
     public class FlameRow : Enemy

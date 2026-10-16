@@ -15,7 +15,7 @@ namespace MazeOfKnight.Game
             if (player == null || player.Motor == null || bootstrap.EndingRunning || bootstrap.AttractRunning)
                 return;
             // Con el estilo del remake el marcador es RemakeHud; esto solo con F8.
-            if (Visuals.Atmosphere.Styled && !Visuals.RemakeHud.ShowDebug)
+            if ((Visuals.Atmosphere.Styled || Visuals.HollowHud.Active) && !Visuals.RemakeHud.ShowDebug)
                 return;
             style ??= new GUIStyle(GUI.skin.label) { fontSize = Mathf.Max(12, Screen.height / 45) };
             var m = player.Motor;

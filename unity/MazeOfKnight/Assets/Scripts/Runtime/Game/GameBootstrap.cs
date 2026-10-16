@@ -137,6 +137,8 @@ namespace MazeOfKnight.Game
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
             hollowEnemies = Visuals.HollowEnemyArt.Load();
+            // Marcador de Hollow Knight (con los dos estilos), si se ha importado.
+            if (Visuals.HollowHud.Available) gameObject.AddComponent<Visuals.HollowHud>().game = this;
             if (hollowEnemies != null)
             {
                 // Solo con salas del mapa cargado (al cambiar de mapa puede quedar algún enemigo de la sala anterior).
@@ -1123,6 +1125,8 @@ namespace MazeOfKnight.Game
                 // Con el arte de Hollow Knight, la explosión de muerte del original no se pinta: ya están la animación de
                 // muerte de la criatura y el destello de HitEffects (sigue existiendo: suelta el botín al acabar).
                 if (hollowEnemies != null && e is Enemies.DeathExplosion) { sr.enabled = false; continue; }
+                // La bola de la maza del False Knight ya está en su dibujo: solo su caja (F9).
+                if (hollowEnemies != null && e is Enemies.MaceHead) { sr.enabled = false; continue; }
                 // Botín (flechas, monedas, llaves): el icono de Hollow Knight de su recurso, ajustado a su caja y apoyado
                 // abajo en el centro, sin deformar.
                 if (e is Enemies.LootDrop && Visuals.HollowItems.Loot(e.Type) is Sprite loot)

@@ -74,11 +74,26 @@ namespace MazeOfKnight.Game.Enemies
 
     // Jefe 1 — Bony Dragon (mundo 1). Pasea 14 px a 0,5 px/tick; cada 80..207 ticks salta (vy −7, g 0,5) hasta una
     // altura al azar, lanza 3 huesos 0x54 en la cima o cada 16..47 ticks, y descansa 60 al caer.
+    // Con RemakeRules.FalseKnightMace, en lugar de los huesos da con la maza (Swing); en la cima del salto no, al caer sí.
     public class BonyDragon : Boss
     {
         int jumpTimer, boneTimer, lands;
+        int swing;                       // ticks que le quedan dando con la maza (quieto mientras)
         float targetY;
         const float Floor = 0x68;
+
+        public bool Swinging => swing > 0;
+
+        // Da con la maza hacia el jugador (si no está ya en ello): la bola hace daño donde cae (MaceHead).
+        void Swing(EnemyContext ctx)
+        {
+            if (swing > 0) return;
+            float x0 = float.MaxValue, x1 = float.MinValue;
+            foreach (var (a, _, c, _) in ContactRects()) { x0 = Math.Min(x0, a); x1 = Math.Max(x1, c); }
+            FacingLeft = ctx.Px < (x0 + x1) / 2;
+            swing = MaceHead.Ticks;
+            ctx.SpawnChild(MaceHead.TypeId, X, Y);
+        }
 
         public override void Init(EnemyContext ctx)
         {
@@ -95,24 +110,33 @@ namespace MazeOfKnight.Game.Enemies
 
         public override void Tick(EnemyContext ctx)
         {
+            bool mace = RemakeRules.FalseKnightMace;
+            if (swing > 0) swing--;
             switch (Phase)
             {
                 case 0:
                     Sprite = (ctx.Tick & 0x10) == 0 ? (Vx > 0 ? 0x0E : 0x0D) : 0x0C;
-                    if (--boneTimer <= 0) { Bones(ctx); boneTimer = (R(ctx) & 0x1F) + 0x10; }
+                    if (--boneTimer <= 0)
+                    {
+                        if (mace) Swing(ctx); else Bones(ctx);
+                        boneTimer = (R(ctx) & 0x1F) + 0x10;
+                    }
                     if (Vx < 0 && X < 0x92 || Vx > 0 && X >= 0xA0) Vx = -Vx;
+                    if (mace && swing > 0) break;      // quieto mientras da con la maza
+                    if (mace) FacingLeft = Vx < 0;
                     X += Vx;
                     if (--jumpTimer <= 0) { Phase = 1; Sprite = 0x0D; Vx = 0; Vy = -7; targetY = ((R(ctx) & 3) + 3) * 16 + 5; }
                     break;
                 case 1:
                     if ((ctx.Tick & 3) == 0) Sprite ^= 2;
                     Vy += 0.5f;
-                    if (Vy < 0 && Y < targetY) { Vy = -Vy; Bones(ctx); }
+                    if (Vy < 0 && Y < targetY) { Vy = -Vy; if (!mace) Bones(ctx); }
                     Y += Vy;
                     if (Vy > 0 && Y >= Floor)
                     {
                         Y = Floor; Vy = 0; Sprite = 0x0C; Phase = 2; Timer = 60;
                         jumpTimer = 0x50 + (R(ctx) & 0x7F);
+                        if (mace) Swing(ctx);
                     }
                     break;
                 case 2:
