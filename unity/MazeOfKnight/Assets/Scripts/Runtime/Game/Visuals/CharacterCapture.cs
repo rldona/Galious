@@ -65,6 +65,7 @@ namespace MazeOfKnight.Game.Visuals
             var game = FindAnyObjectByType<GameBootstrap>();
             var player = FindAnyObjectByType<PlayerController>();
             if (game == null || player == null) { Application.Quit(); yield break; }
+            game.DebugInvulnerable = true;
             var room = game.Motor.Room;
             int x0 = game.Motor.X, y0 = game.Motor.Y;
             foreach (var c in new[] { Character.Popolon, Character.Aphrodite })
@@ -127,6 +128,39 @@ namespace MazeOfKnight.Game.Visuals
                 game.Motor.Place(game.World, r, 128, 120);
                 yield return new WaitForSeconds(1.5f);
                 yield return Shot($"enemigos_sala_{id:000}");
+            }
+            // Muertes: en salas del castillo con Husks, Vengeflies y Baldurs, se mata a todos y se ve su animación de muerte.
+            foreach (int id in new[] { 20, 13, 3 })
+            {
+                var r = game.World.Room(id);
+                if (r == null) continue;
+                game.Motor.Place(game.World, r, 128, 120);
+                yield return new WaitForSeconds(1.2f);
+                foreach (var e in new System.Collections.Generic.List<Enemies.Enemy>(game.Enemies.Enemies))
+                    if (e.Alive && e.Room == game.Motor.Room && !e.Invulnerable) game.Enemies.Damage(e, 99);
+                yield return new WaitForSeconds(0.15f);
+                yield return Shot($"muertes_sala_{id:000}_a");
+                yield return new WaitForSeconds(0.35f);
+                yield return Shot($"muertes_sala_{id:000}_b");
+            }
+            // Enemigos de los diez mundos: las salas que juntan todos sus tipos.
+            var worldRooms = new[]
+            {
+                new[] { 8, 11 }, new[] { 12, 8, 5 }, new[] { 6, 9, 8, 11, 14 }, new[] { 2, 3, 5, 6 }, new[] { 2, 5, 6, 12 },
+                new[] { 2, 5, 9, 11 }, new[] { 6, 12, 19, 16 }, new[] { 6, 3, 20 }, new[] { 2, 6, 7, 11, 14, 26 }, new[] { 3, 6 },
+            };
+            for (int w = 1; w <= 10; w++)
+            {
+                game.DebugEnterWorld(w);
+                yield return new WaitForSeconds(1.5f);
+                foreach (int id in worldRooms[w - 1])
+                {
+                    var r = game.World.Room(id);
+                    if (r == null) continue;
+                    game.Motor.Place(game.World, r, 128, 120);
+                    yield return new WaitForSeconds(1.5f);
+                    yield return Shot($"enemigos_mundo{w:00}_sala_{id:000}");
+                }
             }
             Application.Quit();
         }

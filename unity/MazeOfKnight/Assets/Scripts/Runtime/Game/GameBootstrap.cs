@@ -137,6 +137,15 @@ namespace MazeOfKnight.Game
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
             hollowEnemies = Visuals.HollowEnemyArt.Load();
+            if (hollowEnemies != null)
+            {
+                Enemies.Spawned += e => hollowEnemies.Spawned(e);
+                Enemies.Killed += e =>
+                {
+                    var v = enemyViews.TryGetValue(e, out var view) ? view : null;
+                    hollowEnemies.Killed(e, v != null ? v.sharedMaterial : null, v != null ? v.sortingOrder : 5);
+                };
+            }
             Enemies.Hit += _ => player?.HitStop();
             Enemies.Killed += _ => player?.HitStop();
             menu = gameObject.AddComponent<InventoryMenu>();
@@ -463,9 +472,12 @@ namespace MazeOfKnight.Game
         }
 
         // Daño al jugador: vitalidad, retroceso y 42 ticks de invulnerabilidad.
+        // Solo para las capturas automáticas (Visuals/CharacterCapture): que no se acabe la partida mientras se espera.
+        public bool DebugInvulnerable;
+
         void Hurt(int damage, int dir, string message)
         {
-            if (HurtTicks > 0)
+            if (HurtTicks > 0 || DebugInvulnerable)
                 return;
             int c = (int)motor.Character;
             PendingVitality[c] -= damage;
@@ -1042,11 +1054,18 @@ namespace MazeOfKnight.Game
 
         // Enemigos con el dibujo de Hollow Knight (Visuals/HollowEnemyArt), con cualquier estilo; null si no se ha importado.
         Visuals.HollowEnemyArt hollowEnemies;
+        RoomModel hollowRoom;
 
         void LateUpdate()
         {
             if (motor == null)
                 return;
+            if (hollowEnemies != null)
+            {
+                // Las muertes se quedan en su sala: al cambiar, fuera.
+                hollowEnemies.TickCorpses(Time.deltaTime, motor.Room != hollowRoom);
+                hollowRoom = motor.Room;
+            }
             foreach (var p in projectileViews.Keys.Where(p => !p.Alive).ToList())
             {
                 if (projectileViews[p] != null) Destroy(projectileViews[p].gameObject);
@@ -1093,21 +1112,21 @@ namespace MazeOfKnight.Game
                 }
                 var (x0, y0, x1, y1) = e.DrawRect();
                 var bottomLeft = RoomCoords.PixelToWorld(e.Room, (int)x0, (int)y1);
+                // Con el arte de Hollow Knight, la explosión de muerte del original no se pinta: ya están la animación de
+                // muerte de la criatura y el destello de HitEffects (sigue existiendo: suelta el botín al acabar).
+                if (hollowEnemies != null && e is Enemies.DeathExplosion) { sr.enabled = false; continue; }
                 var hk = hollowEnemies?.Frame(e, Time.deltaTime);
                 if (hk != null)
                 {
-                    // Dibujo de Hollow Knight: sin deformar, a K veces la altura de la caja, apoyado abajo en el centro
-                    // (los que andan) o en el centro (los que vuelan). Se gira con la escala (el material de contorno no
-                    // aplica flipX).
-                    var info = hollowEnemies.For(e);
-                    float boxH = Mathf.Max(1f, y1 - y0);
-                    float scale = boxH * 8f * info.K / Mathf.Max(1f, info.RefHeight);
-                    var at = bottomLeft + new Vector2((x1 - x0) / 2f, info.Feet ? 0 : boxH / 2f) / RoomCoords.PixelsPerUnit;
+                    // Dibujo de Hollow Knight: con su caja de contacto original de referencia, sin deformar (misma escala
+                    // en los dos ejes), apoyado abajo en el centro (los que andan) o en el centro (los que vuelan). Se gira
+                    // con la escala (el material de contorno no aplica flipX); los proyectiles alargados, con su vuelo.
+                    var (pos, scl, rot) = hollowEnemies.Place(e, hollowEnemies.For(e));
                     sr.sprite = hk;
                     sr.color = Color.white;
                     sr.flipX = false;
-                    sr.transform.position = new Vector3(at.x, at.y, 0);
-                    sr.transform.localScale = new Vector3(e.FacingLeft ? -scale : scale, scale, 1);
+                    sr.transform.SetPositionAndRotation(pos, rot);
+                    sr.transform.localScale = scl;
                     continue;
                 }
                 sr.transform.position = new Vector3(bottomLeft.x, bottomLeft.y, 0);

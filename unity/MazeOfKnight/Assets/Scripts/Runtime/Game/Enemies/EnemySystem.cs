@@ -161,6 +161,8 @@ namespace MazeOfKnight.Game.Enemies
             }
         }
 
+        Enemy ticking;     // el que está actuando: lo que cree es suyo (Enemy.Parent)
+
         Enemy Create(int type, float x, float y, int param, PeriodicJson generator = null)
         {
             if (!Factories.TryGetValue(type, out var make) && !Projectiles.TryGetValue(type, out make))
@@ -174,6 +176,7 @@ namespace MazeOfKnight.Game.Enemies
             e.Y = y;
             e.Param = param;
             e.Generator = generator;
+            e.Parent = ticking;
             if (catalog.TryGetValue(type, out var info))
             {
                 e.Hp = info.hp;
@@ -253,7 +256,9 @@ namespace MazeOfKnight.Game.Enemies
                 var e = enemies[i];
                 if (!e.Alive)
                     continue;
+                ticking = e;
                 e.Tick(Context);
+                ticking = null;
                 // b06:B452: se borra el enemigo que sale de la pantalla (y ≥ 0xB8 o x ≥ 0xF9; por debajo de 0 el byte
                 // da la vuelta y también cuenta).
                 if (!e.KeepOffScreen && (e.Y >= 0xB8 || e.X >= 0xF9 || e.X < 0 || e.Y < 0))

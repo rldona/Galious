@@ -69,6 +69,7 @@ namespace MazeOfKnight.Game.Enemies
         public bool FacingLeft;
         public float Grow = 1f;          // parte visible de la caja (pinchos y brotes que crecen), de abajo arriba
         public int Param;                // B del creador (E624): dirección, pareja…
+        public Enemy Parent;             // quién lo lanzó (proyectiles y crías); solo aspecto: el lanzador anima "atacar"
         public bool Marked;              // IX+2 bit 3: cuenta para el evento de la sala
         public PeriodicJson Generator;   // generador periódico que lo creó (null si no)
         public bool DiesOnTouch;         // los proyectiles desaparecen al dar al jugador [I]
