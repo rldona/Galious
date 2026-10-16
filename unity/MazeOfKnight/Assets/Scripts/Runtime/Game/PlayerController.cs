@@ -10,6 +10,8 @@ namespace MazeOfKnight.Game
     public class PlayerController : MonoBehaviour
     {
         public SpriteRenderer body;
+        // RemakeRules.HollowBenches: sentado en un banco (sin moverse) y si se ha pedido levantarse.
+        public bool Seated, WantsToStand;
         public SpriteRenderer sword;
         // Estilo del remake (Visuals/Atmosphere): fotogramas dibujados y la estela del espadazo. Null = provisional.
         public Visuals.CharacterArt Art;
@@ -136,6 +138,14 @@ namespace MazeOfKnight.Game
             if (down && !downWasDown) downLatch = true;
             upWasDown = up;
             downWasDown = down;
+            // Sentado en un banco: el jugador no se mueve; cualquier dirección, salto o espada lo levanta.
+            if (Seated)
+            {
+                if (v.x < -0.5f || v.x > 0.5f || upLatch || attack.WasPressedThisFrame()) WantsToStand = true;
+                upLatch = downLatch = attackLatch = false;
+                v = Vector2.zero;
+                up = down = false;
+            }
             var input = new MotorInput
             {
                 Left = ReverseControls ? v.x > 0.5f : v.x < -0.5f,

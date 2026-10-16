@@ -184,6 +184,10 @@ ENEMIES = {
     "relampago": dict(types=[0x06], col="Zap Cloud", anchor="centro", k=1.2,
                       clips={"quieto": "Zap", "mover": "Zap"}),
 
+    # La sombra (RemakeRules.HollowDeath, tipo propio 0x1F1): donde murió el jugador, con su geo; la de Hollow Knight.
+    "sombra_jugador": dict(types=[0x1F1], col="Hollow Shade", anchor="centro", k=1.4,
+                   clips={"quieto": "Idle", "mover": "Fly", "atacar": ["Slash Antic", "Slash"], "morir": "Death"}),
+
     # ---------- jefes (tipo 0x100 + id del jefe) y lo que crean ----------
     # Bony Dragon (pasea, salta y lanza 3 huesos en parábola): el False Knight, que salta y aplasta.
     # Con RemakeRules.FalseKnightMace no lanza huesos: da con la maza delante y la bola hace daño donde cae (atacar,

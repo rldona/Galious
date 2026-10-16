@@ -50,6 +50,15 @@ namespace MazeOfKnight.Game
         // él. Sin el arte del menú importado, el ciclo del original.
         public static bool HollowTitle = true;            // activado: lo ha pedido el usuario
 
+        // Original: se guarda en el santuario de Demeter y, al perder todas las vidas, GAME OVER. Remake (Galious: The
+        // Hollow Kingdom, como Hollow Knight): bancos en el castillo, en la entrada de cada mundo y antes de cada jefe
+        // (Benches); sentarse (↓) rellena todas las máscaras, guarda y fija dónde se reaparece.
+        public static bool HollowBenches = true;          // activado: lo ha pedido el usuario
+        // Original: vidas de reserva y GAME OVER. Remake: sin vidas; al morir se vuelve al último banco con todas las
+        // máscaras y el geo (monedas) se queda en la sombra (Enemies.Shade) donde se murió; al derrotarla se recupera.
+        // Morir otra vez antes pierde el de la sombra anterior.
+        public static bool HollowDeath = true;            // activado: lo ha pedido el usuario
+
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks

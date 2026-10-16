@@ -12,8 +12,8 @@ namespace MazeOfKnight.Game.Visuals
     public class HitboxOverlay : MonoBehaviour
     {
         public GameBootstrap game;
-        // Encendidas por defecto mientras se prueba la fusión con Hollow Knight (16 de octubre de 2026); F9 las quita.
-        public static bool Show = true;
+        // Ocultas por defecto (lo pidió el usuario); F9 las enseña.
+        public static bool Show;
 
         void Update()
         {

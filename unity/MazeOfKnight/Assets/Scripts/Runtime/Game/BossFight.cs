@@ -155,6 +155,14 @@ namespace MazeOfKnight.Game
 
         // El jugador muere en pleno combate: reaparece en la sala y el jefe se vuelve a invocar sin la palabra, con
         // toda su vida.
+        // RemakeRules.HollowDeath: el jugador muere y vuelve a un banco: el combate se deja (el jefe vuelve a esperar su
+        // palabra).
+        public void Abandon()
+        {
+            Boss = null;
+            Current = Stage.Idle;
+        }
+
         public void PlayerDied()
         {
             if (!InFight) return;

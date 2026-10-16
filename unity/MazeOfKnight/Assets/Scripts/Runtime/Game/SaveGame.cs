@@ -22,6 +22,11 @@ namespace MazeOfKnight.Game
         public int[] lives = new int[2], credits = new int[2];
         public int arrows, coins, keys, weapon, character;
         public int world10Door;              // E06E: dónde sale la puerta del mundo 10
+        // RemakeRules.HollowBenches / HollowDeath: el último banco y la sombra (mapa vacío = ninguno).
+        public string benchMap = "";
+        public int benchRoom, benchX, benchY;
+        public string shadeMap = "";
+        public int shadeRoom, shadeX, shadeY, shadeGeo;
         public List<string> takenItems = new List<string>(), brokenRocks = new List<string>(), openedDoors = new List<string>(),
             roomObjects = new List<string>(), firedEvents = new List<string>();
 

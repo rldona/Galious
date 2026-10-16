@@ -41,7 +41,8 @@ namespace MazeOfKnight.Game.Enemies
             { 0x58, () => new FanShot() },
             { 0x59, () => new Spore2() },
             { 0x63, () => new SummonSpark() },
-            { MaceHead.TypeId, () => new MaceHead() },           // remake: la bola de la maza del False Knight
+            { MaceHead.TypeId, () => new MaceHead() },
+            { Shade.TypeId, () => new Shade() },                 // remake: la sombra del jugador (RemakeRules.HollowDeath)           // remake: la bola de la maza del False Knight
             { 0x65, () => new LipShot() },
             { 0x67, () => new GaliousOrb() },
             { 0x68, () => new MonsterBall() },

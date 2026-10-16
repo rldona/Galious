@@ -27,6 +27,9 @@ namespace MazeOfKnight.Game
         public int X { get; private set; }
         public int Y { get; private set; }
         public Character Character = Character.Popolon;
+        // Postura en el banco (RemakeRules.HollowBenches), solo para el dibujo: null, "sentarse", "sentado", "levantarse" o
+        // "despertar".
+        public string Pose;
         public MotorState State { get; private set; } = MotorState.Ground;
         public bool FacingLeft { get; private set; }
 

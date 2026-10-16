@@ -26,6 +26,7 @@ import hud  # noqa: E402
 import escenario  # noqa: E402
 import liquidos  # noqa: E402
 import menu  # noqa: E402
+import bancos  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/personajes"
@@ -64,6 +65,16 @@ CHARACTERS = {
             # o se queda quieta flotando.
             "nadar": ("Knight", "Surface Swim", None, 12, None),
             "nadar_quieto": ("Knight", "Surface Idle", lambda f: f.startswith("water_surface_idle"), 12, None),
+            # En el banco (RemakeRules.HollowBenches): sentarse, sentado, levantarse y despertar al reaparecer.
+            "sentarse": ("Knight", "Sit", None, 12, None),
+            "sentado": ("Knight", "Sit Idle", None, 12, None),
+            "levantarse": ("Knight", "Wake", None, 16, None),          # se rehace abajo: del sentado al de pie
+            "despertar": ("Knight", "Wake", None, 12, None),           # se rehace abajo: dormido en el banco y sentarse
+        },
+        "explicit": {
+            "levantarse": ("Knight", ["sit0003", "sit0004", "land0000", "land0001", "land0002"], 16, None),
+            "despertar": ("Knight", ["wake0001", "wake0002", "wake0003", "wake0004", "wake0004", "wake0004", "sit0003",
+                                     "sit0002"], 10, None),
         },
     },
     "aphrodite": {
@@ -243,6 +254,7 @@ def main(argv):
     escenario.build(src)
     liquidos.build(src)
     menu.build(src)
+    bancos.build(src)
 
 
 if __name__ == "__main__":

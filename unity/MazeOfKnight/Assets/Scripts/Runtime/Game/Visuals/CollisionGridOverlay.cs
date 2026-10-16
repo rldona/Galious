@@ -11,9 +11,9 @@ namespace MazeOfKnight.Game.Visuals
     public class CollisionGridOverlay : MonoBehaviour
     {
         public GameBootstrap game;
-        // Encendida por defecto mientras se monta el escenario de Hollow Knight sobre la colisión (16 de octubre de 2026):
-        // el sólido en rojo, como en la colisión de las salas de Hollow Knight.
-        public static bool Show = true;
+        // Oculta por defecto (lo pidió el usuario); F10 la enseña: el sólido en rojo, como en la colisión de las salas de
+        // Hollow Knight.
+        public static bool Show;
 
         const int T = 32;                      // texels por tile (4 por píxel del original)
         SpriteRenderer grid, playerBox;

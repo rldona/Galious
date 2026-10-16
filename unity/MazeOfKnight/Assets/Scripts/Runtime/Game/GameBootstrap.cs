@@ -136,11 +136,15 @@ namespace MazeOfKnight.Game
             };
             enemyCatalog = catalog;
             Enemies.Killed += GainExperience;
+            Enemies.Killed += e => { if (e is global::MazeOfKnight.Game.Enemies.Shade s) RecoverShade(s); };
+            Enemies.Spawned += KeepBenchClear;
             hollowEnemies = Visuals.HollowEnemyArt.Load();
             // Marcador de Hollow Knight (con los dos estilos), si se ha importado.
             if (Visuals.HollowHud.Available) gameObject.AddComponent<Visuals.HollowHud>().game = this;
             // Menú de pausa (Esc o Start) con salida al menú principal.
             if (RemakeRules.HollowTitle && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.HollowPauseMenu>().game = this;
+            // El efecto de descansar en un banco.
+            if (RemakeRules.HollowBenches) gameObject.AddComponent<Visuals.BenchRest>().game = this;
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
@@ -297,6 +301,205 @@ namespace MazeOfKnight.Game
             ApplyWorldItems();
             foreach (var (m, id) in firedEvents)
                 if (m == name) ApplyEvent(id);
+            ShowBenches();
+        }
+
+        // ---------- bancos y muerte como en Hollow Knight (RemakeRules.HollowBenches, HollowDeath) ----------
+
+        Benches benches;
+        Benches.Bench? lastBench;
+        string shadeMap;
+        int shadeRoom, shadeX, shadeY, shadeGeo;
+        readonly List<GameObject> benchViews = new List<GameObject>();
+        float poseTimer;
+        string poseNext;
+        public float SavedIconUntil;     // HollowHud: la cresta mientras se guarda
+        // HollowHud: el jugador está de pie junto a un banco (se ofrece "Descansar").
+        public bool NearBench => RemakeRules.HollowBenches && motor != null && player != null && !player.Seated && !Bosses.InFight &&
+                                 motor.State == MotorState.Ground && BenchList.At(mapName, motor.Room.id, motor.X, motor.Y) != null;
+        // Dónde se escribe "Descansar": encima del banco, en coordenadas del mundo.
+        public Vector2 NearBenchLabel
+        {
+            get
+            {
+                var b = BenchList.At(mapName, motor.Room.id, motor.X, motor.Y);
+                return b is Benches.Bench bench ? RoomCoords.PixelToWorld(motor.Room, bench.X, bench.Y - 34) : Vector2.zero;
+            }
+        }
+
+        Benches BenchList
+        {
+            get
+            {
+                if (benches != null) return benches;
+                var worlds = maps.ToDictionary(kv => kv.Key, kv => new RoomWorld(kv.Value.rooms.Select(r => r.room)));
+                return benches = new Benches(worlds, startRoom, w => Bosses?.InfoFor(w)?.room ?? -1);
+            }
+        }
+
+        void ShowBenches()
+        {
+            foreach (var go in benchViews) if (go != null) Destroy(go);
+            benchViews.Clear();
+            if (!RemakeRules.HollowBenches || World == null) return;
+            var look = Visuals.HollowScenery.LookFor(mapName);
+            var sprite = Resources.Load<Sprite>($"Hollow/bancos/{look.Zone}") ?? Resources.Load<Sprite>("Hollow/bancos/cruces");
+            foreach (var b in BenchList.All)
+            {
+                if (b.Map != mapName) continue;
+                var room = World.Room(b.Room);
+                if (room == null) continue;
+                var go = new GameObject($"Banco (sala {b.Room})");
+                var sr = go.AddComponent<SpriteRenderer>();
+                sr.sortingOrder = 4;
+                var lit = Resources.Load<Material>("Materials/SpriteLit");
+                if (lit != null) sr.sharedMaterial = lit;
+                if (sprite != null)
+                {
+                    sr.sprite = sprite;
+                    // Del ancho del banco (4 casillas), sin deformar.
+                    float k = Benches.Width / (sprite.bounds.size.x * RoomCoords.PixelsPerUnit);
+                    go.transform.localScale = new Vector3(k, k, 1);
+                }
+                var p = RoomCoords.PixelToWorld(room, b.X, b.Y);
+                go.transform.position = new Vector3(p.x, p.y, 0);
+                benchViews.Add(go);
+            }
+        }
+
+        // Para las capturas (Visuals/BenchCapture).
+        public IReadOnlyList<Benches.Bench> DebugBenches => BenchList.All;
+        public void DebugGoToBench(Benches.Bench b)
+        {
+            player.Seated = false;
+            motor.Pose = null;
+            if (b.Map != mapName) GoToMap(b.Map);
+            motor.Place(World, World.Room(b.Room), b.X + 10, b.Y);
+        }
+        public void DebugSit(Benches.Bench b) => Sit(b);
+        public void DebugDie() => HollowDie();
+        public void DebugGoTo(string map, int room)
+        {
+            player.Seated = false;
+            motor.Pose = null;
+            if (map != mapName) GoToMap(map);
+            var r = World.Room(room);
+            var (x, y) = StandSpot(r);
+            motor.Place(World, r, x, y);
+        }
+
+        // El banco de antes del jefe puede estar en una sala con enemigos: los que aparecen cerca de él no salen (ni los
+        // colocados ni los de generador; los jefes, sus hijos, los disparos y la sombra, sí).
+        void KeepBenchClear(global::MazeOfKnight.Game.Enemies.Enemy e)
+        {
+            if (!RemakeRules.HollowBenches || e == null || e.Room == null || e.Parent != null || e.Marked) return;
+            if (e is global::MazeOfKnight.Game.Enemies.Boss || e is global::MazeOfKnight.Game.Enemies.Shade ||
+                e is global::MazeOfKnight.Game.Enemies.LootDrop || e is global::MazeOfKnight.Game.Enemies.DeathExplosion) return;
+            foreach (var b in BenchList.In(mapName, e.Room.id))
+            {
+                var (x0, y0, x1, y1) = e.Box();
+                if (System.Math.Abs((x0 + x1) / 2 - b.X) < Benches.ClearX && System.Math.Abs((y0 + y1) / 2 - (b.Y - 8)) < Benches.ClearY)
+                {
+                    e.Alive = false;
+                    return;
+                }
+            }
+        }
+
+        void SetPose(string pose, float seconds = 0, string then = null)
+        {
+            motor.Pose = pose;
+            poseTimer = seconds;
+            poseNext = then;
+        }
+
+        // Cada tick: sentarse con ↓ encima de un banco; levantarse con cualquier otra tecla; las posturas que se acaban.
+        void TickBench()
+        {
+            if (!RemakeRules.HollowBenches || motor == null || player == null) return;
+            if (poseTimer > 0 && (poseTimer -= 1f / OriginalPhysics.TicksPerSecond) <= 0)
+                motor.Pose = poseNext;
+            if (player.Seated)
+            {
+                if (player.WantsToStand)
+                {
+                    player.Seated = player.WantsToStand = false;
+                    SetPose("levantarse", 0.35f, null);
+                }
+                return;
+            }
+            player.WantsToStand = false;
+            if (motor.State != MotorState.Ground || !motor.LastInput.DownPressed || Bosses.InFight) return;
+            if (!(BenchList.At(mapName, motor.Room.id, motor.X, motor.Y) is Benches.Bench b)) return;
+            Sit(b);
+        }
+
+        void Sit(Benches.Bench b)
+        {
+            motor.Place(World, motor.Room, b.X, b.Y);
+            player.Seated = true;
+            SetPose("sentarse", 0.25f, "sentado");
+            int c = (int)motor.Character;
+            Refill(c);                             // todas las máscaras, una a una (1 unidad cada 4 ticks), como en Hollow Knight
+            lastBench = b;
+            Sound.Effect(0x2E);
+            SaveAtBench();
+        }
+
+        // Guarda la partida (como en el santuario de Demeter) con el banco y la sombra.
+        void SaveAtBench()
+        {
+            SaveGameNow(Arrows, Coins, Keys);
+            SavedIconUntil = Time.time + 1.5f;
+        }
+
+        // RemakeRules.HollowDeath: sin vidas ni GAME OVER. El geo se queda en la sombra y se vuelve al último banco.
+        void HollowDie()
+        {
+            int c = (int)motor.Character;
+            Inventory.Experience[c] = 0;
+            PendingVitality[0] = PendingVitality[1] = 0;
+            liquidTicks = 0;
+            Vitality[c] = MaxVitality[c];
+            Sound.Effect(0x2B);
+            Jingle(0x95);
+            // La sombra: la anterior se pierde con su geo.
+            shadeMap = mapName; shadeRoom = motor.Room.id; shadeX = motor.X - 8; shadeY = motor.Y - 24; shadeGeo = Coins;
+            Coins = 0;
+            if (Bosses.InFight) Bosses.Abandon();
+            var b = lastBench ?? BenchList.Find("castle", startRoom);
+            if (b is Benches.Bench bench)
+            {
+                if (bench.Map != mapName) GoToMap(bench.Map);
+                motor.Place(World, World.Room(bench.Room), bench.X, bench.Y);
+                player.Seated = true;
+                SetPose("despertar", 0.8f, "sentado");
+            }
+            else
+                motor.Place(World, World.Room(startRoom), startX, startY);
+            HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
+            Say(shadeGeo > 0 ? $"Tu sombra guarda {shadeGeo} geo" : "Has despertado en el banco");
+        }
+
+        // Cambia de mapa (al reaparecer en un banco de otro mundo o del castillo).
+        void GoToMap(string map)
+        {
+            Inventory.EnterWorld(Benches.WorldOf(map));
+            LoadMap(map);
+            worldRetaken = false;
+        }
+
+        void SpawnShade()
+        {
+            if (!RemakeRules.HollowDeath || string.IsNullOrEmpty(shadeMap) || shadeMap != mapName || motor.Room.id != shadeRoom) return;
+            if (Enemies.Spawn(global::MazeOfKnight.Game.Enemies.Shade.TypeId, shadeX, shadeY) is global::MazeOfKnight.Game.Enemies.Shade s) s.Geo = shadeGeo;
+        }
+
+        void RecoverShade(global::MazeOfKnight.Game.Enemies.Shade s)
+        {
+            Coins = Mathf.Min(999, Coins + s.Geo);
+            Say(s.Geo > 0 ? $"Recuperas {s.Geo} geo" : "Tu sombra se desvanece");
+            shadeMap = null;
         }
 
         void EnterWorld(int world) => EnterWorld(world, false);
@@ -348,6 +551,7 @@ namespace MazeOfKnight.Game
 
         void AfterTick()
         {
+            TickBench();
             if (Enemies.Room != motor.Room)
             {
                 EnterEnemyRoom();
@@ -501,6 +705,9 @@ namespace MazeOfKnight.Game
         void Hurt(int damage, int dir, string message)
         {
             if (HurtTicks > 0 || DebugInvulnerable)
+                return;
+            // Sentado en un banco (RemakeRules.HollowBenches) no se recibe daño: los que andan pueden llegar hasta él.
+            if (player != null && player.Seated)
                 return;
             int c = (int)motor.Character;
             PendingVitality[c] -= damage;
@@ -727,7 +934,9 @@ namespace MazeOfKnight.Game
 
         // ---------- partida guardada (Demeter; SaveGame.cs) ----------
 
-        public void SaveGameNow(ShrineVisit v)
+        public void SaveGameNow(ShrineVisit v) => SaveGameNow(v.Arrows, v.Coins, v.Keys);
+
+        void SaveGameNow(int arrows, int coins, int keys)
         {
             var d = new SaveData
             {
@@ -742,12 +951,14 @@ namespace MazeOfKnight.Game
                 maxVitality = (int[])MaxVitality.Clone(),
                 lives = (int[])Lives.Clone(),
                 credits = (int[])ResurrectionCredit.Clone(),
-                arrows = v.Arrows, coins = v.Coins, keys = v.Keys,
+                arrows = arrows, coins = coins, keys = keys,
                 weapon = SelectedWeapon, character = (int)motor.Character, world10Door = World10Door,
                 takenItems = SaveData.Pack(takenItems), brokenRocks = SaveData.Pack(brokenRocks),
                 openedDoors = SaveData.Pack(openedDoors), roomObjects = SaveData.Pack(roomObjectState),
                 firedEvents = SaveData.Pack(firedEvents),
             };
+            if (lastBench is Benches.Bench lb) { d.benchMap = lb.Map; d.benchRoom = lb.Room; d.benchX = lb.X; d.benchY = lb.Y; }
+            if (!string.IsNullOrEmpty(shadeMap)) { d.shadeMap = shadeMap; d.shadeRoom = shadeRoom; d.shadeX = shadeX; d.shadeY = shadeY; d.shadeGeo = shadeGeo; }
             for (int c = 0; c < 2; c++) d.vitality[c] = Mathf.Clamp(Vitality[c] + PendingVitality[c], 0, MaxVitality[c]);
             try { d.Write(); Say("Partida guardada"); }
             catch (System.Exception e) { Say($"No se pudo guardar: {e.Message}"); }
@@ -796,6 +1007,18 @@ namespace MazeOfKnight.Game
             var room = World.Room(demeter?.exit.toRoom ?? startRoom);
             motor.Character = (Character)d.character;
             ApplySoloKnight();
+            shadeMap = d.shadeMap; shadeRoom = d.shadeRoom; shadeX = d.shadeX; shadeY = d.shadeY; shadeGeo = d.shadeGeo;
+            if (RemakeRules.HollowBenches && !string.IsNullOrEmpty(d.benchMap) && maps.ContainsKey(d.benchMap))
+            {
+                // Se despierta en el banco donde se guardó.
+                lastBench = new Benches.Bench { Map = d.benchMap, Room = d.benchRoom, X = d.benchX, Y = d.benchY };
+                if (d.benchMap != "castle") GoToMap(d.benchMap);
+                motor.Place(World, World.Room(d.benchRoom), d.benchX, d.benchY);
+                player.Seated = true;
+                SetPose("despertar", 0.8f, "sentado");
+                Say("Partida cargada");
+                return true;
+            }
             motor.Place(World, room, demeter?.exit.x ?? startX, demeter?.exit.y ?? startY);
             Say("Partida cargada");
             return true;
@@ -1008,6 +1231,7 @@ namespace MazeOfKnight.Game
             enemyViews.Clear();
             Enemies.EnterRoom(World, motor.Room, motor, motor.Room.markedRoom && !firedEvents.Contains((mapName, motor.Room.id)));
             Bosses.EnterRoom(Inventory.CurrentWorld, motor.Room);
+            SpawnShade();
         }
 
         // Colores provisionales: los de las primeras fichas y, para el resto, un tono fijo por tipo. Los proyectiles
@@ -1381,6 +1605,7 @@ namespace MazeOfKnight.Game
         // del jefe durante el combate).
         void LoseLife()
         {
+            if (RemakeRules.HollowDeath) { HollowDie(); return; }
             int c = (int)motor.Character, o = 1 - c;
             Vitality[c] = 0;
             Inventory.Experience[c] = 0;

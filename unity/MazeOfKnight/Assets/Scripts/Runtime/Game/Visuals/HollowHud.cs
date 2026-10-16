@@ -22,6 +22,7 @@ namespace MazeOfKnight.Game.Visuals
         public GameBootstrap game;
         Sprite frame, maskEmpty, geo;
         Sprite maskFull;
+        Sprite crest;
         readonly Sprite[] soul = new Sprite[11];
         readonly List<Sprite> maskBreak = new List<Sprite>();
         readonly Dictionary<(int, int), float> breaking = new Dictionary<(int, int), float>();   // (personaje, máscara) → inicio
@@ -132,8 +133,10 @@ namespace MazeOfKnight.Game.Visuals
             float maskX = pad + 128 * k, maskY = pad + 58 * k;
             Masks(me, maskX - 32 * km, maskY - 37 * km, km, step, row);
             int nMe = Mathf.Min(PerRow, Mathf.CeilToInt(game.MaxVitality[me] / (float)UnitsPerMask));
-            UiKit.Text(new Rect(maskX + nMe * step + 6 * s, maskY + 4 * s, 300 * s, 20 * s),
-                $"{m.Character.ToString().ToUpperInvariant()}  ×{game.Lives[me]}", 14, TextAnchor.UpperLeft, UiKit.Bone, true);
+            // Sin vidas (RemakeRules.HollowDeath) no hay contador.
+            if (!RemakeRules.HollowDeath)
+                UiKit.Text(new Rect(maskX + nMe * step + 6 * s, maskY + 4 * s, 300 * s, 20 * s),
+                    $"{m.Character.ToString().ToUpperInvariant()}  ×{game.Lives[me]}", 14, TextAnchor.UpperLeft, UiKit.Bone, true);
             float otherY = maskY + Rows(me) * row + 6 * s;
             // El otro personaje, en pequeño (con RemakeRules.SoloKnight no hay otro).
             if (!RemakeRules.SoloKnight)
@@ -175,6 +178,19 @@ namespace MazeOfKnight.Game.Visuals
             }
             else if (bosses != null && bosses.Listening)
                 UiKit.Text(new Rect(0, Screen.height - pad - 30 * s, Screen.width, 26 * s), "Escribe la palabra de la lápida", 15, TextAnchor.MiddleCenter, UiKit.Dim);
+
+            // Junto a un banco: "Descansar", como en Hollow Knight; al guardar, la cresta abajo a la derecha.
+            if (game.NearBench && Camera.main != null)
+            {
+                var p = Camera.main.WorldToScreenPoint(game.NearBenchLabel);
+                UiKit.Text(new Rect(p.x - 150 * s, Screen.height - p.y - 15 * s, 300 * s, 30 * s), "↓  Descansar", 18, TextAnchor.MiddleCenter, UiKit.Bone, true);
+            }
+            if (Time.time < game.SavedIconUntil)
+            {
+                crest ??= Resources.Load<Sprite>("Hollow/menu/remate");
+                float a = Mathf.Clamp01((game.SavedIconUntil - Time.time) / 0.4f) * (0.6f + 0.4f * Mathf.Sin(Time.time * 6));
+                UiKit.Icon(new Rect(Screen.width - 70 * s, Screen.height - 90 * s, 44 * s, 60 * s), crest, a);
+            }
 
             // Mensaje (con la barra del jefe, por encima de su nombre).
             if (!string.IsNullOrEmpty(game.Message))
