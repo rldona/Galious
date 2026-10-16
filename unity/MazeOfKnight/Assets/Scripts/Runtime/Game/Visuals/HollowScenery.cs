@@ -53,7 +53,7 @@ namespace MazeOfKnight.Game.Visuals
             With(L("colmena", "#99876b", "#120d06", 0.8f, "#4a3a1f", 0.45f, "#3d301b", "#8a7449"), 14),   // 3 guarida ámbar
             With(L("cristal", "#8a7a99", "#0e0914", 0.8f, "#3a2a4d", 0.45f, "#30243f", "#73609a"), 10),   // 4 cristal violeta
             L("ciudad", "#6b7d99", "#070b14", 0.8f, "#1f2d4a", 0.45f, "#1d2840", "#4f6494"),      // 5 ruinas hundidas
-            L("fungicos", "#8a8a6b", "#0d0d07", 0.8f, "#3a3a1f", 0.45f, "#30301b", "#7a7a4f"),    // 6 bosque de hongos
+            With(L("fungicos", "#7f97ab", "#060b10", 0.8f, "#1f364a", 0.45f, "#1c2f40", "#55748f"), 8),   // 6 bosque de hongos (azul, como los Páramos)
             L("abismo", "#5a6280", "#030408", 0.85f, "#141a2e", 0.45f, "#121726", "#3d4a73"),     // 7 abismo luminoso
             L("nido", "#5a5a66", "#050506", 0.85f, "#1c1c24", 0.45f, "#18181f", "#474757"),       // 8 magma
             L("confines", "#8c8c8c", "#0d0d0d", 0.8f, "#3a3a3a", 0.45f, "#2e2e2e", "#7a7a7a"),    // 9 osario

@@ -187,6 +187,24 @@ KITS = {
         "detalle": ["otras/ruins_breakable_watcher_statue_0000_watcher_statue_debris_01", "otras/ruin_add_pillarend",
                     "otras/ruins_breakable_watcher_statue_0003_watcher_statue_base"],
     },
+    # Mundo 6 (bosque de hongos): los Páramos Fúngicos. Setas de puntos por suelo y techo, máscaras de hongo y muros que
+    # se rompen por pared; setas grandes, tallos y montones de setas al fondo y como siluetas.
+    "fungicos": {
+        "suelo": ["atlas_Fung/fungd_mush_01_0001_a", "otras/fungus_crubmle_floor", "otras/shroom_charm_plinth_0001_floor",
+                  "otras/ancient_wall_pieces_0000_a_mushroom"],
+        "techo": ["atlas_Fung/fung_roof_mush_01_0001_a", "atlas_Fung/fung_new_mush_layered_03_0006_a",
+                  "atlas_Fung/fung_new_mush_layered_03_0003_a"],
+        "estalactita": ["otras/fung_pod_01", "otras/fung_pod_02", "otras/fung_mask_03"],
+        "pared_izq": ["otras/break_wall_fung", "otras/fung_break_wall_02", "otras/fung_new_0014_Layer-335"],
+        "masa": ["atlas_Fung/fung_new_0007_m", "atlas_Fung/fung_new_0005_m", "otras/mr_mush_riddle_room_0003_Layer-8"],
+        "fondo": ["atlas_Fung/fung_new_0002_m", "atlas_Fung/fung_new_0004_m", "atlas_Fung/fung_new_0010_m",
+                  "otras/ruin_mush_BG_single", "otras/fung_mush_01", "otras/mr_mush_riddle_room_0002_Layer-7",
+                  "atlas_Fung/fung_new_mush_layered_03_0004_a", "otras/fung_mask_02"],
+        "pp_abajo": ["atlas_Fung/fung_new_0005_m", "atlas_Fung/fung_new_0010_m", "otras/fung_mask_04"],
+        "pp_arriba": ["atlas_Fung/fung_roof_mush_01_0001_a", "otras/fung_mask_02", "otras/giraffe_masks_0001_fung_new_0133_Layer-236"],
+        "detalle": ["atlas_Fung/mush_010000", "atlas_Fung/mush_020000", "atlas_Fung/mush_050000",
+                    "atlas_Fung/fungd_mush_09_0004_a"],
+    },
 }
 
 
@@ -257,6 +275,10 @@ FAR = {
                           ("Ruins1_27", 5916, 2708), ("Ruins1_24", 664, 812), ("Ruins1_18", 7433, 1679),
                           ("Ruins1_06", 6011, 2096), ("Ruins1_01", 1219, 540), ("Ruins1_18", 9694, 1493),
                           ("Ruins1_03", 3160, 4513)]),
+    "fungicos": ("Fungus2", [("Fungus2_19", 1769, 840), ("Fungus2_06", 1481, 4731), ("Fungus2_09", 1048, 268),
+                             ("Fungus2_10", 3927, 3400), ("Fungus2_28", 4893, 1017), ("Fungus2_20", 2148, 1081),
+                             ("Fungus2_11", 1824, 3489), ("Fungus2_14", 6723, 888), ("Fungus2_18", 2774, 3610),
+                             ("Fungus2_23", 3344, 2587)]),
 }
 
 
