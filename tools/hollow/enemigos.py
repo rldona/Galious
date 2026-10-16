@@ -182,6 +182,64 @@ ENEMIES = {
                  clips={"quieto": "Beam Shoot", "mover": "Beam Shoot"}),
     "relampago": dict(types=[0x06], col="Zap Cloud", anchor="centro", k=1.2,
                       clips={"quieto": "Zap", "mover": "Zap"}),
+
+    # ---------- jefes (tipo 0x100 + id del jefe) y lo que crean ----------
+    # Bony Dragon (pasea, salta y lanza 3 huesos en parábola): el False Knight, que salta y aplasta.
+    "jefe_bony_dragon": dict(types=[0x101], col="False Knight", anchor="pies", k=1.3,
+                             clips={"quieto": "Idle", "mover": "Run", "atacar": ["Attack Antic", "Attack"]}),
+    # Elusive Dragon (asoma por los lados a 5 alturas, llamarada, se esconde): los Mantis Lords, que llegan por la pared.
+    # Su caja de contacto es todo el cuello que sale de la pared: se apoya en la zona que recibe golpes (la cabeza).
+    "jefe_elusive_dragon": dict(types=[0x102], col="Mantis Lords Anim", anchor="centro", k=1.5, on_weapon=True,
+                                clips={"quieto": "Wall Ready", "mover": "Wall Ready", "atacar": ["Throw Antic", "Throw"]}),   # Wall Arrive es una estela borrosa
+    # Arlyane (camina, te persigue, abanicos de disparos): el Traitor Lord, que lanza hoces.
+    "jefe_arlyane": dict(types=[0x103], col="Traitor Lord Anim", anchor="pies", k=1.3,
+                         clips={"quieto": "Idle", "mover": "Walk", "atacar": ["Sickle Throw Antic", "Sickle Throw Attack"]}),
+    # Sea Anemone (fija, se abre y se cierra, surtidor de esporas): Uumuu.
+    "jefe_sea_anemone": dict(types=[0x104], col="Mega Jellyfish Anim", anchor="centro", k=1.3,
+                             clips={"quieto": "Idle", "mover": "Idle", "atacar": "Attack"}),
+    # King Dragon (pasea y se para, llamaradas, nubes de tormenta): Grimm.
+    "jefe_king_dragon": dict(types=[0x106], col="Grimm Anim", anchor="pies", k=1.3,
+                             clips={"quieto": "Idle", "mover": "Idle", "atacar": "Cast"}),
+    # Big Lip (ida y vuelta, saca la lengua, disparo en 8 direcciones): el Mawlek.
+    "jefe_big_lip": dict(types=[0x107], col="Mini Mawlek Anim", anchor="pies", k=1.3,
+                         clips={"quieto": "Rest", "mover": "Run Forward", "atacar": ["Shoot Antic", "Shoot"]}),
+    # Monster (anda, cae por los bordes, bolas que rebotan): el Broken Vessel y sus globos de infección.
+    "jefe_monster": dict(types=[0x108], col="Broken Vessel Anim", anchor="pies", k=1.3,
+                         clips={"quieto": "Idle", "mover": "Walk", "atacar": "Shake Loop"}),
+    # Galious (fijo, se teletransporta, orbes en órbita): la Radiance.
+    "jefe_galious": dict(types=[0x109], col="Radiance Anim", anchor="centro", k=1.3,
+                         clips={"quieto": "Idle", "mover": "Tele In", "atacar": "Antic"}),
+    # Donra (vuela por una caja, la cabeza sigue tu altura, llamarada): Nosk alado.
+    # Su caja de contacto es muy plana (unos 42 × 12 px): con más margen, para que se vea (unos 26 px de alto).
+    "jefe_donra": dict(types=[0x10A], col="Nosk_Hornet", anchor="centro", k=2.2,
+                       clips={"quieto": "Idle", "mover": "Fly", "atacar": ["Swoop Antic", "Swoop"]}),
+    # Jump Slime (se arrastra y salta para aplastar): el Dung Defender, que rueda y salta.
+    "jefe_jump_slime": dict(types=[0x10B], col="Dung Defender Anim", anchor="pies", k=1.3,
+                            clips={"quieto": "Idle", "mover": "Roll"}),
+    # Lo que crean los jefes.
+    "hueso": dict(types=[0x54, 0x55], col="Mantis Lords Anim", anchor="centro", k=1.3, spin=0,   # Bony Dragon
+                  clips={"quieto": "Lance", "mover": "Lance"}),
+    "llamarada": dict(types=[0x57], col="Grimm Anim", anchor="centro", k=1.3,     # Elusive Dragon, King Dragon, Donra
+                      clips={"quieto": "Firebat", "mover": "Firebat"}),
+    "hoz": dict(types=[0x58], col="Mantis Lords Anim", anchor="centro", k=1.3,    # abanicos de Arlyane
+                clips={"quieto": "Mantis Air Projectile", "mover": "Mantis Air Projectile"}),
+    "medusita": dict(types=[0x59], col="Jellyfish", anchor="centro", k=1.4,       # esporas de Sea Anemone
+                     clips={"quieto": "Lil Fly", "mover": "Lil Fly"}),
+    "escupitajo_mawlek": dict(types=[0x65], col="Orange Glob Anim", anchor="centro", k=1.3,   # de Big Lip
+                              clips={"quieto": "Fall", "mover": "Fall"}),
+    "orbe_radiance": dict(types=[0x67], col="Laser Beam Anim", anchor="centro", k=1.3,   # orbes de Galious
+                          clips={"quieto": "Ball Shoot", "mover": "Ball Shoot"}),
+    "globo": dict(types=[0x68], col="Parasite Balloon Anim", anchor="centro", k=1.4,   # bolas de Monster
+                  clips={"quieto": "Chase", "mover": "Chase"}),
+    "chispa_invocacion": dict(types=[0x63], col="Light Effects", anchor="centro", k=1.5,
+                              clips={"quieto": "Burst Effect", "mover": "Burst Effect"}),
+    # Final: fantasmas de las piedras, piedras del bebé y el bebé (Pampas, un gusarapo de Hollow Knight).
+    "fantasma_espiral": dict(types=[0x39], col="Ghost Slug Anim", anchor="centro", k=1.4,
+                             clips={"quieto": "Idle", "mover": "Idle"}),
+    "piedra_bebe": dict(types=[0x5C], col="Geo Rocks Green", anchor="pies", k=1.1,
+                        clips={"quieto": "Idle 1", "mover": "Idle 1", "morir": "Broken 1"}),
+    "bebe": dict(types=[0x6B], col="Grub2", anchor="pies", k=1.4,
+                 clips={"quieto": "Idle", "mover": "Idle"}),
 }
 
 
@@ -236,7 +294,9 @@ def frames(src, col, rows, names, rot):
 # Lo que no es una criatura (agua y proyectiles): sin girar ni morir buscados solos (serían los de otra criatura de su
 # colección, como el orbe del Soul Twister).
 NOT_CREATURES = {"geiser", "gota", "salpicadura", "escupitajo", "pua", "bolita_gris", "media_luna", "gota_naranja",
-                 "orbe_alma", "bola_fuego", "bola_naranja", "orbe_rosa", "gota_agua", "bomba", "espora", "rayo", "relampago"}
+                 "orbe_alma", "bola_fuego", "bola_naranja", "orbe_rosa", "gota_agua", "bomba", "espora", "rayo", "relampago",
+                 "hueso", "llamarada", "hoz", "medusita", "escupitajo_mawlek", "orbe_radiance", "chispa_invocacion",
+                 "piedra_bebe", "bebe"}
 
 
 def clips_for(key, spec, rows):
@@ -301,7 +361,8 @@ def build(src):
             made.append(f"{a} {len(fr)}")
         types = ",".join(f"{t:02X}" for t in spec["types"])
         spin = spec.get("spin")
-        info.append(f"enemigo {key} {types} {spec['anchor']} {spec['k']} {ref_h} {ref_w} {'-' if spin is None else spin}")
+        info.append(f"enemigo {key} {types} {spec['anchor']} {spec['k']} {ref_h} {ref_w} {'-' if spin is None else spin} "
+                    f"{'arma' if spec.get('on_weapon') else 'contacto'}")
         print(f"{key}: {spec['col']} ({', '.join(made)})")
     (RES / "enemigos" / "info.txt").write_text("\n".join(info) + "\n", encoding="utf-8")
     print(f"enemigos: {len(ENEMIES)} → {RES / 'enemigos'}")

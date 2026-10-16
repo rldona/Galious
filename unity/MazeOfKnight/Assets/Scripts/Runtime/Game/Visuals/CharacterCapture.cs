@@ -11,12 +11,21 @@ namespace MazeOfKnight.Game.Visuals
     public class CharacterCapture : MonoBehaviour
     {
         static string dir;
+        static bool bossesOnly;      // -capturaJefes <carpeta> [mundo]: solo los combates (o el de ese mundo; un combate
+        static int bossWorld;        // empezado sigue activo en los demás mundos, así que uno por ejecución)
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Init()
         {
             var args = System.Environment.GetCommandLineArgs();
             int i = System.Array.IndexOf(args, "-capturaPersonajes");
+            int j = System.Array.IndexOf(args, "-capturaJefes");
+            if (j >= 0 && j + 1 < args.Length)
+            {
+                i = j;
+                bossesOnly = true;
+                if (j + 2 < args.Length) int.TryParse(args[j + 2], out bossWorld);
+            }
             if (i < 0 || i + 1 >= args.Length) return;
             dir = args[i + 1];
             AttractMode.Current = AttractMode.Mode.Game;
@@ -52,6 +61,35 @@ namespace MazeOfKnight.Game.Visuals
             player.Demo = null;
         }
 
+        // Jefes: en cada mundo, a la sala del jefe, se escribe su palabra y se fotografía el combate.
+        IEnumerator Bosses(GameBootstrap game)
+        {
+            // Los objetos que piden algunos mundos para entrar (el Necklace del 7…), como si ya se tuvieran.
+            foreach (var it in game.Inventory.Data.items)
+                if (it.effect != null && it.effect.kind == "worldEntry") game.Inventory.Add(it.type);
+            for (int w = bossWorld > 0 ? bossWorld : 1; w <= (bossWorld > 0 ? bossWorld : 10); w++)
+            {
+                game.DebugEnterWorld(w);
+                yield return new WaitForSeconds(1.2f);
+                game.DebugGoToBoss();
+                yield return new WaitForSeconds(1.0f);
+                if (game.Bosses?.Info == null) continue;
+                Debug.Log($"[Capturas] mundo {w}: escuchando {game.Bosses.Listening}, palabra {game.Bosses.Info.word}, sala del jefe {game.Bosses.Info.room}, jugador en {game.Motor.Room.id}");
+                // Como si se tecleara: una letra repetida necesita soltar la tecla antes (BossFight.KeysReleased).
+                foreach (char ch in game.Bosses.Info.word)
+                {
+                    game.Bosses.KeysReleased();
+                    game.Bosses.Type(ch);
+                    yield return new WaitForSeconds(0.12f);
+                }
+                Debug.Log($"[Capturas] mundo {w}: tras la palabra, fase {game.Bosses.Current}");
+                yield return new WaitForSeconds(6.5f);
+                yield return Shot($"jefe_mundo{w:00}_a");
+                yield return new WaitForSeconds(1.5f);
+                yield return Shot($"jefe_mundo{w:00}_b");
+            }
+        }
+
         IEnumerator Shot(string name)
         {
             ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"));
@@ -66,6 +104,7 @@ namespace MazeOfKnight.Game.Visuals
             var player = FindAnyObjectByType<PlayerController>();
             if (game == null || player == null) { Application.Quit(); yield break; }
             game.DebugInvulnerable = true;
+            if (bossesOnly) { yield return Bosses(game); Application.Quit(); yield break; }
             var room = game.Motor.Room;
             int x0 = game.Motor.X, y0 = game.Motor.Y;
             foreach (var c in new[] { Character.Popolon, Character.Aphrodite })

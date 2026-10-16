@@ -23,12 +23,14 @@ namespace MazeOfKnight.Game.Visuals
             public float K;                  // el cuerpo mide como mucho K veces la caja de contacto, en alto y en ancho
             public float RefHeight, RefWidth;  // alto y ancho del cuerpo en reposo, en texels (8 por píxel del original)
             public float? Spin;              // proyectil alargado: ángulo al que apunta el dibujo (gira con su vuelo)
+            public bool OnWeapon;            // a lo ancho, en la zona que recibe golpes y no en toda la de contacto (el cuello del Elusive Dragon)
         }
 
         class State
         {
             public FrameAnimator Anim = new FrameAnimator();
             public float LastX, LastY, Moved = -10, Angle;
+            public float SizeW, SizeH;       // jefes: la caja de contacto de su primera aparición (la suya cambia con cada pose)
             public bool LastLeft, Known;
             public string OneShot;           // "atacar" o "girar" mientras se ven
         }
@@ -48,6 +50,8 @@ namespace MazeOfKnight.Game.Visuals
         Transform corpseRoot;
 
         public int Count => byType.Count;
+        // Colisión de la sala (RoomWorld.Solid): para apoyar en el suelo a los que andan.
+        public System.Func<RoomModel, int, int, bool> Solid;
 
         HollowEnemyArt(ArtLibrary lib) => this.lib = lib;
 
@@ -64,7 +68,7 @@ namespace MazeOfKnight.Game.Visuals
                 var p = line.Trim().Split(' ');
                 if (p.Length == 3 && p[0] == "clip" && float.TryParse(p[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float f))
                     art.fps[p[1]] = f;
-                else if (p.Length == 8 && p[0] == "enemigo")
+                else if (p.Length == 9 && p[0] == "enemigo")
                 {
                     var info = new Info
                     {
@@ -73,6 +77,7 @@ namespace MazeOfKnight.Game.Visuals
                         RefHeight = float.Parse(p[5], CultureInfo.InvariantCulture),
                         RefWidth = float.Parse(p[6], CultureInfo.InvariantCulture),
                         Spin = p[7] == "-" ? (float?)null : float.Parse(p[7], CultureInfo.InvariantCulture),
+                        OnWeapon = p[8] == "arma",
                     };
                     foreach (var t in p[2].Split(','))
                         art.byType[int.Parse(t, NumberStyles.HexNumber)] = info;
@@ -94,6 +99,17 @@ namespace MazeOfKnight.Game.Visuals
             return Mathf.Min(byHeight, byWidth);
         }
 
+        // Zona que recibe golpes (la unión de sus cajas de arma); si no tiene, la de contacto.
+        public static (float x0, float y0, float x1, float y1) WeaponBox(Enemy e)
+        {
+            float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+            foreach (var (a, b, c, d) in e.WeaponRects())
+            {
+                x0 = Mathf.Min(x0, a); y0 = Mathf.Min(y0, b); x1 = Mathf.Max(x1, c); y1 = Mathf.Max(y1, d);
+            }
+            return x0 <= x1 ? (x0, y0, x1, y1) : ContactBox(e);
+        }
+
         // Caja de contacto original del enemigo (la unión de sus cajas de contacto).
         public static (float x0, float y0, float x1, float y1) ContactBox(Enemy e)
         {
@@ -109,9 +125,34 @@ namespace MazeOfKnight.Game.Visuals
         public (Vector3 pos, Vector3 scale, Quaternion rot) Place(Enemy e, Info info)
         {
             var (cx0, cy0, cx1, cy1) = ContactBox(e);
-            float s = Scale(info, cx1 - cx0, cy1 - cy0);
+            if (info.OnWeapon)
+            {
+                // A lo ancho, la zona que recibe golpes (el lado de la cabeza); a lo alto, la de contacto (la de golpes sube
+                // por encima de la cabeza). Del ancho, el de la zona de golpes.
+                var (wx0, _, wx1, _) = WeaponBox(e);
+                cx0 = wx0;
+                cx1 = wx1;
+            }
+            float w = cx1 - cx0, h = cy1 - cy0;
+            // Los jefes cambian de caja con cada pose del original: el tamaño, con la primera (si no, palpitaría).
+            if (e is Boss && states.TryGetValue(e, out var bs))
+            {
+                if (bs.SizeW <= 0) { bs.SizeW = w; bs.SizeH = h; }
+                w = bs.SizeW;
+                h = bs.SizeH;
+            }
+            float s = Scale(info, w, h);
+            float feet = cy1;
+            // Los que andan, con los pies en el suelo: si bajo el centro de la caja hay suelo dentro de ella (la caja
+            // del original puede bajar de él, como la de los jefes), ahí. Si no, el borde de abajo de la caja.
+            if (info.Feet && Solid != null)
+            {
+                int x = Mathf.RoundToInt((cx0 + cx1) / 2f);
+                for (int y = Mathf.RoundToInt((cy0 + cy1) / 2f); y < cy1; y++)
+                    if (Solid(e.Room, x, y)) { feet = y; break; }
+            }
             var at = RoomCoords.PixelToWorld(e.Room, 0, 0) +
-                     new Vector2((cx0 + cx1) / 2f, -(info.Feet ? cy1 : (cy0 + cy1) / 2f)) / RoomCoords.PixelsPerUnit;
+                     new Vector2((cx0 + cx1) / 2f, -(info.Feet ? feet : (cy0 + cy1) / 2f)) / RoomCoords.PixelsPerUnit;
             if (info.Spin is float spin && states.TryGetValue(e, out var st))
                 return (new Vector3(at.x, at.y, 0), new Vector3(s, s, 1), Quaternion.Euler(0, 0, st.Angle - spin));
             return (new Vector3(at.x, at.y, 0), new Vector3(e.FacingLeft ? -s : s, s, 1), Quaternion.identity);

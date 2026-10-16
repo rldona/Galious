@@ -139,7 +139,13 @@ namespace MazeOfKnight.Game
             hollowEnemies = Visuals.HollowEnemyArt.Load();
             if (hollowEnemies != null)
             {
+                hollowEnemies.Solid = (r, x, y) => World != null && World.Solid(r, x, y);
                 Enemies.Spawned += e => hollowEnemies.Spawned(e);
+                Enemies.BossDefeated += b =>
+                {
+                    var v = enemyViews.TryGetValue(b, out var view) ? view : null;
+                    hollowEnemies.Killed(b, v != null ? v.sharedMaterial : null, v != null ? v.sortingOrder : 5);
+                };
                 Enemies.Killed += e =>
                 {
                     var v = enemyViews.TryGetValue(e, out var view) ? view : null;
@@ -1102,7 +1108,8 @@ namespace MazeOfKnight.Game
             {
                 if (sr == null) continue;
                 sr.enabled = e.Alive && e.Visible;
-                if (bossArt.TryGetValue(e, out var off))
+                // La imagen del jefe del original (con tiles), si no tiene dibujo de Hollow Knight.
+                if (hollowEnemies?.For(e) == null && bossArt.TryGetValue(e, out var off))
                 {
                     // Como en el original, en la rejilla de 8 px (pivote arriba a la izquierda).
                     var tl = RoomCoords.PixelToWorld(e.Room, ((int)e.X & ~7) + off.dx, ((int)e.Y & ~7) + off.dy);
