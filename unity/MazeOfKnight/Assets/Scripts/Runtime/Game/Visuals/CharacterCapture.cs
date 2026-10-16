@@ -13,6 +13,9 @@ namespace MazeOfKnight.Game.Visuals
         static string dir;
         static bool bossesOnly;      // -capturaJefes <carpeta> [mundo]: solo los combates (o el de ese mundo; un combate
         static int bossWorld;        // empezado sigue activo en los demás mundos, así que uno por ejecución)
+        static bool roomsOnly;       // -capturaSalas <carpeta> <mundo> [sala…]: salas del mundo (0, el castillo), todas o esas
+        static int roomsWorld;
+        static readonly System.Collections.Generic.List<int> roomIds = new System.Collections.Generic.List<int>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Init()
@@ -25,6 +28,14 @@ namespace MazeOfKnight.Game.Visuals
                 i = j;
                 bossesOnly = true;
                 if (j + 2 < args.Length) int.TryParse(args[j + 2], out bossWorld);
+            }
+            int k = System.Array.IndexOf(args, "-capturaSalas");
+            if (k >= 0 && k + 2 < args.Length)
+            {
+                i = k;
+                roomsOnly = true;
+                int.TryParse(args[k + 2], out roomsWorld);
+                for (int a = k + 3; a < args.Length && int.TryParse(args[a], out int id); a++) roomIds.Add(id);
             }
             if (i < 0 || i + 1 >= args.Length) return;
             dir = args[i + 1];
@@ -95,6 +106,46 @@ namespace MazeOfKnight.Game.Visuals
             }
         }
 
+        // Salas: el jugador quieto en un hueco con suelo de cada una (el primero desde abajo a la izquierda) y una foto.
+        IEnumerator Rooms(GameBootstrap game, PlayerController player)
+        {
+            if (roomsWorld > 0)
+            {
+                foreach (var it in game.Inventory.Data.items)
+                    if (it.effect != null && it.effect.kind == "worldEntry") game.Inventory.Add(it.type);
+                game.DebugEnterWorld(roomsWorld);
+                yield return new WaitForSeconds(1.2f);
+            }
+            var ids = roomIds.Count > 0 ? roomIds : new System.Collections.Generic.List<int>(System.Linq.Enumerable.Select(game.World.Rooms, r => r.id));
+            ids.Sort();
+            foreach (int id in ids)
+            {
+                var room = game.World.Room(id);
+                if (room == null) continue;
+                var (x, y) = Spot(game.World, room);
+                player.Demo = null;
+                game.Motor.Place(game.World, room, x, y);
+                yield return new WaitForSeconds(0.6f);
+                // Con la colisión marcada (F10) y las cajas (F9), y sin nada encima.
+                yield return Shot($"sala_m{roomsWorld:00}_{id:000}_colision");
+                CollisionGridOverlay.Show = HitboxOverlay.Show = false;
+                yield return new WaitForSeconds(0.1f);
+                yield return Shot($"sala_m{roomsWorld:00}_{id:000}");
+                CollisionGridOverlay.Show = HitboxOverlay.Show = true;
+            }
+        }
+
+        // Un sitio de pie: aire en 2 × 2 celdas con suelo debajo, empezando por abajo a la izquierda.
+        static (int x, int y) Spot(RoomWorld world, RoomModel room)
+        {
+            bool Air(int c, int r) => world.TileAt(room, c * 8, OriginalPhysics.RoomTopPx + r * 8) is TileClass.Empty or TileClass.Ladder;
+            for (int r = RoomCoords.Rows - 2; r >= 2; r--)
+                for (int c = 2; c < RoomCoords.Cols - 2; c++)
+                    if (Air(c, r) && Air(c + 1, r) && Air(c, r - 1) && Air(c + 1, r - 1) && !Air(c, r + 1) && !Air(c + 1, r + 1))
+                        return (c * 8 + 8, OriginalPhysics.RoomTopPx + r * 8 + 8);
+            return (128, 120);
+        }
+
         IEnumerator Shot(string name)
         {
             ScreenCapture.CaptureScreenshot(Path.Combine(dir, name + ".png"));
@@ -110,6 +161,7 @@ namespace MazeOfKnight.Game.Visuals
             if (game == null || player == null) { Application.Quit(); yield break; }
             game.DebugInvulnerable = true;
             if (bossesOnly) { yield return Bosses(game); Application.Quit(); yield break; }
+            if (roomsOnly) { yield return Rooms(game, player); Application.Quit(); yield break; }
             var room = game.Motor.Room;
             int x0 = game.Motor.X, y0 = game.Motor.Y;
             foreach (var c in new[] { Character.Popolon, Character.Aphrodite })

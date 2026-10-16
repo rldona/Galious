@@ -11,7 +11,9 @@ namespace MazeOfKnight.Game.Visuals
     public class CollisionGridOverlay : MonoBehaviour
     {
         public GameBootstrap game;
-        public static bool Show;
+        // Encendida por defecto mientras se monta el escenario de Hollow Knight sobre la colisión (16 de octubre de 2026):
+        // el sólido en rojo, como en la colisión de las salas de Hollow Knight.
+        public static bool Show = true;
 
         const int T = 32;                      // texels por tile (4 por píxel del original)
         SpriteRenderer grid, playerBox;
@@ -38,7 +40,7 @@ namespace MazeOfKnight.Game.Visuals
             if (!on) return;
             if (grid == null)
             {
-                grid = NewRenderer("Rejilla de colisión", 998);
+                grid = NewRenderer("Rejilla de colisión", 4);   // encima del escenario, debajo de objetos y personajes
                 playerBox = NewRenderer("Caja del jugador", 999);
                 playerBox.sprite = BoxSprite();
             }
@@ -60,8 +62,8 @@ namespace MazeOfKnight.Game.Visuals
 
         SpriteRenderer NewRenderer(string name, int order)
         {
+            // Suelto en el mundo: el objeto del ambiente se mueve con la cámara.
             var go = new GameObject(name);
-            go.transform.SetParent(transform, false);
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sortingOrder = order;
             if (material != null) sr.sharedMaterial = material;
@@ -70,7 +72,7 @@ namespace MazeOfKnight.Game.Visuals
 
         static Color Tint(TileClass c) => c switch
         {
-            TileClass.Solid => new Color(0.55f, 0.75f, 1f, 0.22f),
+            TileClass.Solid => new Color(0.85f, 0.08f, 0.12f, 0.3f),
             TileClass.Ladder => new Color(1f, 0.9f, 0.3f, 0.3f),
             TileClass.Water => new Color(0.3f, 0.9f, 1f, 0.25f),
             TileClass.Lava => new Color(1f, 0.5f, 0.2f, 0.3f),
@@ -83,8 +85,8 @@ namespace MazeOfKnight.Game.Visuals
             int w = RoomCoords.Cols * T, h = RoomCoords.Rows * T;
             var tex = new Texture2D(w, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
             var px = new Color[w * h];
-            var line = new Color(1, 1, 1, 0.35f);
-            var strong = new Color(1, 1, 1, 0.7f);
+            var line = new Color(0.35f, 0f, 0.04f, 0.45f);
+            var strong = new Color(0.25f, 0f, 0.03f, 0.7f);
             for (int r = 0; r < RoomCoords.Rows; r++)
                 for (int c = 0; c < RoomCoords.Cols; c++)
                 {
@@ -95,7 +97,8 @@ namespace MazeOfKnight.Game.Visuals
                         {
                             bool edge = x == 0 || y == 0;
                             bool big = x == 0 && c % 4 == 0 || y == 0 && (RoomCoords.Rows - r) % 4 == 0;
-                            px[(oy + y) * w + ox + x] = edge ? (big ? strong : line) : tint;
+                            // La rejilla, solo en las celdas que no son aire (como la colisión marcada de Hollow Knight).
+                            px[(oy + y) * w + ox + x] = tint.a <= 0 ? Color.clear : edge ? (big ? strong : line) : tint;
                         }
                 }
             tex.SetPixels(px);

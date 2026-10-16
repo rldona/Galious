@@ -44,6 +44,17 @@ namespace MazeOfKnight.Game
 
         Grid grid;
         Tilemap back, front, rim, rocks, keyDoors, doorsLayer;
+        // Escenario de Hollow Knight (Visuals/HollowScenery), con los dos estilos; null si no se ha importado.
+        Visuals.HollowScenery scenery;
+        bool sceneryLoaded;
+        Visuals.HollowScenery Scenery
+        {
+            get
+            {
+                if (!sceneryLoaded) { sceneryLoaded = true; scenery = Visuals.HollowScenery.Load(); }
+                return scenery;
+            }
+        }
         MapData lastMap;
         RoomWorld lastWorld;
 
@@ -62,7 +73,7 @@ namespace MazeOfKnight.Game
             foreach (var ((room, x, y), visible) in new Dictionary<(RoomModel, int, int), bool>(shownRocks)) ShowRock(room, x, y, visible);
             foreach (var ((room, x, y), open) in new Dictionary<(RoomModel, int, int), int>(shownDoors)) ShowDoor(room, x, y, open);
             foreach (var (room, x, y) in new List<(RoomModel, int, int)>(shownRevolving)) ShowRevolvingDoor(room, x, y);
-            back.GetComponent<TilemapRenderer>().enabled = style == null;
+            back.GetComponent<TilemapRenderer>().enabled = style == null || Scenery != null;
             rim.ClearAllTiles();
             if (lastMap != null)
                 foreach (var data in lastMap.rooms)
@@ -82,11 +93,12 @@ namespace MazeOfKnight.Game
             shownDoors.Clear();
             if (grid != null)
                 DestroyImmediate(grid.gameObject);
+            Scenery?.Clear();
             grid = new GameObject($"{map.mapName} (salas)").AddComponent<Grid>();
             grid.transform.SetParent(transform, false);
             grid.cellSize = new Vector3(RoomCoords.TileSize, RoomCoords.TileSize, 0);
             back = Layer("Fondo", -10);
-            back.GetComponent<TilemapRenderer>().enabled = Style == null;
+            back.GetComponent<TilemapRenderer>().enabled = Style == null || Scenery != null;
             var doors = doorsLayer = Layer("Puertas", -8);
             front = Layer("Colisión", -6);
             rim = Layer("Bordes", -5);
@@ -96,7 +108,7 @@ namespace MazeOfKnight.Game
             foreach (var data in map.rooms)
             {
                 var room = data.room;
-                var bg = room.shrine ? shrine : ((room.gridX + room.gridY) & 1) == 0 ? background : backgroundAlt;
+                var bg = room.shrine ? shrine : Scenery != null ? null : ((room.gridX + room.gridY) & 1) == 0 ? background : backgroundAlt;
                 for (int row = 0; row < RoomCoords.Rows; row++)
                     for (int col = 0; col < RoomCoords.Cols; col++)
                     {
@@ -107,6 +119,7 @@ namespace MazeOfKnight.Game
                             front.SetTile(cell, tile);
                         if (!room.shrine) UpdateRim(world, room, col, row);
                     }
+                if (!room.shrine) Scenery?.BuildRoom(world, room, grid.transform);
             }
         }
 
@@ -138,6 +151,7 @@ namespace MazeOfKnight.Game
             for (int r = row; r <= row + height; r++)
                 for (int c = col; c < col + width; c++)
                     UpdateRim(world, room, c, r);
+            if (!room.shrine && grid != null) Scenery?.BuildRoom(world, room, grid.transform);
         }
 
         // Borde de arriba: un sólido con aire (o escalera, o agua) encima.
@@ -145,7 +159,7 @@ namespace MazeOfKnight.Game
         {
             if (rim == null || row < 0 || row >= RoomCoords.Rows || col < 0 || col >= RoomCoords.Cols) return;
             // Sin borde sobre una piedra (es sólida, pero no es suelo de la sala).
-            bool on = Style != null && !RockAt(room, col, row) &&
+            bool on = Style != null && Scenery == null && !RockAt(room, col, row) &&
                       world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8) == TileClass.Solid &&
                       world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + row * 8 - 8) != TileClass.Solid;
             rim.SetTile(RoomCoords.Cell(room, col, row), on ? Style.Rim : null);
@@ -181,6 +195,7 @@ namespace MazeOfKnight.Game
         // Sala oscura (mundo 5, sala 6, sin la Candle): los muros no se ven, pero siguen ahí.
         public void SetDark(RoomWorld world, RoomModel room, bool dark)
         {
+            Scenery?.SetVisible(room, !dark);
             if (dark)
             {
                 for (int r = 0; r < RoomCoords.Rows; r++)
@@ -321,6 +336,9 @@ namespace MazeOfKnight.Game
                              world.TileAt(room, (col - 2) * 8, OriginalPhysics.RoomTopPx + row * 8) != TileClass.Ladder;
                 return hl[row & 1, right ? 1 : 0];
             }
+            // Con el escenario de Hollow Knight, el sólido es negro (sus piezas visten los bordes); la piedra, su dibujo.
+            if (Scenery != null && (cls == TileClass.Solid || cls == TileClass.BossPassable))
+                return RockAt(room, col, row) ? null : Scenery.FillTile;
             // Escalera de 2 tiles: la mitad derecha es la que tiene escalera a su izquierda.
             if (Style?.LadderRight != null && cls == TileClass.Ladder &&
                 world.TileAt(room, (col - 1) * 8, OriginalPhysics.RoomTopPx + row * 8) == TileClass.Ladder &&

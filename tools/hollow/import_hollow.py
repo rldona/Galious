@@ -23,6 +23,7 @@ import efectos  # noqa: E402
 import enemigos  # noqa: E402
 import objetos  # noqa: E402
 import hud  # noqa: E402
+import escenario  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/personajes"
@@ -233,6 +234,7 @@ def main(argv):
     enemigos.build(src)
     objetos.build(src)
     hud.build(src)
+    escenario.build(src)
 
 
 if __name__ == "__main__":
