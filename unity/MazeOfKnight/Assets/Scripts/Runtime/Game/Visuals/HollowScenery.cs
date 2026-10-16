@@ -57,7 +57,7 @@ namespace MazeOfKnight.Game.Visuals
             With(L("abismo", "#5a6280", "#030408", 0.85f, "#141a2e", 0.45f, "#121726", "#3d4a73"), 18),   // 7 abismo luminoso
             With(L("nido", "#7a7f94", "#06070a", 0.8f, "#2a2e3d", 0.5f, "#222633", "#5a6075"), 16),   // 8 magma (el Nido Profundo)
             L("confines", "#8c8c8c", "#0d0d0d", 0.8f, "#3a3a3a", 0.45f, "#2e2e2e", "#7a7a7a"),    // 9 osario
-            L("palacio", "#a3a3b3", "#0f0f14", 0.75f, "#4d4d5c", 0.45f, "#3d3d4a", "#9494a8"),    // 10 trono carmesí
+            With(L("palacio", "#a3a3b3", "#0f0f14", 0.75f, "#4d4d5c", 0.45f, "#3d3d4a", "#9494a8"), 14),   // 10 trono carmesí (el Palacio Blanco)
         };
         public static Look LookFor(string mapName)
         {

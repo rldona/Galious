@@ -44,6 +44,7 @@ HIVE = "Hive.png"
 ABYSS = "Abyss.png"
 DEEP = "Deepnest.png"
 DUNES, WYRM, OUTLOOK = "Dunes.png", "Wyrm.png", "Outlook.png"
+WP = "White_Palace.png"
 
 
 def A(atlas, box, name):
@@ -281,6 +282,31 @@ KITS = {
                       "otras/colosseum_EXT_0003_col_05"],
         "detalle": ["otras/ash_grass1000", "otras/ash_grass_02000", "otras/ash_grass_03000", "otras/bone_spike_03"],
     },
+    # Mundo 10 (trono carmesí; Hollow Knight no tiene zona carmesí): el Palacio Blanco, el final, entre nubes. Cornisas
+    # de piedra blanca por suelo, frisos con púas colgando por techo, cortinas de piedra y columnas por pared; arcos,
+    # vidrieras, bancos y estatuas al fondo; las ramas de piedra delante.
+    "palacio": {
+        "suelo": [A(WP, (132, 1804, 468, 1868), "cornisa_a"), A(WP, (472, 1800, 736, 1868), "cornisa_b"),
+                  A(WP, (388, 1876, 900, 1932), "losa"), A(WP, (1632, 2036, 1848, 2080), "cornisa_c"),
+                  A(WP, (2132, 2112, 2392, 2160), "cornisa_d")],
+        "techo": [A(WP, (724, 2440, 1268, 2716), "friso"), A(WP, (2652, 3296, 3044, 3524), "arco_roto"),
+                  "atlas_Crossroads/roof_03"],
+        "estalactita": [A(WP, (1652, 2080, 2020, 2476), "puas_a"), A(WP, (1136, 2220, 1500, 2580), "puas_b"),
+                        A(WP, (3224, 2696, 3448, 3068), "colgajo")],
+        "pared_izq": [A(WP, (2640, 3528, 2856, 4096), "cortina"), A(WP, (196, 2012, 368, 2296), "columna")],
+        "masa": [A(WP, (2592, 2968, 2960, 3216), "roca_a"), A(WP, (2056, 3672, 2368, 4092), "copa"),
+                 A(WP, (3168, 3428, 3488, 3692), "cuenco")],
+        "fondo": [A(WP, (1312, 2680, 1656, 3544), "vidriera"), A(WP, (0, 2360, 344, 3000), "puerta"),
+                  A(WP, (196, 2012, 368, 2296), "columna"), A(WP, (1112, 2024, 1316, 2216), "estatua"),
+                  A(WP, (384, 1384, 600, 1516), "baranda"), A(WP, (3452, 2592, 3720, 2840), "trono"),
+                  A(WP, (3760, 2212, 3976, 2440), "fuente"), A(WP, (2888, 2248, 3064, 2548), "ramas")],
+        "pp_abajo": [A(WP, (2560, 2360, 2884, 2552), "rocas"), A(WP, (1572, 3140, 1896, 3548), "monton"),
+                     A(WP, (400, 3940, 660, 4096), "relieve")],
+        "pp_arriba": [A(WP, (1652, 2080, 2020, 2476), "puas_a"), A(WP, (3324, 2248, 3520, 2492), "garra"),
+                      A(WP, (2928, 2760, 3128, 3016), "zarza")],
+        "detalle": [A(WP, (184, 1048, 264, 1236), "jarron"), A(WP, (740, 1704, 852, 1868), "huevo"),
+                    A(WP, (268, 1248, 396, 1372), "piedra")],
+    },
 }
 
 
@@ -368,6 +394,11 @@ FAR = {
                                    ("Deepnest_East_06", 5763, 344), ("Deepnest_East_06", 8761, 523),
                                    ("Deepnest_East_11", 4977, 3192), ("Deepnest_East_03", 2789, 1954),
                                    ("Deepnest_East_08", 7097, 1367), ("Deepnest_East_18", 5982, 4160)]),
+    "palacio": ("White_Palace", [("White_Palace_01", 7448, 6906), ("White_Palace_03_hub", 6023, 6452),
+                                 ("White_Palace_14", 4726, 2354), ("White_Palace_03_hub", 4831, 4435),
+                                 ("White_Palace_02", 3854, 3130), ("White_Palace_09", 5660, 6478),
+                                 ("White_Palace_13", 6826, 3038), ("White_Palace_19", 7806, 2699),
+                                 ("White_Palace_04", 6834, 3544), ("White_Palace_07", 5, 5646)]),
 }
 
 
