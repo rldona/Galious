@@ -129,7 +129,7 @@ namespace MazeOfKnight.Game.Visuals
             // Tarareo: más fuerte cerca, nada fuera de su sala.
             float target = 0;
             if (view != null && here is Cornifers.Spot c && game.Motor != null && game.Motor.Room?.id == c.Room && !game.Busy)
-                target = Mathf.Clamp01(1 - Mathf.Abs(game.Motor.X - c.X) / HearPx) * HollowMenus.Volume * (Talking ? 0.3f : 1f);
+                target = Mathf.Clamp01(1 - Mathf.Abs(game.Motor.X - c.X) / HearPx) * GameSettings.EffectsVolume * (Talking ? 0.3f : 1f);
             hum.volume = Mathf.MoveTowards(hum.volume, target, Time.unscaledDeltaTime);
             if (hum.volume > 0 && !hum.isPlaying && hum.clip != null) hum.Play();
             if (hum.volume == 0 && hum.isPlaying) hum.Stop();

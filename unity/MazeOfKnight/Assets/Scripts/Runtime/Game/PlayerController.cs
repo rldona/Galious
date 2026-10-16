@@ -39,7 +39,12 @@ namespace MazeOfKnight.Game
         }
         public bool HopFlip;
 
-        InputAction move, jump, attack, fire, focus;
+        InputAction move;
+        // Los botones, que se pueden cambiar en Opciones (Controls).
+        static InputAction jump => Controls.Action("saltar");
+        static InputAction attack => Controls.Action("espada");
+        static InputAction fire => Controls.Action("arma");
+        static InputAction focus => Controls.Action("concentrar");
         // RemakeRules.HollowSoul: el botón de concentrarse, mantenido.
         public bool FocusHeld => DebugHoldFocus || focus != null && focus.IsPressed() && Demo == null;
         public bool DebugHoldFocus;          // para las capturas
@@ -75,30 +80,12 @@ namespace MazeOfKnight.Game
                 .With("Left", "<Keyboard>/leftArrow").With("Right", "<Keyboard>/rightArrow");
             move.AddBinding("<Gamepad>/leftStick");
             move.AddBinding("<Gamepad>/dpad");
-            jump = new InputAction("Saltar", InputActionType.Button);
-            jump.AddBinding("<Gamepad>/buttonSouth");
-            attack = new InputAction("Espada", InputActionType.Button);
-            attack.AddBinding("<Keyboard>/space");
-            attack.AddBinding("<Gamepad>/buttonWest");
-            focus = new InputAction("Concentrarse", InputActionType.Button);
-            focus.AddBinding("<Keyboard>/f");
-            focus.AddBinding("<Gamepad>/buttonEast");
-            focus.Enable();
-            fire = new InputAction("Arma", InputActionType.Button);
-            fire.AddBinding("<Keyboard>/m");
-            fire.AddBinding("<Gamepad>/buttonNorth");
-            fire.Enable();
             move.Enable();
-            jump.Enable();
-            attack.Enable();
         }
 
         void OnDisable()
         {
             move.Disable();
-            fire.Disable();
-            jump.Disable();
-            attack.Disable();
         }
 
         void Update()

@@ -46,10 +46,29 @@ namespace MazeOfKnight.Game.Visuals
 
         // ---------- entrada ----------
 
-        public static bool Up => Pressed(k => k.upArrowKey, g => g.dpad.up) || Pressed(k => k.wKey, null);
-        public static bool Down => Pressed(k => k.downArrowKey, g => g.dpad.down) || Pressed(k => k.sKey, null);
-        public static bool Left => Pressed(k => k.leftArrowKey, g => g.dpad.left);
-        public static bool Right => Pressed(k => k.rightArrowKey, g => g.dpad.right);
+        public static bool Up => Pressed(k => k.upArrowKey, g => g.dpad.up) || Pressed(k => k.wKey, null) || Stick().y > 0;
+        public static bool Down => Pressed(k => k.downArrowKey, g => g.dpad.down) || Pressed(k => k.sKey, null) || Stick().y < 0;
+        public static bool Left => Pressed(k => k.leftArrowKey, g => g.dpad.left) || Stick().x < 0;
+        public static bool Right => Pressed(k => k.rightArrowKey, g => g.dpad.right) || Stick().x > 0;
+
+        // El stick izquierdo como cruceta: una pulsación al inclinarlo y, si se mantiene, otra cada 0,15 s pasado 0,4 s.
+        static int stickFrame = -1;
+        static Vector2Int stickDir, stickHeld;
+        static float stickNext;
+        static Vector2Int Stick()
+        {
+            if (stickFrame == Time.frameCount) return stickDir;
+            stickFrame = Time.frameCount;
+            var v = Gamepad.current?.leftStick.ReadValue() ?? Vector2.zero;
+            var d = new Vector2Int(v.x > 0.6f ? 1 : v.x < -0.6f ? -1 : 0, v.y > 0.6f ? 1 : v.y < -0.6f ? -1 : 0);
+            if (Mathf.Abs(v.x) > Mathf.Abs(v.y)) d.y = 0; else d.x = 0;
+            float now = Time.unscaledTime;
+            if (d == Vector2Int.zero) { stickHeld = d; stickDir = d; }
+            else if (d != stickHeld) { stickHeld = d; stickDir = d; stickNext = now + 0.4f; }
+            else if (now >= stickNext) { stickDir = d; stickNext = now + 0.15f; }
+            else stickDir = Vector2Int.zero;
+            return stickDir;
+        }
         public static bool Accept => Pressed(k => k.enterKey, g => g.buttonSouth) || Pressed(k => k.spaceKey, null) || Pressed(k => k.zKey, null);
         public static bool Back => Pressed(k => k.escapeKey, g => g.buttonEast) || Pressed(k => k.backspaceKey, null);
         public static bool Pause => Pressed(k => k.escapeKey, g => g.startButton);
@@ -65,37 +84,8 @@ namespace MazeOfKnight.Game.Visuals
 
         // ---------- opciones ----------
 
-        public static float Volume
-        {
-            get => PlayerPrefs.GetFloat("volumen", 0.35f);
-            set { PlayerPrefs.SetFloat("volumen", Mathf.Clamp01(value)); Apply(); }
-        }
-
-        public static void Apply()
-        {
-            if (Sound.Instance != null) Sound.Instance.Volume = Volume;
-        }
-
-        // Opciones: (texto, ← → lo cambian, Aceptar lo cambia). "Volver" cierra.
-        public static List<string> OptionLines() => new List<string>
-        {
-            $"Volumen   {Mathf.RoundToInt(Volume * 10)}",
-            $"Pantalla completa   {(Screen.fullScreen ? "Sí" : "No")}",
-            "Volver",
-        };
-
-        // Devuelve true al elegir "Volver".
-        public static bool TickOptions(ref int sel)
-        {
-            int n = OptionLines().Count;
-            if (Up) sel = (sel + n - 1) % n;
-            if (Down) sel = (sel + 1) % n;
-            int dx = Left ? -1 : Right ? 1 : 0;
-            if (sel == 0 && dx != 0) Volume += dx * 0.1f;
-            if (sel == 1 && (dx != 0 || Accept)) Screen.fullScreen = !Screen.fullScreen;
-            if (Back || sel == n - 1 && Accept) return true;
-            return false;
-        }
+        // Las opciones están en GameSettings y su menú en OptionsMenu.
+        public static void Apply() => GameSettings.Apply();
 
         // ---------- dibujo ----------
 
@@ -109,13 +99,21 @@ namespace MazeOfKnight.Game.Visuals
                 var r = new Rect(cx - 300 * s, y + i * step * s, 600 * s, step * s);
                 bool on = i == sel;
                 UiKit.Text(r, items[i], size, TextAnchor.MiddleCenter, on ? UiKit.Bone : UiKit.Dim, true, alpha);
-                if (!on || arrow == null) continue;
-                measure.font = UiKit.Title;
-                measure.fontSize = Mathf.Max(8, Mathf.RoundToInt(size * s));
-                float half = measure.CalcSize(new GUIContent(items[i])).x / 2 + 14 * s, h = size * 0.95f * s, w = h * arrow.rect.width / arrow.rect.height;
-                UiKit.Icon(new Rect(cx - half - w, r.center.y - h / 2, w, h), arrow, alpha);
-                UiKit.Icon(new Rect(cx + half, r.center.y - h / 2, w, h), arrow, alpha, true);
+                if (on) Arrows(cx, r.center.y, items[i], size, alpha);
             }
+        }
+
+        // Las dos flechas con filigrana a los lados de un texto centrado en cx (la opción elegida).
+        public static void Arrows(float cx, float cy, string text, float size, float alpha = 1)
+        {
+            Load();
+            if (arrow == null) return;
+            float s = UiKit.Scale;
+            measure.font = UiKit.Title;
+            measure.fontSize = Mathf.Max(8, Mathf.RoundToInt(size * s));
+            float half = measure.CalcSize(new GUIContent(text)).x / 2 + 14 * s, h = size * 0.95f * s, w = h * arrow.rect.width / arrow.rect.height;
+            UiKit.Icon(new Rect(cx - half - w, cy - h / 2, w, h), arrow, alpha);
+            UiKit.Icon(new Rect(cx + half, cy - h / 2, w, h), arrow, alpha, true);
         }
 
         // El título con sus adornos y un halo, centrado en cx con la parte de arriba en y; devuelve su alto.
@@ -158,11 +156,13 @@ namespace MazeOfKnight.Game.Visuals
     // Opciones, Extras y Salir.
     public class HollowMainMenu : MonoBehaviour
     {
-        enum Screen_ { Main, Options, Extras }
+        enum Screen_ { Notice, Main, Options, Extras, Quit }
 
         public bool Running { get; private set; } = true;
         Screen_ screen;
-        int sel, optSel;
+        int sel, quitSel;
+        readonly OptionsMenu options = new OptionsMenu();
+        static bool noticeShown;            // el aviso de autoguardado, una vez al arrancar
         float t, leaving = -1;
         System.Action onLeave;
         Sprite background, fog;
@@ -180,10 +180,17 @@ namespace MazeOfKnight.Game.Visuals
                 motes.Add(new Vector4((float)rng.NextDouble(), (float)rng.NextDouble(), 0.01f + (float)rng.NextDouble() * 0.03f, 1 + (float)rng.NextDouble() * 3));
             Sound.StopMusic();
             Rebuild();
+            if (!noticeShown && HollowMenus.Available) screen = Screen_.Notice;
+            noticeShown = true;
         }
 
-        // Para las capturas: 0 principal, 1 opciones, 2 extras.
-        public void Show(int which) { screen = (Screen_)which; t = Mathf.Max(t, 2f); }
+        // Para las capturas: 0 principal, 1 opciones, 2 extras, 3 salir, 4 aviso; page, la página de opciones.
+        public void Show(int which, OptionsMenu.Page page = OptionsMenu.Page.Root)
+        {
+            screen = which switch { 1 => Screen_.Options, 2 => Screen_.Extras, 3 => Screen_.Quit, 4 => Screen_.Notice, _ => Screen_.Main };
+            options.Open(page);
+            t = Mathf.Max(t, 2f);
+        }
 
         void Rebuild()
         {
@@ -215,6 +222,10 @@ namespace MazeOfKnight.Game.Visuals
             if (t < 0.4f) return;
             switch (screen)
             {
+                case Screen_.Notice:
+                    // Como en Hollow Knight: unos segundos, o hasta que se pulse algo.
+                    if (t > 4.5f || t > 1.2f && (HollowMenus.Accept || HollowMenus.Back)) { screen = Screen_.Main; t = 0.4f; }
+                    break;
                 case Screen_.Main:
                     if (HollowMenus.Up) sel = (sel + items.Count - 1) % items.Count;
                     if (HollowMenus.Down) sel = (sel + 1) % items.Count;
@@ -223,13 +234,18 @@ namespace MazeOfKnight.Game.Visuals
                     {
                         case "Continuar": Leave(() => { AttractMode.LoadSave = true; AttractMode.Go(AttractMode.Mode.Game); }); break;
                         case "Nueva partida": Leave(() => AttractMode.Go(AttractMode.Mode.Game)); break;
-                        case "Opciones": screen = Screen_.Options; optSel = 0; break;
+                        case "Opciones": screen = Screen_.Options; options.Open(); break;
                         case "Extras": screen = Screen_.Extras; break;
-                        case "Salir del juego": Leave(() => { Application.Quit(); }); break;
+                        case "Salir del juego": screen = Screen_.Quit; quitSel = 1; break;
                     }
                     break;
                 case Screen_.Options:
-                    if (HollowMenus.TickOptions(ref optSel)) screen = Screen_.Main;
+                    if (options.Tick()) screen = Screen_.Main;
+                    break;
+                case Screen_.Quit:
+                    if (HollowMenus.Up || HollowMenus.Down || HollowMenus.Left || HollowMenus.Right) quitSel = 1 - quitSel;
+                    if (HollowMenus.Back || HollowMenus.Accept && quitSel == 1) screen = Screen_.Main;
+                    else if (HollowMenus.Accept) Leave(() => { Application.Quit(); });
                     break;
                 case Screen_.Extras:
                     if (HollowMenus.Accept || HollowMenus.Back) screen = Screen_.Main;
@@ -280,7 +296,9 @@ namespace MazeOfKnight.Game.Visuals
                 UiKit.Box(new Rect(x * W, y * H, size, size), dark ? new Color(0, 0, 0, 0.6f) : new Color(1, 1, 1, 0.25f + 0.2f * Mathf.Sin(t * 2 + i)));
             }
             float alpha = Mathf.Clamp01(t / 1.2f) * (leaving >= 0 ? Mathf.Clamp01(1 - leaving / 0.7f) : 1);
-            float logoH = HollowMenus.Logo(W / 2, H * 0.08f, Mathf.Min(W * 0.62f, 900 * s), alpha);
+            if (screen == Screen_.Notice) { DrawNotice(W, H, s); return; }
+            bool deep = screen == Screen_.Options;
+            float logoH = deep ? 0 : HollowMenus.Logo(W / 2, H * 0.08f, Mathf.Min(W * 0.62f, 900 * s), alpha);
             float y0 = H * 0.08f + logoH + 40 * s;
             switch (screen)
             {
@@ -288,9 +306,12 @@ namespace MazeOfKnight.Game.Visuals
                     HollowMenus.List(items, sel, W / 2, y0, 46, 26, alpha);
                     break;
                 case Screen_.Options:
-                    UiKit.Text(new Rect(0, y0 - 10 * s, W, 40 * s), "Opciones", 30, TextAnchor.MiddleCenter, UiKit.Bone, true, alpha);
+                    options.Draw(W / 2, H * 0.1f, alpha);
+                    break;
+                case Screen_.Quit:
+                    UiKit.Text(new Rect(0, y0 - 10 * s, W, 40 * s), "¿Salir del juego?", 30, TextAnchor.MiddleCenter, UiKit.Bone, true, alpha);
                     HollowMenus.Divider(W / 2, y0 + 30 * s, 320 * s, alpha);
-                    HollowMenus.List(HollowMenus.OptionLines(), optSel, W / 2, y0 + 70 * s, 44, 24, alpha);
+                    HollowMenus.List(new[] { "Sí", "No" }, quitSel, W / 2, y0 + 70 * s, 46, 26, alpha);
                     break;
                 case Screen_.Extras:
                     UiKit.Text(new Rect(0, y0 - 10 * s, W, 40 * s), "Extras", 30, TextAnchor.MiddleCenter, UiKit.Bone, true, alpha);
@@ -308,6 +329,27 @@ namespace MazeOfKnight.Game.Visuals
             float fade = t < 0.6f ? 1 - t / 0.6f : leaving >= 0 ? Mathf.Clamp01(leaving / 0.7f) : 0;
             if (fade > 0) UiKit.Box(new Rect(0, 0, W, H), new Color(0, 0, 0, fade));
         }
+
+        // El aviso del principio, como el de Hollow Knight: la cresta que brilla, entre dos filigranas, y que el juego
+        // guarda solo.
+        static Sprite crest;
+        void DrawNotice(float W, float H, float s)
+        {
+            UiKit.Box(new Rect(0, 0, W, H), Color.black);
+            float a = Mathf.Clamp01(t / 0.8f) * Mathf.Clamp01((4.5f - t) / 0.6f);
+            crest ??= Resources.Load<Sprite>("Hollow/menu/remate");
+            float pulse = 0.75f + 0.25f * Mathf.Sin(t * 3f);
+            var old = GUI.color;
+            GUI.color = new Color(0.9f, 0.9f, 1f, 0.25f * a * pulse);
+            GUI.DrawTexture(new Rect(W / 2 - 110 * s, H * 0.36f - 110 * s, 220 * s, 220 * s), HollowMenus.Blob);
+            GUI.color = old;
+            if (crest != null) UiKit.Icon(new Rect(W / 2 - 40 * s, H * 0.36f - 55 * s, 80 * s, 110 * s), crest, a * pulse);
+            HollowMenus.Divider(W / 2, H * 0.52f, 360 * s, a);
+            UiKit.Text(new Rect(W / 2 - 420 * s, H * 0.58f, 840 * s, 90 * s),
+                "Este juego guarda automáticamente al descansar en los bancos.\nNo cierres el juego mientras aparezca este símbolo.",
+                21, TextAnchor.UpperCenter, UiKit.Bone, false, a);
+            HollowMenus.Divider(W / 2, H * 0.72f, 360 * s, a);
+        }
     }
 
     // Menú de pausa en la partida (Esc o Start): Continuar, Opciones y Salir al menú principal, sobre el juego oscurecido.
@@ -315,8 +357,9 @@ namespace MazeOfKnight.Game.Visuals
     {
         public GameBootstrap game;
         public bool Open { get; private set; }
-        bool options;
-        int sel, optSel;
+        bool options, confirm;
+        int sel, confirmSel;
+        readonly OptionsMenu optionsMenu = new OptionsMenu();
         static readonly string[] Items = { "Continuar", "Opciones", "Salir al menú principal" };
 
         void Update()
@@ -335,7 +378,14 @@ namespace MazeOfKnight.Game.Visuals
             }
             if (options)
             {
-                if (HollowMenus.TickOptions(ref optSel)) options = false;
+                if (optionsMenu.Tick()) options = false;
+                return;
+            }
+            if (confirm)
+            {
+                if (HollowMenus.Up || HollowMenus.Down || HollowMenus.Left || HollowMenus.Right) confirmSel = 1 - confirmSel;
+                if (HollowMenus.Back || HollowMenus.Accept && confirmSel == 1) confirm = false;
+                else if (HollowMenus.Accept) { Open = false; AttractMode.Go(AttractMode.Mode.Attract); }
                 return;
             }
             if (HollowMenus.Up) sel = (sel + Items.Length - 1) % Items.Length;
@@ -345,13 +395,13 @@ namespace MazeOfKnight.Game.Visuals
             switch (sel)
             {
                 case 0: Close(); break;
-                case 1: options = true; optSel = 0; break;
-                case 2: Open = false; AttractMode.Go(AttractMode.Mode.Attract); break;
+                case 1: options = true; optionsMenu.Open(); break;
+                case 2: confirm = true; confirmSel = 1; break;
             }
         }
 
         // Para las capturas: abierto ya.
-        public void ShowNow() { Open = true; options = false; sel = 0; game.SetPaused(true); }
+        public void ShowNow() { Open = true; options = confirm = false; sel = 0; game.SetPaused(true); }
         public void HideNow() => Close();
 
         void Close()
@@ -366,13 +416,16 @@ namespace MazeOfKnight.Game.Visuals
             GUI.depth = -9;
             float s = UiKit.Scale, W = Screen.width, H = Screen.height;
             UiKit.Box(new Rect(0, 0, W, H), new Color(0, 0, 0, 0.72f));
-            float logoH = HollowMenus.Logo(W / 2, H * 0.12f, Mathf.Min(W * 0.45f, 640 * s), 0.9f);
+            bool deep = options;
+            float logoH = deep ? 0 : HollowMenus.Logo(W / 2, H * 0.12f, Mathf.Min(W * 0.45f, 640 * s), 0.9f);
             float y0 = H * 0.12f + logoH + 40 * s;
             if (options)
+                optionsMenu.Draw(W / 2, H * 0.1f);
+            else if (confirm)
             {
-                UiKit.Text(new Rect(0, y0 - 10 * s, W, 40 * s), "Opciones", 28, TextAnchor.MiddleCenter, UiKit.Bone, true);
-                HollowMenus.Divider(W / 2, y0 + 28 * s, 300 * s);
-                HollowMenus.List(HollowMenus.OptionLines(), optSel, W / 2, y0 + 66 * s, 42, 22);
+                UiKit.Text(new Rect(0, y0 - 10 * s, W, 40 * s), "¿Salir al menú principal?", 28, TextAnchor.MiddleCenter, UiKit.Bone, true);
+                UiKit.Text(new Rect(0, y0 + 30 * s, W, 30 * s), "Se pierde lo hecho desde el último banco.", 17, TextAnchor.MiddleCenter, UiKit.Dim);
+                HollowMenus.List(new[] { "Sí", "No" }, confirmSel, W / 2, y0 + 80 * s, 44, 24);
             }
             else
                 HollowMenus.List(Items, sel, W / 2, y0, 44, 24);

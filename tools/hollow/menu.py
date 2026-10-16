@@ -6,7 +6,8 @@ menús, sin su logo ni el de Team Cherry (el título es el nuestro, escrito con 
   - flecha.png: la flecha con filigrana que señala la opción elegida (a la izquierda; la derecha es la misma volteada);
   - separador.png: la línea fina con un remate, bajo los títulos de las pantallas;
   - adorno_arriba.png / adorno_abajo.png: los adornos grandes con la cresta que enmarcan el título (Pause_fleurs);
-  - remate.png: la cresta sola.
+  - remate.png: la cresta sola;
+  - mando.png: el dibujo del mando (Xbox Series) de su página de opciones.
 Y la fuente de Hollow Knight (Perpetua) en Assets/Art/Resources/Hollow/fuentes/Perpetua.ttf, que UiKit usa si está.
 """
 import shutil
@@ -39,6 +40,7 @@ def build(src):
         if atlas not in atlases:
             atlases[atlas] = Image.open(src / "hollow-knight-texturas/atlas_sprites" / atlas).convert("RGBA")
         atlas_piezas.piece(atlases[atlas], box).save(OUT / f"{name}.png")
+    Image.open(src / "hollow-knight-texturas/interfaz/ui_0000_xbox_series_x_controller_image.png").convert("RGBA").save(OUT / "mando.png")
     # El adorno de arriba, del revés (Pause_fleurs solo trae el de abajo con la cresta hacia abajo).
     Image.open(OUT / "adorno_arriba.png").transpose(Image.FLIP_TOP_BOTTOM).save(OUT / "adorno_arriba.png")
     FONTS.mkdir(parents=True, exist_ok=True)

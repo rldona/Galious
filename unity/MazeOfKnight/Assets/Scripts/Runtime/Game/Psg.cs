@@ -99,7 +99,7 @@ namespace MazeOfKnight.Game
                     bool output = (!toneOn || toneOut[c]) && (!noiseOn || noiseOut);
                     int vol = Regs[8 + c];
                     float a = (vol & 16) != 0 ? Volume[EnvelopeLevel()] : Volume[vol & 15];
-                    s += output ? a : 0;
+                    s += output ? a * Gain[c] : 0;
                 }
                 sum += s;
                 samples++;
@@ -113,5 +113,8 @@ namespace MazeOfKnight.Game
         }
 
         float dc, last;
+
+        // Volumen de cada canal (A, B, C), para separar la música de los efectos (Sound); 1 es el del original.
+        public readonly float[] Gain = { 1, 1, 1 };
     }
 }

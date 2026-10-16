@@ -25,6 +25,7 @@ namespace MazeOfKnight.Game
         int fxId = -1, fxFrame;
         byte lastR13 = 0xFF;
         public float Volume = 0.35f;
+        public float MusicGain = 1, EffectsGain = 1;    // GameSettings: música y sonido (Volume ya lleva el general)
         public bool MusicMuted;
 
         public int CurrentSong => songId;
@@ -132,6 +133,9 @@ namespace MazeOfKnight.Game
                 }
                 else
                     Silence();
+                // Volúmenes de Opciones: los canales de la música y, el C, el del efecto mientras suena uno.
+                psg.Gain[0] = psg.Gain[1] = MusicGain;
+                psg.Gain[2] = fx != null ? EffectsGain : MusicGain;
                 if (fx != null)
                 {
                     int o = fxFrame * 5;

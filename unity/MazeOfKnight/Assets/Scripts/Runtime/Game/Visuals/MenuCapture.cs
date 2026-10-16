@@ -37,10 +37,24 @@ namespace MazeOfKnight.Game.Visuals
             yield return new WaitForSeconds(3f);
             var menu = FindAnyObjectByType<HollowMainMenu>();
             if (menu == null) { Debug.LogError("[Capturas] sin menú principal"); Application.Quit(); yield break; }
+            menu.Show(4);
+            yield return new WaitForSeconds(0.2f);
+            yield return Shot("aviso_autoguardado");
+            menu.Show(0);
+            yield return new WaitForSeconds(0.5f);
             yield return Shot("menu_principal");
             menu.Show(1);
             yield return new WaitForSeconds(0.5f);
             yield return Shot("menu_opciones");
+            foreach (var page in new[] { OptionsMenu.Page.Audio, OptionsMenu.Page.Video, OptionsMenu.Page.Brightness, OptionsMenu.Page.Pad, OptionsMenu.Page.Keys })
+            {
+                menu.Show(1, page);
+                yield return new WaitForSeconds(0.4f);
+                yield return Shot("opciones_" + page.ToString().ToLowerInvariant());
+            }
+            menu.Show(3);
+            yield return new WaitForSeconds(0.4f);
+            yield return Shot("menu_salir");
             menu.Show(2);
             yield return new WaitForSeconds(0.5f);
             yield return Shot("menu_extras");
@@ -90,6 +104,14 @@ namespace MazeOfKnight.Game.Visuals
                     yield return new WaitForSeconds(1.2f);
                     yield return Shot("lamina_amuleto");
                     tut.HideNow();
+                }
+                var pad = game.GetComponent<WordPad>();
+                if (pad != null)
+                {
+                    pad.ShowNow();
+                    yield return new WaitForSeconds(0.4f);
+                    yield return Shot("escribir_mando");
+                    pad.HideNow();
                 }
                 var hj = game.GetComponent<HuntersJournal>();
                 if (hj != null)

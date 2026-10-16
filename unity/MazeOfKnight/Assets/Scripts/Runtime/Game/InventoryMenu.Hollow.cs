@@ -15,7 +15,7 @@ namespace MazeOfKnight.Game
     //   - Amuletos: los equipados y las muescas arriba, todos los amuletos debajo y el elegido a la derecha con su coste.
     //     Solo se equipan o se quitan sentado en un banco.
     //   - Mapa: el del mundo, si se tiene.
-    // Se abre y se cierra con I, Tab o F1 (Select en el mando); Esc o B también cierran.
+    // Se abre y se cierra con I, Tab o F1 (Select en el mando; I y Select se cambian en Opciones); Esc o B también cierran.
     public partial class InventoryMenu
     {
         enum Tab { Inventory, Charms, Map, Journal }
@@ -87,7 +87,7 @@ namespace MazeOfKnight.Game
 
         void HollowUpdate()
         {
-            bool toggle = !game.TypingWord && (Pressed(Key.I, g => g.selectButton) || Pressed(Key.Tab, null)) || Pressed(Key.F1, null);
+            bool toggle = !game.TypingWord && (Controls.Pressed("inventario") || Pressed(Key.Tab, null)) || Pressed(Key.F1, null);
             if (!Open)
             {
                 if (toggle) HollowOpen();

@@ -156,6 +156,7 @@ namespace MazeOfKnight.Game
             if (RemakeRules.HollowCharms && Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.ItemTutorial>().game = this;
             if (RemakeRules.HollowJournal && Visuals.HuntersJournal.Available) gameObject.AddComponent<Visuals.HuntersJournal>().game = this;
             if (RemakeRules.HollowMaps && Visuals.CorniferView.Available) (CorniferView = gameObject.AddComponent<Visuals.CorniferView>()).game = this;
+            if (Visuals.HollowMenus.Available) gameObject.AddComponent<Visuals.WordPad>().game = this;
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
@@ -217,7 +218,7 @@ namespace MazeOfKnight.Game
         Visuals.HollowMainMenu mainMenu;
         public bool AttractRunning => attract != null && attract.Running || mainMenu != null && mainMenu.Running;
         // Algún menú abierto (inventario o santuario): el de pausa no se abre encima.
-        public bool MenuOpen => GetComponent<InventoryMenu>() is InventoryMenu im && (im.Open || im.JustClosed) || GetComponent<Visuals.ItemTutorial>()?.Open == true || CorniferView != null && CorniferView.Talking || shrineScreen != null && shrineScreen.Open;
+        public bool MenuOpen => GetComponent<InventoryMenu>() is InventoryMenu im && (im.Open || im.JustClosed) || GetComponent<Visuals.ItemTutorial>()?.Open == true || CorniferView != null && CorniferView.Talking || GetComponent<Visuals.WordPad>()?.Open == true || shrineScreen != null && shrineScreen.Open;
         // Presentación, demo o final: ni menú ni teclas de depuración.
         public bool Busy => AttractRunning || player != null && player.Demo != null || EndingRunning;
         public bool skipAttract;     // para probar en el editor: empieza directamente la partida
@@ -1273,10 +1274,19 @@ namespace MazeOfKnight.Game
             }
         }
 
-        // Daga: tecleando UMBRELLA mueren los murciélagos de la sala (con su experiencia y botín).
-        void OnTextInput(char ch)
+        // Una letra escrita con el selector de letras del mando (Visuals/WordPad): como tecleada.
+        public void TypeLetter(char ch)
         {
-            if (player != null && !player.Paused) Bosses?.Type(ch);
+            Bosses?.Type(ch);
+            OnTextInput(ch, true);
+        }
+
+        void OnTextInput(char ch) => OnTextInput(ch, false);
+
+        // Daga: tecleando UMBRELLA mueren los murciélagos de la sala (con su experiencia y botín).
+        void OnTextInput(char ch, bool fromPad)
+        {
+            if (!fromPad && player != null && !player.Paused) Bosses?.Type(ch);
             if (!char.IsLetter(ch)) return;
             typed = (typed + char.ToUpperInvariant(ch));
             if (typed.Length > 8) typed = typed.Substring(typed.Length - 8);
@@ -1852,9 +1862,9 @@ namespace MazeOfKnight.Game
                 Keys = Mathf.Min(999, Keys + 1);
                 Say($"[depuración] +1 llave ({Keys})");
             }
-            // Biblia: CTRL congela a los enemigos 150 ticks (16 veces en la partida).
+            // Biblia: CTRL (o el botón de Controls: LB en el mando) congela a los enemigos 150 ticks (16 veces en la partida).
             var kbd = UnityEngine.InputSystem.Keyboard.current;
-            if (kbd != null && (kbd.leftCtrlKey.wasPressedThisFrame || kbd.rightCtrlKey.wasPressedThisFrame) && !player.Paused
+            if ((Controls.Pressed("biblia") || kbd != null && kbd.rightCtrlKey.wasPressedThisFrame) && !player.Paused
                 && Enemies.FreezeTicks == 0 && Inventory.UseBible())
             {
                 Enemies.FreezeTicks = Inventory.BibleTicks;
