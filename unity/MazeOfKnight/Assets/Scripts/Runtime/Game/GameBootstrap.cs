@@ -139,7 +139,8 @@ namespace MazeOfKnight.Game
             hollowEnemies = Visuals.HollowEnemyArt.Load();
             if (hollowEnemies != null)
             {
-                hollowEnemies.Solid = (r, x, y) => World != null && World.Solid(r, x, y);
+                // Solo con salas del mapa cargado (al cambiar de mapa puede quedar algún enemigo de la sala anterior).
+                hollowEnemies.Solid = (r, x, y) => World != null && r != null && World.Room(r.id) == r && World.Solid(r, x, y);
                 Enemies.Spawned += e => hollowEnemies.Spawned(e);
                 Enemies.BossDefeated += b =>
                 {
@@ -1122,6 +1123,20 @@ namespace MazeOfKnight.Game
                 // Con el arte de Hollow Knight, la explosión de muerte del original no se pinta: ya están la animación de
                 // muerte de la criatura y el destello de HitEffects (sigue existiendo: suelta el botín al acabar).
                 if (hollowEnemies != null && e is Enemies.DeathExplosion) { sr.enabled = false; continue; }
+                // Botín (flechas, monedas, llaves): el icono de Hollow Knight de su recurso, ajustado a su caja y apoyado
+                // abajo en el centro, sin deformar.
+                if (e is Enemies.LootDrop && Visuals.HollowItems.Loot(e.Type) is Sprite loot)
+                {
+                    var (lx0, ly0, lx1, ly1) = Visuals.HollowEnemyArt.ContactBox(e);
+                    float ls = Mathf.Min(lx1 - lx0, ly1 - ly0) / 16f;
+                    var lat = RoomCoords.PixelToWorld(e.Room, 0, 0) + new Vector2((lx0 + lx1) / 2f, -ly1) / RoomCoords.PixelsPerUnit;
+                    sr.sprite = loot;
+                    sr.color = Color.white;
+                    sr.flipX = false;
+                    sr.transform.SetPositionAndRotation(new Vector3(lat.x, lat.y, 0), Quaternion.identity);
+                    sr.transform.localScale = new Vector3(ls, ls, 1);
+                    continue;
+                }
                 var hk = hollowEnemies?.Frame(e, Time.deltaTime);
                 if (hk != null)
                 {
@@ -1398,8 +1413,9 @@ namespace MazeOfKnight.Game
             visibleItems.Add((room, go));
         }
 
-        // Con el estilo del remake, el dibujo de cada objeto (Visuals/PropArt); si no, el rombo provisional.
-        Sprite ItemSprite(int type) => Visuals.Atmosphere.Props?.Item(type) ?? itemSprite;
+        // El icono de Hollow Knight (Visuals/HollowItems); si no, con el estilo del remake, su dibujo (Visuals/PropArt); si
+        // no, el rombo provisional.
+        Sprite ItemSprite(int type) => Visuals.HollowItems.Icon(type) ?? Visuals.Atmosphere.Props?.Item(type) ?? itemSprite;
 
         // ---------- depuración y capturas (F2, Visuals/UiCapture) ----------
 

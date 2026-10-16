@@ -140,6 +140,14 @@ namespace MazeOfKnight.Game
                 bool own = game.Inventory.Has(item.type) || item.type == 0x28 && game.Inventory.ShieldLevel > 0;
                 if (!own) { Frame(R(m.x, m.y, 15, 15), new Color(1, 1, 1, 0.12f)); continue; }
                 string name = item.type == 0x28 ? new[] { "", "Copper", "Silver", "Gold" }[game.Inventory.ShieldLevel] + " Shield" : item.name;
+                int iconType = item.type == 0x28 ? new[] { 0x28, 0x28, 0x2B, 0x2C }[game.Inventory.ShieldLevel] : item.type;
+                if (Visuals.HollowItems.Icon(iconType) is Sprite hk)
+                {
+                    // Icono de Hollow Knight (Visuals/HollowItems).
+                    Frame(R(m.x, m.y, 15, 15), new Color(1, 1, 1, 0.25f));
+                    Visuals.UiKit.Icon(R(m.x, m.y, 15, 15), hk);
+                    continue;
+                }
                 Box(R(m.x, m.y, 15, 15), m.area == "world" ? new Color(0.25f, 0.35f, 0.15f) : new Color(0.2f, 0.2f, 0.35f));
                 GUI.Label(R(m.x, m.y, 15, 15), Short(name), small);
             }
@@ -153,6 +161,7 @@ namespace MazeOfKnight.Game
             {
                 if (!game.Inventory.Has(w.type)) continue;
                 int x = WeaponX[w.type - 1];
+                if (Visuals.HollowItems.Icon(w.type) is Sprite hk) { Visuals.UiKit.Icon(R(x - 2, 164, 16, 16), hk); continue; }
                 GUI.Label(R(x - 4, 166, 24, 10), Short(w.name), small);
             }
             if (weapon > 0 && (row != 1 || blink))
@@ -197,9 +206,10 @@ namespace MazeOfKnight.Game
                 bool own = game.Inventory.Has(item.type) || item.type == 0x28 && shield > 0;
                 var cell = R(m.x, m.y, 15, 15);
                 Visuals.UiKit.Frame(cell, new Color(1, 1, 1, own ? 0.25f : 0.08f), Mathf.Max(1, scale * 0.3f));
-                if (!own || props == null) continue;
+                if (!own) continue;
                 int type = item.type == 0x28 ? new[] { 0x28, 0x28, 0x2B, 0x2C }[shield] : item.type;
-                Visuals.UiKit.Icon(cell, props.Item(type));
+                var icon = Visuals.HollowItems.Icon(type) ?? props?.Item(type);
+                if (icon != null) Visuals.UiKit.Icon(cell, icon);
             }
             T(R(8, 128, 120, 10), "MAPA", 6, TextAnchor.MiddleLeft, Visuals.UiKit.Bone, true);
             DrawMap(R);
@@ -208,8 +218,9 @@ namespace MazeOfKnight.Game
             Visuals.UiKit.Frame(R(104, 160, 136, 24), new Color(1, 1, 1, 0.5f), Mathf.Max(1, scale * 0.4f));
             foreach (var w in game.Inventory.Data.items.Where(i => i.menu.area == "weapons"))
             {
-                if (!game.Inventory.Has(w.type) || props == null) continue;
-                Visuals.UiKit.Icon(R(WeaponX[w.type - 1] - 2, 164, 16, 16), props.Item(w.type));
+                var wicon = Visuals.HollowItems.Icon(w.type) ?? props?.Item(w.type);
+                if (!game.Inventory.Has(w.type) || wicon == null) continue;
+                Visuals.UiKit.Icon(R(WeaponX[w.type - 1] - 2, 164, 16, 16), wicon);
             }
             if (weapon > 0 && (row != 1 || blink))
                 Visuals.UiKit.Frame(R(WeaponX[weapon - 1] - 4, 163, 20, 18), Visuals.UiKit.Gold, Mathf.Max(1, scale * 0.6f));

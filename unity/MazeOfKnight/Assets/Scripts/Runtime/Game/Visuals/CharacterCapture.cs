@@ -168,7 +168,16 @@ namespace MazeOfKnight.Game.Visuals
                 yield return new WaitForSeconds(1.5f);
                 yield return Shot($"enemigos_sala_{id:000}");
             }
-            // Muertes: en salas del castillo con Husks, Vengeflies y Baldurs, se mata a todos y se ve su animación de muerte.
+            // Objetos en salas del castillo (Bible, Earrings, monedas, Pitcher) con su icono de Hollow Knight.
+            foreach (int id in new[] { 11, 13, 18, 19 })
+            {
+                var r = game.World.Room(id);
+                if (r == null) continue;
+                game.Motor.Place(game.World, r, 128, 120);
+                yield return new WaitForSeconds(1.0f);
+                yield return Shot($"objetos_sala_{id:000}");
+            }
+            // Muertes (y su botín): en salas del castillo con Husks, Vengeflies y Baldurs, se mata a todos.
             foreach (int id in new[] { 20, 13, 3 })
             {
                 var r = game.World.Room(id);
@@ -181,6 +190,8 @@ namespace MazeOfKnight.Game.Visuals
                 yield return Shot($"muertes_sala_{id:000}_a");
                 yield return new WaitForSeconds(0.35f);
                 yield return Shot($"muertes_sala_{id:000}_b");
+                yield return new WaitForSeconds(1.2f);
+                yield return Shot($"muertes_sala_{id:000}_botin");
             }
             // Enemigos de los diez mundos: las salas que juntan todos sus tipos.
             var worldRooms = new[]

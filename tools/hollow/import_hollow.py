@@ -21,6 +21,7 @@ from PIL import Image, ImageFilter
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import efectos  # noqa: E402
 import enemigos  # noqa: E402
+import objetos  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/personajes"
@@ -229,6 +230,7 @@ def main(argv):
     print(f"→ {OUT}")
     efectos.build(src)
     enemigos.build(src)
+    objetos.build(src)
 
 
 if __name__ == "__main__":
