@@ -337,6 +337,14 @@ namespace MazeOfKnight.Game
                              world.TileAt(room, (col - 2) * 8, OriginalPhysics.RoomTopPx + row * 8) != TileClass.Ladder;
                 return hl[row & 1, right ? 1 : 0];
             }
+            // Con el escenario de Hollow Knight, el agua y la lava con su color (la superficie la pone HollowLiquids).
+            if (Scenery != null && (cls == TileClass.Water || cls == TileClass.Lava))
+            {
+                int depth = 0;
+                while (depth < Visuals.HollowScenery.LiquidDepths && row - depth - 1 >= 0 &&
+                       world.TileAt(room, col * 8, OriginalPhysics.RoomTopPx + (row - depth - 1) * 8) == cls) depth++;
+                return Scenery.Liquid(cls == TileClass.Lava, depth);
+            }
             // Con el escenario de Hollow Knight, el sólido es negro (sus piezas visten los bordes); la piedra, su dibujo.
             if (Scenery != null && (cls == TileClass.Solid || cls == TileClass.BossPassable))
                 return RockAt(room, col, row) ? null : Scenery.FillTile;

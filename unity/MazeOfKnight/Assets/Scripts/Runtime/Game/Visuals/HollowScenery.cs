@@ -98,6 +98,11 @@ namespace MazeOfKnight.Game.Visuals
         readonly Dictionary<RoomModel, GameObject> built = new Dictionary<RoomModel, GameObject>();
         Material material;
         public TileBase FillTile { get; private set; }
+        // Cuerpo del agua y de la lava (HollowLiquids pone la superficie y lo que se mueve), por profundidad: la fila de
+        // arriba más clara y cada una más oscura hasta la cuarta.
+        public const int LiquidDepths = 4;
+        TileBase[] water, lava;
+        public TileBase Liquid(bool isLava, int depth) => (isLava ? lava : water)[Mathf.Clamp(depth, 0, LiquidDepths - 1)];
 
         public static HollowScenery Load()
         {
@@ -105,6 +110,14 @@ namespace MazeOfKnight.Game.Visuals
             if (s.Kit(Looks[0].Zone).Count == 0) return null;
             s.UseMap(null);
             s.FillTile = SolidTile(Rock);
+            s.water = new TileBase[LiquidDepths];
+            s.lava = new TileBase[LiquidDepths];
+            for (int d = 0; d < LiquidDepths; d++)
+            {
+                float t = d / (float)(LiquidDepths - 1);
+                s.water[d] = SolidTile(Color.Lerp(new Color(0.22f, 0.36f, 0.55f, 0.6f), new Color(0.03f, 0.06f, 0.13f, 0.85f), t));
+                s.lava[d] = SolidTile(Color.Lerp(new Color(1f, 0.52f, 0.14f, 0.95f), new Color(0.3f, 0.04f, 0.03f, 0.97f), Mathf.Sqrt(t)));
+            }
             s.material = Resources.Load<Material>("Materials/SpriteLit");
             return s;
         }

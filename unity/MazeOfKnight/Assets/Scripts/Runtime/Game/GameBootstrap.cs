@@ -139,6 +139,8 @@ namespace MazeOfKnight.Game
             hollowEnemies = Visuals.HollowEnemyArt.Load();
             // Marcador de Hollow Knight (con los dos estilos), si se ha importado.
             if (Visuals.HollowHud.Available) gameObject.AddComponent<Visuals.HollowHud>().game = this;
+            // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
+            if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
             if (hollowEnemies != null)
             {
                 // Solo con salas del mapa cargado (al cambiar de mapa puede quedar algún enemigo de la sala anterior).
