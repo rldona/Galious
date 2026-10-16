@@ -15,7 +15,7 @@ namespace MazeOfKnight.Game.Visuals
         public static bool Available => Resources.Load<Sprite>("Hollow/cornifer/cornifer_escribir_00") != null;
 
         // La zona de Hollow Knight de cada mundo, para sus frases (la de los Cruces no, que habla de Bocasucia).
-        static readonly string[] Zone = { "", "GREENPATH", "WATERWAYS", "FOG_CANYON", "MINES", "CITY", "FUNGAL_WASTES", "ABYSS", "DEEPNEST", "OUTSKIRTS" };
+        static readonly string[] Zone = { "CROSSROADS", "GREENPATH", "WATERWAYS", "FOG_CANYON", "MINES", "CITY", "FUNGAL_WASTES", "ABYSS", "DEEPNEST", "OUTSKIRTS" };
         const float Fps = 10, HearPx = 200;
 
         Sprite[] writing, talking;

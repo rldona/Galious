@@ -121,7 +121,7 @@ namespace MazeOfKnight.Game
             var weaponsJson = Resources.Load<TextAsset>("Weapons");
             Weapons = new WeaponSystem(weaponsJson != null ? JsonUtility.FromJson<WeaponsData>(weaponsJson.text) : null);
             Weapons.Spawned += ShowProjectile;
-            Weapons.PlayerHit += (damage, dir) => Hurt(Inventory.ReduceDamage(damage), dir, $"-{damage} (mina)");
+            Weapons.PlayerHit += (damage, dir) => Hurt(Inventory.ReduceDamage(damage), dir, RemakeRules.DebugKeys ? $"-{damage} (mina)" : null);
             var itemsJson = Resources.Load<TextAsset>("Items");
             Inventory = new Inventory(itemsJson != null ? JsonUtility.FromJson<ItemsData>(itemsJson.text) : null, Collected);
             Inventory.BossesDefeated = () => Bosses != null ? Bosses.Defeated.Count : 0;
@@ -165,6 +165,8 @@ namespace MazeOfKnight.Game
             Visuals.HollowMenus.Apply();
             // Agua y lava de Hollow Knight (con los dos estilos), si se han importado.
             if (Visuals.HollowLiquids.Available) gameObject.AddComponent<Visuals.HollowLiquids>().game = this;
+            // Ambiente de cada zona de Hollow Knight (gradación, luz, oscuridad y partículas), si se ha importado.
+            if (Visuals.HollowAmbience.Available) gameObject.AddComponent<Visuals.HollowAmbience>().game = this;
             if (hollowEnemies != null)
             {
                 // Solo con salas del mapa cargado (al cambiar de mapa puede quedar algún enemigo de la sala anterior).
@@ -214,6 +216,7 @@ namespace MazeOfKnight.Game
             motor.CastleExitReached += ExitToCastle;
             player.Init(motor);
             player.Ticked += AfterTick;
+            player.BeforeTick += SnapshotForInterpolation;
             StartMode();
         }
 
@@ -779,7 +782,7 @@ namespace MazeOfKnight.Game
             if (enemy.DiesOnTouch)
                 enemy.Alive = false;
             int damage = Inventory.ReduceDamage(enemy.Damage);
-            Hurt(damage, dir, $"-{damage} (0x{enemy.Type:X2})");
+            Hurt(damage, dir, RemakeRules.DebugKeys ? $"-{damage} (0x{enemy.Type:X2})" : null);   // el número del enemigo, solo al depurar
         }
 
         // Daño al jugador: vitalidad, retroceso y 42 ticks de invulnerabilidad.
@@ -813,7 +816,7 @@ namespace MazeOfKnight.Game
             motor.Knockback(dir);
             Visuals.HitEffects.PlayerHurt(motor);
             HurtTicks = OriginalPhysics.HurtInvulnerableTicks;
-            Say(message);
+            if (message != null) Say(message);
         }
 
         // ---------- armas secundarias ----------
@@ -1083,6 +1086,7 @@ namespace MazeOfKnight.Game
             d.journal = Journal.Pack();
             d.visited = SaveData.Pack(VisitedRooms);
             d.corniferMet = CorniferMet;
+            d.castleMap = CastleMap;
             d.corniferGreeted = new List<int>(CorniferGreeted);
             if (lastBench is Benches.Bench lb) { d.benchMap = lb.Map; d.benchRoom = lb.Room; d.benchX = lb.X; d.benchY = lb.Y; }
             if (!string.IsNullOrEmpty(shadeMap)) { d.shadeMap = shadeMap; d.shadeRoom = shadeRoom; d.shadeX = shadeX; d.shadeY = shadeY; d.shadeGeo = shadeGeo; }
@@ -1103,6 +1107,7 @@ namespace MazeOfKnight.Game
             VisitedRooms.Clear();
             SaveData.Unpack(d.visited, VisitedRooms);
             CorniferMet = d.corniferMet;
+            CastleMap = d.castleMap;
             CorniferGreeted.Clear();
             CorniferGreeted.UnionWith(d.corniferGreeted);
             SeenTutorials.Clear();
@@ -1466,6 +1471,27 @@ namespace MazeOfKnight.Game
         Visuals.HollowEnemyArt hollowEnemies;
         RoomModel hollowRoom;
 
+        readonly List<object> deadScratch = new List<object>();
+        readonly Dictionary<Enemy, (RoomModel room, float x, float y)> prevEnemy = new Dictionary<Enemy, (RoomModel, float, float)>();
+        readonly Dictionary<Projectile, (RoomModel room, float x, float y)> prevProjectile = new Dictionary<Projectile, (RoomModel, float, float)>();
+
+        // Antes de cada paso: dónde estaba cada enemigo y proyectil (para dibujarlos interpolados).
+        void SnapshotForInterpolation()
+        {
+            prevEnemy.Clear();
+            foreach (var e in enemyViews.Keys) prevEnemy[e] = (e.Room, e.X, e.Y);
+            prevProjectile.Clear();
+            foreach (var p in projectileViews.Keys) prevProjectile[p] = (Weapons.Room ?? motor?.Room, p.X, p.Y);
+        }
+
+        // Lo que hay que retrasar el dibujo hacia la posición del paso anterior (nada si ha cambiado de sala o ha saltado).
+        static Vector3 Lag(RoomModel room, float x, float y, (RoomModel room, float x, float y) prev)
+        {
+            if (room != prev.room || Mathf.Abs(prev.x - x) > 24 || Mathf.Abs(prev.y - y) > 24) return Vector3.zero;
+            float k = 1 - PlayerController.TickAlpha;
+            return new Vector3((prev.x - x) * k, -(prev.y - y) * k, 0) / RoomCoords.PixelsPerUnit;
+        }
+
         void LateUpdate()
         {
             if (motor == null)
@@ -1476,13 +1502,18 @@ namespace MazeOfKnight.Game
                 hollowEnemies.TickCorpses(Time.deltaTime, motor.Room != hollowRoom);
                 hollowRoom = motor.Room;
             }
-            foreach (var p in projectileViews.Keys.Where(p => !p.Alive).ToList())
+            // Sin LINQ ni listas nuevas en cada fotograma (la basura hacía unas 6 recolecciones por segundo).
+            deadScratch.Clear();
+            foreach (var p in projectileViews.Keys) if (!p.Alive) deadScratch.Add(p);
+            foreach (Projectile p in deadScratch)
             {
                 if (projectileViews[p] != null) Destroy(projectileViews[p].gameObject);
                 projectileViews.Remove(p);
             }
-            foreach (var (p, sr) in projectileViews.Select(kv => (kv.Key, kv.Value)))
+            foreach (var kvp in projectileViews)
             {
+                var p = kvp.Key;
+                var sr = kvp.Value;
                 var (x0, y0, x1, y1) = Weapons.Box(p);
                 var bl = RoomCoords.PixelToWorld(Weapons.Room ?? motor.Room, (int)x0, (int)y1);
                 sr.transform.position = new Vector3(bl.x, bl.y, 0);
@@ -1514,14 +1545,18 @@ namespace MazeOfKnight.Game
                 if (p.Exploding) sr.color = new Color(1f, 0.9f, 0.3f, 0.7f);
                 else if (p.Id == 5) sr.color = p.Armed && (p.Age / 4) % 2 == 0 ? Color.white : Color.gray;
             }
-            foreach (var e in enemyViews.Keys.Where(e => !e.Alive).ToList())
+            deadScratch.Clear();
+            foreach (var e in enemyViews.Keys) if (!e.Alive) deadScratch.Add(e);
+            foreach (Enemy e in deadScratch)
             {
                 if (enemyViews[e] != null) Destroy(enemyViews[e].gameObject);
                 enemyViews.Remove(e);
                 hollowEnemies?.Forget(e);
             }
-            foreach (var (e, sr) in enemyViews.Select(kv => (kv.Key, kv.Value)))
+            foreach (var kve in enemyViews)
             {
+                var e = kve.Key;
+                var sr = kve.Value;
                 if (sr == null) continue;
                 sr.enabled = e.Alive && e.Visible;
                 // La imagen del jefe del original (con tiles), si no tiene dibujo de Hollow Knight.
@@ -1586,6 +1621,15 @@ namespace MazeOfKnight.Game
                 // caja entera a la izquierda de donde está el enemigo. Se coloca desde la esquina de la derecha.
                 if (sr.flipX) sr.transform.position = new Vector3(bottomLeft.x + (x1 - x0) / 16f, bottomLeft.y, 0);
             }
+            // Enemigos, jefes y proyectiles, dibujados entre el paso anterior y el actual (PlayerController.TickAlpha), como
+            // el Caballero: la lógica va a 30 pasos por segundo y, sin esto, se veían a saltos. Las imágenes de jefe del
+            // original van en la rejilla de 8 px y no se mueven así.
+            foreach (var kve in enemyViews)
+                if (kve.Value != null && kve.Value.enabled && prevEnemy.TryGetValue(kve.Key, out var pe) && !(hollowEnemies?.For(kve.Key) == null && bossArt.ContainsKey(kve.Key)))
+                    kve.Value.transform.position += Lag(kve.Key.Room, kve.Key.X, kve.Key.Y, pe);
+            foreach (var kvp in projectileViews)
+                if (kvp.Value != null && prevProjectile.TryGetValue(kvp.Key, out var pp))
+                    kvp.Value.transform.position += Lag(Weapons.Room ?? motor.Room, kvp.Key.X, kvp.Key.Y, pp);
             // Ascensores de la sala: dos bloques de 16 × 16 (x … x + 31, y … y + 15).
             int n = 0;
             if (Lifts != null)
@@ -1662,7 +1706,7 @@ namespace MazeOfKnight.Game
             {
                 Sound.Effect(0x24);
                 Visuals.HollowLiquids.Splashed?.Invoke(motor.Room, motor.X, true);
-                Hurt(RemakeRules.LavaDamage, 0, $"-{RemakeRules.LavaDamage} (lava)");
+                Hurt(RemakeRules.LavaDamage, 0, RemakeRules.DebugKeys ? $"-{RemakeRules.LavaDamage} (lava)" : null);
                 motor.Place(World, safeRoom, safeX, safeY);
                 Debug.Log($"[Lava] vuelve a la sala {safeRoom.id} ({safeX}, {safeY})");
                 HurtTicks = Mathf.Max(HurtTicks, OriginalPhysics.HurtInvulnerableTicks);
@@ -1714,8 +1758,10 @@ namespace MazeOfKnight.Game
             return Inventory.CurrentWorld > 0 ? $"mundo{Inventory.CurrentWorld}" : "castillo";
         }
 
-        // Las canciones del original que son de fondo (en bucle): con la música de Hollow Knight, el chip las calla.
-        public static bool IsBackgroundSong(int id) => id is 0x88 or 0x8A or 0x8B or 0x8D or 0x8F or 0x90 or 0x91;
+        // Las canciones del original que son de fondo (en bucle): con la música de Hollow Knight, el chip las calla. La
+        // 0x87 es la del castillo con su entrada, la de empezar partida (sin ella, al empezar sonaba el chip y la de Hollow
+        // Knight quedaba bajada hasta cambiar de sala), y la 0x89 su variante.
+        public static bool IsBackgroundSong(int id) => id is 0x87 or 0x88 or 0x89 or 0x8A or 0x8B or 0x8D or 0x8F or 0x90 or 0x91;
 
         int BackgroundMusic()
         {
@@ -1921,6 +1967,22 @@ namespace MazeOfKnight.Game
             Say($"[depuración] sala del jefe: escribe {info.word}");
         }
 
+        // Para el recorrido de pruebas (Visuals/Playthrough).
+        public IReadOnlyList<Shrine> DebugShrines => shrines.shrines;
+        public ShrineScreen DebugShrineScreen => shrineScreen;
+        public void DebugOpenShrine(Shrine s)
+        {
+            SetPaused(true);
+            shrineScreen.Show(new ShrineVisit(s, shrines, Inventory, Arrows, Coins, Keys, Lives, ResurrectionCredit, motor.Character));
+        }
+        public EndingScreen DebugEnding => ending;
+        public void DebugGoToBaby()
+        {
+            Inventory.EnterWorld(10);
+            LoadMap("world10");
+            if (World.Room(6) is RoomModel room) motor.Place(World, room, 24, 184);
+        }
+
         // Abre la pantalla del primer santuario de ese dios en el mapa actual.
         public bool DebugOpenShrine(string god)
         {
@@ -1949,7 +2011,7 @@ namespace MazeOfKnight.Game
             if (Busy)
                 return;
             // Depuración: K da una llave (en el original salen de piedras, enemigos y tiendas).
-            if (!TypingWord && UnityEngine.InputSystem.Keyboard.current?.kKey.wasPressedThisFrame == true)
+            if (RemakeRules.DebugKeys && !TypingWord && UnityEngine.InputSystem.Keyboard.current?.kKey.wasPressedThisFrame == true)
             {
                 Keys = Mathf.Min(999, Keys + 1);
                 Say($"[depuración] +1 llave ({Keys})");
@@ -1963,7 +2025,7 @@ namespace MazeOfKnight.Game
                 Say($"Biblia: enemigos congelados ({16 - Inventory.BibleUses} usos)");
             }
             // Depuración: F4 lleva a la sala del bebé (mundo 10, sala 6).
-            if (UnityEngine.InputSystem.Keyboard.current?.f4Key.wasPressedThisFrame == true && !Bosses.Active && !ending.Running && maps.ContainsKey("world10"))
+            if (RemakeRules.DebugKeys && UnityEngine.InputSystem.Keyboard.current?.f4Key.wasPressedThisFrame == true && !Bosses.Active && !ending.Running && maps.ContainsKey("world10"))
             {
                 Inventory.EnterWorld(10);
                 LoadMap("world10");
@@ -1974,19 +2036,19 @@ namespace MazeOfKnight.Game
                     Say("[depuración] sala del bebé: rompe las piedras");
                 }
             }
-            if (UnityEngine.InputSystem.Keyboard.current?.f5Key.wasPressedThisFrame == true)
+            if (RemakeRules.DebugKeys && UnityEngine.InputSystem.Keyboard.current?.f5Key.wasPressedThisFrame == true)
                 DebugOpenAllDoors();
             // F11: sensación de Hollow Knight (RemakeRules: pausa al golpear, coyote time y búfer de salto).
-            if (UnityEngine.InputSystem.Keyboard.current?.f11Key.wasPressedThisFrame == true)
+            if (RemakeRules.DebugKeys && UnityEngine.InputSystem.Keyboard.current?.f11Key.wasPressedThisFrame == true)
             {
                 RemakeRules.HollowFeel = !RemakeRules.HollowFeel;
                 Say(RemakeRules.HollowFeel ? "Sensación Hollow Knight: pausa al golpear, coyote time y búfer de salto" : "Saltos y golpes del original");
             }
             // Depuración: F2 lleva a la sala del jefe del mundo en el que estás.
-            if (UnityEngine.InputSystem.Keyboard.current?.f2Key.wasPressedThisFrame == true && Inventory.CurrentWorld > 0 && !Bosses.Active)
+            if (RemakeRules.DebugKeys && UnityEngine.InputSystem.Keyboard.current?.f2Key.wasPressedThisFrame == true && Inventory.CurrentWorld > 0 && !Bosses.Active)
                 DebugGoToBoss();
             // Depuración: G da las seis armas y 50 flechas para probarlas.
-            if (!TypingWord && UnityEngine.InputSystem.Keyboard.current?.gKey.wasPressedThisFrame == true)
+            if (RemakeRules.DebugKeys && !TypingWord && UnityEngine.InputSystem.Keyboard.current?.gKey.wasPressedThisFrame == true)
             {
                 for (int id = 1; id <= 6; id++)
                     Inventory.Add(id);

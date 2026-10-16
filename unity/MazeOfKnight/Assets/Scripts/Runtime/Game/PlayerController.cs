@@ -27,6 +27,19 @@ namespace MazeOfKnight.Game
         public DemoPlayer Demo;          // demo en curso: las teclas salen de la grabación
         public event System.Action DemoInterrupted;   // una tecla de juego durante la demo
         public event System.Action Ticked;
+        // Justo antes de cada paso de la lógica (30 por segundo), también de los que no avanzan (pausa al golpear, carga de
+        // sala): GameBootstrap apunta dónde estaba todo para dibujarlo interpolado.
+        public event System.Action BeforeTick;
+        // Fracción del paso que ha pasado desde el último (0…1): con ella se dibuja todo entre la posición del paso anterior
+        // y la del actual. La lógica sigue a 30 pasos por segundo, como el original; sin esto, a 60 o 120 FPS el movimiento
+        // se veía a saltos de 30 por segundo.
+        public static float TickAlpha { get; private set; } = 1;
+        // -sinInterpolar: como antes, en la posición del último paso (para medir la diferencia con Visuals/PerfProbe).
+        static readonly bool NoInterpolation = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-sinInterpolar") >= 0;
+        // Lo que se corre el dibujo del Caballero respecto a su posición lógica (la estela, el tajo y su luz van con él).
+        public static Vector2 DrawOffset { get; private set; }
+        RoomModel prevRoom;
+        int prevX, prevY;
         // Celebración tras coger la Gran Llave (BossEffects): saltitos en el sitio, girándose en cada aterrizaje.
         public float HopPx;
         // Cambio de sala: el original deja de jugar mientras dibuja la sala nueva (estado 10).
@@ -116,6 +129,7 @@ namespace MazeOfKnight.Game
                 while (accumulator >= dt && g++ < 4)
                 {
                     accumulator -= dt;
+                    Snapshot();
                     if (roomPause > 0) { roomPause--; continue; }   // la demo tampoco avanza mientras se carga la sala
                     var di = Demo.Next();
                     if (Demo.FirePressed) fireLatch = true;
@@ -125,6 +139,7 @@ namespace MazeOfKnight.Game
                     if (Demo == null) break;
                 }
                 if (g >= 4) accumulator = 0;
+                TickAlpha = NoInterpolation ? 1 : Mathf.Clamp01(accumulator / dt);
                 UpdateVisual();
                 return;
             }
@@ -171,6 +186,7 @@ namespace MazeOfKnight.Game
             while (accumulator >= tick && guard++ < 4)
             {
                 accumulator -= tick;
+                Snapshot();
                 if (roomPause > 0) { roomPause--; continue; }
                 if (hitStop > 0) { hitStop--; continue; }   // las pulsaciones se guardan para cuando siga
                 Motor.Tick(delayed);
@@ -184,6 +200,7 @@ namespace MazeOfKnight.Game
             }
             if (guard >= 4)
                 accumulator = 0;
+            TickAlpha = NoInterpolation ? 1 : Mathf.Clamp01(accumulator / tick);
             UpdateVisual();
         }
 
@@ -210,10 +227,32 @@ namespace MazeOfKnight.Game
             return tajos[dir > 0 ? 0 : 1, frame];
         }
 
+        void Snapshot()
+        {
+            prevRoom = Motor.Room;
+            prevX = Motor.X;
+            prevY = Motor.Y;
+            BeforeTick?.Invoke();
+        }
+
+        // Posición de dibujo entre el paso anterior y el actual (en la misma sala y sin saltos de más de 24 px:
+        // cambios de sala, bancos, teletransportes).
+        public static Vector2 Interpolate(RoomModel room, float x, float y, RoomModel prevRoom, float px, float py)
+        {
+            var now = RoomCoords.PixelToWorld(room, 0, 0) + new Vector2(x, -y) / RoomCoords.PixelsPerUnit;
+            if (room != prevRoom || Mathf.Abs(px - x) > 24 || Mathf.Abs(py - y) > 24) return now;
+            float a = TickAlpha;
+            return now + new Vector2((px - x) * (1 - a), -(py - y) * (1 - a)) / RoomCoords.PixelsPerUnit;
+        }
+
         void UpdateVisual()
         {
-            // El sprite de 16 x 16 px tiene el pivote abajo en el centro: coincide con los pies del original.
-            transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y) + new Vector2(0, HopPx / RoomCoords.PixelsPerUnit);
+            // El sprite de 16 x 16 px tiene el pivote abajo en el centro: coincide con los pies del original. Dibujado
+            // entre el paso anterior y el actual (TickAlpha).
+            var feet = Interpolate(Motor.Room, Motor.X, Motor.Y, prevRoom, prevX, prevY) -
+                       (RoomCoords.PixelToWorld(Motor.Room, 0, 0) + new Vector2(Motor.X, -Motor.Y) / RoomCoords.PixelsPerUnit);
+            DrawOffset = feet;
+            transform.position = RoomCoords.PixelToWorld(Motor.Room, Motor.X, Motor.Y) + feet + new Vector2(0, HopPx / RoomCoords.PixelsPerUnit);
             if (body != null && placeholder == null) placeholder = body.sprite;
             // Sin fotograma (arte solo dibujado y sin clip): el cuadro provisional.
             var frame = Art != null && body != null ? Art.Frame(Motor, hitStop > 0 ? 0 : Time.deltaTime) : null;
@@ -249,7 +288,7 @@ namespace MazeOfKnight.Game
                 if (Slash != null && Motor.SlashDir != 0 && Motor.AttackTicks > 1 && Tajo(Motor.SlashDir, Motor.AttackTicks >= 3 ? 0 : 1) is Sprite tajo)
                 {
                     var (tx0, tx1, ty0, ty1) = Motor.SwordRect();
-                    var at = RoomCoords.PixelToWorld(Motor.Room, (tx0 + tx1 + 1) / 2, (ty0 + ty1) / 2);
+                    var at = RoomCoords.PixelToWorld(Motor.Room, (tx0 + tx1 + 1) / 2, (ty0 + ty1) / 2) + DrawOffset;
                     Slash.enabled = true;
                     Slash.sprite = tajo;
                     Slash.transform.position = new Vector3(at.x, at.y, 0);
@@ -274,7 +313,7 @@ namespace MazeOfKnight.Game
                     if (Slash.enabled)
                     {
                         var (sx0, sx1, sy0, sy1) = Motor.SwordRect();
-                        var at = RoomCoords.PixelToWorld(Motor.Room, (sx0 + sx1 + 1) / 2, (sy0 + sy1) / 2 + 1);
+                        var at = RoomCoords.PixelToWorld(Motor.Room, (sx0 + sx1 + 1) / 2, (sy0 + sy1) / 2 + 1) + DrawOffset;
                         Slash.transform.position = new Vector3(at.x, at.y, 0);
                         FaceSlash(Motor.FacingLeft);
                         // Fuerte en el tick del golpe y se apaga al recoger la hoja.
@@ -302,7 +341,7 @@ namespace MazeOfKnight.Game
                 sword.enabled = Motor.AttackTicks > 0;
                 var (x0, x1, y0, y1) = Motor.SwordRect();
                 int midY = (y0 + y1) / 2;
-                sword.transform.position = RoomCoords.PixelToWorld(Motor.Room, (x0 + x1 + 1) / 2, midY + 1);
+                sword.transform.position = RoomCoords.PixelToWorld(Motor.Room, (x0 + x1 + 1) / 2, midY + 1) + DrawOffset;
                 sword.flipX = Motor.FacingLeft;
             }
         }

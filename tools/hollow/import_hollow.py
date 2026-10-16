@@ -36,6 +36,7 @@ import armas  # noqa: E402
 import decorados  # noqa: E402
 import iconos  # noqa: E402
 import dioses  # noqa: E402
+import ambiente  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "unity/MazeOfKnight/Assets/Art/Resources/Hollow/personajes"
@@ -286,6 +287,7 @@ def main(argv):
     decorados.build(src)
     iconos.build(src)
     dioses.build(src)
+    ambiente.build(src)
 
 
 if __name__ == "__main__":

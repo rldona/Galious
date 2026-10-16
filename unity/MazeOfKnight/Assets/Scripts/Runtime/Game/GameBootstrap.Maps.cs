@@ -23,13 +23,14 @@ namespace MazeOfKnight.Game
 
         public RoomWorld WorldFor(string map) => AllWorlds.TryGetValue(map, out var w) ? w : null;
 
-        public Cornifers CorniferList => cornifers ??= new Cornifers(AllWorlds, w => Bosses?.InfoFor(w)?.room ?? -1, BenchList);
+        public Cornifers CorniferList => cornifers ??= new Cornifers(AllWorlds, w => w > 0 ? Bosses?.InfoFor(w)?.room ?? -1 : -1, BenchList, startRoom);
+        public bool CastleMap;                                     // el mapa del castillo, comprado a su Cornifer
 
         public IReadOnlyList<Benches.Bench> BenchesIn(string map) => BenchList.All.Where(b => b.Map == map).ToList();
 
-        // El mapa de ese mundo: comprado a Cornifer o encontrado (el objeto 0x0A de ese mundo).
+        // El mapa de ese mundo: comprado a Cornifer o encontrado (el objeto 0x0A de ese mundo); el del castillo, comprado.
         public bool HasMapOf(int world) =>
-            world > 0 && (Inventory.CurrentWorld == world ? Inventory.Has(Inventory.Map) : Inventory.WorldItemsPacked().Contains(world * 256 + Inventory.Map));
+            world == 0 ? CastleMap : (Inventory.CurrentWorld == world ? Inventory.Has(Inventory.Map) : Inventory.WorldItemsPacked().Contains(world * 256 + Inventory.Map));
 
         public Cornifers.Spot? CorniferHere => RemakeRules.HollowMaps && motor != null ? CorniferList.In(Inventory.CurrentWorld, motor.Room.id) : null;
 
@@ -55,9 +56,10 @@ namespace MazeOfKnight.Game
             int price = Cornifers.Price(world);
             if (Coins < price) return false;
             Coins -= price;
-            Inventory.Add(Inventory.Map);
+            if (world == 0) CastleMap = true;
+            else Inventory.Add(Inventory.Map);
             Sound.Effect(0x2D);
-            Say($"Mapa del mundo {world} (−{price} geo)");
+            Say(world == 0 ? $"Mapa del castillo (−{price} geo)" : $"Mapa del mundo {world} (−{price} geo)");
             return true;
         }
 

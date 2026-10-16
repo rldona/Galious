@@ -6,7 +6,8 @@ using UnityEngine;
 
 namespace MazeOfKnight.Tests
 {
-    // RemakeRules.HollowMaps: un Cornifer en cada mundo con mapa, lejos de la entrada y de los enemigos, con los mapas reales.
+    // RemakeRules.HollowMaps: un Cornifer en cada mundo con mapa, lejos de la entrada y de los enemigos, y otro en el
+    // castillo, con los mapas reales.
     public class CorniferTests
     {
         [Test]
@@ -32,11 +33,18 @@ namespace MazeOfKnight.Tests
                 Assert.IsNull(benches.Find(Benches.MapName(w), c.Room), $"mundo {w}: no con un banco");
             }
             Assert.IsFalse(cornifers.All.Any(c => c.World == 10), "el mundo 10 no tiene mapa");
+            // El castillo tiene el suyo, a media distancia de la sala de inicio (en la más alejada ya se habría recorrido
+            // todo), sin banco y fuera de las salas con puerta de mundo.
+            var castle = cornifers.All.Single(c => c.World == 0);
+            Assert.That(castle.Distance, Is.InRange(Cornifers.CastleMinDistance, Cornifers.CastleMaxDistance), "castillo: a media distancia");
+            Assert.IsNull(benches.Find("castle", castle.Room), "castillo: no con un banco");
+            Assert.AreEqual(0, worlds["castle"].Room(castle.Room).doorWorld, "castillo: no en una sala con puerta de mundo");
         }
 
         [Test]
         public void TheMapCostsMoreInLaterWorlds()
         {
+            Assert.AreEqual(20, Cornifers.Price(0));
             Assert.AreEqual(30, Cornifers.Price(1));
             Assert.AreEqual(110, Cornifers.Price(9));
         }

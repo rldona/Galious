@@ -52,7 +52,7 @@ namespace MazeOfKnight.Game.Visuals
                     Add("Resolución", $"{res.x} × {res.y}");
                     Add("Pantalla completa", YesNo(GameSettings.FullScreen));
                     Add("Sincronía vertical", YesNo(GameSettings.VSync));
-                    Add("Límite de fotogramas", GameSettings.FrameCap == 0 ? "Sin límite" : GameSettings.FrameCap.ToString());
+                    Add("Límite de fotogramas", GameSettings.FrameCap.ToString());
                     Add("Brillo", $"{GameSettings.Brightness} %");
                     Add("Restablecer"); Add("Volver");
                     break;

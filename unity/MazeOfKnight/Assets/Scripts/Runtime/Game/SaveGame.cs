@@ -29,6 +29,7 @@ namespace MazeOfKnight.Game
         public List<int> journal = new List<int>();     // RemakeRules.HollowJournal: tipo * 65536 + derrotas
         public List<string> visited = new List<string>();   // RemakeRules.HollowMaps: salas visitadas (mapa:sala)
         public bool corniferMet;
+        public bool castleMap;          // el mapa del castillo, comprado a su Cornifer
         public List<int> corniferGreeted = new List<int>();
         public string benchMap = "";
         public int benchRoom, benchX, benchY;
@@ -37,7 +38,11 @@ namespace MazeOfKnight.Game
         public List<string> takenItems = new List<string>(), brokenRocks = new List<string>(), openedDoors = new List<string>(),
             roomObjects = new List<string>(), firedEvents = new List<string>();
 
-        public static string Path => System.IO.Path.Combine(Application.persistentDataPath, "partida.json");
+        // Las capturas y el recorrido de pruebas (-captura…, -recorrido) guardan aparte: antes escribían encima de la
+        // partida del jugador (se sientan en bancos, que guardan).
+        public static readonly bool Testing = System.Array.Exists(System.Environment.GetCommandLineArgs(),
+            a => a.StartsWith("-captura") || a == "-recorrido");
+        public static string Path => System.IO.Path.Combine(Application.persistentDataPath, Testing ? "partida_pruebas.json" : "partida.json");
         public static bool Exists => File.Exists(Path) || File.Exists(Path + ".new");
 
         public void Write() => WriteAtomic(Path, JsonUtility.ToJson(this, true));

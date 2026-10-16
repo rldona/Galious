@@ -545,12 +545,12 @@ namespace MazeOfKnight.Game.Visuals
         {
             if (game == null || game.Motor == null) return;
             var kb = Keyboard.current;
-            if (kb != null && kb.f7Key.wasPressedThisFrame)
+            if (RemakeRules.DebugKeys && kb != null && kb.f7Key.wasPressedThisFrame)
             {
                 Apply(!styled);
                 game.Say(styled ? "Estilo del remake" : "Estilo provisional");
             }
-            if (kb != null && kb.f6Key.wasPressedThisFrame && styled)
+            if (RemakeRules.DebugKeys && kb != null && kb.f6Key.wasPressedThisFrame && styled)
             {
                 paletteOverride = (paletteOverride + 2) % (WorldPalette.All.Length + 1) - 1;   // -1 = la del mapa
                 shownRoom = null;

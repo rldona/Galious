@@ -23,7 +23,7 @@ namespace MazeOfKnight.Game.Visuals
 
         void Update()
         {
-            if (Keyboard.current != null && Keyboard.current.f8Key.wasPressedThisFrame) ShowDebug = !ShowDebug;
+            if (RemakeRules.DebugKeys && Keyboard.current != null && Keyboard.current.f8Key.wasPressedThisFrame) ShowDebug = !ShowDebug;
             if (game != null && game.mapName != shownMap)
             {
                 shownMap = game.mapName;

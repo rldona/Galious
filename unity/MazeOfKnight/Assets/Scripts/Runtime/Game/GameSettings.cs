@@ -10,12 +10,14 @@ namespace MazeOfKnight.Game
     //   - Audio: volumen general, de los efectos y de la música, de 0 a 10. La música y los efectos salen del mismo chip
     //     (Sound/Psg): el efecto suena por el canal C, que mientras tanto va con el volumen de los efectos. Con los dos
     //     al máximo se oye como el original.
-    //   - Vídeo: resolución, pantalla completa, sincronía vertical y límite de fotogramas.
+    //   - Vídeo: resolución, pantalla completa (por defecto, a pantalla completa con la resolución nativa), sincronía
+    //     vertical y límite de fotogramas.
     //   - Brillo: de 0 a 100 % (50, el normal), como exposición del posproceso (Brightness): aclara u oscurece el juego,
     //     no la interfaz.
     public static class GameSettings
     {
-        public static readonly int[] FrameCaps = { 0, 30, 60, 120, 144 };   // 0: sin límite
+        // Límite de fotogramas: entre 60 y 120 (lo pidió el usuario); 120 por defecto. Sin límite el juego pasaba de 700 FPS.
+        public static readonly int[] FrameCaps = { 60, 120 };
 
         static int Get(string k, int d) => PlayerPrefs.GetInt(k, d);
         static void Set(string k, int v) { PlayerPrefs.SetInt(k, v); Apply(); }
@@ -36,14 +38,22 @@ namespace MazeOfKnight.Game
         public static float HollowMusicVolume => Mathf.Clamp01(Master / 7f) * Music / 10f;
 
         public static bool VSync { get => Get("vsync", 1) == 1; set => Set("vsync", value ? 1 : 0); }
-        public static int FrameCap { get => Get("fps", 0); set => Set("fps", value); }
+        public static int FrameCap { get { int f = Get("fps", 120); return System.Array.IndexOf(FrameCaps, f) >= 0 ? f : 120; } set => Set("fps", value); }
         public static int Brightness { get => Get("brillo", 50); set => Set("brillo", Mathf.Clamp(value, 0, 100)); }
         public static bool Vibration { get => Get("vibracion", 1) == 1; set => Set("vibracion", value ? 1 : 0); }
 
+        // Pantalla: por defecto, a pantalla completa (sin bordes) con la resolución nativa del monitor o la tele en que se
+        // abra (lo pidió el usuario). Lo que se elija en Opciones se guarda ("pantalla_completa", "res_ancho"/"res_alto";
+        // 0 = la nativa) y se aplica al arrancar, por encima de lo que Unity recuerde de la última vez.
         public static bool FullScreen
         {
             get => Screen.fullScreen;
-            set { Screen.fullScreenMode = value ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed; Screen.fullScreen = value; }
+            set
+            {
+                PlayerPrefs.SetInt("pantalla_completa", value ? 1 : 0);
+                var r = Chosen();
+                Screen.SetResolution(r.x, r.y, value ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
+            }
         }
 
         // Las resoluciones de la pantalla, sin repetir (de menor a mayor).
@@ -53,7 +63,33 @@ namespace MazeOfKnight.Game
         public static Vector2Int Resolution
         {
             get => new Vector2Int(Screen.width, Screen.height);
-            set => Screen.SetResolution(value.x, value.y, Screen.fullScreenMode);
+            set
+            {
+                bool native = value == Native;
+                PlayerPrefs.SetInt("res_ancho", native ? 0 : value.x);
+                PlayerPrefs.SetInt("res_alto", native ? 0 : value.y);
+                Screen.SetResolution(value.x, value.y, Screen.fullScreenMode);
+            }
+        }
+
+        // La resolución nativa de la pantalla en la que está el juego.
+        public static Vector2Int Native => new Vector2Int(Display.main.systemWidth, Display.main.systemHeight);
+
+        static Vector2Int Chosen()
+        {
+            int w = Get("res_ancho", 0), h = Get("res_alto", 0);
+            return w > 0 && h > 0 ? new Vector2Int(w, h) : Native;
+        }
+
+        // Al arrancar. Las capturas (-captura…) y -ventana se quedan en ventana, para no tomar la pantalla.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void ApplyScreen()
+        {
+            if (Application.isEditor) return;
+            var args = System.Environment.GetCommandLineArgs();
+            if (args.Any(a => a.StartsWith("-captura") || a == "-ventana" || a == "-recorrido" || a == "-rendimiento")) return;
+            var r = Chosen();
+            Screen.SetResolution(r.x, r.y, Get("pantalla_completa", 1) == 1 ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
         }
 
         public static void ResetAudio()
@@ -64,8 +100,9 @@ namespace MazeOfKnight.Game
 
         public static void ResetVideo()
         {
-            foreach (var k in new[] { "vsync", "fps", "brillo" }) PlayerPrefs.DeleteKey(k);
+            foreach (var k in new[] { "vsync", "fps", "brillo", "pantalla_completa", "res_ancho", "res_alto" }) PlayerPrefs.DeleteKey(k);
             Apply();
+            Screen.SetResolution(Native.x, Native.y, FullScreenMode.FullScreenWindow);
         }
 
         public static void Apply()
@@ -78,7 +115,9 @@ namespace MazeOfKnight.Game
                 snd.MusicGain = Music / 10f;
             }
             QualitySettings.vSyncCount = VSync ? 1 : 0;
-            Application.targetFrameRate = FrameCap > 0 ? FrameCap : -1;
+            // Con sincronía vertical, el refresco de la pantalla (60 en una tele, 120 en una pantalla ProMotion), con el
+            // límite como tope; sin ella, el límite.
+            Application.targetFrameRate = FrameCap;
             Visuals.Brightness.Ensure();
         }
     }
@@ -109,7 +148,7 @@ namespace MazeOfKnight.Game.Visuals
             v.isGlobal = true;
             v.priority = 100;
             var profile = ScriptableObject.CreateInstance<VolumeProfile>();
-            adjust = profile.Add<ColorAdjustments>(true);
+            adjust = profile.Add<ColorAdjustments>(false);   // solo la exposición: la gradación de cada zona es de HollowAmbience
             v.sharedProfile = profile;
         }
 

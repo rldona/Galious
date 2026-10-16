@@ -103,7 +103,7 @@ El original no lleva registro de los enemigos. El usuario pidió el **diario del
 
 ## RemakeRules.HollowMaps (activado)
 
-En el original el mapa de cada mundo es un objeto escondido (0x0A) y el menú pinta una cuadrícula de salas. El usuario pidió el **Cornifer** de Hollow Knight, uno en cada mundo, que vende el mapa, y el mapa **dibujado a mano**. Cornifer está en los mundos 1–9 (el 10 no tiene mapa en el original). Conseguir el mapa tiene que costar (lo pidió el usuario), así que está en la sala más alejada de la entrada contando salas (de 5 a 12 según el mundo), con suelo para él y lejos de donde aparecen enemigos (los que salen a su lado no aparecen, como junto a los bancos); a igual distancia, mejor en una sala sin enemigos. Cuesta 20 + 10 geo por mundo (de 30 a 110). Se le oye tararear al acercarse; con ↓ a su lado se le escucha: la primera vez se presenta, luego saluda con lo que dice en la zona de Hollow Knight de ese mundo y pregunta si se quiere el mapa (Sí / No). Comprarlo da el objeto Map de ese mundo, como encontrarlo, que sigue en su sitio. En la pestaña Mapa, como en Hollow Knight: sin el mapa de la zona no se ve nada (el pergamino tachado y "No tienes el mapa de esta zona"); con él, todas las salas, desde su colisión, las no visitadas solo su contorno a trazos y las visitadas entintadas, con sus bancos, la máscara del Caballero donde estás y, con la Lámpara, la marca del jefe. El castillo, que no tiene Cornifer, se conoce desde el principio. Las salas visitadas se guardan con la partida. Sus frases, su dibujo y su tarareo se importan en local (`tools/hollow/cornifer.py`). **Activado.** Test: `CorniferTests`.
+En el original el mapa de cada mundo es un objeto escondido (0x0A) y el menú pinta una cuadrícula de salas. El usuario pidió el **Cornifer** de Hollow Knight, uno en cada mundo, que vende el mapa, y el mapa **dibujado a mano**. Cornifer está en los mundos 1–9 (el 10 no tiene mapa en el original). Conseguir el mapa tiene que costar (lo pidió el usuario), así que está en la sala más alejada de la entrada contando salas (de 5 a 12 según el mundo), con suelo para él y lejos de donde aparecen enemigos (los que salen a su lado no aparecen, como junto a los bancos); a igual distancia, mejor en una sala sin enemigos. Cuesta 20 + 10 geo por mundo (de 30 a 110). Se le oye tararear al acercarse; con ↓ a su lado se le escucha: la primera vez se presenta, luego saluda con lo que dice en la zona de Hollow Knight de ese mundo y pregunta si se quiere el mapa (Sí / No). Comprarlo da el objeto Map de ese mundo, como encontrarlo, que sigue en su sitio. En la pestaña Mapa, como en Hollow Knight: sin el mapa de la zona no se ve nada (el pergamino tachado y "No tienes el mapa de esta zona"); con él, todas las salas, desde su colisión, las no visitadas solo su contorno a trazos y las visitadas entintadas, con sus bancos, la máscara del Caballero donde estás y, con la Lámpara, la marca del jefe. El castillo también tiene su Cornifer (lo pidió el usuario: antes se conocía entero desde el principio): habla como el de los Cruces Olvidados y vende su mapa por 20 geo; no está en la sala más alejada (con 146 salas, al llegar ya se habría recorrido todo) sino, como en Hollow Knight, a media distancia, en la más alejada de las que están a 6–10 salas de la de inicio, fuera de las salas con puerta de mundo. Sin su mapa, el castillo tampoco se ve. Las salas visitadas se guardan con la partida. Sus frases, su dibujo y su tarareo se importan en local (`tools/hollow/cornifer.py`). **Activado.** Test: `CorniferTests`.
 
 ## Mando y opciones (paso 7 de Galious: The Hollow Kingdom)
 
@@ -130,6 +130,35 @@ Con el arte de Hollow Knight, el tamaño de cada enemigo se fija al aparecer (el
 ## Santuarios como en Hollow Knight
 
 La pantalla del santuario del original (nombre, retrato de 2 × 2 casillas, ventana de texto y tres huecos con la mano) se dibuja como en Hollow Knight (`ShrineScreen.DrawHollow`): cada dios lo hace un personaje de Hollow Knight con su animación de reposo (`tools/hollow/dioses.py`: Hefesto, el Forjador de Aguijones; Ares, Sly; Deméter, Iselda; Atenea, el Anciano Hu; Asclepio, Jiji; la Muerte, Grimm), su nombre con la filigrana, lo que dice en castellano (`ShrineTexts`; con el Caballero solo, la Muerte y la pista de Atenea a Aphrodite se adaptan) y, en las tiendas, los tres objetos con su icono, nombre, precio en geo y descripción. Se maneja también con mando: cruceta o stick para elegir, A (o Espacio, Intro, Z) para comprar o responder y B, Esc o ↓ para salir; el ↓ o el stick con que se entra no cuentan. Las reglas (precios, escudos en orden, carcaj, llaves, guardar con Deméter) no cambian. Al entrar en los del castillo el Caballero no se hunde 16 px en el suelo como en el original (se le veía por encima de la piedra): la pantalla funde a negro en 0,45 s y, al salir, vuelve de negro con el Caballero de pie en su sitio.
+
+## RemakeRules.HollowAmbience (activado)
+
+El ambiente de cada mundo como lo pone Team Cherry (lo pidió el usuario; `Visuals/HollowAmbience`, texturas con `tools/hollow/ambiente.py`). En Hollow Knight cada escena lleva un `SceneManager` con la saturación y las curvas de color, la luz ambiente, el color de la luz del Caballero y un nivel de oscuridad (de −1 a 2: la viñeta deja un hueco alrededor del Caballero, que la linterna agranda), y la cámara enciende las partículas de su zona. Aquí, por mundo, con su zona de Hollow Knight:
+
+| Mapa | Zona | Oscuridad | Partículas |
+|---|---|---|---|
+| castillo | Cruces Olvidados | 0 | polvo |
+| 1 | Sendero Verde | 0 | hojas |
+| 2 | Canales Reales | 1 | goteo y niebla baja |
+| 3 | la Colmena | 0 | hexágonos |
+| 4 | Pico de Cristal | 0 | cristales que flotan |
+| 5 | Ciudad de las Lágrimas | 0 | lluvia |
+| 6 | Páramos Fúngicos | 0 | esporas |
+| 7 | el Abismo | 1 | humo |
+| 8 | Nido Profundo | 1 | hilos de telaraña y polvo |
+| 9 | Confines del Reino | 0 | ceniza con viento |
+| 10 | Palacio Blanco | −1 | pétalos |
+
+Los niveles de oscuridad salen de los datos del juego (en los Canales, el Abismo y el Nido la mayoría de las salas son de nivel 1); el hueco es más amplio y el velo menos opaco que en Hollow Knight, porque aquí la sala entera está en pantalla y hay que ver por dónde se va. La Vela hace de linterna: con ella el hueco se abre. La luz de las puertas de los mundos atraviesa la oscuridad.
+
+Los valores de color de cada escena (saturación, curvas, luz ambiente) no están en la carpeta de Hollow Knight decodificado, solo los campos en el código. Se han medido con `tools/hollow/medir_ambiente.py`: el color medio, la saturación y el brillo de todas las salas de cada zona (las imágenes de `hollow-knight-mundos`, reconstruidas desde sus ficheros de nivel) frente a nuestras salas sin gradación (`-ambienteNeutro -capturaSalas`). De ahí salen el filtro de color y la saturación de cada mundo, a la que se suman los 17 puntos que la cámara de Hollow Knight añade siempre (`SceneManager.AdjustSaturationForPlatform`) y que las imágenes no llevan. Las salas de Hollow Knight son más luminosas y menos saturadas que las nuestras, con bruma entre los planos y sombra junto a la roca; el usuario pidió ese toque ambiental: cada sala lleva oclusión ambiental (`AmbientOcclusion`, desde la colisión), una bruma del color medio de la zona entre el fondo y el plano de juego, más espesa abajo, y jirones de niebla (`Fog.png`) que pasan despacio.
+
+## Fluidez, fotogramas y pruebas
+
+- **Interpolación:** la lógica sigue a 30 pasos por segundo, como el original, pero el Caballero, los enemigos, los jefes, los proyectiles, la estela, el tajo y la luz del Caballero se dibujan entre la posición del paso anterior y la del actual (`PlayerController.TickAlpha`). Sin ello, a 60 o 120 FPS el movimiento se veía a saltos de 30 por segundo: andando, el dibujo se quedaba quieto el 50 % de los fotogramas a 60 FPS y el 74 % a 120; con ella, ninguno (medido con `-rendimiento`). No se interpola en los cambios de sala ni en saltos de más de 24 px, ni mientras el juego está parado por un golpe. Las imágenes de jefe del original van en su rejilla de 8 px.
+- **Fotogramas:** límite de 60 o 120 (120 por defecto); con sincronía vertical, el refresco de la pantalla. Sin límite el juego pasaba de 700 FPS en un M1 Pro.
+- **Teclas de depuración** (K, G, F2–F11) y los textos de daño ("-1 (0x1F1)") solo con `-depuracion` o en compilaciones de desarrollo.
+- Las capturas, el recorrido y la medida guardan la partida aparte (`partida_pruebas.json`).
 
 ## Música del menú principal
 

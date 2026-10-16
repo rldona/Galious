@@ -97,7 +97,7 @@ namespace MazeOfKnight.Game
         {
             if (!Running) return;
             frame += Time.deltaTime * 60f;
-            bool skip = Keyboard.current?.f3Key.wasPressedThisFrame == true;
+            bool skip = RemakeRules.DebugKeys && Keyboard.current?.f3Key.wasPressedThisFrame == true;
             if (frame - stageStart >= Duration(stage) || skip)
             {
                 stage++;

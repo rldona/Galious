@@ -23,10 +23,14 @@ namespace MazeOfKnight.EditorTools
         public static void BuildMac()
         {
             PlayerSettings.productName = "Maze of Knight";
-            PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
+            // A pantalla completa con la resolución nativa (GameSettings la vuelve a poner al arrancar; las capturas, en ventana).
+            PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
+            PlayerSettings.defaultIsNativeResolution = true;
+            PlayerSettings.macRetinaSupport = true;
             PlayerSettings.defaultScreenWidth = 1280;
             PlayerSettings.defaultScreenHeight = 800;
             PlayerSettings.resizableWindow = true;
+            PlayerSettings.enableFrameTimingStats = true;    // tiempos de procesador y gráfica (Visuals/PerfProbe)
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { GameSceneBuilder.ScenePath },

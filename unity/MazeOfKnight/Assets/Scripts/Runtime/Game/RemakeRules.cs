@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace MazeOfKnight.Game
 {
     // Cambios del remake respecto al original (Design Bible, cap. 11). Cada uno se puede desactivar para
@@ -94,6 +96,14 @@ namespace MazeOfKnight.Game
         // los santuarios y la de la pelea con cada jefe. Las fanfarrias (objetos, invocación, jefe vencido, muerte, final)
         // siguen con el chip, con la otra bajada mientras suenan.
         public static bool HollowMusic = true;            // activado: lo ha pedido el usuario
+        // Teclas de depuración (K, G, F2–F11): solo en compilaciones de desarrollo o lanzando el juego con -depuracion. Antes
+        // estaban en el juego normal: K daba llaves, G armas, F4 llevaba al final y F7 quitaba el aspecto de Hollow Knight.
+        public static readonly bool DebugKeys = Debug.isDebugBuild ||
+            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-depuracion") >= 0;
+        // El ambiente de cada zona como en Hollow Knight (Visuals/HollowAmbience): gradación de color, luz del Caballero,
+        // oscuridad con un hueco alrededor del Caballero en los Canales, el Abismo y el Nido (la Vela lo abre, como la
+        // linterna) y las partículas de la zona.
+        public static bool HollowAmbience = true;         // activado: lo ha pedido el usuario
         public const int SlashHalf = 10, SlashReach = 16;
         public const int BounceRise = 5;                  // entrada de OriginalPhysics.RiseTable desde la que rebota
 

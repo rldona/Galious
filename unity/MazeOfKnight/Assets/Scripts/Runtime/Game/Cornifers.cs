@@ -5,8 +5,10 @@ using System.Linq;
 namespace MazeOfKnight.Game
 {
     // RemakeRules.HollowMaps: Cornifer, el cartógrafo de Hollow Knight, uno en cada mundo con mapa (1–9; el 10 no tiene
-    // mapa en el original). Conseguir el mapa tiene que costar (lo pidió el usuario): está en la sala más alejada de la
-    // de entrada, contando salas, sin banco, sin santuario y que no sea la del jefe, con suelo para él (Width casillas,
+    // mapa en el original) y otro en el castillo (0; lo pidió el usuario: sin comprarle el mapa solo se ve lo visitado).
+    // Conseguir el mapa tiene que costar (lo pidió el usuario): en los mundos está en la sala más alejada de la de entrada,
+    // contando salas; en el castillo (146 salas: en la más alejada ya se habría recorrido todo), como el de los Cruces
+    // Olvidados de Hollow Knight, a media distancia: la más alejada a no más de CastleMaxDistance salas de la de inicio, sin banco, sin santuario y que no sea la del jefe, con suelo para él (Width casillas,
     // Benches.Spot, lejos de donde aparecen enemigos). Vende el mapa del mundo (el objeto 0x0A de ese
     // mundo) por Price(mundo) geo.
     public class Cornifers
@@ -15,6 +17,7 @@ namespace MazeOfKnight.Game
         public const int Air = 5;                 // filas de aire encima que se prefieren (mide 31 px); como poco 3
         public const int Reach = 28;              // px de su centro a los que se le puede hablar
         public const int MinDistance = 2;
+        public const int CastleMinDistance = 6, CastleMaxDistance = 10;
 
         public static int Price(int world) => 20 + 10 * world;   // de 30 a 110 geo: tiene que costar
 
@@ -26,15 +29,16 @@ namespace MazeOfKnight.Game
         readonly List<Spot> all = new List<Spot>();
         public IReadOnlyList<Spot> All => all;
 
-        public Cornifers(IDictionary<string, RoomWorld> worlds, System.Func<int, int> bossRoom, Benches benches)
+        public Cornifers(IDictionary<string, RoomWorld> worlds, System.Func<int, int> bossRoom, Benches benches, int castleStartRoom = 1)
         {
-            for (int world = 1; world <= 9; world++)
+            for (int world = 0; world <= 9; world++)
             {
-                if (!worlds.TryGetValue(Benches.MapName(world), out var w) || w.Room(1) == null) continue;
+                int start = world == 0 ? castleStartRoom : 1;
+                if (!worlds.TryGetValue(Benches.MapName(world), out var w) || w.Room(start) == null) continue;
                 // Distancia en salas desde la entrada.
-                var dist = new Dictionary<int, int> { [1] = 0 };
+                var dist = new Dictionary<int, int> { [start] = 0 };
                 var queue = new Queue<int>();
-                queue.Enqueue(1);
+                queue.Enqueue(start);
                 while (queue.Count > 0)
                 {
                     int id = queue.Dequeue();
@@ -50,6 +54,7 @@ namespace MazeOfKnight.Game
                 {
                     var room = w.Room(kv.Key);
                     if (kv.Value < MinDistance || room.shrine || kv.Key == bossRoom(world)) continue;
+                    if (world == 0 && (kv.Value < CastleMinDistance || kv.Value > CastleMaxDistance || room.doorWorld > 0)) continue;
                     if (benches != null && benches.Find(Benches.MapName(world), kv.Key) != null) continue;
                     for (int air = Air; air >= 3; air--)
                     {

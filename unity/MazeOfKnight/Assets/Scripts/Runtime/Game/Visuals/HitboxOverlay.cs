@@ -17,7 +17,7 @@ namespace MazeOfKnight.Game.Visuals
 
         void Update()
         {
-            if (Keyboard.current != null && Keyboard.current.f9Key.wasPressedThisFrame) Show = !Show;
+            if (RemakeRules.DebugKeys && Keyboard.current != null && Keyboard.current.f9Key.wasPressedThisFrame) Show = !Show;
         }
 
         void OnGUI()

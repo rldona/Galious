@@ -47,7 +47,7 @@ namespace MazeOfKnight.Game
                     return true;
             foreach (var b in BenchList.In(mapName, room.id))
                 if (Near(b.X - 28, b.X + 28, b.Y)) return true;
-            if (RemakeRules.HollowMaps && mapName != "castle" && CorniferList.In(Inventory.CurrentWorld, room.id) is Cornifers.Spot c && Near(c.X - 24, c.X + 24, c.Y))
+            if (RemakeRules.HollowMaps && CorniferList.In(Inventory.CurrentWorld, room.id) is Cornifers.Spot c && Near(c.X - 24, c.X + 24, c.Y))
                 return true;
             int e041 = maps.TryGetValue(mapName, out var md) ? md.e041 : -1;
             foreach (var t in Weapons.Data.magnifier.tombstones)
@@ -145,7 +145,7 @@ namespace MazeOfKnight.Game
             decorViews.Add(go);
             var halo = go.AddComponent<SpriteRenderer>();
             halo.sprite = Resources.Load<Sprite>("Hollow/inventario/luz");
-            halo.sortingOrder = 1;
+            halo.sortingOrder = 41;                    // como las luces de Hollow Knight, atraviesa la oscuridad (HollowAmbience)
             halo.color = new Color(0.75f, 0.85f, 1f, 0.5f);
             go.transform.localScale = new Vector3(3.2f, 3.2f, 1);
             go.AddComponent<Visuals.Pulse>();

@@ -25,7 +25,7 @@ namespace MazeOfKnight.Game.Visuals
 
         void Update()
         {
-            if (Keyboard.current != null && Keyboard.current.f10Key.wasPressedThisFrame)
+            if (RemakeRules.DebugKeys && Keyboard.current != null && Keyboard.current.f10Key.wasPressedThisFrame)
             {
                 Show = !Show;
                 game?.Say(Show ? "Rejilla de colisión" : "Rejilla quitada");

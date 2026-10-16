@@ -483,7 +483,7 @@ namespace MazeOfKnight.Game
             bool cornifer = false;
             foreach (var c in game.CorniferList.All) if (c.World == game.Inventory.CurrentWorld) cornifer = true;
             UiKit.Text(new Rect(body.x, cy + r + 64 * s, body.width, 30 * s),
-                cornifer ? "Cornifer lo vende en algún rincón de este mundo." : "Nadie ha cartografiado esta zona.", 16, TextAnchor.MiddleCenter, UiKit.Dim);
+                cornifer ? (game.Inventory.CurrentWorld == 0 ? "Cornifer lo vende en algún rincón del castillo." : "Cornifer lo vende en algún rincón de este mundo.") : "Nadie ha cartografiado esta zona.", 16, TextAnchor.MiddleCenter, UiKit.Dim);
         }
 
         void DrawMapTab(Rect body)
@@ -497,9 +497,8 @@ namespace MazeOfKnight.Game
             if (zone != "") UiKit.Text(new Rect(body.x, body.y + 26 * s, body.width, 26 * s), zone, 17, TextAnchor.MiddleCenter, UiKit.Dim, true);
             var rw = game.WorldFor(map);
             if (!RemakeRules.HollowMaps || rw == null) return;
-            // Como en Hollow Knight: sin el mapa de la zona no se ve nada. El castillo, sin Cornifer, se conoce desde el
-            // principio.
-            bool hasMap = world == 0 || game.HasMapOf(world);
+            // Como en Hollow Knight: sin el mapa de la zona no se ve nada (también el castillo, que tiene su Cornifer).
+            bool hasMap = game.HasMapOf(world);
             if (!hasMap) { DrawNoMap(body); return; }
             var tex = HandMap.Get(map, rw, game.VisitedRooms);
             var area = new Rect(body.x, body.y + 64 * s, body.width, body.height - 110 * s);
