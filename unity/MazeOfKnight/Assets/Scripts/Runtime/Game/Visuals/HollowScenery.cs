@@ -50,7 +50,7 @@ namespace MazeOfKnight.Game.Visuals
             L("cruces", "#6b7899", "#0a0d14", 0.8f, "#29334a", 0.45f, "#2b354d", "#5c6e94"),      // castillo
             With(L("greenpath", "#7a9993", "#08100f", 0.8f, "#1f3d38", 0.45f, "#1f3833", "#527a73"), 4),   // 1 cueva verde agua (hierba)
             With(L("canales", "#6b8a99", "#070d12", 0.8f, "#1f3542", 0.45f, "#1d313d", "#4f7385"), 16),   // 2 arrecife (tarros, pocos)
-            L("colmena", "#99876b", "#120d06", 0.8f, "#4a3a1f", 0.45f, "#3d301b", "#8a7449"),     // 3 guarida ámbar
+            With(L("colmena", "#99876b", "#120d06", 0.8f, "#4a3a1f", 0.45f, "#3d301b", "#8a7449"), 14),   // 3 guarida ámbar
             L("cristal", "#8a7a99", "#0e0914", 0.8f, "#3a2a4d", 0.45f, "#30243f", "#73609a"),     // 4 cristal violeta
             L("ciudad", "#6b7d99", "#070b14", 0.8f, "#1f2d4a", 0.45f, "#1d2840", "#4f6494"),      // 5 ruinas hundidas
             L("fungicos", "#8a8a6b", "#0d0d07", 0.8f, "#3a3a1f", 0.45f, "#30301b", "#7a7a4f"),    // 6 bosque de hongos
@@ -184,9 +184,9 @@ namespace MazeOfKnight.Game.Visuals
             {
                 int cc = c;
                 foreach (var (r0, r1) in Runs(r => S(cc, r) && !S(cc - 1, r), RoomCoords.Rows))
-                    Column(room, root.transform, rng, cc * 8, r0, r1, true);
+                    Column(room, root.transform, rng, cc * 8, r0, r1, true, Thickness(S, cc, r0, r1, 1));
                 foreach (var (r0, r1) in Runs(r => S(cc, r) && !S(cc + 1, r), RoomCoords.Rows))
-                    Column(room, root.transform, rng, cc * 8 + 8, r0, r1, false);
+                    Column(room, root.transform, rng, cc * 8 + 8, r0, r1, false, Thickness(S, cc, r0, r1, -1));
             }
         }
 
@@ -274,7 +274,22 @@ namespace MazeOfKnight.Game.Visuals
         }
 
         // Un lado de pared en x (la cara del sólido), de la fila r0 a r1; airLeft: el aire a la izquierda.
-        void Column(RoomModel room, Transform parent, System.Random rng, float x, int r0, int r1, bool airLeft)
+        // Grosor en px del sólido desde la columna c hacia dentro (dir +1 a la derecha, −1 a la izquierda), el menor de las
+        // filas r0…r1: una pared no puede ser más ancha (asomaría por el otro lado de un muro fino).
+        static float Thickness(System.Func<int, int, bool> solid, int c, int r0, int r1, int dir)
+        {
+            int min = RoomCoords.Cols;
+            for (int r = r0; r < r1; r++)
+            {
+                int n = 0;
+                while (n < RoomCoords.Cols && c + dir * n >= 0 && c + dir * n < RoomCoords.Cols && solid(c + dir * n, r)) n++;
+                if (c + dir * n < 0 || c + dir * n >= RoomCoords.Cols) n = RoomCoords.Cols;   // sigue en la sala de al lado
+                min = Mathf.Min(min, n);
+            }
+            return min * 8;
+        }
+
+        void Column(RoomModel room, Transform parent, System.Random rng, float x, int r0, int r1, bool airLeft, float thick)
         {
             float y0 = OriginalPhysics.RoomTopPx + r0 * 8, y1 = OriginalPhysics.RoomTopPx + r1 * 8;
             float y = y0;
@@ -287,6 +302,7 @@ namespace MazeOfKnight.Game.Visuals
                 var size = SizePx(sp);
                 float k = 1, span = y1 - y0;
                 if (size.y > span) k = Mathf.Max(0.35f, span / size.y);
+                if (size.x * k > thick + 4) k = Mathf.Max(0.35f, (thick + 4) / size.x);
                 float w = size.x * k, h = size.y * k;
                 float py = y + h > y1 ? y1 - h : y;
                 // La pared asoma 2 px al aire; el resto, dentro del sólido.

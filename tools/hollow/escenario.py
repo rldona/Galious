@@ -40,6 +40,7 @@ KIT = "hollow-knight-crossroads"
 
 GG = "GG_Waterway.png"          # el del Palacio de los dioses, con las piezas de los Canales
 SLUICE = "Water_Sluice.png"
+HIVE = "Hive.png"
 
 
 def A(atlas, box, name):
@@ -119,12 +120,39 @@ KITS = {
         "detalle": [A(GG, (1568, 850, 1696, 984), "tarro"), A(GG, (1704, 890, 1832, 1022), "barril"),
                     A(GG, (640, 450, 750, 566), "piedras")],
     },
+    # Mundo 3 (guarida ámbar): la Colmena. Bordes con miel por suelo, goterones de miel por techo, columnas y paneles
+    # hexagonales por pared; marcos hexagonales, columnas de cristal y manchas de luz ámbar al fondo.
+    "colmena": {
+        "suelo": [A(HIVE, (1196, 568, 1664, 680), "borde_a"), A(HIVE, (1220, 680, 1708, 796), "borde_b"),
+                  A(HIVE, (2268, 1260, 2588, 1312), "borde_c"), A(HIVE, (2424, 1656, 2744, 1712), "borde_d"),
+                  A(HIVE, (2924, 1784, 3196, 1816), "borde_e"), A(HIVE, (2564, 1992, 2940, 2048), "borde_f")],
+        "techo": [A(HIVE, (248, 1052, 824, 1208), "miel_goteando"), A(HIVE, (2196, 1884, 2564, 1964), "miel_a"),
+                  A(HIVE, (2196, 1968, 2564, 2048), "miel_b"), A(HIVE, (1204, 1120, 1460, 1268), "goteron")],
+        "estalactita": [A(HIVE, (700, 1184, 988, 1704), "miel_larga"), A(HIVE, (940, 1528, 1232, 2048), "miel_negra"),
+                        A(HIVE, (980, 992, 1116, 1404), "chorro")],
+        "pared_izq": [A(HIVE, (616, 696, 812, 1048), "hexagonos"), A(HIVE, (2092, 1704, 2188, 2044), "columna_hex"),
+                      A(HIVE, (1528, 1052, 1728, 1748), "columna_miel"), A(HIVE, (1236, 1652, 1432, 1892), "hex_roto")],
+        "masa": [A(HIVE, (1152, 1292, 1504, 1520), "panal_a"), A(HIVE, (388, 1740, 920, 2000), "panal_b"),
+                 A(HIVE, (172, 812, 488, 1048), "panal_roto")],
+        "fondo": [A(HIVE, (200, 248, 420, 572), "marco_hex_a"), A(HIVE, (992, 488, 1188, 776), "marco_hex_b"),
+                  A(HIVE, (1556, 4, 1708, 268), "cristal_a"), A(HIVE, (1880, 860, 2024, 1116), "cristal_b"),
+                  A(HIVE, (1944, 1788, 2088, 2044), "cristal_c"), A(HIVE, (12, 1364, 324, 2036), "vitrina"),
+                  A(HIVE, (312, 1224, 700, 1616), "luz_a"), A(HIVE, (1184, 796, 1420, 1008), "luz_b"),
+                  A(HIVE, (296, 576, 612, 816), "paneles")],
+        "pp_abajo": [A(HIVE, (1180, 1752, 1672, 2048), "ladera"), A(HIVE, (584, 208, 868, 348), "bloque"),
+                     A(HIVE, (2412, 1068, 2612, 1132), "losa")],
+        "pp_arriba": [A(HIVE, (1668, 492, 1880, 684), "colgajo"), A(HIVE, (940, 1528, 1232, 2048), "miel_negra"),
+                      A(HIVE, (1204, 1120, 1460, 1268), "goteron")],
+        # Los trozos de miel brillan como un objeto: uno solo, entre piedras.
+        "detalle": [A(HIVE, (2472, 1552, 2592, 1652), "trozo_miel"), A(HIVE, (2592, 1568, 2740, 1652), "piedra"),
+                    A(None, A(HIVE, (2592, 1568, 2740, 1652), "x"), "piedra_b")],
+    },
 }
 
 
 def load_piece(src, name):
     if isinstance(name, tuple) and name[0] is None:
-        name = name[1]
+        return load_piece(src, name[1])
     elif isinstance(name, tuple):
         atlas, box, _ = name
         return atlas_piezas.piece(Image.open(src / "hollow-knight-texturas/atlas_sprites" / atlas).convert("RGBA"), box)
@@ -178,6 +206,9 @@ FAR = {
                               ("Waterways_09", 1514, 605), ("Waterways_09", 1127, 634), ("Waterways_04", 5157, 2865),
                               ("Waterways_04b", 4825, 2305), ("Waterways_04b", 7010, 1069), ("Waterways_04b", 2302, 2144),
                               ("Waterways_04", 6137, 2619)]),
+    "colmena": ("Hive", [("Hive_02", 6884, 907), ("Hive_04", 6754, 2039), ("Hive_01", 4856, 2613), ("Hive_01", 5597, 2346),
+                         ("Hive_05", 3319, 2429), ("Hive_05", 5095, 2548), ("Hive_05", 5424, 2625),
+                         ("Hive_03_c", 3777, 2249), ("Hive_05", 4081, 2061), ("Hive_01", 6491, 3662)]),
 }
 
 
