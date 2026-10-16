@@ -43,6 +43,7 @@ SLUICE = "Water_Sluice.png"
 HIVE = "Hive.png"
 ABYSS = "Abyss.png"
 DEEP = "Deepnest.png"
+DUNES, WYRM, OUTLOOK = "Dunes.png", "Wyrm.png", "Outlook.png"
 
 
 def A(atlas, box, name):
@@ -259,6 +260,27 @@ KITS = {
         "detalle": [A(DEEP, (1820, 52, 2004, 232), "setas_a"), A(DEEP, (1896, 924, 1960, 1096), "seta"),
                     A(DEEP, (1836, 1284, 1968, 1468), "setas_b"), A(DEEP, (2016, 1816, 2076, 1896), "setas_c")],
     },
+    # Mundo 9 (osario): los Confines del Reino, la ceniza blanca sobre los huesos del Wyrm. Dunas de ceniza por suelo,
+    # costillas y tendones del Wyrm por techo y pared, colmillos y púas de hueso colgando y en el fondo, pilares y arcos
+    # del mirador; hierba de ceniza blanca encima del suelo.
+    "confines": {
+        "suelo": [A(DUNES, (390, 75, 896, 153), "duna_a"), A(DUNES, (0, 196, 495, 311), "duna_b"),
+                  A(DUNES, (6, 97, 437, 190), "duna_c"), A(WYRM, (0, 2604, 436, 2696), "tendon")],
+        "techo": ["atlas_Crossroads/roof_03", A(WYRM, (1364, 1860, 1968, 2084), "carne"), A(WYRM, (1240, 1624, 1512, 1824), "hueso_a")],
+        "estalactita": ["otras/bone_spike_04", "otras/bone_spike_06", "otras/bone_deep_0028_Layer-152", "otras/bone_deep_0029_Layer-153"],
+        "pared_izq": ["otras/east_wall_break_0002_1", "otras/bone_deep_0018_Layer-142", "otras/ruind_wall_edge_01"],
+        "masa": [A(WYRM, (440, 604, 908, 1208), "costilla"), A(WYRM, (308, 2524, 1372, 3272), "lomo"),
+                 "otras/colosseum_EXT_0004_col_04"],
+        "fondo": [A(OUTLOOK, (645, 28, 748, 517), "pilar_a"), A(OUTLOOK, (207, 243, 336, 701), "pilar_b"),
+                  A(OUTLOOK, (431, 223, 638, 496), "arco_a"), A(OUTLOOK, (347, 406, 566, 679), "arco_b"),
+                  "otras/bone_deep_0027_Layer-151", "otras/bone_deep_0034_Layer-121", "otras/colosseum_EXT_0002_col_06",
+                  "otras/colosseum_EXT_0007_col_01", "otras/white_ash_scenery_0021_22"],
+        "pp_abajo": [A(DUNES, (312, 267, 1023, 427), "duna_grande"), A(DUNES, (0, 332, 610, 512), "loma"),
+                     "otras/FG_bone_pile"],
+        "pp_arriba": [A(WYRM, (0, 2712, 456, 3196), "colgajo"), A(WYRM, (976, 3688, 1348, 4092), "garras"),
+                      "otras/colosseum_EXT_0003_col_05"],
+        "detalle": ["otras/ash_grass1000", "otras/ash_grass_02000", "otras/ash_grass_03000", "otras/bone_spike_03"],
+    },
 }
 
 
@@ -341,6 +363,11 @@ FAR = {
                           ("Deepnest_Spider_Town", 260, 8349), ("Deepnest_34", 7599, 2277), ("Deepnest_44", 5072, 3224),
                           ("Deepnest_38", 3922, 1287), ("Deepnest_01b", 2267, 3988), ("Deepnest_41", 783, 1082),
                           ("Deepnest_14", 4167, 2094)]),
+    "confines": ("Deepnest_East", [("Deepnest_East_12", 2212, 1459), ("Deepnest_East_12", 6272, 1548),
+                                   ("Deepnest_East_14", 4545, 6204), ("Deepnest_East_04", 1525, 1338),
+                                   ("Deepnest_East_06", 5763, 344), ("Deepnest_East_06", 8761, 523),
+                                   ("Deepnest_East_11", 4977, 3192), ("Deepnest_East_03", 2789, 1954),
+                                   ("Deepnest_East_08", 7097, 1367), ("Deepnest_East_18", 5982, 4160)]),
 }
 
 

@@ -1248,6 +1248,7 @@ namespace MazeOfKnight.Game
             if (++liquidTicks < every)
                 return;
             liquidTicks = 0;
+            if (DebugInvulnerable) return;       // capturas: tampoco los líquidos
             PendingVitality[(int)motor.Character]--;
             Sound.Effect(0x25);
         }
