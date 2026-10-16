@@ -126,6 +126,9 @@ namespace MazeOfKnight.Game.Visuals
                 player.Demo = null;
                 game.Motor.Place(game.World, room, x, y);
                 yield return new WaitForSeconds(0.6f);
+                // Sin la lámina de un objeto recogido al pasar (tapaba la sala).
+                var tutorial = FindAnyObjectByType<ItemTutorial>();
+                if (tutorial != null && tutorial.Open) { tutorial.HideNow(); yield return new WaitForSeconds(0.2f); }
                 // Con la colisión marcada (F10) y las cajas (F9), y sin nada encima.
                 yield return Shot($"sala_m{roomsWorld:00}_{id:000}_colision");
                 CollisionGridOverlay.Show = HitboxOverlay.Show = false;

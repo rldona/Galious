@@ -84,6 +84,10 @@ namespace MazeOfKnight.Game.Enemies
 
         public bool Swinging => swing > 0;
 
+        // Con RemakeRules.HollowBosses, todo el cuerpo recibe golpes (en el original, solo la cabeza).
+        public override IEnumerable<(float x0, float y0, float x1, float y1)> WeaponRects() =>
+            RemakeRules.HollowBosses ? ContactRects() : base.WeaponRects();
+
         // Da con la maza hacia el jugador (si no está ya en ello): la bola hace daño donde cae (MaceHead).
         void Swing(EnemyContext ctx)
         {

@@ -26,8 +26,10 @@ namespace MazeOfKnight.Game.Visuals
         // 3, el degradado con niebla, rocas grandes y arcos y estatuas; 2, el juego (el sólido y sus bordes); 1, siluetas
         // negras por delante de los personajes, asomando por los bordes de la sala.
         public const int FarOrder = -13, ForeOrder = 30;
-        static readonly Color Silhouette = new Color(0.008f, 0.008f, 0.014f);
-        public static readonly Color Rock = new Color(0.02f, 0.02f, 0.03f);
+        static readonly Color Silhouette = Color.black;
+        // Negro puro, como el contorno del arte: con un poco de color, la gradación de cada zona (saturación y filtro) lo
+        // volvía gris azulado o verdoso.
+        public static readonly Color Rock = Color.black;
 
         // Zona de Hollow Knight de cada mapa (su kit en Hollow/escenario/<zona>) y sus colores: el tinte del fondo lejano,
         // el degradado (arriba, abajo con niebla), las rocas grandes del fondo (Deep) y los arcos y estatuas (Far).
@@ -188,8 +190,10 @@ namespace MazeOfKnight.Game.Visuals
                         if (rng.Next(look.DetailEvery) == 0 && Pick("detalle", rng) is Sprite d && Reserved?.Invoke(room, c * 8 + 4, surface) != true)
                         {
                             var size = SizePx(d);
-                            float k = Mathf.Min(1, 12f / size.y);
-                            Put(room, root.transform, d, c * 8 + 4 - size.x * k / 2, surface - Lip + 1 - size.y * k, k, rng.Next(2) == 0, -4, Color.white);
+                            float k = Mathf.Min(1, 12f / size.y, (c1 - c0) * 8 / size.x);
+                            // Dentro del tramo de suelo: no asoma por el borde de la plataforma.
+                            float w = size.x * k, x = Mathf.Clamp(c * 8 + 4 - w / 2, c0 * 8, c1 * 8 - w);
+                            Put(room, root.transform, d, x, surface - Lip + 1 - size.y * k, k, rng.Next(2) == 0, -4, Color.white);
                         }
                 }
             // Techos: tramos con aire debajo; alguna estalactita si quedan 5 filas libres.
@@ -476,7 +480,20 @@ namespace MazeOfKnight.Game.Visuals
                 float k = 0.55f + (float)rng.NextDouble() * 0.25f;
                 var size = SizePx(sp) * k;
                 float floor = OriginalPhysics.RoomTopPx + r * 8;
-                Put(room, parent, sp, c * 8 + 4 - size.x / 2, floor - size.y + 2, k, rng.Next(2) == 0, -9, look.Far);
+                float x = c * 8 + 4 - size.x / 2;
+                if (r < RoomCoords.Rows)
+                {
+                    // Apoyada en ese tramo de suelo, sin salirse por sus bordes (en el aire parecía flotar): más pequeña si
+                    // no cabe, y si ni así, nada.
+                    int left = c, right = c;
+                    while (left > 0 && solid(left - 1, r) && !solid(left - 1, r - 1)) left--;
+                    while (right < RoomCoords.Cols - 1 && solid(right + 1, r) && !solid(right + 1, r - 1)) right++;
+                    float runW = (right - left + 1) * 8;
+                    if (size.x > runW) { k *= runW / size.x; size = SizePx(sp) * k; }
+                    if (k < 0.3f) continue;
+                    x = Mathf.Clamp(x, left * 8, (right + 1) * 8 - size.x);
+                }
+                Put(room, parent, sp, x, floor - size.y + 2, k, rng.Next(2) == 0, -9, look.Far);
             }
         }
     }

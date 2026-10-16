@@ -217,6 +217,8 @@ namespace MazeOfKnight.Game.Enemies
             b.Hp = holyWater ? info.hpHolyWater : info.hp;
             b.WeaponMask = info.weaponMask;
             b.Damage = cloak ? info.contactDamageCloak : info.contactDamage;
+            if (RemakeRules.HollowBosses)
+                b.Damage = Math.Max(1, RemakeRules.BossContactMasks(info.contactDamage) - (cloak ? 1 : 0));   // la Cloak, una menos
             b.X = info.init.x; b.Y = info.init.y;
             b.Init(Context);
             enemies.Add(b);

@@ -169,7 +169,9 @@ namespace MazeOfKnight.Game.Visuals
         void UpdateOcclusion(RoomModel room)
         {
             var w = game.World;
-            bool Solid(int c, int r) => w.TileAt(room, c * 8 + 4, OriginalPhysics.RoomTopPx + r * 8 + 4) == TileClass.Solid;
+            // Las piedras rompibles no cuentan (tienen su dibujo redondo): oscurecía el aire de alrededor y no su hueco, y
+            // quedaba un cuadrado claro detrás de cada una.
+            bool Solid(int c, int r) => w.TileAt(room, c * 8 + 4, OriginalPhysics.RoomTopPx + r * 8 + 4) == TileClass.Solid && !RockCell(room, c, r);
             int hash = AmbientOcclusion.Hash(Solid, RoomCoords.Cols, RoomCoords.Rows);
             if (room == shownRoom && hash == occlusionHash && occlusion.sprite != null) return;
             occlusionHash = hash;
@@ -180,6 +182,16 @@ namespace MazeOfKnight.Game.Visuals
                 AmbientOcclusion.TexelsPerTile / RoomCoords.TileSize, 0, SpriteMeshType.FullRect);
             var o = RoomCoords.RoomOrigin(room);
             occlusion.transform.position = new Vector3(o.x, o.y, 0);
+        }
+
+        static bool RockCell(RoomModel room, int c, int r)
+        {
+            foreach (var k in room.rocks)
+            {
+                int rc = k.x >> 3, rr = (k.y - OriginalPhysics.RoomTopPx) >> 3;
+                if (c >= rc && c < rc + 2 && r >= rr && r < rr + 2) return true;
+            }
+            return false;
         }
 
         static ParticleSystem NewParticles(Transform root, string name)

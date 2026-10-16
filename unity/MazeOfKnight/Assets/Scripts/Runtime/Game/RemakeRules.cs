@@ -25,6 +25,14 @@ namespace MazeOfKnight.Game
         // de la maza donde golpea el suelo (Enemies.MaceHead).
         public static bool FalseKnightMace = true;        // activado: lo ha pedido el usuario
 
+        // Original: el Bony Dragon solo recibe golpes en la cabeza (16 px en su lado izquierdo, y en los fotogramas en que
+        // la baja) y tocar a un jefe quita de 8 a 40 de vitalidad, cuando se empieza con 8: con el False Knight dibujado
+        // las flechas lo atravesaban sin daño, acercarse para darle con la espada era imposible y un toque mataba (el
+        // usuario, 17 de octubre de 2026). Remake, como en Hollow Knight: el False Knight recibe golpes en todo el cuerpo y
+        // tocar a un jefe quita BossContactMasks (de 1 a 3 máscaras, más cuanto más fuerte en el original).
+        public static bool HollowBosses = true;           // activado: lo ha pedido el usuario
+        public static int BossContactMasks(int original) => System.Math.Max(1, System.Math.Min(3, (original + 6) / 12));
+
         // Original: en el agua (y en la lava) se hunde despacio hasta el fondo y todo va 4 veces más lento. Remake (petición
         // del usuario del 16 de octubre de 2026, como en Hollow Knight): en el agua el jugador flota en la superficie con
         // los pies SwimDepth px por debajo y nada a izquierda y derecha (a la mitad de velocidad, como el original en el

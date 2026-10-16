@@ -73,8 +73,14 @@ namespace MazeOfKnight.Tests
         public void HolyWaterHalvesAndCloakHalvesContact()
         {
             var (fight, sys, _, _, _) = Setup(1);
-            var b = sys.SpawnBoss(fight.Info, true, true, false);
-            Assert.AreEqual((12, 4), (b.Hp, b.Damage));
+            bool before = RemakeRules.HollowBosses;
+            RemakeRules.HollowBosses = false;
+            try
+            {
+                var b = sys.SpawnBoss(fight.Info, true, true, false);
+                Assert.AreEqual((12, 4), (b.Hp, b.Damage));
+            }
+            finally { RemakeRules.HollowBosses = before; }
         }
 
         [Test]
@@ -86,6 +92,46 @@ namespace MazeOfKnight.Tests
             Assert.IsTrue(b.Vulnerable(1), "flecha");
             Assert.IsFalse(b.Vulnerable(4), "fuego no");
             Assert.IsFalse(b.Vulnerable(5), "mina no");
+        }
+
+        // Remake (RemakeRules.HollowBosses): desde su mismo suelo, las flechas dan al False Knight siempre que lo alcanzan
+        // (en el original, solo cuando baja la cabeza, y en su lado izquierdo), y tocarlo quita una máscara, no las 8.
+        [Test]
+        public void ArrowsHitTheFalseKnightAndTouchingCostsOneMask()
+        {
+            bool before = RemakeRules.HollowBosses;
+            try
+            {
+                foreach (bool hollow in new[] { true, false })
+                {
+                    RemakeRules.HollowBosses = hollow;
+                    var (fight, sys, world, room, motor) = Setup(1);
+                    var boss = Summon(fight, sys);
+                    Assert.AreEqual(hollow ? 1 : 8, boss.Damage, "daño al tocarlo");
+                    var weapons = new WeaponSystem(JsonUtility.FromJson<WeaponsData>(Resources.Load<TextAsset>("Weapons").text));
+                    var arrow = weapons.Data.Get(1);
+                    var items = new List<int>();
+                    motor.Place(world, room, 100, 120);
+                    for (int t = 0; t < 60; t++) motor.Tick(new MotorInput());
+                    int shots = 0, hits = 0;
+                    for (int t = 0; t < 400; t++)
+                    {
+                        sys.Tick();
+                        if (t % 20 == 0 && weapons.CanFire(arrow, motor, items, 99) == null && weapons.Fire(arrow, motor, world, sys, null, items) != null)
+                        {
+                            int hp = boss.Hp;
+                            shots++;
+                            for (int k = 0; k < 19; k++) { sys.Tick(); weapons.Tick(motor, world, sys, null, items); }
+                            t += 19;
+                            if (boss.Hp < hp) hits++;
+                        }
+                        weapons.Tick(motor, world, sys, null, items);
+                    }
+                    if (hollow) Assert.AreEqual(shots, hits, "todas las flechas le dan");
+                    else Assert.Less(hits, shots, "en el original, solo cuando baja la cabeza");
+                }
+            }
+            finally { RemakeRules.HollowBosses = before; }
         }
 
         // Remake (RemakeRules.FalseKnightMace): el False Knight da con la maza en vez de lanzar huesos; la bola hace daño
