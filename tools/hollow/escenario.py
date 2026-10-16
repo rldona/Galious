@@ -147,6 +147,25 @@ KITS = {
         "detalle": [A(HIVE, (2472, 1552, 2592, 1652), "trozo_miel"), A(HIVE, (2592, 1568, 2740, 1652), "piedra"),
                     A(None, A(HIVE, (2592, 1568, 2740, 1652), "x"), "piedra_b")],
     },
+    # Mundo 4 (cristal violeta): los Picos de Cristal. Piedras y tablones de mina por suelo, paredes de roca con puntales
+    # de madera (cada una con su versión para el otro lado), cristales violetas, arcos de roca, ruedas, cestas y andamios
+    # al fondo; cristales oscuros como siluetas delante.
+    "cristal": {
+        "suelo": ["otras/mine_floor_01", "otras/mine_loose_stones", "otras/mines_floor_rocks_0003_Layer-1",
+                  "otras/mines_metal_thin_floors_0001_a", "otras/mines_metal_thin_floors_0004_a"],
+        "techo": ["atlas_Crossroads/roof_03", "otras/Mines_Layered_0080_a", "otras/Mines_Layered_0081_a"],
+        "estalactita": ["atlas_Crossroads/roof_FG_rock_08_0000_06", "atlas_Crossroads/roof_FG_rock_08_0005_01",
+                        "otras/mines_floating_crystals"],
+        "pared_izq": ["otras/mine_wall_01", "otras/mine_wall_02", "otras/mine_wall_03"],
+        "pared_der": ["otras/mine_wall_01_r", "otras/mine_wall_02_r", "otras/mine_wall_03_r"],
+        "masa": ["otras/mines_additions_02_0004_a", "otras/Mines_Layered_0090_a", "otras/cryst_cave_0004_Layer-6"],
+        "fondo": ["otras/Mines_Layered_0087_c", "otras/Mines_Layered_0088_c", "otras/Mines_Layered_0089_c",
+                  "otras/cryst_cave_0002_Layer-3", "otras/mine_spike_fg_clear", "otras/mine_strut_07_BG",
+                  "otras/mine_wood_back", "otras/mines_additions_03_0001_a", "otras/mines_flip_platform_BG"],
+        "pp_abajo": ["otras/Mines_Layered_0088_c", "otras/Mines_Layered_0089_c", "otras/mines_quake_floor"],
+        "pp_arriba": ["atlas_Crossroads/roof_FG_rock_08_0004_02", "atlas_Crossroads/roof_FG_rock_07_0003_03"],
+        "detalle": ["otras/mine_crystal_08", "otras/mines_additions_02_0010_a"],   # sin los rosas brillantes de la cima
+    },
 }
 
 
@@ -156,7 +175,8 @@ def load_piece(src, name):
     elif isinstance(name, tuple):
         atlas, box, _ = name
         return atlas_piezas.piece(Image.open(src / "hollow-knight-texturas/atlas_sprites" / atlas).convert("RGBA"), box)
-    p = src / KIT / f"{name}.png"
+    # Texturas sueltas (hollow-knight-texturas/otras: las de los Picos de Cristal, por ejemplo).
+    p = src / "hollow-knight-texturas" / f"{name}.png" if name.startswith("otras/") else src / KIT / f"{name}.png"
     if not p.exists():
         raise SystemExit(f"No está la pieza {p}")
     return Image.open(p).convert("RGBA")
@@ -209,6 +229,9 @@ FAR = {
     "colmena": ("Hive", [("Hive_02", 6884, 907), ("Hive_04", 6754, 2039), ("Hive_01", 4856, 2613), ("Hive_01", 5597, 2346),
                          ("Hive_05", 3319, 2429), ("Hive_05", 5095, 2548), ("Hive_05", 5424, 2625),
                          ("Hive_03_c", 3777, 2249), ("Hive_05", 4081, 2061), ("Hive_01", 6491, 3662)]),
+    "cristal": ("Mines", [("Mines_02", 6027, 2711), ("Mines_06", 7727, 997), ("Mines_30", 5899, 937), ("Mines_31", 5297, 1999),
+                          ("Mines_17", 1276, 783), ("Mines_10", 7115, 1127), ("Mines_13", 8706, 1822),
+                          ("Mines_01", 374, 1263), ("Mines_18", 1654, 1338), ("Mines_29", 1830, 3322)]),
 }
 
 

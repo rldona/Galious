@@ -51,7 +51,7 @@ namespace MazeOfKnight.Game.Visuals
             With(L("greenpath", "#7a9993", "#08100f", 0.8f, "#1f3d38", 0.45f, "#1f3833", "#527a73"), 4),   // 1 cueva verde agua (hierba)
             With(L("canales", "#6b8a99", "#070d12", 0.8f, "#1f3542", 0.45f, "#1d313d", "#4f7385"), 16),   // 2 arrecife (tarros, pocos)
             With(L("colmena", "#99876b", "#120d06", 0.8f, "#4a3a1f", 0.45f, "#3d301b", "#8a7449"), 14),   // 3 guarida ámbar
-            L("cristal", "#8a7a99", "#0e0914", 0.8f, "#3a2a4d", 0.45f, "#30243f", "#73609a"),     // 4 cristal violeta
+            With(L("cristal", "#8a7a99", "#0e0914", 0.8f, "#3a2a4d", 0.45f, "#30243f", "#73609a"), 10),   // 4 cristal violeta
             L("ciudad", "#6b7d99", "#070b14", 0.8f, "#1f2d4a", 0.45f, "#1d2840", "#4f6494"),      // 5 ruinas hundidas
             L("fungicos", "#8a8a6b", "#0d0d07", 0.8f, "#3a3a1f", 0.45f, "#30301b", "#7a7a4f"),    // 6 bosque de hongos
             L("abismo", "#5a6280", "#030408", 0.85f, "#141a2e", 0.45f, "#121726", "#3d4a73"),     // 7 abismo luminoso
