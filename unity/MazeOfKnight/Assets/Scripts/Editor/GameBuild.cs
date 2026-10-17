@@ -58,7 +58,7 @@ namespace MazeOfKnight.EditorTools
         {
             PlayerSettings.productName = Product;
             PlayerSettings.companyName = "rldona";
-            PlayerSettings.bundleVersion = "1.0.0";
+            PlayerSettings.bundleVersion = "1.1.0";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone, "com.rldona.galious");
             var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(Icon);
             if (icon != null)
