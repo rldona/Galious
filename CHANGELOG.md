@@ -22,6 +22,8 @@ Sensación de Hollow Knight y CI al día.
 - Wiki: en «la colisión bajo el arte», el castillo va primero y con su colisión; añadidos los mundos 8 y 10.
 - CI de pruebas: la de las demos escribía su traza en `logs/unity`, que no está en el repo, y el resumen de resultados
   no tenía permiso para publicarse.
+- CI de builds: GameCI v6 no podía descargar su herramienta (la API de GitHub le cortaba sin el token); ahora se
+  puede compilar una sola plataforma a mano.
 
 ## [1.0.0] - 2026-10-17
 
