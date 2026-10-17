@@ -1,7 +1,9 @@
-# Compila el juego para Windows, Linux (y SteamOS), macOS y la web con GameCI, todo en servidores Linux (la de macOS va
+# Compila el juego para Windows, Linux (y SteamOS) y macOS con GameCI, todo en servidores Linux (la de macOS va
 # con Mono: no gasta minutos de macOS, que cuentan x10), y lo sube a una Release del repo (privada, como el repo; los
 # artefactos de Actions no caben: en el plan gratis hay 500 MB y cada build comprimida pesa unos 220 MB).
 # Se lanza a mano (Actions → Builds → Run workflow, todas las plataformas o una) o al subir una etiqueta v*.
+# La web (WebGL) no: tardaba una hora o más y no se publica; se compila a mano en Unity (Maze of Knight → Compilar
+# para la web).
 # Secretos: UNITY_LICENSE, UNITY_EMAIL y UNITY_PASSWORD (ver tests.yml).
 name: Builds
 
@@ -11,7 +13,7 @@ on:
       plataforma:
         description: Qué compilar
         type: choice
-        options: [todas, Windows, Linux, macOS, Web]
+        options: [todas, Windows, Linux, macOS]
         default: todas
   push:
     tags: ['v*']
@@ -31,7 +33,6 @@ jobs:
           - { name: Windows, target: StandaloneWindows64, method: BuildWindows, out: Galious.exe }
           - { name: Linux, target: StandaloneLinux64, method: BuildLinux, out: Galious.x86_64 }
           - { name: macOS, target: StandaloneOSX, method: BuildMac, out: Galious.app }
-          - { name: Web, target: WebGL, method: BuildWeb, out: Web }
     steps:
       - name: Espacio en disco
         if: ${{ inputs.plataforma == '' || inputs.plataforma == 'todas' || inputs.plataforma == matrix.name }}

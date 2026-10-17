@@ -1228,7 +1228,7 @@ PlayerSettings.SplashScreen.showUnityLogo = <span class="k">false</span>;</pre>
   <h3 class="revelar">CI con GameCI</h3>
   <div class="rejilla r3 revelar">
     <div class="tarjeta"><h4>Pruebas</h4><p><code>tests.yml</code>: en cada push a <code>main</code> y en cada pull request, las pruebas EditMode con <code>game-ci/unity-test-runner</code>, con caché de <code>Library</code>.</p></div>
-    <div class="tarjeta"><h4>Builds</h4><p><code>builds.yml</code>: a mano o al subir una etiqueta <code>v*</code>; matriz de Windows, Linux, macOS (con Mono, en Linux: no gasta minutos de macOS) y Web, empaquetado y subida a una Release.</p></div>
+    <div class="tarjeta"><h4>Builds</h4><p><code>builds.yml</code>: a mano o al subir una etiqueta <code>v*</code>; matriz de Windows, Linux, macOS (con Mono, en Linux: no gasta minutos de macOS), empaquetado y subida a una Release. La web no: tardaba una hora o más; se compila a mano en Unity.</p></div>
     <div class="tarjeta"><h4>Wiki</h4><p><code>wiki.yml</code>: publica esta carpeta <code>wiki/</code> tal cual en GitHub Pages cuando cambia en <code>main</code>.</p></div>
   </div>
   <p class="revelar">Necesitan tres secretos del repo: <code>UNITY_LICENSE</code>, <code>UNITY_EMAIL</code> y <code>UNITY_PASSWORD</code>. Las builds van a una Release y no a los artefactos de Actions: cada build comprimida pesa unos 220 MB.</p>

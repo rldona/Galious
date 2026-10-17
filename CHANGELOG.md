@@ -4,6 +4,13 @@ Historial de cambios de **Galious: The Hollow Kingdom**. Cada versión tiene su 
 GitHub. Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versiones con
 [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Cambiado
+- El CI ya no compila la versión web: tardaba una hora o más y no se publica. Se sigue pudiendo compilar a mano en
+  Unity (*Maze of Knight → Compilar para la web*).
+- README: cómo instalar en Linux y añadirlo a Steam, con sus imágenes en la biblioteca.
+
 ## [1.1.0] - 2026-10-17
 
 Sensación de Hollow Knight y CI al día.
@@ -170,6 +177,7 @@ Ingeniería inversa de *Knightmare II: The Maze of Galious*.
 - IA de los 53 enemigos y de los 10 jefes, con el ritmo del bucle medido (30 ticks por segundo).
 - Música (driver, 21 canciones, grabación del PSG y conversión a MIDI) y los 48 efectos de sonido.
 
+[Sin publicar]: https://github.com/rldona/Galious/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/rldona/Galious/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rldona/Galious/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/rldona/Galious/compare/v0.8.0...v0.9.0

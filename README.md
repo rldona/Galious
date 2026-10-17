@@ -27,7 +27,6 @@ Las builds salen del CI y se suben a la [Release de cada versión](https://githu
 | **Windows** | `Galious-Windows.zip` | Descomprimir y abrir `Galious.exe` (SmartScreen: *Más información* → *Ejecutar de todas formas*). |
 | **Linux / SteamOS** | `Galious-Linux.tar.gz` | Ver [Linux y Steam](#linux-y-steam), más abajo. |
 | **macOS** | `Galious-macOS.tar.gz` | Descomprimir y abrir `Galious.app` (la primera vez, clic derecho → *Abrir*: no está firmada). |
-| **Web** | `Galious-Web.zip` | Servir la carpeta con un servidor web (`python3 -m http.server`) y abrir `index.html`. |
 
 ### Linux y Steam
 
@@ -121,8 +120,8 @@ Cada regla del remake se puede apagar en `Assets/Scripts/Runtime/Game/RemakeRule
 ### CI
 
 - **Pruebas** (`.github/workflows/tests.yml`): en cada push, con [GameCI](https://game.ci).
-- **Builds** (`.github/workflows/builds.yml`): a mano o con una etiqueta `v*`; Windows, Linux, macOS y web en servidores
-  Linux, subidas a la Release.
+- **Builds** (`.github/workflows/builds.yml`): a mano o con una etiqueta `v*`; Windows, Linux y macOS en servidores
+  Linux, subidas a la Release. La versión web se compila a mano en Unity (*Maze of Knight → Compilar para la web*).
 - **Wiki** (`.github/workflows/wiki.yml`): publica `wiki/` en GitHub Pages.
 
 Necesitan tres secretos del repo (*Settings → Secrets and variables → Actions*): `UNITY_LICENSE` (el contenido de
