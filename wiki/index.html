@@ -1,0 +1,1410 @@
+<!doctype html>
+<html lang="es" class="sin-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galious: The Hollow Kingdom — Cómo se hizo</title>
+<meta name="description" content="Wiki didáctica de cómo se hizo Galious: The Hollow Kingdom, un remake educativo en Unity de Knightmare II: The Maze of Galious (Konami, MSX, 1987) con el arte, la música y la sensación de Hollow Knight.">
+<meta name="author" content="rldona">
+<meta name="theme-color" content="#0b0d14">
+<meta property="og:title" content="Galious: The Hollow Kingdom — Cómo se hizo">
+<meta property="og:description" content="Ingeniería inversa de un clásico del MSX y su reimplementación en Unity con el aspecto de Hollow Knight.">
+<meta property="og:image" content="img/heroe.jpg">
+<link rel="icon" href="img/icono.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<a class="saltar" href="#idea">Saltar al contenido</a>
+
+<header class="barra" aria-label="Barra superior">
+  <a class="marca" href="#inicio"><img src="img/icono.png" alt="" width="30" height="30"><span>GALIOUS<small>Cómo se hizo</small></span></a>
+  <button class="boton-menu" aria-label="Abrir el índice" aria-expanded="false" aria-controls="indice"><span></span></button>
+  <div class="progreso" aria-hidden="true"></div>
+</header>
+
+<nav class="indice" id="indice" aria-label="Índice">
+  <h2>Índice</h2>
+  <ol>
+    <li><a href="#inicio">Portada</a></li>
+    <li><a href="#idea">La idea y el método</a></li>
+    <li><a href="#original">Original frente a remake</a></li>
+    <li><a href="#arquitectura">Arquitectura del juego</a></li>
+    <li><a href="#unity">Configuración de Unity</a></li>
+    <li><a href="#cajas">El mundo por cajas</a></li>
+    <li><a href="#texturas">Composición de texturas</a></li>
+    <li><a href="#ambiente">Ambientación</a></li>
+    <li><a href="#efectos">Efectos</a></li>
+    <li><a href="#musica">Música y sonido</a></li>
+    <li><a href="#enemigos">Enemigos</a></li>
+    <li><a href="#jefes">Jefes</a></li>
+    <li><a href="#mundos">Mundos</a></li>
+    <li><a href="#interfaz">Interfaz y menús</a></li>
+    <li><a href="#rendimiento">Rendimiento</a></li>
+    <li><a href="#builds">Distribución de builds</a></li>
+    <li><a href="#pruebas">Pruebas</a></li>
+    <li><a href="#modificar">Cómo modificarlo</a></li>
+    <li><a href="#glosario">Glosario</a></li>
+  </ol>
+</nav>
+
+<!-- ============================== 1. PORTADA ============================== -->
+<section class="heroe" id="inicio" aria-label="Portada">
+  <div class="capa fondo" data-velocidad="0.35" aria-hidden="true"></div>
+  <div class="capa frente" data-velocidad="0.15" aria-hidden="true"></div>
+  <div class="niebla" aria-hidden="true"></div>
+  <div class="niebla dos" aria-hidden="true"></div>
+  <canvas id="particulas" aria-hidden="true"></canvas>
+  <div class="heroe-contenido">
+    <h1 style="margin:0"><img class="logo" src="img/logo.png" alt="Galious: The Hollow Kingdom" width="1080" height="390"></h1>
+    <p class="lema">Un clásico de MSX de 1987 desmontado pieza a pieza, medido en el emulador y vuelto a construir en Unity con el arte, la música y la sensación de <em>Hollow Knight</em>.</p>
+    <p class="autor">Proyecto educativo de rldona · Cómo se hizo</p>
+    <div class="cifras" role="list">
+      <div class="cifra" role="listitem"><b>1 + 10</b><span>castillo y mundos</span></div>
+      <div class="cifra" role="listitem"><b>321</b><span>salas de la ROM</span></div>
+      <div class="cifra" role="listitem"><b>53</b><span>tipos de enemigo, más 25 hijos</span></div>
+      <div class="cifra" role="listitem"><b>10</b><span>jefes con su palabra</span></div>
+      <div class="cifra" role="listitem"><b>192</b><span>pruebas EditMode</span></div>
+      <div class="cifra" role="listitem"><b>~860</b><span>FPS de media sin límite (M1 Pro)</span></div>
+    </div>
+    <a class="bajar" href="#idea">Descender<i></i></a>
+  </div>
+</section>
+
+<main id="contenido">
+
+<!-- ============================== 2. IDEA ============================== -->
+<section class="seccion" id="idea">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">I · LA IDEA</div>
+    <h2 class="titulo">La idea y el método</h2>
+    <p class="entradilla">Aprender cómo está hecho un juego por dentro: abrir la ROM, medirlo todo y rehacerlo en un motor moderno sin traducir ni una línea de ensamblador.</p>
+  </header>
+
+  <div class="rejilla r2 revelar">
+    <div class="tarjeta">
+      <h4>El original</h4>
+      <p><em>Knightmare II: The Maze of Galious</em> (Konami, MSX, 1987) es un laberinto de salas fijas: un <strong>castillo de 147 salas</strong> y <strong>10 mundos</strong> con llave, lápida, palabra y jefe. Dos personajes, Popolon y Aphrodite, recorren el castillo buscando objetos, flechas, monedas y llaves para abrir mundo tras mundo.</p>
+      <p>Todo cabe en una ROM de <strong>128 KB</strong> repartida en bancos que se paginan, con un bucle de juego a unos <strong>30 ciclos por segundo</strong>.</p>
+    </div>
+    <div class="tarjeta">
+      <h4>El remake</h4>
+      <p><strong>Galious: The Hollow Kingdom</strong> conserva la base y las reglas de Galious (física, salas, enemigos, jefes, santuarios y objetos son los de 1987) pero evoluciona con sistemas de <em>Hollow Knight</em>: bancos, sombra al morir, mapas de Cornifer, amuletos con muescas, tajos arriba y abajo, nadar, el ambiente de cada zona y su música.</p>
+      <p>Hecho en <strong>Unity 6</strong> (6000.6.5f1) con URP 2D, como proyecto personal y educativo.</p>
+    </div>
+  </div>
+
+  <h3 class="revelar">De la ROM a Unity, en fases</h3>
+  <div class="diagrama revelar" role="img" aria-label="Flujo: ROM, emulador y desensamblador, herramientas de extracción, documentación, biblia de diseño, importador de Unity y juego">
+    <svg viewBox="0 0 1000 170" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="pf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#7fb3ec"/></marker>
+        <linearGradient id="gc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d2539"/><stop offset="1" stop-color="#121725"/></linearGradient>
+      </defs>
+      <g font-size="13" text-anchor="middle" fill="#ece6d6">
+        <rect x="4" y="40" width="120" height="78" rx="10" fill="url(#gc)" stroke="#d9c58e"/>
+        <text x="64" y="72" font-weight="600" fill="#d9c58e">ROM</text><text x="64" y="92" font-size="11" fill="#98a1b4">128 KB · Z80</text>
+        <rect x="150" y="40" width="130" height="78" rx="10" fill="url(#gc)" stroke="#2a3247"/>
+        <text x="215" y="66" font-weight="600">openMSX</text><text x="215" y="84" font-weight="600">REA / Ghidra</text><text x="215" y="104" font-size="11" fill="#98a1b4">medir y leer</text>
+        <rect x="306" y="40" width="130" height="78" rx="10" fill="url(#gc)" stroke="#2a3247"/>
+        <text x="371" y="72" font-weight="600">tools/</text><text x="371" y="92" font-size="11" fill="#98a1b4">Python: extraer</text>
+        <rect x="462" y="40" width="130" height="78" rx="10" fill="url(#gc)" stroke="#2a3247"/>
+        <text x="527" y="72" font-weight="600">docs/</text><text x="527" y="92" font-size="11" fill="#98a1b4">fichas [C] [O] [G] [I]</text>
+        <rect x="618" y="40" width="130" height="78" rx="10" fill="url(#gc)" stroke="#b9dcff"/>
+        <text x="683" y="72" font-weight="600" fill="#b9dcff">Biblia</text><text x="683" y="92" font-size="11" fill="#98a1b4">12 capítulos</text>
+        <rect x="774" y="40" width="100" height="78" rx="10" fill="url(#gc)" stroke="#2a3247"/>
+        <text x="824" y="72" font-weight="600">Importador</text><text x="824" y="92" font-size="11" fill="#98a1b4">JSON → assets</text>
+        <rect x="896" y="40" width="100" height="78" rx="10" fill="#1d2b40" stroke="#b9dcff"/>
+        <text x="946" y="72" font-weight="700" fill="#fff">Unity</text><text x="946" y="92" font-size="11" fill="#b9dcff">el juego</text>
+      </g>
+      <g stroke="#7fb3ec" stroke-width="1.5" fill="none" marker-end="url(#pf)">
+        <path d="M124 79H146"/><path d="M280 79H302"/><path d="M436 79H458"/><path d="M592 79H614"/><path d="M748 79H770"/><path d="M874 79H892"/>
+      </g>
+      <g font-size="11" fill="#98a1b4" text-anchor="middle">
+        <text x="215" y="150">fase 1–2</text><text x="371" y="150">fase 3</text><text x="527" y="150">fases 1–3</text><text x="683" y="150">fase 4</text><text x="870" y="150">fase 5 y siguientes</text>
+      </g>
+    </svg>
+  </div>
+
+  <ol class="tuberia revelar">
+    <li><h4>Entorno</h4><p>La copia de la ROM del propio usuario, el emulador <strong>openMSX</strong> como herramienta principal (depurador, puntos de parada, volcados de RAM y VRAM, capturas) y un desensamblador Z80 (<strong>REA</strong> sobre <strong>Ghidra</strong>, alimentado con vistas ELF de los bancos que genera <code>tools/rom_views.py</code>).</p></li>
+    <li><h4>Caja negra</h4><p>Mapear la RAM jugando: dónde están la posición del jugador, la vitalidad, flechas, monedas, llaves, la sala y el personaje activo. Los scripts de <code>tools/openmsx/</code> (Tcl y Python) mueven al jugador, fuerzan valores y graban cada fotograma.</p></li>
+    <li><h4>Lectura del código</h4><p>Papel de cada banco, la máquina de estados global (21 estados), la física del salto, las colisiones, la IA de los 53 tipos de enemigo y de los 10 jefes, el daño. Todo queda en fichas en <code>docs/</code> con su dirección de la ROM.</p></li>
+    <li><h4>Extracción de datos</h4><p><code>tools/extract/</code> saca de la ROM los mapas y enlaces, la colisión por sala, entidades, eventos, catálogos de enemigos y objetos, jefes, música (partituras del PSG) y efectos. La música reconstruida coincide en el 98–100 % de los fotogramas con la grabación del chip.</p></li>
+    <li><h4>Biblia de diseño</h4><p><code>docs/design_bible/</code>: la síntesis en 12 capítulos de <strong>qué hace el juego</strong>, con sus reglas y números, para reimplementarlo desde ahí. El capítulo 11 recoge cada decisión del remake con su motivo.</p></li>
+    <li><h4>Unity</h4><p>Un importador convierte los JSON en <em>ScriptableObjects</em>, tilemaps y escenas; el juego se reimplementa <strong>a partir de la documentación</strong>, tick a tick, y las pruebas comparan sus curvas con lo medido en el emulador. Encima va la capa de <em>Hollow Knight</em>.</p></li>
+  </ol>
+
+  <h3 class="revelar">Cada dato lleva su prueba</h3>
+  <p class="revelar">La biblia y los documentos técnicos marcan la <strong>confianza</strong> de cada dato. Así se sabe qué está leído en el código, qué se ha visto y qué es una suposición:</p>
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Marca</th><th>Significa</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><span class="etiqueta e-c">[C]</span></td><td>leído en el código de la ROM</td><td>sólido si el tile es ≥ <code>0xBA</code></td></tr>
+      <tr><td><span class="etiqueta e-o">[O]</span></td><td>observado en el emulador (openMSX)</td><td>andar: 2 px por tick = 60 px/s</td></tr>
+      <tr><td><span class="etiqueta e-os">[O*]</span></td><td>observado forzando la RAM (invencible, posición escrita a mano)</td><td>piedras: 3 golpes de Popolon</td></tr>
+      <tr><td><span class="etiqueta e-g">[G]</span></td><td>solo lo dice la guía de GameFAQs, sin contrastar</td><td>la puerta del mundo 10 aparece en uno de 4 sitios</td></tr>
+      <tr><td><span class="etiqueta e-i">[I]</span></td><td>interpretación propia</td><td>los enemigos reaparecen al volver a la sala</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="versus revelar">
+    <div class="orig"><h5>Fiel</h5><p>La física del salto, las salas y su colisión, los 53 tipos de enemigo, los 10 jefes con su vida y su debilidad, los santuarios y precios, los 47 objetos: los números del original, medidos y probados.</p></div>
+    <div class="flecha" aria-hidden="true">✦</div>
+    <div class="remake"><h5>Pero mejorado</h5><p>Cada cambio es una <strong>regla del remake</strong> en <code>RemakeRules.cs</code>, con su motivo en el capítulo 11 de la biblia y una prueba que comprueba el juego con y sin ella. Se puede apagar para volver al original.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 3. ARQUITECTURA ============================== -->
+<!-- ============================== 3. ORIGINAL Y REMAKE ============================== -->
+<section class="seccion" id="original">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">II · ORIGINAL Y REMAKE</div>
+    <h2 class="titulo">De 1987 a hoy</h2>
+    <p class="entradilla">La misma sala, píxel a píxel: el remake conserva la colisión del original, así que cada plataforma, escalera y pared está donde estaba en el MSX. Lo que cambia es cómo se viste. Arrastra el tirador y elige el castillo o cualquiera de los diez mundos.</p>
+  </header>
+
+  <div class="selector revelar" id="selector-original" aria-label="Elegir mundo">
+    <button type="button" data-par="m00" data-pie="Castillo, sala 49. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Cruces Olvidados de Hollow Knight." aria-pressed="false">Castillo</button>
+    <button type="button" data-par="m01" data-pie="Mundo 1, sala 5. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Sendero Verde de Hollow Knight." aria-pressed="true">Mundo 1</button>
+    <button type="button" data-par="m02" data-pie="Mundo 2, sala 10. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Canales Reales de Hollow Knight." aria-pressed="false">Mundo 2</button>
+    <button type="button" data-par="m03" data-pie="Mundo 3, sala 11. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona la Colmena de Hollow Knight." aria-pressed="false">Mundo 3</button>
+    <button type="button" data-par="m04" data-pie="Mundo 4, sala 6. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Picos de Cristal de Hollow Knight." aria-pressed="false">Mundo 4</button>
+    <button type="button" data-par="m05" data-pie="Mundo 5, sala 12. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Ciudad de las Lágrimas de Hollow Knight." aria-pressed="false">Mundo 5</button>
+    <button type="button" data-par="m06" data-pie="Mundo 6, sala 7. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Páramos Fúngicos de Hollow Knight." aria-pressed="false">Mundo 6</button>
+    <button type="button" data-par="m07" data-pie="Mundo 7, sala 13. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona el Abismo de Hollow Knight." aria-pressed="false">Mundo 7</button>
+    <button type="button" data-par="m08" data-pie="Mundo 8, sala 7. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Nido Profundo de Hollow Knight." aria-pressed="false">Mundo 8</button>
+    <button type="button" data-par="m09" data-pie="Mundo 9, sala 9. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Confines del Reino de Hollow Knight." aria-pressed="false">Mundo 9</button>
+    <button type="button" data-par="m10" data-pie="Mundo 10, sala 6. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Palacio Blanco de Hollow Knight." aria-pressed="false">Mundo 10</button>
+  </div>
+  <div class="comparador revelar" id="comparador-original">
+    <img class="base" src="img/comparar/m01_original.png" alt="Sala del mundo 1 en el original de MSX" width="1280" height="800" style="image-rendering: pixelated">
+    <img class="encima" src="img/comparar/m01_remake.jpg" alt="La misma sala en el remake con el arte de Hollow Knight" width="1280" height="800">
+    <div class="linea"></div><div class="tirador" aria-hidden="true">◀▶</div>
+    <span class="rotulo izq">MSX · 1987</span><span class="rotulo der" style="color: var(--brillo)">Remake</span>
+    <input type="range" min="0" max="100" value="50" aria-label="Mover el comparador entre el original y el remake">
+  </div>
+  <p class="revelar" id="pie-original" style="font-size:13.5px;color:var(--apagado)">Mundo 1, sala 5. A la izquierda, el MSX de 1987 (el fondo de la sala sacado de la ROM); a la derecha, la misma sala en el remake, con la zona Sendero Verde de Hollow Knight.</p>
+  <div class="nota revelar"><b class="etq">Por qué encajan tan bien</b>Las salas del remake no se han redibujado: se importan de la ROM (32 × 20 casillas de 8 px) y el escenario de Hollow Knight solo viste los bordes del sólido, que se pinta negro. Los enemigos, los objetos y la interfaz sí son nuevos; en el lado del original solo está el fondo de la sala.</div>
+</div>
+</section>
+
+<section class="seccion" id="arquitectura">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">III · ARQUITECTURA</div>
+    <h2 class="titulo">Arquitectura del juego</h2>
+    <p class="entradilla">Una lógica pura que avanza a 30 pasos por segundo, como la del MSX, y una capa de Unity que la dibuja suave a 60 o 120 fotogramas.</p>
+  </header>
+
+  <div class="diagrama revelar" role="img" aria-label="Diagrama de la arquitectura: datos importados, lógica a 30 ticks por segundo y presentación a 60 o 120 FPS">
+    <svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#7fb3ec"/></marker>
+        <linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d2539"/><stop offset="1" stop-color="#131826"/></linearGradient>
+      </defs>
+      <!-- columnas -->
+      <g font-size="12" font-weight="600" letter-spacing="2.5" fill="#98a1b4" text-anchor="middle">
+        <text x="140" y="24">DATOS</text><text x="500" y="24">LÓGICA · 30 TICKS/S</text><text x="860" y="24">PRESENTACIÓN · 60/120 FPS</text>
+      </g>
+      <rect x="20" y="36" width="240" height="548" rx="14" fill="none" stroke="#2a3247" stroke-dasharray="4 4"/>
+      <rect x="290" y="36" width="420" height="548" rx="14" fill="rgba(185,220,255,0.03)" stroke="#3b4a6b"/>
+      <rect x="740" y="36" width="240" height="548" rx="14" fill="none" stroke="#2a3247" stroke-dasharray="4 4"/>
+      <g font-size="13" fill="#ece6d6" text-anchor="middle">
+        <!-- datos -->
+        <rect x="40" y="60" width="200" height="66" rx="9" fill="url(#ga)" stroke="#d9c58e"/>
+        <text x="140" y="86" font-weight="600" fill="#d9c58e">Assets/Generated</text><text x="140" y="106" font-size="11" fill="#98a1b4">MapData · RoomData (ROM)</text>
+        <rect x="40" y="142" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="140" y="168" font-weight="600">Resources/*.json</text><text x="140" y="188" font-size="11" fill="#98a1b4">jefes, objetos, armas, audio…</text>
+        <rect x="40" y="224" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="140" y="250" font-weight="600">Art/Resources/Hollow</text><text x="140" y="270" font-size="11" fill="#98a1b4">sprites y música de HK</text>
+        <rect x="40" y="306" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="140" y="332" font-weight="600">SaveGame</text><text x="140" y="352" font-size="11" fill="#98a1b4">partida.json (atómica)</text>
+        <rect x="40" y="388" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="140" y="414" font-weight="600">GameSettings · Controls</text><text x="140" y="434" font-size="11" fill="#98a1b4">opciones y botones</text>
+        <rect x="40" y="470" width="200" height="94" rx="9" fill="url(#ga)" stroke="#b9dcff"/>
+        <text x="140" y="498" font-weight="600" fill="#b9dcff">RemakeRules</text><text x="140" y="518" font-size="11" fill="#98a1b4">interruptores del remake</text><text x="140" y="536" font-size="11" fill="#98a1b4">(capítulo 11 de la biblia)</text>
+
+        <!-- logica -->
+        <rect x="310" y="60" width="380" height="74" rx="10" fill="#1d2b40" stroke="#b9dcff"/>
+        <text x="500" y="88" font-weight="700" fill="#fff">GameBootstrap</text><text x="500" y="110" font-size="11" fill="#b9dcff">partial: .cs · .Maps.cs · .Decor.cs — orquesta salas, estados y reglas</text>
+        <rect x="310" y="154" width="182" height="70" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="401" y="182" font-weight="600">PlayerController</text><text x="401" y="202" font-size="11" fill="#98a1b4">entrada + acumulador</text>
+        <rect x="508" y="154" width="182" height="70" rx="9" fill="url(#ga)" stroke="#9fd5a8"/>
+        <text x="599" y="182" font-weight="600" fill="#9fd5a8">PlayerMotor</text><text x="599" y="202" font-size="11" fill="#98a1b4">física del original, sin Unity</text>
+        <rect x="310" y="244" width="182" height="62" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="401" y="270" font-weight="600">RoomWorld</text><text x="401" y="289" font-size="11" fill="#98a1b4">tiles, enlaces, piedras</text>
+        <rect x="508" y="244" width="182" height="62" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="599" y="270" font-weight="600">EnemySystem</text><text x="599" y="289" font-size="11" fill="#98a1b4">53 tipos + hijos, botín</text>
+        <rect x="310" y="322" width="182" height="62" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="401" y="348" font-weight="600">BossFight · Bosses</text><text x="401" y="367" font-size="11" fill="#98a1b4">palabra, invocación, IA</text>
+        <rect x="508" y="322" width="182" height="62" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="599" y="348" font-weight="600">Weapons · Inventory</text><text x="599" y="367" font-size="11" fill="#98a1b4">armas, objetos, amuletos</text>
+        <rect x="310" y="400" width="182" height="62" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="401" y="426" font-weight="600">RoomObjects · Lifts</text><text x="401" y="445" font-size="11" fill="#98a1b4">puertas, muros, ascensores</text>
+        <rect x="508" y="400" width="182" height="62" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="599" y="426" font-weight="600">Soul · Benches · Journal</text><text x="599" y="445" font-size="11" fill="#98a1b4">sistemas de Hollow Knight</text>
+        <rect x="310" y="478" width="380" height="86" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="500" y="504" font-weight="600">Sound · Psg · PsgOutput</text><text x="500" y="524" font-size="11" fill="#98a1b4">AY-3-8910 emulado en OnAudioFilterRead (efectos y fanfarrias)</text><text x="500" y="544" font-size="11" fill="#98a1b4">ShrineVisit · WorldDoors · KeyDoors · Cornifers · Loot · Periodic</text>
+
+        <!-- presentacion -->
+        <rect x="760" y="60" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="860" y="86" font-weight="600">MapView</text><text x="860" y="106" font-size="11" fill="#98a1b4">tilemaps, líquidos, escaleras</text>
+        <rect x="760" y="142" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="860" y="168" font-weight="600">HollowScenery</text><text x="860" y="188" font-size="11" fill="#98a1b4">viste la colisión por capas</text>
+        <rect x="760" y="224" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="860" y="250" font-weight="600">HollowAmbience</text><text x="860" y="270" font-size="11" fill="#98a1b4">color, luz, oscuridad, motas</text>
+        <rect x="760" y="306" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="860" y="332" font-weight="600">HitEffects · HollowFx</text><text x="860" y="352" font-size="11" fill="#98a1b4">chispas, Rumble</text>
+        <rect x="760" y="388" width="200" height="66" rx="9" fill="url(#ga)" stroke="#2a3247"/>
+        <text x="860" y="414" font-weight="600">HollowMusic</text><text x="860" y="434" font-size="11" fill="#98a1b4">pistas por zona y jefe</text>
+        <rect x="760" y="470" width="200" height="94" rx="9" fill="url(#ga)" stroke="#d9c58e"/>
+        <text x="860" y="498" font-weight="600" fill="#d9c58e">OnGUI</text><text x="860" y="518" font-size="11" fill="#98a1b4">UiKit · HollowMenus · HollowHud</text><text x="860" y="536" font-size="11" fill="#98a1b4">InventoryMenu · ShrineScreen</text>
+      </g>
+      <g stroke="#7fb3ec" stroke-width="1.4" fill="none" marker-end="url(#pa)">
+        <path d="M240 93H306"/><path d="M240 175C275 175 275 110 306 105"/><path d="M240 339C278 339 280 130 306 124"/>
+        <path d="M240 517C276 517 276 470 306 462"/>
+        <path d="M492 189H504"/>
+        <path d="M500 134V150"/>
+        <path d="M690 97H756"/><path d="M690 120C725 120 725 175 756 175"/><path d="M690 128C730 130 730 255 756 257"/>
+        <path d="M690 290C725 290 725 335 756 339"/><path d="M690 520C725 520 725 425 756 421"/><path d="M690 540C730 540 730 517 756 517"/>
+      </g>
+      <path d="M240 257C470 250 700 250 756 175" stroke="#d9c58e" stroke-opacity=".45" stroke-dasharray="3 4" fill="none" marker-end="url(#pa)"/>
+    </svg>
+  </div>
+
+  <div class="rejilla r2 revelar">
+    <div class="tarjeta">
+      <h4>Lógica pura: <code>PlayerMotor</code></h4>
+      <p>Una clase <strong>sin MonoBehaviour</strong>, en píxeles del original dentro de la sala (x = centro, y = pies). Aplica tick a tick la física medida en openMSX: el salto, la caída, las escaleras, los líquidos, el retroceso y la espada. Al no depender de Unity, las pruebas la comparan directamente con las curvas grabadas en el emulador.</p>
+    </div>
+    <div class="tarjeta">
+      <h4>Unity alrededor: <code>PlayerController</code></h4>
+      <p>Lee la entrada (Input System) en cada fotograma y la guarda para el tick siguiente, ejecuta los ticks a 30 por segundo con un acumulador, avisa a <code>GameBootstrap</code> antes de cada paso y dibuja al Caballero <strong>interpolado</strong> entre el paso anterior y el actual.</p>
+    </div>
+  </div>
+
+  <div class="codigo revelar">
+    <div class="fichero">Runtime/Game/PlayerController.cs — el bucle de ticks</div>
+<pre><span class="c">// 30 pasos por segundo, como el original; el resto del fotograma se usa para interpolar.</span>
+accumulator += Time.deltaTime;
+<span class="k">float</span> tick = <span class="nu">1f</span> / OriginalPhysics.TicksPerSecond;   <span class="c">// 30</span>
+<span class="k">int</span> guard = <span class="nu">0</span>;
+<span class="k">while</span> (accumulator &gt;= tick &amp;&amp; guard++ &lt; <span class="nu">4</span>)
+{
+    accumulator -= tick;
+    Snapshot();
+    <span class="k">if</span> (roomPause &gt; <span class="nu">0</span>) { roomPause--; <span class="k">continue</span>; }
+    <span class="k">if</span> (hitStop &gt; <span class="nu">0</span>) { hitStop--; <span class="k">continue</span>; }   <span class="c">// las pulsaciones se guardan para cuando siga</span>
+    Motor.Tick(delayed);
+    delayed = input;
+    ...
+    Ticked?.Invoke();
+}
+TickAlpha = NoInterpolation ? <span class="nu">1</span> : Mathf.Clamp01(accumulator / tick);
+UpdateVisual();</pre>
+  </div>
+
+  <h3 class="revelar">Las piezas</h3>
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Pieza</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><code>GameBootstrap</code></td><td>El director: carga el mapa, cambia de sala, conecta enemigos, jefes, armas, inventario, santuarios, bancos y música. Es una clase <code>partial</code> repartida en <code>GameBootstrap.cs</code>, <code>GameBootstrap.Maps.cs</code> (mapa dibujado a mano) y <code>GameBootstrap.Decor.cs</code> (lápidas, entradas y fachadas).</td></tr>
+      <tr><td><code>RoomWorld</code></td><td>Consulta de tiles en coordenadas del original; sigue los enlaces a la sala vecina si el punto cae fuera. Guarda una copia de la colisión de cada sala para cambiarla en juego (piedras rotas) sin tocar los assets.</td></tr>
+      <tr><td><code>EnemySystem</code></td><td>Hasta 16 enemigos a la vez como en el original; los crea desde los generadores de la sala, los hace avanzar cada tick, resuelve contacto, espada, escudos, daño y botín. Los tipos están en <code>Enemies/</code> por familias (andan, vuelan, fijos, generados, proyectiles).</td></tr>
+      <tr><td><code>BossFight</code></td><td>El ciclo del jefe: escuchar la palabra, invocación, combate, disolución, Gran Llave y celebración.</td></tr>
+      <tr><td><code>Weapons</code> · <code>Inventory</code></td><td>Las seis armas secundarias con sus límites, y los 47 objetos con sus efectos; con la regla de amuletos, coste en muescas.</td></tr>
+      <tr><td><code>SaveGame</code></td><td>La partida en JSON en la carpeta de datos de la aplicación, escrita de forma atómica (primero <code>.new</code>, luego se reemplaza).</td></tr>
+      <tr><td><code>UiKit</code> · <code>HollowMenus</code></td><td>Toda la interfaz se dibuja con <strong>IMGUI</strong> (<code>OnGUI</code>), con la fuente de Hollow Knight y sus filigranas. Para no generar basura, los componentes que no usan GUILayout desactivan su pasada de maquetación (<code>useGUILayout = false</code>).</td></tr>
+    </tbody>
+  </table></div>
+</div>
+</section>
+
+<!-- ============================== 4. UNITY ============================== -->
+<section class="seccion" id="unity">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">IV · UNITY</div>
+    <h2 class="titulo">Configuración de Unity</h2>
+    <p class="entradilla">Un proyecto pequeño en paquetes y grande en herramientas: importadores, constructor de escenas, compilación por línea de comandos y pruebas.</p>
+  </header>
+
+  <div class="rejilla r3 revelar">
+    <div class="tarjeta"><h4>Versión</h4><p><strong>Unity 6000.6.5f1</strong>, proyecto en <code>unity/MazeOfKnight</code> (el nombre de trabajo del remake era «Maze of Knight»).</p></div>
+    <div class="tarjeta"><h4>Render</h4><p><strong>URP 17.6</strong> con el renderer 2D: luces 2D, posproceso con <em>Volume</em> (gradación, bloom, viñeta) y cámara en perspectiva por capas.</p></div>
+    <div class="tarjeta"><h4>Paquetes</h4><p>2D Tilemap y Tilemap Extras, Pixel Perfect, <strong>Input System</strong> (teclado y mando), Newtonsoft JSON y Test Framework.</p></div>
+  </div>
+
+  <h3 class="revelar">Dónde está cada cosa</h3>
+<div class="arbol revelar">unity/MazeOfKnight/Assets/
+├── <span class="d">Scripts/Runtime/Data</span>        <span class="c"># MapData, RoomData, RoomCoords: el modelo importado</span>
+├── <span class="d">Scripts/Runtime/Game</span>        <span class="c"># el juego: GameBootstrap, PlayerMotor, RemakeRules…</span>
+│   ├── <span class="d">Enemies/</span>                <span class="c"># EnemySystem, tipos, jefes, proyectiles, sombra</span>
+│   └── <span class="d">Visuals/</span>                <span class="c"># HollowScenery, HollowAmbience, HitEffects, menús…</span>
+├── <span class="d">Scripts/Editor</span>              <span class="c"># GaliousImporter, ArtImporter, GameSceneBuilder, GameBuild</span>
+├── <span class="d">Generated/</span>                  <span class="c"># lo importado de la ROM: mapas, salas, escenas de consulta</span>
+├── <span class="d">Art/Resources/Hollow/</span>       <span class="c"># lo importado de Hollow Knight con tools/hollow</span>
+├── <span class="d">Plugins/macOS/</span>              <span class="c"># GameHaptics.bundle (vibración nativa)</span>
+├── <span class="d">Scenes/Game.unity</span>           <span class="c"># la escena de juego</span>
+└── <span class="d">Tests/EditMode</span>              <span class="c"># 192 pruebas</span></div>
+
+  <h3 class="revelar">Del JSON a la escena</h3>
+  <ol class="tuberia revelar">
+    <li><h4>Exportar el paquete de salas</h4><p><code>tools/extract/collision.py</code> y <code>tools/extract/unity_bundle.py</code> generan <code>extracted/unity/&lt;mapa&gt;.json</code>: 11 mapas y 321 salas, más el final del juego.</p></li>
+    <li><h4>Importar en Unity</h4><p>Menú <strong>Maze of Knight → Importar salas</strong> (o en batch con <code>GaliousImporter.ImportAndRenderBatch</code>). Crea un <code>MapData</code> por mapa y un <code>RoomData</code> por sala con su rejilla, enlaces (−1 sin salida; <code>0xF5–0xFE</code> salida al castillo), colisión 32 × 20, enemigos, objetos, piedras y puertas.</p></li>
+    <li><h4>Escenas de consulta</h4><p>Cada mapa tiene una vista general con todas las salas en su rejilla, una capa de Tilemap por clase de colisión; se abre con <strong>Abrir mapa → Castillo / Mundo 1…10</strong>. En batch, además, se renderiza a PNG para compararla con los mapas montados con capturas del emulador.</p></li>
+    <li><h4>Arte por nombre</h4><p><code>ArtImporter</code> (un <code>AssetPostprocessor</code>) trata todo PNG de <code>Art/Resources/Hollow</code> como sprite a 8 texels por píxel del original, bilineal, sin mipmaps ni compresión, con el pivote en los pies o en el centro según la carpeta.</p></li>
+    <li><h4>Escena de juego</h4><p><strong>Crear escena de juego</strong> (<code>GameSceneBuilder</code>) monta <code>Game.unity</code> y configura el render 2D; el jugador empieza donde en el original: castillo, sala 1, x = 192, y = 120.</p></li>
+  </ol>
+
+  <div class="codigo revelar">
+    <div class="fichero">Terminal — importar, probar y compilar en batch (macOS)</div>
+<pre>UNITY=/Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app/Contents/MacOS/Unity
+<span class="c"># importar las salas y renderizar las vistas generales (sin -nographics: hace falta GPU)</span>
+$UNITY -batchmode -projectPath unity/MazeOfKnight \
+  -executeMethod MazeOfKnight.EditorTools.GaliousImporter.ImportAndRenderBatch -quit
+<span class="c"># pruebas EditMode</span>
+$UNITY -batchmode -projectPath unity/MazeOfKnight -runTests -testPlatform EditMode \
+  -testResults "$PWD/logs/unity/tests.xml"
+<span class="c"># compilar para macOS (también BuildLinux, BuildWindows, BuildWeb)</span>
+$UNITY -batchmode -quit -projectPath unity/MazeOfKnight \
+  -executeMethod MazeOfKnight.EditorTools.GameBuild.BuildMac</pre>
+  </div>
+
+  <h3 class="revelar">Unidades</h3>
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Concepto</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td>Unidad de Unity</td><td>1 u = 16 px del original; un tile de 8 px = 0,5 u; una sala = 16 × 10 u</td></tr>
+      <tr><td>Celdas</td><td><code>RoomCoords.Cell(room, col, fila)</code>: la fila 0 es la de arriba; el eje y de Unity crece hacia arriba</td></tr>
+      <tr><td>Coordenadas del original</td><td>x, y de pantalla; la sala empieza en y = 32 (debajo del marcador). <code>RoomCoords.PixelToWorld</code> las convierte</td></tr>
+      <tr><td>Arte</td><td>8 texels por píxel del original → <strong>128 píxeles por unidad</strong></td></tr>
+      <tr><td>Tiempo</td><td>1 tick = 1/30 s (un ciclo del juego cada dos fotogramas de vídeo a 60 Hz)</td></tr>
+    </tbody>
+  </table></div>
+</div>
+</section>
+
+<!-- ============================== 5. EL MUNDO POR CAJAS ============================== -->
+<section class="seccion" id="cajas">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">V · EL MUNDO POR CAJAS</div>
+    <h2 class="titulo">El mundo por cajas</h2>
+    <p class="entradilla">Debajo de cada sala de Hollow Knight hay una rejilla de 32 × 20 casillas de 8 píxeles: la colisión exacta del juego de 1987.</p>
+  </header>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <p>El juego decide qué es cada casilla por el <strong>número de tile</strong> del mapa de nombres en RAM <span class="etiqueta e-c">[C]</span>. <code>tools/extract/collision.py</code> lo convierte en una letra por casilla y una cuadrícula de 20 filas × 32 columnas por sala, incluidas las piezas superpuestas (piedras, muros, estatuas, puertas, escaleras extra). La sala del jefe trae además su versión de combate.</p>
+      <p>Esta clasificación se validó en el emulador con <strong>91 caídas en 12 salas</strong>: en todas el jugador acabó apoyado en una casilla que la cuadrícula marca como sólida <span class="etiqueta e-o">[O]</span>.</p>
+    </div>
+    <div class="leyenda-col">
+      <div><span class="tile vacio"></span><code>.</code><span>aire y fondo</span></div>
+      <div><span class="tile solido"></span><code>#</code><span>sólido: tile ≥ <code>0xBA</code></span></div>
+      <div><span class="tile escalera"></span><code>H</code><span>escalera: <code>9A</code>, <code>9B</code></span></div>
+      <div><span class="tile agua"></span><code>~</code><span>agua: <code>B6</code>, <code>B7</code></span></div>
+      <div><span class="tile lava"></span><code>L</code><span>lava: <code>B8</code>, <code>B9</code></span></div>
+      <div><span class="tile jefe"></span><code>j</code><span>sólido que se atraviesa en combate (<code>BA–EF</code>)</span></div>
+    </div>
+  </div>
+
+  <figure class="figura revelar">
+    <div class="sala-esquema" aria-label="Rejilla de colisión de la sala 137 del castillo">
+<i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="h"></i><i class="h"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i></i><i></i><i class="h"></i><i class="h"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i></i><i></i><i class="h"></i><i class="h"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="w"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i>
+    </div>
+    <figcaption>La colisión real de la sala 137 del castillo, tal como la extrae <code>collision.py</code>: muro a la izquierda, plataformas, una escalera y agua en la mitad de abajo. 640 casillas que deciden dónde se pisa, se trepa o se nada.</figcaption>
+  </figure>
+
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Medida</th><th>Valor del original</th></tr></thead>
+    <tbody>
+      <tr><td>Pantalla de juego</td><td>256 × 160 px (32 × 20 tiles de 8 px) bajo un marcador de 32 px; 8 × 5 bloques de 32 × 32</td></tr>
+      <tr><td>Mapas</td><td>castillo de 147 salas en una cuadrícula de 15 × 16 y 10 mundos de 5 a 27 salas: <strong>321</strong> en total</td></tr>
+      <tr><td>Enlaces</td><td>cuatro por sala (arriba, abajo, izquierda y derecha); en los mundos, <code>F5–FE</code> significa «volver al castillo»</td></tr>
+      <tr><td>Recuento de tiles</td><td>fondo 109 735 · sólido 76 671 · escalera 6 796 · agua 2 406 · lava 3 432</td></tr>
+      <tr><td>Caja del jugador</td><td>paredes: x − 8 … x + 7; apoyo en el suelo solo con x − 4 … x + 4 <span class="etiqueta e-o">[O]</span></td></tr>
+      <tr><td>Rareza</td><td>la sala 4 del mundo 3 enlaza hacia arriba consigo misma: un pozo sin fin que, subido 5 veces, abre un muro</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="revelar">Antes y después: la colisión bajo el arte</h3>
+  <p class="revelar">Como en Hollow Knight, <strong>la colisión no se ve</strong>. Arrastra el tirador para descubrir, en rojo, el sólido del original bajo el escenario (la rejilla se enciende en el juego con <kbd>F10</kbd>).</p>
+  <div class="selector revelar" id="selector-colision" aria-label="Elegir sala">
+    <button type="button" data-sala="m01_1" data-pie="Mundo 1 (Sendero Verde). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="true">Mundo 1</button>
+    <button type="button" data-sala="m00_1" data-pie="Castillo (Cruces Olvidados). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Castillo</button>
+    <button type="button" data-sala="m02_1" data-pie="Mundo 2 (Canales Reales). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Mundo 2</button>
+    <button type="button" data-sala="m03_1" data-pie="Mundo 3 (la Colmena). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Mundo 3</button>
+    <button type="button" data-sala="m04_1" data-pie="Mundo 4 (Picos de Cristal). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Mundo 4</button>
+    <button type="button" data-sala="m05_1" data-pie="Mundo 5 (Ciudad de las Lágrimas). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Mundo 5</button>
+    <button type="button" data-sala="m06_1" data-pie="Mundo 6 (Páramos Fúngicos). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Mundo 6</button>
+    <button type="button" data-sala="m07_1" data-pie="Mundo 7 (el Abismo). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Mundo 7</button>
+    <button type="button" data-sala="m09_1" data-pie="Mundo 9 (Confines del Reino). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo." aria-pressed="false">Mundo 9</button>
+  </div>
+  <div class="comparador revelar" id="comparador-salas">
+    <img class="base" src="img/mundos/m01_1.jpg" alt="Sala del mundo 1 con el arte de Hollow Knight" width="1280" height="803">
+    <img class="encima" src="img/mundos/m01_1_colision.jpg" alt="La misma sala con la colisión del original marcada" width="1280" height="803">
+    <div class="linea"></div><div class="tirador" aria-hidden="true">◀▶</div>
+    <span class="rotulo izq">Arte</span><span class="rotulo der">Colisión</span>
+    <input type="range" min="0" max="100" value="50" aria-label="Mover el comparador entre el arte y la colisión">
+  </div>
+  <p class="revelar" id="pie-comparador" style="font-size:13.5px;color:var(--apagado)">Mundo 1 (Sendero Verde). A la derecha, en rojo, lo sólido del original; las escaleras, en amarillo.</p>
+
+  <h3 class="revelar">Cómo se viste una caja: <code>HollowScenery</code></h3>
+  <p class="revelar">El sólido de cada sala se pinta <strong>negro puro</strong> (el interior de la roca) y piezas sueltas del kit de la zona visten sus bordes, sin pasarse mucho de ellos para que lo que se ve sea lo que se pisa. Todo sale de una semilla por sala, así que cada sala es siempre igual, y se rehace si su colisión cambia.</p>
+  <div class="rejilla r2 revelar">
+    <ul>
+      <li><strong>Suelos</strong> arriba de cada sólido con aire encima, uno tras otro, con el labio asomando 2 px por encima de donde se pisa.</li>
+      <li><strong>Techos</strong> colgando debajo (12 px como mucho) y, si hay sitio, estalactitas.</li>
+      <li><strong>Paredes</strong> en los lados con aire, apiladas, nunca más anchas que el grosor de su roca.</li>
+      <li><strong>Adornos</strong> (hierba, huesos, bases de columna) sobre uno de cada pocos suelos, lejos de puertas, bancos, lápidas y Cornifer.</li>
+      <li>Fuera de la sala cuenta como la celda del borde: <strong>sin bordes en los límites</strong>. Las piedras rompibles no cuentan como sólido: tienen su dibujo.</li>
+    </ul>
+    <div class="capas" aria-label="Capas de una sala">
+      <div class="capa-fila l4"><div class="z">4</div><div class="cuerpo"><b>Fondo lejano</b>: un trozo de una sala de Hollow Knight ya pintada, desenfocado y apagado.</div></div>
+      <div class="capa-fila l3"><div class="z">3</div><div class="cuerpo"><b>Degradado</b> con niebla abajo, rocas grandes lejanas, arcos y estatuas apagados.</div></div>
+      <div class="capa-fila l2"><div class="z">2</div><div class="cuerpo"><b>El juego</b>: el sólido negro y sus bordes, personajes, enemigos y objetos.</div></div>
+      <div class="capa-fila l1"><div class="z">1</div><div class="cuerpo"><b>Primer plano</b>: siluetas negras de roca por delante, asomando 4–10 px desde el suelo o hasta 18 px desde el techo.</div></div>
+    </div>
+  </div>
+
+  <div class="codigo revelar">
+    <div class="fichero">Runtime/Game/Visuals/HollowScenery.cs</div>
+<pre><span class="k">public const float</span> Lip = <span class="nu">2f</span>;          <span class="c">// px que asoma el suelo por encima de donde se pisa</span>
+<span class="k">public const float</span> Overlap = <span class="nu">0.8f</span>;    <span class="c">// cada pieza empieza al 80 % de la anterior</span>
+<span class="k">public const float</span> TechoMax = <span class="nu">12f</span>;
+<span class="c">// Negro puro, como el contorno del arte: con un poco de color, la gradación de cada zona</span>
+<span class="c">// (saturación y filtro) lo volvía gris azulado o verdoso.</span>
+<span class="k">public static readonly</span> <span class="t">Color</span> Rock = <span class="t">Color</span>.black;</pre>
+  </div>
+
+  <div class="galeria revelar" data-grupo="puertas">
+    <figure><img class="ampliable" src="img/mini/interfaz/puerta_0_cerrada.jpg" data-grande="img/interfaz/puerta_0_cerrada.jpg" alt="Puerta de un mundo, cerrada: la fachada según el mundo al que lleva y los estandartes" width="480" height="286" loading="lazy" decoding="async"><figcaption>Puerta de un mundo, cerrada: la fachada según el mundo al que lleva y los estandartes</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/puerta_1_abriendo.jpg" data-grande="img/interfaz/puerta_1_abriendo.jpg" alt="Abriéndose: con la Gran Llave, en 3 pasos de 6 ticks, como el original" width="480" height="286" loading="lazy" decoding="async"><figcaption>Abriéndose: con la Gran Llave, en 3 pasos de 6 ticks, como el original</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/puerta_2_abierta.jpg" data-grande="img/interfaz/puerta_2_abierta.jpg" alt="Abierta: «↓ Entrar»" width="480" height="286" loading="lazy" decoding="async"><figcaption>Abierta: «↓ Entrar»</figcaption></figure>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 6. TEXTURAS ============================== -->
+<section class="seccion" id="texturas">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">VI · TEXTURAS</div>
+    <h2 class="titulo">Composición de texturas</h2>
+    <p class="entradilla">Un importador por familia de arte: de los atlas de Hollow Knight a sprites sueltos con nombre, escala y pivote fijos.</p>
+  </header>
+
+  <p class="revelar">El arte se lee de una carpeta local con Hollow Knight decodificado y sale a <code>Assets/Art/Resources/Hollow/</code>. Cada script de <code>tools/hollow/</code> se ocupa de una familia; <code>import_hollow.py</code> los ejecuta todos (con Pillow, en el entorno <code>.venv</code> del repo).</p>
+
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Script</th><th>Qué importa</th></tr></thead>
+    <tbody>
+      <tr><td><code>import_hollow.py</code></td><td>El Caballero (Popolon) y Hornet: un PNG por fotograma con su nombre de <code>ArtLibrary</code>, mirando a la derecha, pies abajo en el centro, y <code>fps.txt</code> con la velocidad y el bucle de cada clip</td></tr>
+      <tr><td><code>enemigos.py</code></td><td>Una criatura de Hollow Knight por tipo del original, con sus acciones (quieto, mover, atacar, girar, morir) y los proyectiles</td></tr>
+      <tr><td><code>escenario.py</code> · <code>atlas_piezas.py</code></td><td>Kits de piezas por zona (suelos, techos, paredes, fondos); <code>atlas_piezas.py</code> numera las manchas de un atlas sin recortar y da su caja</td></tr>
+      <tr><td><code>efectos.py</code> · <code>tajos.py</code> · <code>armas.py</code></td><td>Chispas, grietas, polvo y piezas del atlas de impactos; los tajos arriba y abajo; los proyectiles de las armas</td></tr>
+      <tr><td><code>objetos.py</code> · <code>iconos.py</code></td><td>Iconos de amuletos para los 47 objetos, piedras, verjas, puertas y escaleras; iconos de la ROM redibujados al estilo de Hollow Knight</td></tr>
+      <tr><td><code>liquidos.py</code> · <code>ambiente.py</code></td><td>Superficie ondulada, gotas, salpicaduras; partículas, luz y niebla de cada zona</td></tr>
+      <tr><td><code>hud.py</code> · <code>menu.py</code> · <code>inventario.py</code> · <code>diario.py</code></td><td>Máscaras y orbe del marcador; menús, filigranas y fuente; inventario y amuletos; el diario del cazador</td></tr>
+      <tr><td><code>bancos.py</code> · <code>cornifer.py</code> · <code>dioses.py</code> · <code>decorados.py</code></td><td>Un banco por zona; Cornifer y su mapa; los dioses de los santuarios; lápidas, entradas y fachadas de las puertas</td></tr>
+      <tr><td><code>musica.py</code></td><td>Las pistas por zona, santuario y jefe, mezcladas y normalizadas a −14 LUFS</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="revelar">8 texels por píxel</h3>
+  <div class="rejilla r2 revelar">
+    <div>
+      <p>La regla que lo une todo: <strong>un píxel del original son 8 texels de arte</strong>. Como una unidad de Unity son 16 píxeles del original, los sprites se importan a <strong>128 píxeles por unidad</strong>. Así el arte en alta resolución cae exactamente sobre la rejilla de 8 px y nunca la cambia.</p>
+      <p>El Caballero va a <strong>×1,375</strong>: su cuerpo sin los cuernos mide 16 px, lo que el sprite de Popolon del original (22 px con ellos). Hornet iba a ×1,125 (30 px), algo menos alta que en Hollow Knight para caber en estas salas.</p>
+    </div>
+    <div class="codigo" style="margin-top:0">
+      <div class="fichero">Editor/ArtImporter.cs</div>
+<pre><span class="k">public const float</span> TexelsPerPixel = <span class="nu">8f</span>;
+<span class="k">public const float</span> PixelsPerUnit =
+    TexelsPerPixel * Data.RoomCoords.PixelsPerUnit;   <span class="c">// 128</span>
+...
+importer.spritePixelsPerUnit = PixelsPerUnit;</pre>
+    </div>
+  </div>
+
+  <h3 class="revelar">Tamaño de los enemigos: atado a su caja</h3>
+  <p class="revelar">Cada enemigo se escala a partir de su <strong>caja de contacto original</strong>, con una sola escala para los dos ejes (no se deforma): la menor que hace que su cuerpo (la silueta sin patas, alas finas ni armas) mida <em>k</em> veces la caja de alto o de ancho. Se apoya abajo en el centro de la caja si anda, o en su centro si vuela. <strong>Ninguna colisión cambia</strong>; la prueba <code>HollowEnemyArtTests</code> lo vigila. Y el tamaño se fija al aparecer: en el original la caja cambia con cada pose y el dibujo se estiraba y encogía.</p>
+  <div class="codigo revelar">
+    <div class="fichero">tools/hollow/enemigos.py — la tabla ENEMIES</div>
+<pre><span class="c"># clave → tipos del original, colección tk2d, anclaje, k y clips de cada acción</span>
+<span class="s">"murcielago"</span>: dict(types=[<span class="nu">0x0E</span>], col=<span class="s">"Buzzer"</span>, anchor=<span class="s">"centro"</span>, k=<span class="nu">1.5</span>,     <span class="c"># Vengefly</span>
+                   clips={<span class="s">"quieto"</span>: <span class="s">"Idle"</span>, <span class="s">"mover"</span>: <span class="s">"Fly"</span>, <span class="s">"atacar"</span>: <span class="s">"Chase"</span>, <span class="s">"girar"</span>: <span class="s">"TurnToFly"</span>}),
+<span class="s">"esqueleto"</span>: dict(types=[<span class="nu">0x25</span>], col=<span class="s">"Zombie Basic1"</span>, anchor=<span class="s">"pies"</span>, k=<span class="nu">1.25</span>,   <span class="c"># Husk</span>
+                  clips={<span class="s">"quieto"</span>: <span class="s">"Idle"</span>, <span class="s">"mover"</span>: <span class="s">"Walk"</span>, <span class="s">"atacar"</span>: [<span class="s">"Attack Anticipate"</span>, <span class="s">"Attack Lunge"</span>]}),</pre>
+  </div>
+
+  <h3 class="revelar">El tajo y su caja</h3>
+  <div class="versus revelar">
+    <div class="orig"><h5>Original</h5><p>La espada golpea una franja de 4 px de alto (y − 7 … y − 4), de x + 8 a x + 18. Delante y solo delante.</p></div>
+    <div class="flecha" aria-hidden="true">✦</div>
+    <div class="remake"><h5>Remake · <code>SlashBoxFromArt</code></h5><p>La caja es la del <strong>tajo dibujado</strong>, medida en sus texturas: delante de x + 2 a x + 22 y de y − 19 a y − 4; arriba y abajo, 22 px. Era frustrante que el golpe no diera a lo que tocaba el tajo.</p></div>
+  </div>
+  <div class="galeria revelar" data-grupo="popolon">
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_0_quieto.jpg" data-grande="img/personajes/popolon_0_quieto.jpg" alt="El Caballero quieto (Popolon)" width="480" height="286" loading="lazy" decoding="async"><figcaption>El Caballero quieto (Popolon)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_1_correr.jpg" data-grande="img/personajes/popolon_1_correr.jpg" alt="Corriendo: 2 px por tick" width="480" height="286" loading="lazy" decoding="async"><figcaption>Corriendo: 2 px por tick</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_2_estocada.jpg" data-grande="img/personajes/popolon_2_estocada.jpg" alt="Espadazo con el tajo de Hollow Knight" width="480" height="286" loading="lazy" decoding="async"><figcaption>Espadazo con el tajo de Hollow Knight</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_4_salto_subir.jpg" data-grande="img/personajes/popolon_4_salto_subir.jpg" alt="Salto, subida: 6 6 6 6 6 5 5 4 4 3 2 1 px por tick" width="480" height="286" loading="lazy" decoding="async"><figcaption>Salto, subida: 6 6 6 6 6 5 5 4 4 3 2 1 px por tick</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_5_salto_caer.jpg" data-grande="img/personajes/popolon_5_salto_caer.jpg" alt="Salto, caída: 1 2 3 4 4 5 5 6" width="480" height="286" loading="lazy" decoding="async"><figcaption>Salto, caída: 1 2 3 4 4 5 5 6</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_6_escalera.jpg" data-grande="img/personajes/popolon_6_escalera.jpg" alt="En la escalera: 1 px por tick" width="480" height="286" loading="lazy" decoding="async"><figcaption>En la escalera: 1 px por tick</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_7_cajas_estocada.jpg" data-grande="img/personajes/popolon_7_cajas_estocada.jpg" alt="Espadazo con las cajas de colisión visibles (F9)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Espadazo con las cajas de colisión visibles (F9)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/popolon_8_cajas_quieto.jpg" data-grande="img/personajes/popolon_8_cajas_quieto.jpg" alt="Quieto con su caja de colisión (F9)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Quieto con su caja de colisión (F9)</figcaption></figure>
+  </div>
+
+  <h3 class="revelar">Escaleras y piezas de sala</h3>
+  <p class="revelar">Hollow Knight no tiene escaleras: se montan con piezas suyas (barras de hierro en el castillo, cadenas de campanas en los mundos construidos y cadenas con travesaños en los demás), un trozo cuadrado escalado sin deformar a 16 × 16 px y partido en 4 baldosas que <code>MapView</code> alterna. El Caballero sube de espaldas con los fotogramas de entrar por una puerta. Las piedras rompibles son rocas de geo, las puertas con llave la verja del Archivo y los ascensores, la plataforma del Coliseo.</p>
+  <div class="galeria revelar" data-grupo="objetos">
+    <figure><img class="ampliable" src="img/mini/personajes/objetos_sala_007.jpg" data-grande="img/personajes/objetos_sala_007.jpg" alt="Castillo, sala 7: un objeto en la sala" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 7: un objeto en la sala</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/objetos_sala_016.jpg" data-grande="img/personajes/objetos_sala_016.jpg" alt="Castillo, sala 16" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 16</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/objetos_sala_019.jpg" data-grande="img/personajes/objetos_sala_019.jpg" alt="Castillo, sala 19" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 19</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/objetos_sala_077.jpg" data-grande="img/personajes/objetos_sala_077.jpg" alt="Castillo, sala 77" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 77</figcaption></figure>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 7. AMBIENTE ============================== -->
+<section class="seccion" id="ambiente">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">VII · AMBIENTE</div>
+    <h2 class="titulo">Ambientación</h2>
+    <p class="entradilla">Cada mundo lleva el aire de una zona de Hollow Knight: su color, su oscuridad, su luz y lo que flota en él.</p>
+  </header>
+
+  <p class="revelar">En Hollow Knight cada escena lleva un <code>SceneManager</code> con la saturación y las curvas de color, la luz ambiente, el color de la luz del Caballero y un <strong>nivel de oscuridad</strong> (de −1 a 2): la viñeta deja un hueco alrededor del Caballero que la linterna agranda. La cámara enciende las partículas de su zona. <code>HollowAmbience</code> hace lo mismo por mundo con un <em>Volume</em> de URP.</p>
+
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Mapa</th><th>Zona de Hollow Knight</th><th class="n">Oscuridad</th><th>Partículas</th></tr></thead>
+    <tbody>
+      <tr><td>Castillo</td><td>Cruces Olvidados</td><td class="n">0</td><td>polvo</td></tr>
+      <tr><td>Mundo 1</td><td>Sendero Verde</td><td class="n">0</td><td>hojas</td></tr>
+      <tr><td>Mundo 2</td><td>Canales Reales</td><td class="n">1</td><td>goteo y niebla baja</td></tr>
+      <tr><td>Mundo 3</td><td>la Colmena</td><td class="n">0</td><td>hexágonos</td></tr>
+      <tr><td>Mundo 4</td><td>Picos de Cristal</td><td class="n">0</td><td>cristales que flotan</td></tr>
+      <tr><td>Mundo 5</td><td>Ciudad de las Lágrimas</td><td class="n">0</td><td>lluvia</td></tr>
+      <tr><td>Mundo 6</td><td>Páramos Fúngicos</td><td class="n">0</td><td>esporas</td></tr>
+      <tr><td>Mundo 7</td><td>el Abismo</td><td class="n">1</td><td>humo</td></tr>
+      <tr><td>Mundo 8</td><td>Nido Profundo</td><td class="n">1</td><td>hilos de telaraña y polvo</td></tr>
+      <tr><td>Mundo 9</td><td>Confines del Reino</td><td class="n">0</td><td>ceniza con viento</td></tr>
+      <tr><td>Mundo 10</td><td>Palacio Blanco</td><td class="n">−1</td><td>pétalos</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="revelar">Color medido, no inventado</h3>
+  <ol class="tuberia revelar">
+    <li><h4>Las salas de referencia</h4><p>Los valores de color de cada escena no están en los datos decodificados, solo los campos en el código. Se toman las imágenes de todas las salas de cada zona, reconstruidas desde sus ficheros de nivel.</p></li>
+    <li><h4>Nuestras salas, sin gradación</h4><p>El juego se lanza con <code>-ambienteNeutro -capturaSalas</code> para fotografiar las salas propias sin ningún filtro.</p></li>
+    <li><h4>Medir y comparar</h4><p><code>tools/hollow/medir_ambiente.py</code> calcula color medio, saturación y brillo de unas y otras. De la diferencia salen el filtro de color, la saturación y el color de la bruma de cada mundo; a la saturación se le suman los 17 puntos que la cámara de Hollow Knight añade siempre.</p></li>
+  </ol>
+
+  <div class="rejilla r3 revelar">
+    <div class="tarjeta"><div class="icono">◐</div><h4>Oscuridad con hueco</h4><p>En los Canales, el Abismo y el Nido, una viñeta deja un hueco alrededor del Caballero, más amplio y menos opaco que en Hollow Knight porque aquí la sala entera está en pantalla. La <strong>Vela</strong> del original hace de linterna y lo abre.</p></div>
+    <div class="tarjeta"><div class="icono">✧</div><h4>Luz del Caballero</h4><p>Una luz suave y aditiva que le acompaña, con el color de la zona; la luz de las puertas de los mundos atraviesa la oscuridad.</p></div>
+    <div class="tarjeta"><div class="icono">≋</div><h4>Bruma y jirones</h4><p>Entre el fondo y el plano de juego, una bruma del color medio de la zona, más espesa abajo, y jirones de niebla que pasan despacio.</p></div>
+  </div>
+
+  <h3 class="revelar">Oclusión ambiental desde la colisión</h3>
+  <p class="revelar">Las salas de Hollow Knight tienen sombra junto a la roca. Aquí se calcula a partir de la rejilla: <code>AmbientOcclusion</code> oscurece el aire donde el suelo toca la pared, los rincones y la base de cada saliente, en una textura de negro con alfa por sala que va encima de los tiles y debajo de los personajes. Solo es aspecto: no toca la colisión.</p>
+  <div class="codigo revelar">
+    <div class="fichero">Runtime/Game/Visuals/AmbientOcclusion.cs</div>
+<pre><span class="k">public const int</span> TexelsPerTile = <span class="nu">4</span>;
+<span class="k">public const float</span> Radius = <span class="nu">1.6f</span>;       <span class="c">// alcance, en tiles</span>
+<span class="k">public const float</span> MaxAlpha = <span class="nu">0.55f</span>;    <span class="c">// oscuridad máxima (en un rincón)</span>
+
+<span class="c">// Oclusión de cada texel (0..1 = alfa del negro) de una rejilla cols × rows cuyo solid(col, fila)</span>
+<span class="c">// dice si el tile es macizo (fila 0 arriba). Dentro del macizo es 0.</span>
+<span class="k">public static float</span>[] Compute(<span class="t">Func</span>&lt;<span class="k">int</span>, <span class="k">int</span>, <span class="k">bool</span>&gt; solid, <span class="k">int</span> cols, <span class="k">int</span> rows)</pre>
+  </div>
+  <div class="nota revelar"><b class="etq">Negro puro</b>El macizo se pinta con negro exacto, como el contorno del arte. Con un poco de color, la gradación de cada zona lo volvía gris azulado o verdoso y la roca dejaba de leerse como roca.</div>
+</div>
+</section>
+
+<!-- ============================== 8. EFECTOS ============================== -->
+<section class="seccion" id="efectos">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">VIII · EFECTOS</div>
+    <h2 class="titulo">Efectos</h2>
+    <p class="entradilla">Que cada golpe se note: chispas, destellos, vibración del mando y líquidos vivos, sin tocar los tiempos del original.</p>
+  </header>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <h4>Golpes (<code>HitEffects</code>)</h4>
+      <ul>
+        <li><strong>Espada contra un enemigo</strong>: la raya del tajo, un destello en estrella y un abanico de chispas hacia el otro lado.</li>
+        <li><strong>Enemigo muerto</strong>: destello grande, gotas y abanicos a los dos lados; queda su animación de muerte de Hollow Knight.</li>
+        <li><strong>Escudo</strong> que para un golpe: chispas de metal.</li>
+        <li><strong>Piedra</strong> golpeada: polvo y un destello pequeño; rota, una nube alargada y esquirlas.</li>
+        <li><strong>Jugador herido</strong>: el rayo blanco y un destello con su raya.</li>
+        <li><strong>Puerta de mundo</strong> que se abre: polvo que sube del hueco.</li>
+      </ul>
+      <p>Las piezas salen de los atlas de impactos de Hollow Knight, que vienen sin recortar y se separan por manchas.</p>
+    </div>
+    <div class="galeria compacta" data-grupo="efectos" style="margin-top:0">
+      <figure><img class="ampliable" src="img/mini/interfaz/golpes_chispas.jpg" data-grande="img/interfaz/golpes_chispas.jpg" alt="Chispas y destello al golpear" width="480" height="286" loading="lazy" decoding="async"><figcaption>Chispas y destello al golpear</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/efectos_03.jpg" data-grande="img/personajes/efectos_03.jpg" alt="Efectos de Hollow Knight sobre una sala del castillo" width="480" height="286" loading="lazy" decoding="async"><figcaption>Efectos de Hollow Knight sobre una sala del castillo</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/efectos_10.jpg" data-grande="img/personajes/efectos_10.jpg" alt="Más efectos de impacto" width="480" height="286" loading="lazy" decoding="async"><figcaption>Más efectos de impacto</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_cajas_45.jpg" data-grande="img/interfaz/interfaz_cajas_45.jpg" alt="Enemigos con sus cajas de colisión (F9)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Enemigos con sus cajas de colisión (F9)</figcaption></figure>
+    </div>
+  </div>
+
+  <h3 class="revelar">Sensación de Hollow Knight</h3>
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Regla</th><th>Qué hace</th><th>Por defecto</th></tr></thead>
+    <tbody>
+      <tr><td><code>HitStop</code></td><td>Al acertar un golpe todo el juego se para 3 ticks (0,1 s; Hollow Knight, unos 0,11 s). Las pulsaciones de esos ticks se guardan.</td><td class="no">apagada</td></tr>
+      <tr><td><code>CoyoteJump</code></td><td>El original deja 4 ticks quieto en el aire al salir de un borde; en los 2 primeros, ↑ salta como desde el suelo.</td><td class="no">apagada</td></tr>
+      <tr><td><code>JumpBuffer</code></td><td>Una pulsación en los 2 últimos ticks en el aire salta en el primer tick en el suelo.</td><td class="no">apagada</td></tr>
+    </tbody>
+  </table></div>
+  <p class="revelar">Las tres se activan o quitan a la vez con <kbd>F11</kbd> (teclas de depuración). No cambian la física medida: solo perdonan o marcan el tiempo.</p>
+
+  <h3 class="revelar">Vibración: tres caminos</h3>
+  <div class="rejilla r2 revelar">
+    <div>
+      <p><code>Rumble</code> da un pulso corto al golpear (enemigo, piedra, pared o escudo), uno más fuerte al matar, al recibir daño y al curarse, y un zumbido que crece mientras el Caballero se concentra. Se quita en <em>Opciones → Mando</em>.</p>
+      <ul>
+        <li><strong>macOS</strong>: el Input System no hace vibrar los mandos allí, así que va por el framework de Apple (GameController + CoreHaptics) con un plugin propio, <code>GameHaptics.bundle</code>, compilado desde <code>tools/native/GameHaptics.m</code>.</li>
+        <li><strong>Linux y Windows</strong>: el Input System. En Linux solo se llama a <code>SetMotorSpeeds</code> cuando la intensidad cambia (en pasos de 0,1): cada llamada sube un efecto al mando, y en una Legion Go 2 con SteamOS se quedaba una vibración larga y luego ninguna.</li>
+      </ul>
+    </div>
+    <div class="codigo" style="margin-top:0">
+      <div class="fichero">Runtime/Game/Rumble.cs</div>
+<pre><span class="k">#if</span> UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
+[<span class="t">DllImport</span>(<span class="s">"GameHaptics"</span>)] <span class="k">static extern int</span> GH_Available();
+[<span class="t">DllImport</span>(<span class="s">"GameHaptics"</span>)] <span class="k">static extern void</span> GH_Rumble(
+    <span class="k">float</span> intensity, <span class="k">float</span> sharpness, <span class="k">float</span> seconds);
+[<span class="t">DllImport</span>(<span class="s">"GameHaptics"</span>)] <span class="k">static extern void</span> GH_Stop();
+<span class="k">#else</span>
+<span class="k">static bool</span> Native =&gt; <span class="k">false</span>;</pre>
+    </div>
+  </div>
+
+  <h3 class="revelar">Líquidos y fundidos</h3>
+  <div class="rejilla r2 revelar">
+    <div class="tarjeta">
+      <h4>Agua y lava (<code>HollowLiquids</code>)</h4>
+      <p>El cuerpo lo pinta <code>MapView</code> por profundidad, con un degradado continuo de la superficie a la cuarta fila y por delante de los personajes. En la superficie, la línea ondulada animada de Hollow Knight. Agua: gotas que caen del techo y niebla flotando (sin burbujas: en Hollow Knight solo las tiene el ácido). Lava, que Hollow Knight no tiene: su agua en naranja con los glóbulos de la infección, burbujas que estallan, ascuas, humo y vapor. Al entrar o salir, una salpicadura.</p>
+    </div>
+    <div class="tarjeta">
+      <h4>Fundidos</h4>
+      <p>Fundido desde negro al cambiar de sala y más largo al cambiar de mapa. Al entrar en un santuario del castillo la pantalla funde a negro en 0,45 s en lugar de hundir al Caballero 16 px en el suelo como el original (se le veía por encima de la piedra). La música también cambia con un fundido.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 9. MÚSICA ============================== -->
+<section class="seccion" id="musica">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">IX · MÚSICA Y SONIDO</div>
+    <h2 class="titulo">Música y sonido</h2>
+    <p class="entradilla">Un chip de 1987 emulado nota a nota para los efectos y las fanfarrias, y la banda sonora de Hollow Knight para cada zona y cada jefe.</p>
+  </header>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <h4>El chip original</h4>
+      <p>El MSX suena con un <strong>PSG AY-3-8910</strong> a 1,79 MHz: 3 canales de tono más ruido y envolvente, manejados por 14 registros. El driver de Konami lee una partitura propia (notas, silencios, tempo, octavas, «guiones» de instrumento para arpegios y percusiones, bucles) una vez por fotograma.</p>
+      <p><code>tools/openmsx/record_music.py</code> graba los registros del PSG de cada canción en el emulador y <code>tools/extract/score.py</code> decodifica las partituras; la reconstrucción coincide con la grabación en el <strong>98–100 % de los fotogramas</strong> de las 21 canciones.</p>
+    </div>
+    <div>
+      <h4>En Unity: <code>Psg.cs</code></h4>
+      <p>Un AY-3-8910 emulado (clase sin Unity, para poder probarla) reproduce los registros grabados de cada canción, recortados a una vuelta con su bucle, y los efectos del driver en el canal C con su prioridad: uno nuevo solo interrumpe al actual si su número es mayor o igual.</p>
+      <p>El chip escribe sus muestras <strong>directamente en la salida de audio</strong> (<code>PsgOutput.OnAudioFilterRead</code>, búfer de 256 muestras) en vez de un clip en streaming, que llegaba con retardo: el efecto suena en 1 fotograma.</p>
+    </div>
+  </div>
+
+  <h3 class="revelar">Hollow Knight por zona y por jefe</h3>
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Dónde</th><th>Pista de Hollow Knight</th></tr></thead>
+    <tbody>
+      <tr><td>Menú principal</td><td>Title</td></tr>
+      <tr><td>Castillo · mundos 1–10</td><td>Cruces Olvidados, Sendero Verde, Canales Reales, la Colmena, Picos de Cristal, Ciudad de las Lágrimas, Páramos Fúngicos, el Abismo, Nido Profundo, Confines del Reino y Palacio Blanco (las que van por capas, mezcladas)</td></tr>
+      <tr><td>Santuarios</td><td>la de las salas con un personaje</td></tr>
+      <tr><td>Jefes</td><td>la pelea del jefe de Hollow Knight que hace de él: False Knight, Uumuu, Mantis Lords, Dung Defender, Nosk, Hornet (para el Traitor Lord), Soul Master (para el Mawlek), Broken Vessel, Grimm y la Radiance</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <h4>Normalizada a −14 LUFS</h4>
+      <p>Las pistas de Hollow Knight vienen muy bajas (−25 a −29 dB de media) y quedaban por debajo de los efectos del chip. Al importarlas, <code>musica.py</code> mezcla sus capas y las normaliza con <code>ffmpeg</code> a −14 LUFS, con los picos a −1,5 dB. Con el volumen general a 7 (el de serie) suenan enteras.</p>
+    </div>
+    <div class="codigo" style="margin-top:0">
+      <div class="fichero">tools/hollow/musica.py</div>
+<pre>LOUDNESS = <span class="nu">-14</span>   <span class="c"># LUFS de todas las pistas</span>
+norm = f<span class="s">"loudnorm=I={LOUDNESS}:TP=-1.5:LRA=11"</span>
+mix = [<span class="s">"-filter_complex"</span>,
+       f<span class="s">"amix=inputs={len(parts)}:duration=longest:normalize=0,{norm}"</span>]</pre>
+    </div>
+  </div>
+
+  <div class="versus revelar">
+    <div class="orig"><h5>Se queda en el chip</h5><p>Las fanfarrias del original: objeto importante, invocación del jefe, jefe vencido, muerte y el final. Mientras suenan, la música de Hollow Knight baja.</p></div>
+    <div class="flecha" aria-hidden="true">♪</div>
+    <div class="remake"><h5>Efectos que dicen algo</h5><p>Al acertar suenan los del original: 0x1E al enemigo, 0x27 al jefe, 0x20 al morir y 0x1D al chocar con un escudo. El golpe en una pared que suena sigue siendo la pista de que <em>aquí hay algo</em>.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 10. ENEMIGOS ============================== -->
+<section class="seccion" id="enemigos">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">X · ENEMIGOS</div>
+    <h2 class="titulo">Enemigos</h2>
+    <p class="entradilla">53 tipos leídos rutina a rutina, reimplementados desde su ficha y vestidos de criaturas de Hallownest.</p>
+  </header>
+
+  <ol class="tuberia revelar">
+    <li><h4>Desensamblar</h4><p><code>tools/extract/enemy_ai.py</code> desensambla, para cada uno de los 53 tipos que aparecen en salas, su rutina de inicio y la de actualización (dos tablas de saltos de la ROM).</p></li>
+    <li><h4>Una ficha por tipo</h4><p>Cada rutina se lee y se resume en <code>docs/enemy_ai.md</code>: velocidades en px/tick, tiempos en ticks, cajas de colisión por estado, qué dispara y cuándo. Se contrastan con lo medido en el emulador (<code>trace_enemies.py</code>, <code>contact_measure.py</code>, <code>hitbox_measure.py</code>).</p></li>
+    <li><h4>Reimplementar</h4><p>En <code>Enemies/</code>, por familias: <code>EnemyTypes</code>, <code>EnemyWalkers</code> (andan y saltan), <code>EnemyFlyers</code> (voladores y trepamuros), <code>EnemyFixed</code> (trampas y torretas) y <code>Projectiles</code> (los 25 hijos). Combate medido: daño por tipo, retroceso de 6 ticks a 4 px, 42 ticks de invulnerabilidad.</p></li>
+    <li><h4>Vestir</h4><p>Cada tipo lleva una criatura de Hollow Knight con un papel parecido; el dibujo se ajusta a su caja de contacto y no la cambia.</p></li>
+  </ol>
+
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Original</th><th>Hollow Knight</th></tr></thead>
+    <tbody>
+      <tr><td>murciélago</td><td>Vengefly</td></tr>
+      <tr><td>esqueleto</td><td>Husk</td></tr>
+      <tr><td>caballero (solo se le daña por la espalda)</td><td>Husk con escudo</td></tr>
+      <tr><td>brote</td><td>planta trampa</td></tr>
+      <tr><td>rodador</td><td>Baldur</td></tr>
+      <tr><td>murciélagos que se fusionan</td><td>Gruzzer</td></tr>
+      <tr><td>reptador</td><td>Crawlid</td></tr>
+      <tr><td>erizo</td><td>Tiktik</td></tr>
+      <tr><td>espíritu</td><td>Lumafly</td></tr>
+      <tr><td>fantasma</td><td>Folly</td></tr>
+      <tr><td>hechicero</td><td>Soul Twister</td></tr>
+      <tr><td>estatua</td><td>Moss Knight</td></tr>
+      <tr><td>bocas de pared</td><td>Gulka</td></tr>
+      <tr><td>torretas</td><td>la del Mawlek</td></tr>
+      <tr><td>pinchos</td><td>los del Coliseo</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="nota oro revelar"><b class="etq">Fallos del original que no se copian</b>La biblia anota tres rarezas que conviene no reproducir: la torreta 0x32 dispara hacia el lado contrario al jugador, el 0x43 ignora el azar al elegir dirección y el 0x12 elige sentido comparando la Y del jugador con su X.</div>
+
+  <h3 class="revelar">Salas con enemigos</h3>
+  <div class="galeria revelar" data-grupo="enemigos">
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_mundo01_sala_007.jpg" data-grande="img/personajes/enemigos_mundo01_sala_007.jpg" alt="Mundo 1, sala 7" width="480" height="286" loading="lazy" decoding="async"><figcaption>Mundo 1, sala 7</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_002.jpg" data-grande="img/personajes/enemigos_sala_002.jpg" alt="Castillo, sala 2" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_004.jpg" data-grande="img/personajes/enemigos_sala_004.jpg" alt="Castillo, sala 4" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 4</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_006.jpg" data-grande="img/personajes/enemigos_sala_006.jpg" alt="Castillo, sala 6" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 6</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_009.jpg" data-grande="img/personajes/enemigos_sala_009.jpg" alt="Castillo, sala 9" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 9</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_013.jpg" data-grande="img/personajes/enemigos_sala_013.jpg" alt="Castillo, sala 13" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 13</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_018.jpg" data-grande="img/personajes/enemigos_sala_018.jpg" alt="Castillo, sala 18" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 18</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_020.jpg" data-grande="img/personajes/enemigos_sala_020.jpg" alt="Castillo, sala 20" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 20</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/enemigos_sala_025.jpg" data-grande="img/personajes/enemigos_sala_025.jpg" alt="Castillo, sala 25" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 25</figcaption></figure>
+  </div>
+
+  <h3 class="revelar">Muerte y botín</h3>
+  <p class="revelar">Al morir, el enemigo sortea botín según su tipo (flechas, monedas o llaves; geo con el arte de Hollow Knight), que se queda quieto en la rejilla de 8 px hasta recogerlo o salir de la sala.</p>
+  <div class="galeria revelar" data-grupo="muertes">
+    <figure><img class="ampliable" src="img/mini/personajes/muertes_sala_003_a.jpg" data-grande="img/personajes/muertes_sala_003_a.jpg" alt="Castillo, sala 3: el golpe" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 3: el golpe</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/muertes_sala_003_b.jpg" data-grande="img/personajes/muertes_sala_003_b.jpg" alt="Castillo, sala 3: la muerte" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 3: la muerte</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/muertes_sala_003_botin.jpg" data-grande="img/personajes/muertes_sala_003_botin.jpg" alt="Castillo, sala 3: el botín" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 3: el botín</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/muertes_sala_020_a.jpg" data-grande="img/personajes/muertes_sala_020_a.jpg" alt="Castillo, sala 20: el golpe" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 20: el golpe</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/muertes_sala_020_b.jpg" data-grande="img/personajes/muertes_sala_020_b.jpg" alt="Castillo, sala 20: la muerte" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 20: la muerte</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/personajes/muertes_sala_020_botin.jpg" data-grande="img/personajes/muertes_sala_020_botin.jpg" alt="Castillo, sala 20: el botín" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo, sala 20: el botín</figcaption></figure>
+  </div>
+
+  <h3 class="revelar">El diario del cazador</h3>
+  <div class="rejilla r2 revelar">
+    <div>
+      <p>El original no lleva registro de enemigos. Con <code>HollowJournal</code>, la cuarta pestaña del inventario es el <strong>diario del cazador</strong>: como cada criatura ya lleva el dibujo de una de Hollow Knight, su entrada es la de esa criatura, con retrato, descripción y notas del cazador. Los tipos que comparten criatura comparten entrada: <strong>61 en total</strong>, los jefes al final.</p>
+      <p>Las notas se leen a partir de 10 derrotas (los jefes, 1). Pinchos y torretas, que no se pueden derrotar, cuentan al verlos. La primera vez que se registra una criatura sale el aviso abajo a la derecha.</p>
+    </div>
+    <div class="galeria compacta" data-grupo="diario" style="margin-top:0">
+      <figure><img class="ampliable" src="img/mini/menu/diario.jpg" data-grande="img/menu/diario.jpg" alt="El diario del cazador, con las notas" width="480" height="286" loading="lazy" decoding="async"><figcaption>El diario del cazador, con las notas</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/diario_sin_notas.jpg" data-grande="img/menu/diario_sin_notas.jpg" alt="Una entrada sin notas todavía" width="480" height="286" loading="lazy" decoding="async"><figcaption>Una entrada sin notas todavía</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/diario_aviso.jpg" data-grande="img/menu/diario_aviso.jpg" alt="El aviso de nueva entrada" width="480" height="286" loading="lazy" decoding="async"><figcaption>El aviso de nueva entrada</figcaption></figure>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 11. JEFES ============================== -->
+<section class="seccion" id="jefes">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XI · JEFES</div>
+    <h2 class="titulo">Jefes</h2>
+    <p class="entradilla">Diez nombres escritos en diez lápidas. Se teclea la palabra en la sala del jefe y la sala se cierra.</p>
+  </header>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <h4>El ritual</h4>
+      <ol>
+        <li>En cada mundo hay una <strong>lápida</strong>; con la Lupa se lee la palabra.</li>
+        <li>En la sala del jefe se <strong>escribe la palabra</strong> (búfer de 16 letras, sin distinguir mayúsculas). Con mando, <kbd>RB</kbd> abre un selector de letras.</li>
+        <li>Se cierran las salidas y empieza la <strong>invocación</strong> (~97 ticks); salen chispas cada 8 ticks durante 65 y el jefe aparece cuando no queda ningún enemigo.</li>
+        <li>Combate con su IA, su vida (a la mitad con el Holy Water) y la regla de sus armas: cada jefe solo recibe daño de las que marca su máscara en la ROM.</li>
+        <li>Vencido, se deshace y cae la <strong>Gran Llave</strong>, que abre el mundo siguiente.</li>
+      </ol>
+    </div>
+    <div class="galeria compacta" data-grupo="ritual" style="margin-top:0">
+      <figure><img class="ampliable" src="img/mini/interfaz/jefe_0_sala.jpg" data-grande="img/interfaz/jefe_0_sala.jpg" alt="La sala del jefe, esperando la palabra" width="480" height="286" loading="lazy" decoding="async"><figcaption>La sala del jefe, esperando la palabra</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/jefe_1_invocando.jpg" data-grande="img/interfaz/jefe_1_invocando.jpg" alt="Invocación: la sala se deshace en puntos" width="480" height="286" loading="lazy" decoding="async"><figcaption>Invocación: la sala se deshace en puntos</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/jefe_2_combate.jpg" data-grande="img/interfaz/jefe_2_combate.jpg" alt="El combate" width="480" height="286" loading="lazy" decoding="async"><figcaption>El combate</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="jefes" data-grupo="jefes">
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe01_zoom.jpg" data-grande="img/jefes/jefe01_m.jpg" alt="Bony Dragon como False Knight (mundo 1, Sendero Verde)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Bony Dragon como False Knight (mundo 1, Sendero Verde)</figcaption></figure><div class="datos"><div class="mundo">Mundo 1 · Sendero Verde</div><h4>Bony Dragon</h4><div class="hk">→ False Knight</div><span class="palabra">YOMAR</span><p>Pasea, salta y lanza huesos; le dañan flecha y espada. En el remake, la maza. Vida: 24.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe02_zoom.jpg" data-grande="img/jefes/jefe02_m.jpg" alt="Sea Anemone como Uumuu (mundo 2, Canales Reales)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Sea Anemone como Uumuu (mundo 2, Canales Reales)</figcaption></figure><div class="datos"><div class="mundo">Mundo 2 · Canales Reales</div><h4>Sea Anemone</h4><div class="hk">→ Uumuu</div><span class="palabra">ELOHIM</span><p>Fija; se abre y se cierra y lanza esporas. Solo recibe daño abierta. Vida: 40.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe03_zoom.jpg" data-grande="img/jefes/jefe03_m.jpg" alt="Elusive Dragon como Mantis Lords (mundo 3, la Colmena)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Elusive Dragon como Mantis Lords (mundo 3, la Colmena)</figcaption></figure><div class="datos"><div class="mundo">Mundo 3 · la Colmena</div><h4>Elusive Dragon</h4><div class="hk">→ Mantis Lords</div><span class="palabra">HAHAKLA</span><p>Asoma por los lados a cinco alturas y escupe fuego; luego se vuelve invisible. Vida: 64.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe04_zoom.jpg" data-grande="img/jefes/jefe04_m.jpg" alt="Jump Slime como Dung Defender (mundo 4, Picos de Cristal)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Jump Slime como Dung Defender (mundo 4, Picos de Cristal)</figcaption></figure><div class="datos"><div class="mundo">Mundo 4 · Picos de Cristal</div><h4>Jump Slime</h4><div class="hk">→ Dung Defender</div><span class="palabra">BARECHET</span><p>Se arrastra y salta para aplastar. La mina le quita 2. Vida: 112.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe05_zoom.jpg" data-grande="img/jefes/jefe05_m.jpg" alt="Donra como Nosk alado (mundo 5, Ciudad de las Lágrimas)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Donra como Nosk alado (mundo 5, Ciudad de las Lágrimas)</figcaption></figure><div class="datos"><div class="mundo">Mundo 5 · Ciudad de las Lágrimas</div><h4>Donra</h4><div class="hk">→ Nosk alado</div><span class="palabra">HEOTYMEO</span><p>Vuela por una caja con la cabeza a tu altura. Solo la cabeza recibe daño. Vida: 72.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe06_zoom.jpg" data-grande="img/jefes/jefe06_m.jpg" alt="Arlyane como Traitor Lord (mundo 6, Páramos Fúngicos)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Arlyane como Traitor Lord (mundo 6, Páramos Fúngicos)</figcaption></figure><div class="datos"><div class="mundo">Mundo 6 · Páramos Fúngicos</div><h4>Arlyane</h4><div class="hk">→ Traitor Lord</div><span class="palabra">LEPHA</span><p>Camina y persigue; ráfagas de 6 disparos en abanico. Vida: 56.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe07_zoom.jpg" data-grande="img/jefes/jefe07_m.jpg" alt="Big Lip como Mawlek (mundo 7, el Abismo)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Big Lip como Mawlek (mundo 7, el Abismo)</figcaption></figure><div class="datos"><div class="mundo">Mundo 7 · el Abismo</div><h4>Big Lip</h4><div class="hk">→ Mawlek</div><span class="palabra">NAWABRA</span><p>Disparos en 8 direcciones; solo la boca o la lengua reciben daño. Vida: 64.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe08_zoom.jpg" data-grande="img/jefes/jefe08_m.jpg" alt="Monster como Broken Vessel (mundo 8, Nido Profundo)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Monster como Broken Vessel (mundo 8, Nido Profundo)</figcaption></figure><div class="datos"><div class="mundo">Mundo 8 · Nido Profundo</div><h4>Monster</h4><div class="hk">→ Broken Vessel</div><span class="palabra">ASCHER</span><p>Baja por los bordes y sube a tu piso; 5 bolas que rebotan. Débil al fuego rodante. Vida: 80.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe09_zoom.jpg" data-grande="img/jefes/jefe09_m.jpg" alt="King Dragon como Grimm (mundo 9, Confines del Reino)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>King Dragon como Grimm (mundo 9, Confines del Reino)</figcaption></figure><div class="datos"><div class="mundo">Mundo 9 · Confines del Reino</div><h4>King Dragon</h4><div class="hk">→ Grimm</div><span class="palabra">XYWOLEH</span><p>Llamaradas y 4 nubes de tormenta; retrocede al recibir un golpe. Vida: 80.</p></div></article>
+    <article class="jefe revelar"><figure><img class="ampliable" src="img/jefes/jefe10_zoom.jpg" data-grande="img/jefes/jefe10_m.jpg" alt="Galious como la Radiance (mundo 10, Palacio Blanco)" width="600" height="400" loading="lazy" decoding="async"><figcaption hidden>Galious como la Radiance (mundo 10, Palacio Blanco)</figcaption></figure><div class="datos"><div class="mundo">Mundo 10 · Palacio Blanco</div><h4>Galious</h4><div class="hk">→ la Radiance</div><span class="palabra">HAMALECH</span><p>Se teletransporta con 8 bolas en órbita. Solo se le daña con la Cross. Vida: 248.</p></div></article>
+  </div>
+
+  <h3 class="revelar">Reglas del remake para los jefes</h3>
+  <div class="versus revelar">
+    <div class="orig"><h5>Original</h5><p>El Bony Dragon lanza 3 huesos en parábola mientras pasea y en lo alto de cada salto. Solo recibe golpes en la cabeza (16 × 32 px) y tocar a un jefe quita de 8 a 40 de vitalidad cuando se empieza con 8.</p></div>
+    <div class="flecha" aria-hidden="true">✦</div>
+    <div class="remake"><h5><code>FalseKnightMace</code> · <code>HollowBosses</code></h5><p>El False Knight se para y da con la <strong>maza</strong>; lo que hace daño es la bola donde golpea el suelo. Todos los jefes reciben golpes en todo el cuerpo dibujado (la maza incluida) y tocarlos quita de 1 a 3 máscaras según su fuerza original.</p></div>
+  </div>
+  <div class="codigo revelar">
+    <div class="fichero">Runtime/Game/RemakeRules.cs</div>
+<pre><span class="k">public static bool</span> FalseKnightMace = <span class="k">true</span>;   <span class="c">// la maza en lugar de los huesos</span>
+<span class="k">public static bool</span> HollowBosses = <span class="k">true</span>;
+<span class="c">// (daño + 6) / 12, entre 1 y 3: 1 el Bony Dragon… 3 Monster, King Dragon y Galious</span>
+<span class="k">public static int</span> BossContactMasks(<span class="k">int</span> original) =&gt;
+    System.Math.Max(<span class="nu">1</span>, System.Math.Min(<span class="nu">3</span>, (original + <span class="nu">6</span>) / <span class="nu">12</span>));</pre>
+  </div>
+  <p class="revelar">El dibujo de Hollow Knight sustituye a la imagen del jefe del original (que en el MSX es una imagen grande hecha con tiles del fondo y se mueve a saltos de 8 px). Su tamaño se fija con la caja de su primera aparición y al derrotarlo queda su animación de muerte. Si se muere en pleno combate, el jefe espera otra vez su palabra.</p>
+</div>
+</section>
+
+<!-- ============================== 12. MUNDOS ============================== -->
+<section class="seccion" id="mundos">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XII · MUNDOS</div>
+    <h2 class="titulo">Mundos</h2>
+    <p class="entradilla">Once mapas de la ROM, once zonas de Hallownest. Pulsa una imagen para verla grande y recorre con las flechas.</p>
+  </header>
+  <div class="pestanas revelar" id="pestanas-mundos" role="tablist" aria-label="Mapas">
+    <button type="button" role="tab" id="tab-m00" aria-controls="panel-m00" aria-selected="true" tabindex="0">Castillo</button>
+    <button type="button" role="tab" id="tab-m01" aria-controls="panel-m01" aria-selected="false" tabindex="-1">Mundo 1</button>
+    <button type="button" role="tab" id="tab-m02" aria-controls="panel-m02" aria-selected="false" tabindex="-1">Mundo 2</button>
+    <button type="button" role="tab" id="tab-m03" aria-controls="panel-m03" aria-selected="false" tabindex="-1">Mundo 3</button>
+    <button type="button" role="tab" id="tab-m04" aria-controls="panel-m04" aria-selected="false" tabindex="-1">Mundo 4</button>
+    <button type="button" role="tab" id="tab-m05" aria-controls="panel-m05" aria-selected="false" tabindex="-1">Mundo 5</button>
+    <button type="button" role="tab" id="tab-m06" aria-controls="panel-m06" aria-selected="false" tabindex="-1">Mundo 6</button>
+    <button type="button" role="tab" id="tab-m07" aria-controls="panel-m07" aria-selected="false" tabindex="-1">Mundo 7</button>
+    <button type="button" role="tab" id="tab-m08" aria-controls="panel-m08" aria-selected="false" tabindex="-1">Mundo 8</button>
+    <button type="button" role="tab" id="tab-m09" aria-controls="panel-m09" aria-selected="false" tabindex="-1">Mundo 9</button>
+    <button type="button" role="tab" id="tab-m10" aria-controls="panel-m10" aria-selected="false" tabindex="-1">Mundo 10</button>
+  </div>
+  <div class="panel-mundo activo" id="panel-m00" role="tabpanel" aria-labelledby="tab-m00">
+  <p class="zona">Cruces Olvidados <span style="color:var(--apagado);font-size:16px">· Forgotten Crossroads</span></p>
+  <p>Castillo: 147 salas en la ROM. El mundo exterior: puertas a los diez mundos, santuarios de los dioses y ascensores.</p>
+  <div class="galeria" data-grupo="mundo00">
+    <figure><img class="ampliable" src="img/mini/mundos/m00_0.jpg" data-grande="img/mundos/m00_0.jpg" alt="Castillo · Cruces Olvidados, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Castillo · Cruces Olvidados, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m00_1.jpg" data-grande="img/mundos/m00_1.jpg" alt="Castillo · Cruces Olvidados, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Castillo · Cruces Olvidados, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m00_2.jpg" data-grande="img/mundos/m00_2.jpg" alt="Castillo · Cruces Olvidados, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Castillo · Cruces Olvidados, sala de ejemplo 3</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m00_3.jpg" data-grande="img/mundos/m00_3.jpg" alt="Castillo · Cruces Olvidados, sala de ejemplo 4" width="480" height="301" loading="lazy" decoding="async"><figcaption>Castillo · Cruces Olvidados, sala de ejemplo 4</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m01" role="tabpanel" aria-labelledby="tab-m01">
+  <p class="zona">Sendero Verde <span style="color:var(--apagado);font-size:16px">· Greenpath</span></p>
+  <p>Mundo 1: 15 salas en la ROM. Jefe: <strong>Bony Dragon</strong>.</p>
+  <div class="galeria" data-grupo="mundo01">
+    <figure><img class="ampliable" src="img/mini/mundos/m01_0.jpg" data-grande="img/mundos/m01_0.jpg" alt="Mundo 1 · Sendero Verde, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 1 · Sendero Verde, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m01_1.jpg" data-grande="img/mundos/m01_1.jpg" alt="Mundo 1 · Sendero Verde, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 1 · Sendero Verde, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m01_2.jpg" data-grande="img/mundos/m01_2.jpg" alt="Mundo 1 · Sendero Verde, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 1 · Sendero Verde, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m02" role="tabpanel" aria-labelledby="tab-m02">
+  <p class="zona">Canales Reales <span style="color:var(--apagado);font-size:16px">· Royal Waterways</span></p>
+  <p>Mundo 2: 15 salas en la ROM. Jefe: <strong>Sea Anemone</strong>.</p>
+  <div class="galeria" data-grupo="mundo02">
+    <figure><img class="ampliable" src="img/mini/mundos/m02_0.jpg" data-grande="img/mundos/m02_0.jpg" alt="Mundo 2 · Canales Reales, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 2 · Canales Reales, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m02_1.jpg" data-grande="img/mundos/m02_1.jpg" alt="Mundo 2 · Canales Reales, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 2 · Canales Reales, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m02_2.jpg" data-grande="img/mundos/m02_2.jpg" alt="Mundo 2 · Canales Reales, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 2 · Canales Reales, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m03" role="tabpanel" aria-labelledby="tab-m03">
+  <p class="zona">la Colmena <span style="color:var(--apagado);font-size:16px">· The Hive</span></p>
+  <p>Mundo 3: 16 salas en la ROM. Jefe: <strong>Elusive Dragon</strong>.</p>
+  <div class="galeria" data-grupo="mundo03">
+    <figure><img class="ampliable" src="img/mini/mundos/m03_0.jpg" data-grande="img/mundos/m03_0.jpg" alt="Mundo 3 · la Colmena, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 3 · la Colmena, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m03_1.jpg" data-grande="img/mundos/m03_1.jpg" alt="Mundo 3 · la Colmena, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 3 · la Colmena, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m03_2.jpg" data-grande="img/mundos/m03_2.jpg" alt="Mundo 3 · la Colmena, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 3 · la Colmena, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m04" role="tabpanel" aria-labelledby="tab-m04">
+  <p class="zona">Picos de Cristal <span style="color:var(--apagado);font-size:16px">· Crystal Peak</span></p>
+  <p>Mundo 4: 17 salas en la ROM. Jefe: <strong>Jump Slime</strong>.</p>
+  <div class="galeria" data-grupo="mundo04">
+    <figure><img class="ampliable" src="img/mini/mundos/m04_1.jpg" data-grande="img/mundos/m04_1.jpg" alt="Mundo 4 · Picos de Cristal, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 4 · Picos de Cristal, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m04_2.jpg" data-grande="img/mundos/m04_2.jpg" alt="Mundo 4 · Picos de Cristal, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 4 · Picos de Cristal, sala de ejemplo 2</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m05" role="tabpanel" aria-labelledby="tab-m05">
+  <p class="zona">Ciudad de las Lágrimas <span style="color:var(--apagado);font-size:16px">· City of Tears</span></p>
+  <p>Mundo 5: 18 salas en la ROM. Jefe: <strong>Donra</strong>.</p>
+  <div class="galeria" data-grupo="mundo05">
+    <figure><img class="ampliable" src="img/mini/mundos/m05_0.jpg" data-grande="img/mundos/m05_0.jpg" alt="Mundo 5 · Ciudad de las Lágrimas, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 5 · Ciudad de las Lágrimas, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m05_1.jpg" data-grande="img/mundos/m05_1.jpg" alt="Mundo 5 · Ciudad de las Lágrimas, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 5 · Ciudad de las Lágrimas, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m05_2.jpg" data-grande="img/mundos/m05_2.jpg" alt="Mundo 5 · Ciudad de las Lágrimas, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 5 · Ciudad de las Lágrimas, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m06" role="tabpanel" aria-labelledby="tab-m06">
+  <p class="zona">Páramos Fúngicos <span style="color:var(--apagado);font-size:16px">· Fungal Wastes</span></p>
+  <p>Mundo 6: 19 salas en la ROM. Jefe: <strong>Arlyane</strong>.</p>
+  <div class="galeria" data-grupo="mundo06">
+    <figure><img class="ampliable" src="img/mini/mundos/m06_0.jpg" data-grande="img/mundos/m06_0.jpg" alt="Mundo 6 · Páramos Fúngicos, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 6 · Páramos Fúngicos, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m06_1.jpg" data-grande="img/mundos/m06_1.jpg" alt="Mundo 6 · Páramos Fúngicos, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 6 · Páramos Fúngicos, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m06_2.jpg" data-grande="img/mundos/m06_2.jpg" alt="Mundo 6 · Páramos Fúngicos, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 6 · Páramos Fúngicos, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m07" role="tabpanel" aria-labelledby="tab-m07">
+  <p class="zona">el Abismo <span style="color:var(--apagado);font-size:16px">· The Abyss</span></p>
+  <p>Mundo 7: 20 salas en la ROM. Jefe: <strong>Big Lip</strong>.</p>
+  <div class="galeria" data-grupo="mundo07">
+    <figure><img class="ampliable" src="img/mini/mundos/m07_0.jpg" data-grande="img/mundos/m07_0.jpg" alt="Mundo 7 · el Abismo, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 7 · el Abismo, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m07_1.jpg" data-grande="img/mundos/m07_1.jpg" alt="Mundo 7 · el Abismo, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 7 · el Abismo, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m07_2.jpg" data-grande="img/mundos/m07_2.jpg" alt="Mundo 7 · el Abismo, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 7 · el Abismo, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m08" role="tabpanel" aria-labelledby="tab-m08">
+  <p class="zona">Nido Profundo <span style="color:var(--apagado);font-size:16px">· Deepnest</span></p>
+  <p>Mundo 8: 21 salas en la ROM. Jefe: <strong>Monster</strong>.</p>
+  <div class="galeria" data-grupo="mundo08">
+    <figure><img class="ampliable" src="img/mini/mundos/m08_0.jpg" data-grande="img/mundos/m08_0.jpg" alt="Mundo 8 · Nido Profundo, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 8 · Nido Profundo, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m08_1.jpg" data-grande="img/mundos/m08_1.jpg" alt="Mundo 8 · Nido Profundo, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 8 · Nido Profundo, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m08_2.jpg" data-grande="img/mundos/m08_2.jpg" alt="Mundo 8 · Nido Profundo, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 8 · Nido Profundo, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m09" role="tabpanel" aria-labelledby="tab-m09">
+  <p class="zona">Confines del Reino <span style="color:var(--apagado);font-size:16px">· Kingdom's Edge</span></p>
+  <p>Mundo 9: 27 salas en la ROM. Jefe: <strong>King Dragon</strong>.</p>
+  <div class="galeria" data-grupo="mundo09">
+    <figure><img class="ampliable" src="img/mini/mundos/m09_0.jpg" data-grande="img/mundos/m09_0.jpg" alt="Mundo 9 · Confines del Reino, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 9 · Confines del Reino, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m09_1.jpg" data-grande="img/mundos/m09_1.jpg" alt="Mundo 9 · Confines del Reino, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 9 · Confines del Reino, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m09_2.jpg" data-grande="img/mundos/m09_2.jpg" alt="Mundo 9 · Confines del Reino, sala de ejemplo 3" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 9 · Confines del Reino, sala de ejemplo 3</figcaption></figure>
+  </div>
+</div>
+  <div class="panel-mundo" id="panel-m10" role="tabpanel" aria-labelledby="tab-m10">
+  <p class="zona">Palacio Blanco <span style="color:var(--apagado);font-size:16px">· White Palace</span></p>
+  <p>Mundo 10: 5 salas en la ROM. Jefe: <strong>Galious</strong>.</p>
+  <div class="galeria" data-grupo="mundo10">
+    <figure><img class="ampliable" src="img/mini/mundos/m10_0.jpg" data-grande="img/mundos/m10_0.jpg" alt="Mundo 10 · Palacio Blanco, sala de ejemplo 1" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 10 · Palacio Blanco, sala de ejemplo 1</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m10_1.jpg" data-grande="img/mundos/m10_1.jpg" alt="Mundo 10 · Palacio Blanco, sala de ejemplo 2" width="480" height="301" loading="lazy" decoding="async"><figcaption>Mundo 10 · Palacio Blanco, sala de ejemplo 2</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m10_2.jpg" data-grande="img/mundos/m10_2.jpg" alt="Mundo 10 · Palacio Blanco, sala de ejemplo 3" width="480" height="291" loading="lazy" decoding="async"><figcaption>Mundo 10 · Palacio Blanco, sala de ejemplo 3</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/mundos/m10_3.jpg" data-grande="img/mundos/m10_3.jpg" alt="Mundo 10 · Palacio Blanco, sala de ejemplo 4" width="480" height="288" loading="lazy" decoding="async"><figcaption>Mundo 10 · Palacio Blanco, sala de ejemplo 4</figcaption></figure>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ============================== 13. INTERFAZ ============================== -->
+<section class="seccion" id="interfaz">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XIII · INTERFAZ</div>
+    <h2 class="titulo">Interfaz y menús</h2>
+    <p class="entradilla">Menús, marcador, inventario, bancos y la muerte, como en Hollow Knight; las reglas de Galious siguen debajo.</p>
+  </header>
+
+  <h3 class="revelar">Menú principal y opciones</h3>
+  <p class="revelar">Con <code>HollowTitle</code> el ciclo de presentación del original (logo, título, historia y demos) se cambia por un menú principal sobre una vista lejana del Palacio Blanco, con <em>Continuar</em>, <em>Nueva partida</em>, <em>Opciones</em>, <em>Extras</em> y <em>Salir</em>. Las opciones tienen Audio, Vídeo, Brillo, Mando y Teclado; todo se maneja con teclado o mando y los botones se cambian.</p>
+  <div class="galeria revelar" data-grupo="menus">
+    <figure><img class="ampliable" src="img/mini/menu/menu_principal.jpg" data-grande="img/menu/menu_principal.jpg" alt="Menú principal" width="480" height="286" loading="lazy" decoding="async"><figcaption>Menú principal</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/menu_pausa.jpg" data-grande="img/menu/menu_pausa.jpg" alt="Menú de pausa" width="480" height="286" loading="lazy" decoding="async"><figcaption>Menú de pausa</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/menu_extras.jpg" data-grande="img/menu/menu_extras.jpg" alt="Extras: el homenaje y a quién pertenece cada cosa" width="480" height="286" loading="lazy" decoding="async"><figcaption>Extras: el homenaje y a quién pertenece cada cosa</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/menu_salir.jpg" data-grande="img/menu/menu_salir.jpg" alt="Salir pide confirmación" width="480" height="286" loading="lazy" decoding="async"><figcaption>Salir pide confirmación</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/menu_opciones.jpg" data-grande="img/menu/menu_opciones.jpg" alt="Opciones" width="480" height="286" loading="lazy" decoding="async"><figcaption>Opciones</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/opciones_audio.jpg" data-grande="img/menu/opciones_audio.jpg" alt="Audio" width="480" height="286" loading="lazy" decoding="async"><figcaption>Audio</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/opciones_video.jpg" data-grande="img/menu/opciones_video.jpg" alt="Vídeo" width="480" height="286" loading="lazy" decoding="async"><figcaption>Vídeo</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/opciones_brightness.jpg" data-grande="img/menu/opciones_brightness.jpg" alt="Brillo, con una escena de muestra" width="480" height="286" loading="lazy" decoding="async"><figcaption>Brillo, con una escena de muestra</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/opciones_pad.jpg" data-grande="img/menu/opciones_pad.jpg" alt="Mando" width="480" height="286" loading="lazy" decoding="async"><figcaption>Mando</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/opciones_keys.jpg" data-grande="img/menu/opciones_keys.jpg" alt="Teclado" width="480" height="286" loading="lazy" decoding="async"><figcaption>Teclado</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/aviso_autoguardado.jpg" data-grande="img/menu/aviso_autoguardado.jpg" alt="Aviso de autoguardado al arrancar" width="480" height="286" loading="lazy" decoding="async"><figcaption>Aviso de autoguardado al arrancar</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/escribir_mando.jpg" data-grande="img/menu/escribir_mando.jpg" alt="Selector de letras para escribir la palabra con mando" width="480" height="286" loading="lazy" decoding="async"><figcaption>Selector de letras para escribir la palabra con mando</figcaption></figure>
+  </div>
+
+  <h3 class="revelar">Inventario, amuletos, mapa y diario</h3>
+  <p class="revelar">Los objetos pasivos de combate pasan a ser <strong>amuletos</strong> que cuestan muescas y solo hacen efecto equipados (<code>HollowCharms</code>): 3 muescas al empezar y una más por jefe vencido, hasta 13, cuando todos juntos cuestan 20. Se equipan sentado en un banco. El mapa se compra a <strong>Cornifer</strong> (uno por mundo, en la sala más alejada) y se dibuja a mano desde la colisión de cada sala.</p>
+  <div class="galeria revelar" data-grupo="inventario">
+    <figure><img class="ampliable" src="img/mini/menu/inventario.jpg" data-grande="img/menu/inventario.jpg" alt="Inventario" width="480" height="286" loading="lazy" decoding="async"><figcaption>Inventario</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/amuletos.jpg" data-grande="img/menu/amuletos.jpg" alt="Amuletos y muescas" width="480" height="286" loading="lazy" decoding="async"><figcaption>Amuletos y muescas</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/mapa.jpg" data-grande="img/menu/mapa.jpg" alt="Mapa: sin el de la zona, no se ve nada" width="480" height="286" loading="lazy" decoding="async"><figcaption>Mapa: sin el de la zona, no se ve nada</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/lamina_objeto.jpg" data-grande="img/menu/lamina_objeto.jpg" alt="Lámina al recoger un objeto por primera vez" width="480" height="286" loading="lazy" decoding="async"><figcaption>Lámina al recoger un objeto por primera vez</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/lamina_amuleto.jpg" data-grande="img/menu/lamina_amuleto.jpg" alt="Lámina de un amuleto" width="480" height="286" loading="lazy" decoding="async"><figcaption>Lámina de un amuleto</figcaption></figure>
+  </div>
+
+  <h3 class="revelar">Bancos, alma y sombra</h3>
+  <div class="rejilla r3 revelar">
+    <div class="tarjeta"><h4>Bancos</h4><p>18 en total: en la sala de inicio del castillo, en la entrada de cada mundo y en una sala vecina de la del jefe. Sentarse (<kbd>↓</kbd>) rellena las máscaras, guarda la partida y fija dónde se reaparece.</p></div>
+    <div class="tarjeta"><h4>Alma</h4><p>Cada espadazo que acierta da 11 de alma, hasta 99. Mantener <kbd>F</kbd> (o B en el mando) quieto durante 0,9 s gasta 33 y cura 2 máscaras. Sustituye a la experiencia del original.</p></div>
+    <div class="tarjeta"><h4>Sombra</h4><p>Sin vidas ni GAME OVER: al morir se despierta en el último banco y el geo se queda en la sombra donde se cayó, que flota y ataca; al derrotarla (4 espadazos) se recupera.</p></div>
+  </div>
+  <div class="galeria revelar" data-grupo="bancos">
+    <figure><img class="ampliable" src="img/mini/bancos/banco_00_castle_1_de_pie.jpg" data-grande="img/bancos/banco_00_castle_1_de_pie.jpg" alt="Castillo: el banco de la sala de inicio" width="480" height="286" loading="lazy" decoding="async"><figcaption>Castillo: el banco de la sala de inicio</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/banco_00_castle_1_sentandose.jpg" data-grande="img/bancos/banco_00_castle_1_sentandose.jpg" alt="Sentándose" width="480" height="286" loading="lazy" decoding="async"><figcaption>Sentándose</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/banco_00_castle_1_sentado.jpg" data-grande="img/bancos/banco_00_castle_1_sentado.jpg" alt="Sentado: máscaras llenas y partida guardada" width="480" height="286" loading="lazy" decoding="async"><figcaption>Sentado: máscaras llenas y partida guardada</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/alma_1_concentrando.jpg" data-grande="img/bancos/alma_1_concentrando.jpg" alt="Concentrándose: el alma se gasta" width="480" height="286" loading="lazy" decoding="async"><figcaption>Concentrándose: el alma se gasta</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/alma_2_curandose.jpg" data-grande="img/bancos/alma_2_curandose.jpg" alt="Curándose" width="480" height="286" loading="lazy" decoding="async"><figcaption>Curándose</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/alma_3_despues.jpg" data-grande="img/bancos/alma_3_despues.jpg" alt="Después: dos máscaras más" width="480" height="286" loading="lazy" decoding="async"><figcaption>Después: dos máscaras más</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/muerte_1_despertar.jpg" data-grande="img/bancos/muerte_1_despertar.jpg" alt="Tras morir: despertar en el último banco" width="480" height="286" loading="lazy" decoding="async"><figcaption>Tras morir: despertar en el último banco</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/muerte_2_sentado.jpg" data-grande="img/bancos/muerte_2_sentado.jpg" alt="De nuevo sentado" width="480" height="286" loading="lazy" decoding="async"><figcaption>De nuevo sentado</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/banco_03_world03_15_sentado.jpg" data-grande="img/bancos/banco_03_world03_15_sentado.jpg" alt="Banco de la Colmena (mundo 3)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Banco de la Colmena (mundo 3)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/banco_05_world06_8_sentado.jpg" data-grande="img/bancos/banco_05_world06_8_sentado.jpg" alt="Banco de los Páramos Fúngicos (mundo 6)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Banco de los Páramos Fúngicos (mundo 6)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/banco_08_world09_26_sentado.jpg" data-grande="img/bancos/banco_08_world09_26_sentado.jpg" alt="Banco de los Confines del Reino (mundo 9)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Banco de los Confines del Reino (mundo 9)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/bancos/banco_09_world10_4_sentado.jpg" data-grande="img/bancos/banco_09_world10_4_sentado.jpg" alt="Banco del Palacio Blanco (mundo 10)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Banco del Palacio Blanco (mundo 10)</figcaption></figure>
+  </div>
+
+  <h3 class="revelar">Santuarios y marcador</h3>
+  <p class="revelar">Cada dios del original lo hace un personaje de Hollow Knight: Hefesto el Forjador de Aguijones, Ares Sly, Deméter Iselda, Atenea el Anciano Hu, Asclepio Jiji y la Muerte Grimm. Las reglas (precios, escudos en orden, guardar con Deméter) no cambian. El marcador muestra la vitalidad en máscaras, una por unidad, y el orbe de alma.</p>
+  <div class="galeria revelar" data-grupo="santuarios">
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_santuario.jpg" data-grande="img/interfaz/interfaz_santuario.jpg" alt="Santuario de Ares (Sly): tienda" width="480" height="286" loading="lazy" decoding="async"><figcaption>Santuario de Ares (Sly): tienda</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_santuario_hephaestus.jpg" data-grande="img/interfaz/interfaz_santuario_hephaestus.jpg" alt="Hefesto (el Forjador de Aguijones)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Hefesto (el Forjador de Aguijones)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_santuario_demeter.jpg" data-grande="img/interfaz/interfaz_santuario_demeter.jpg" alt="Deméter (Iselda): guarda la partida" width="480" height="286" loading="lazy" decoding="async"><figcaption>Deméter (Iselda): guarda la partida</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_santuario_asclepius.jpg" data-grande="img/interfaz/interfaz_santuario_asclepius.jpg" alt="Asclepio (Jiji)" width="480" height="286" loading="lazy" decoding="async"><figcaption>Asclepio (Jiji)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_santuario_death.jpg" data-grande="img/interfaz/interfaz_santuario_death.jpg" alt="La Muerte (Grimm)" width="480" height="286" loading="lazy" decoding="async"><figcaption>La Muerte (Grimm)</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_marcador.jpg" data-grande="img/interfaz/interfaz_marcador.jpg" alt="El marcador: orbe de alma y máscaras" width="480" height="286" loading="lazy" decoding="async"><figcaption>El marcador: orbe de alma y máscaras</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_marcador_objetos.jpg" data-grande="img/interfaz/interfaz_marcador_objetos.jpg" alt="Marcador con geo, flechas y llaves" width="480" height="286" loading="lazy" decoding="async"><figcaption>Marcador con geo, flechas y llaves</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/interfaz/interfaz_menu.jpg" data-grande="img/interfaz/interfaz_menu.jpg" alt="El menú de objetos" width="480" height="286" loading="lazy" decoding="async"><figcaption>El menú de objetos</figcaption></figure>
+  </div>
+
+  <h3 class="revelar">El final</h3>
+  <p class="revelar">Con <code>SoloKnight</code> solo juega el Caballero; en la escena del castillo Aphrodite no aparece y el epílogo, con las mismas filas para no cambiar los tiempos (~108 s), cuenta que Popolon protegerá el Reino Hueco como su caballero.</p>
+  <div class="galeria compacta revelar" data-grupo="final">
+    <figure><img class="ampliable" src="img/mini/menu/final_castillo.jpg" data-grande="img/menu/final_castillo.jpg" alt="La escena del castillo del final" width="480" height="286" loading="lazy" decoding="async"><figcaption>La escena del castillo del final</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/final_epilogo_900.jpg" data-grande="img/menu/final_epilogo_900.jpg" alt="Epílogo" width="480" height="286" loading="lazy" decoding="async"><figcaption>Epílogo</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/final_epilogo_1300.jpg" data-grande="img/menu/final_epilogo_1300.jpg" alt="Epílogo, más adelante" width="480" height="286" loading="lazy" decoding="async"><figcaption>Epílogo, más adelante</figcaption></figure>
+    <figure><img class="ampliable" src="img/mini/menu/final_epilogo_1700.jpg" data-grande="img/menu/final_epilogo_1700.jpg" alt="Créditos" width="480" height="286" loading="lazy" decoding="async"><figcaption>Créditos</figcaption></figure>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 14. RENDIMIENTO ============================== -->
+<section class="seccion" id="rendimiento">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XIV · RENDIMIENTO</div>
+    <h2 class="titulo">Rendimiento</h2>
+    <p class="entradilla">Medido, no supuesto: el propio juego lleva un modo que recorre los mapas y apunta fotogramas, procesador, gráfica y basura.</p>
+  </header>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <p><code>-rendimiento &lt;carpeta&gt;</code> lanza <code>PerfProbe</code>: sin sincronía vertical ni límite de fotogramas, pasa por tres salas de cada mapa (con su ambiente), por el inventario y por un santuario, y mide durante 4 s en cada sitio los FPS (media y el 1 % más lento), el tiempo de CPU y GPU (<code>FrameTimingManager</code>) y las recolecciones de basura. Lo deja en <code>rendimiento.txt</code>.</p>
+      <p>En un <strong>Apple M1 Pro</strong>, la media va de unos 710 a unos 1050 FPS según la sala y el 1 % más lento se queda por encima de unos 145 FPS en el peor sitio medido (los Canales Reales). Sin límite, el juego pasa de 700 FPS; por eso el límite por defecto es <strong>120</strong> (60 o 120 en Vídeo, o el refresco de la pantalla con sincronía vertical).</p>
+    </div>
+    <div class="grafico" role="figure" aria-label="FPS medio por mapa">
+      <h4>FPS medio por mapa</h4>
+      <div class="sub">Apple M1 Pro, media de tres salas; la marca dorada es el 1 % más lento del peor sitio.</div>
+      <div class="barras">
+        <div class="barra-fila" tabindex="0"><span class="eti">Castillo</span><div class="pista"><div class="valor" data-ancho="88.9"></div><div class="minimo" style="left:17.5%"></div></div><span class="num">978</span><span class="globo">Castillo: 978 FPS de media · 1 % más lento: 192 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 1</span><div class="pista"><div class="valor" data-ancho="80.8"></div><div class="minimo" style="left:16.5%"></div></div><span class="num">889</span><span class="globo">Mundo 1: 889 FPS de media · 1 % más lento: 181 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 2</span><div class="pista"><div class="valor" data-ancho="70.3"></div><div class="minimo" style="left:13.2%"></div></div><span class="num">773</span><span class="globo">Mundo 2: 773 FPS de media · 1 % más lento: 145 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 3</span><div class="pista"><div class="valor" data-ancho="77.2"></div><div class="minimo" style="left:13.8%"></div></div><span class="num">849</span><span class="globo">Mundo 3: 849 FPS de media · 1 % más lento: 152 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 4</span><div class="pista"><div class="valor" data-ancho="78.8"></div><div class="minimo" style="left:37.8%"></div></div><span class="num">867</span><span class="globo">Mundo 4: 867 FPS de media · 1 % más lento: 416 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 5</span><div class="pista"><div class="valor" data-ancho="87.3"></div><div class="minimo" style="left:40.7%"></div></div><span class="num">960</span><span class="globo">Mundo 5: 960 FPS de media · 1 % más lento: 448 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 6</span><div class="pista"><div class="valor" data-ancho="78.0"></div><div class="minimo" style="left:38.9%"></div></div><span class="num">858</span><span class="globo">Mundo 6: 858 FPS de media · 1 % más lento: 428 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 7</span><div class="pista"><div class="valor" data-ancho="72.2"></div><div class="minimo" style="left:35.3%"></div></div><span class="num">794</span><span class="globo">Mundo 7: 794 FPS de media · 1 % más lento: 388 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 8</span><div class="pista"><div class="valor" data-ancho="75.5"></div><div class="minimo" style="left:38.1%"></div></div><span class="num">831</span><span class="globo">Mundo 8: 831 FPS de media · 1 % más lento: 419 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 9</span><div class="pista"><div class="valor" data-ancho="71.9"></div><div class="minimo" style="left:36.6%"></div></div><span class="num">791</span><span class="globo">Mundo 9: 791 FPS de media · 1 % más lento: 403 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Mundo 10</span><div class="pista"><div class="valor" data-ancho="83.3"></div><div class="minimo" style="left:38.1%"></div></div><span class="num">916</span><span class="globo">Mundo 10: 916 FPS de media · 1 % más lento: 419 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Inventario</span><div class="pista"><div class="valor" data-ancho="64.8"></div><div class="minimo" style="left:38.4%"></div></div><span class="num">713</span><span class="globo">Inventario: 713 FPS de media · 1 % más lento: 422 FPS</span></div>
+        <div class="barra-fila" tabindex="0"><span class="eti">Santuario</span><div class="pista"><div class="valor" data-ancho="69.5"></div><div class="minimo" style="left:39.5%"></div></div><span class="num">764</span><span class="globo">Santuario: 764 FPS de media · 1 % más lento: 435 FPS</span></div>
+      </div>
+      <div class="leyenda-graf"><span>FPS medio</span><span class="m">1 % más lento</span></div>
+      <details class="ver-tabla"><summary>Ver como tabla</summary>
+        <div class="tabla"><table><thead><tr><th>Sitio</th><th class="n">FPS medio</th><th class="n">1 % más lento</th></tr></thead><tbody><tr><td>Castillo</td><td class="n">978</td><td class="n">192</td></tr><tr><td>Mundo 1</td><td class="n">889</td><td class="n">181</td></tr><tr><td>Mundo 2</td><td class="n">773</td><td class="n">145</td></tr><tr><td>Mundo 3</td><td class="n">849</td><td class="n">152</td></tr><tr><td>Mundo 4</td><td class="n">867</td><td class="n">416</td></tr><tr><td>Mundo 5</td><td class="n">960</td><td class="n">448</td></tr><tr><td>Mundo 6</td><td class="n">858</td><td class="n">428</td></tr><tr><td>Mundo 7</td><td class="n">794</td><td class="n">388</td></tr><tr><td>Mundo 8</td><td class="n">831</td><td class="n">419</td></tr><tr><td>Mundo 9</td><td class="n">791</td><td class="n">403</td></tr><tr><td>Mundo 10</td><td class="n">916</td><td class="n">419</td></tr><tr><td>Inventario</td><td class="n">713</td><td class="n">422</td></tr><tr><td>Santuario</td><td class="n">764</td><td class="n">435</td></tr></tbody></table></div>
+      </details>
+    </div>
+  </div>
+
+  <h3 class="revelar">Interpolación: de saltos a 30 por segundo a movimiento fluido</h3>
+  <p class="revelar">La lógica sigue a 30 pasos por segundo, como el original, pero el Caballero, los enemigos, los jefes, los proyectiles, la estela, el tajo y la luz se dibujan entre la posición del paso anterior y la del actual. Sin ello, a 60 o 120 FPS el movimiento iba a saltos. Medido andando con <code>-rendimiento</code> (y <code>-sinInterpolar</code> para comparar):</p>
+  <div class="medidor revelar" aria-label="Fotogramas en los que el dibujo se queda quieto al andar">
+    <div><span>Sin interpolar, 60 FPS</span><div class="m-pista"><div class="m-valor" style="width:50%"></div></div><b>50 %</b></div>
+    <div><span>Sin interpolar, 120 FPS</span><div class="m-pista"><div class="m-valor" style="width:74%"></div></div><b>74 %</b></div>
+    <div><span>Interpolado, 60 o 120 FPS</span><div class="m-pista"><div class="m-valor bien" style="width:0.6%"></div></div><b>0 %</b></div>
+  </div>
+  <p class="revelar" style="font-size:14px;color:var(--apagado)">Porcentaje de fotogramas en los que el dibujo del Caballero no se mueve mientras anda. No se interpola en los cambios de sala, en saltos de más de 24 px ni mientras el juego está parado por un golpe.</p>
+  <div class="codigo revelar">
+    <div class="fichero">Runtime/Game/PlayerController.cs</div>
+<pre><span class="c">// Posición de dibujo entre el paso anterior y el actual (en la misma sala y sin saltos de más de 24 px:</span>
+<span class="c">// cambios de sala, bancos, teletransportes).</span>
+<span class="k">public static</span> <span class="t">Vector2</span> Interpolate(<span class="t">RoomModel</span> room, <span class="k">float</span> x, <span class="k">float</span> y, <span class="t">RoomModel</span> prevRoom, <span class="k">float</span> px, <span class="k">float</span> py)
+{
+    <span class="k">var</span> now = RoomCoords.PixelToWorld(room, <span class="nu">0</span>, <span class="nu">0</span>) + <span class="k">new</span> <span class="t">Vector2</span>(x, -y) / RoomCoords.PixelsPerUnit;
+    <span class="k">if</span> (room != prevRoom || Mathf.Abs(px - x) &gt; <span class="nu">24</span> || Mathf.Abs(py - y) &gt; <span class="nu">24</span>) <span class="k">return</span> now;
+    <span class="k">float</span> a = TickAlpha;
+    <span class="k">return</span> now + <span class="k">new</span> <span class="t">Vector2</span>((px - x) * (<span class="nu">1</span> - a), -(py - y) * (<span class="nu">1</span> - a)) / RoomCoords.PixelsPerUnit;
+}</pre>
+  </div>
+
+  <h3 class="revelar">Menos basura por fotograma</h3>
+  <div class="rejilla r2 revelar">
+    <div>
+      <p>Con <code>-rendimiento &lt;carpeta&gt; -basura</code>, la sonda mide los bytes que se piden por fotograma en una sala con enemigos y de dónde salen, apagando grupos de componentes uno a uno. Eran unos <strong>6000 bytes por fotograma</strong>; quitando la pasada de maquetación de IMGUI (<code>useGUILayout = false</code> en los componentes con <code>OnGUI</code> que no usan GUILayout) y sin crear textos de nombres de clip y de pista en cada fotograma, quedaron unos <strong>2200</strong>, que la recolección incremental reparte sin tirones.</p>
+    </div>
+    <div class="medidor" style="margin-top:0" aria-label="Bytes de basura por fotograma">
+      <div><span>Antes</span><div class="m-pista"><div class="m-valor" style="width:100%"></div></div><b>~6000</b></div>
+      <div><span>Después</span><div class="m-pista"><div class="m-valor bien" style="width:37%"></div></div><b>~2200</b></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== 15. BUILDS ============================== -->
+<section class="seccion" id="builds">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XV · BUILDS</div>
+    <h2 class="titulo">Distribución de builds</h2>
+    <p class="entradilla">Cuatro plataformas desde un script de editor, y un CI que las compila en servidores Linux.</p>
+  </header>
+
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Plataforma</th><th>Método</th><th>Sale</th><th>Paquete del CI</th></tr></thead>
+    <tbody>
+      <tr><td><strong>macOS</strong></td><td><code>GameBuild.BuildMac</code></td><td><code>Builds/Galious.app</code></td><td><code>Galious-macOS.tar.gz</code></td></tr>
+      <tr><td><strong>Windows</strong></td><td><code>GameBuild.BuildWindows</code></td><td><code>Builds/Windows/Galious.exe</code> (x86_64)</td><td><code>Galious-Windows.zip</code></td></tr>
+      <tr><td><strong>Linux / SteamOS</strong></td><td><code>GameBuild.BuildLinux</code></td><td><code>Builds/Linux/Galious.x86_64</code> (Mono) y <code>Galious.desktop</code></td><td><code>Galious-Linux.tar.gz</code></td></tr>
+      <tr><td><strong>Web</strong></td><td><code>GameBuild.BuildWeb</code></td><td><code>Builds/Web</code> (WebGL, Brotli)</td><td><code>Galious-Web.zip</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <h4>Identidad</h4>
+      <p>«Galious - The Hollow Kingdom», de rldona, versión 1.0.0, con el icono del emblema. <strong>Sin la pantalla «Made with Unity»</strong>: Unity 6 permite quitarla también con la licencia Personal. Arranca a pantalla completa sin bordes con la resolución nativa; lo elegido en <em>Vídeo</em> se guarda.</p>
+      <p><code>-salida &lt;ruta&gt;</code> compila en otra carpeta: recompilar encima del juego mientras se juega rompe la carga de recursos.</p>
+    </div>
+    <div class="codigo" style="margin-top:0">
+      <div class="fichero">Editor/GameBuild.cs</div>
+<pre>PlayerSettings.productName = Product;
+PlayerSettings.companyName = <span class="s">"rldona"</span>;
+PlayerSettings.bundleVersion = <span class="s">"1.0.0"</span>;
+...
+<span class="c">// sin la pantalla de "Made with Unity" al arrancar (Unity 6 lo permite)</span>
+PlayerSettings.SplashScreen.show = <span class="k">false</span>;
+PlayerSettings.SplashScreen.showUnityLogo = <span class="k">false</span>;</pre>
+    </div>
+  </div>
+
+  <h3 class="revelar">En SteamOS (Steam Deck, Legion Go)</h3>
+  <ol class="tuberia revelar">
+    <li><h4>Descomprimir</h4><p><code>tar -xzf Galious-Linux.tar.gz</code>: el tar conserva los permisos de ejecución de <code>Galious.x86_64</code>. Se empaqueta sin la carpeta <code>*_BackUpThisFolder_ButDontShipItWithYourGame</code>.</p></li>
+    <li><h4>Añadir a Steam</h4><p>Modo escritorio → Steam → <em>Añadir un juego que no es de Steam</em> → <code>Galious.x86_64</code>.</p></li>
+    <li><h4>Arte de la biblioteca</h4><p>Junto a cada build va la carpeta <code>steam/</code> (desde <code>assets/steam</code>) con portada, cubierta, héroe, logo e icono: <em>Propiedades → Personalizar</em>.</p></li>
+  </ol>
+  <figure class="figura revelar" data-grupo="steam">
+    <img class="ampliable foto" src="img/portada.jpg" data-grande="img/portada.jpg" alt="Portada vertical para la biblioteca de Steam" width="600" height="900" loading="lazy" style="max-width:260px;margin:0 auto">
+    <figcaption style="text-align:center">Portada vertical (600 × 900) de <code>assets/steam</code>.</figcaption>
+  </figure>
+
+  <h3 class="revelar">CI con GameCI</h3>
+  <div class="rejilla r3 revelar">
+    <div class="tarjeta"><h4>Pruebas</h4><p><code>tests.yml</code>: en cada push a <code>main</code> y en cada pull request, las pruebas EditMode con <code>game-ci/unity-test-runner</code>, con caché de <code>Library</code>.</p></div>
+    <div class="tarjeta"><h4>Builds</h4><p><code>builds.yml</code>: a mano o al subir una etiqueta <code>v*</code>; matriz de Windows, Linux, macOS (con Mono, en Linux: no gasta minutos de macOS) y Web, empaquetado y subida a una Release.</p></div>
+    <div class="tarjeta"><h4>Wiki</h4><p><code>wiki.yml</code>: publica esta carpeta <code>wiki/</code> tal cual en GitHub Pages cuando cambia en <code>main</code>.</p></div>
+  </div>
+  <p class="revelar">Necesitan tres secretos del repo: <code>UNITY_LICENSE</code>, <code>UNITY_EMAIL</code> y <code>UNITY_PASSWORD</code>. Las builds van a una Release y no a los artefactos de Actions: cada build comprimida pesa unos 220 MB.</p>
+
+  <div class="nota revelar"><b class="etq">Migración de la partida</b>El juego se llamaba «Maze of Knight» (de DefaultCompany) y Unity guarda en una carpeta con esos nombres. La primera vez que arranca como «Galious - The Hollow Kingdom» se trae la partida de la carpeta de antes. Las capturas, el recorrido y las medidas guardan aparte (<code>partida_pruebas.json</code>) para no pisarla.</div>
+</div>
+</section>
+
+<!-- ============================== 16. PRUEBAS ============================== -->
+<section class="seccion" id="pruebas">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XVI · PRUEBAS</div>
+    <h2 class="titulo">Pruebas</h2>
+    <p class="entradilla">192 pruebas EditMode que comparan el remake con lo medido en el emulador, y un recorrido que se pasa el juego solo.</p>
+  </header>
+
+  <div class="rejilla r2 revelar">
+    <div>
+      <p>Las pruebas viven en <code>Assets/Tests/EditMode</code> y se lanzan desde <em>Window → General → Test Runner</em> o con <code>-runTests -testPlatform EditMode</code>. Las de física comparan las curvas del motor con las grabadas en openMSX; las de cada regla del remake comprueban el juego <strong>con y sin ella</strong>.</p>
+      <p>Algunos nombres hablan solos: <code>PlayerMotorTests.SwordDoesNotReachTwentyPixels</code>, <code>BossTests.HittingTheFalseKnightsMaceHurtsHim</code>, <code>PlayerMotorTests.HollowSwimFloatsSwimsAndJumpsOut</code>.</p>
+    </div>
+    <div class="tabla" style="margin-top:0"><table>
+      <thead><tr><th>Fichero</th><th class="n">Pruebas</th></tr></thead>
+      <tbody>
+        <tr><td>PlayerMotorTests</td><td class="n">46</td></tr>
+        <tr><td>EnemyTests</td><td class="n">25</td></tr>
+        <tr><td>EnemyBacklogTests</td><td class="n">13</td></tr>
+        <tr><td>BossTests</td><td class="n">9</td></tr>
+        <tr><td>InventoryTests · RoomObjectsTests · ImportedDataTests</td><td class="n">8 + 8 + 8</td></tr>
+        <tr><td>WeaponTests · BacklogTests</td><td class="n">7 + 7</td></tr>
+        <tr><td>otros 19 ficheros</td><td class="n">61</td></tr>
+        <tr><td><strong>Total</strong></td><td class="n"><strong>192</strong></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <h3 class="revelar">El recorrido automático</h3>
+  <p class="revelar"><code>-recorrido &lt;carpeta&gt;</code> lanza <code>Playthrough</code>, que se pasa el juego entero solo, con la partida guardada aparte:</p>
+  <ul class="revelar">
+    <li>pasa por todas las salas del castillo y de los diez mundos;</li>
+    <li>compra en todas las tiendas y abre los demás santuarios, y compra los mapas a los Cornifer;</li>
+    <li>se sienta en un banco, muere y deja la sombra;</li>
+    <li>invoca y vence a los diez jefes escribiendo su palabra, recoge cada Gran Llave y acaba con el final.</li>
+  </ul>
+  <p class="revelar">Apunta en <code>recorrido.txt</code> cada error o excepción con el paso en que salió (y una captura), las salas donde no se puede colocar al Caballero o queda dentro de la roca, y los generadores con tipos sin implementar. <code>-soloJefes 1,2,5</code> repite solo esos jefes.</p>
+
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Modo de prueba</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><code>-recorrido</code></td><td>el juego completo, de forma automática</td></tr>
+      <tr><td><code>-rendimiento</code> · <code>-basura</code> · <code>-sinInterpolar</code></td><td>FPS, CPU, GPU, basura y fluidez</td></tr>
+      <tr><td><code>-capturaSalas &lt;carpeta&gt; &lt;mundo&gt;</code></td><td>fotografía las salas con y sin la colisión marcada (y nadando, y tras caer en la lava)</td></tr>
+      <tr><td><code>-capturaJefes &lt;carpeta&gt; &lt;mundo&gt;</code></td><td>16 fotos de un combate en 4 s, con la caja del jefe en el registro</td></tr>
+      <tr><td><code>-capturaMenu</code> · <code>-capturaBancos</code> · <code>-capturaPersonajes</code></td><td>menús y opciones; bancos, Cornifer y tajos; personajes, efectos y una sala por tipo de enemigo</td></tr>
+      <tr><td><code>-depuracion</code></td><td>activa las teclas de depuración (K, G, F2–F11)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="revelar" style="font-size:14px;color:var(--apagado)">Las imágenes de esta wiki salen de esos modos de captura.</p>
+</div>
+</section>
+
+<!-- ============================== 17. MODIFICAR ============================== -->
+<section class="seccion" id="modificar">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XVII · MODIFICAR</div>
+    <h2 class="titulo">Cómo modificarlo</h2>
+    <p class="entradilla">Cada regla del remake es un interruptor. Apágalas y vuelves a jugar al Galious de 1987 con otra ropa.</p>
+  </header>
+
+  <ol class="tuberia revelar">
+    <li><h4>Instalar</h4><p>Unity Hub con <strong>Unity 6000.6.5f1</strong> y los módulos Mac, Windows Build Support (Mono), Linux Build Support (Mono) y WebGL.</p></li>
+    <li><h4>Abrir</h4><p><code>unity/MazeOfKnight</code>. Lo importado ya está en el repo (<code>Assets/Generated</code> desde la ROM y <code>Assets/Art/Resources/Hollow</code> desde Hollow Knight); para regenerarlo, <code>tools/</code>.</p></li>
+    <li><h4>Jugar</h4><p>Escena <code>Assets/Scenes/Game.unity</code> → Play. El menú <strong>Maze of Knight</strong> compila para cada plataforma.</p></li>
+    <li><h4>Cambiar una regla</h4><p>En <code>Assets/Scripts/Runtime/Game/RemakeRules.cs</code>, y comprobar con las pruebas.</p></li>
+  </ol>
+
+  <div class="tabla revelar"><table>
+    <thead><tr><th>Regla</th><th>Qué cambia respecto al original</th><th>De serie</th></tr></thead>
+    <tbody>
+      <tr><td><code>NoRoomChangePause</code></td><td>sin el parón de 11 ticks al cambiar de sala</td><td class="si">activada</td></tr>
+      <tr><td><code>SoloKnight</code></td><td>solo juega el Caballero; Aphrodite no está</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowTitle</code></td><td>menú principal y de pausa en lugar del ciclo de presentación</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowBenches · HollowDeath</code></td><td>bancos para guardar y curarse; sin vidas ni GAME OVER, el geo en la sombra</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowSoul</code></td><td>el alma y concentrarse para curarse, en lugar de la experiencia</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowCharms</code></td><td>los objetos pasivos de combate son amuletos con muescas</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowJournal</code></td><td>el diario del cazador</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowMaps</code></td><td>Cornifer vende el mapa, dibujado a mano</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowSlashes</code></td><td>tajos arriba y abajo, con rebote; saltar va con su botón</td><td class="si">activada</td></tr>
+      <tr><td><code>SlashBoxFromArt</code></td><td>la caja del golpe es la del tajo dibujado</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowSwim</code></td><td>se nada en la superficie del agua, que no quita vida</td><td class="si">activada</td></tr>
+      <tr><td><code>LavaRespawn</code></td><td>la lava hace daño como un enemigo y devuelve al último suelo firme</td><td class="si">activada</td></tr>
+      <tr><td><code>FalseKnightMace · HollowBosses</code></td><td>la maza del False Knight; golpes en todo el cuerpo; tocar quita 1–3 máscaras</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowMusic</code></td><td>música de Hollow Knight por zona y jefe</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowAmbience</code></td><td>gradación, oscuridad, luz y partículas de cada zona</td><td class="si">activada</td></tr>
+      <tr><td><code>HollowMessages</code></td><td>sin mensajes abajo, solo los avisos</td><td class="si">activada</td></tr>
+      <tr><td><code>HitStop · CoyoteJump · JumpBuffer</code></td><td>la sensación de Hollow Knight (F11)</td><td class="no">apagada</td></tr>
+      <tr><td><code>LeaveLadderSideways</code></td><td>soltarse de lado a media escalera</td><td class="no">apagada</td></tr>
+      <tr><td><code>BabyAlwaysPresent</code></td><td>el bebé del final siempre en una de las 10 piedras</td><td class="no">apagada</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="codigo revelar">
+    <div class="fichero">Runtime/Game/RemakeRules.cs — una regla, con su porqué</div>
+<pre><span class="c">// Original: en el agua (y en la lava) se hunde despacio hasta el fondo y todo va 4 veces más lento.</span>
+<span class="c">// Remake (como en Hollow Knight): en el agua el jugador flota en la superficie con los pies SwimDepth px</span>
+<span class="c">// por debajo y nada a izquierda y derecha; salta y cae con la velocidad de fuera.</span>
+<span class="k">public static bool</span> HollowSwim = <span class="k">true</span>;
+<span class="k">public const int</span> SwimDepth = <span class="nu">8</span>;</pre>
+  </div>
+
+  <h3 class="revelar">Por dónde empezar</h3>
+  <div class="rejilla r3 revelar">
+    <div class="tarjeta"><h4>Jugabilidad</h4><p><code>PlayerMotor.cs</code> y <code>OriginalPhysics.cs</code> (las tablas del salto) con <code>docs/player.md</code> al lado.</p></div>
+    <div class="tarjeta"><h4>Enemigos y jefes</h4><p><code>Enemies/</code> con las fichas de <code>docs/enemy_ai.md</code> y <code>docs/boss_ai.md</code>.</p></div>
+    <div class="tarjeta"><h4>Aspecto</h4><p><code>Visuals/HollowScenery.cs</code> (kits por zona), <code>HollowAmbience.cs</code> (color y partículas) y los scripts de <code>tools/hollow</code>.</p></div>
+  </div>
+  <div class="codigo revelar">
+    <div class="fichero">Runtime/Game/OriginalPhysics.cs — el salto medido en openMSX</div>
+<pre><span class="k">public const float</span> TicksPerSecond = <span class="nu">30f</span>;
+<span class="k">public const int</span> WalkSpeed = <span class="nu">2</span>;                                          <span class="c">// px por tick</span>
+<span class="k">public static readonly int</span>[] RiseTable = { <span class="nu">6</span>, <span class="nu">6</span>, <span class="nu">6</span>, <span class="nu">6</span>, <span class="nu">6</span>, <span class="nu">5</span>, <span class="nu">5</span>, <span class="nu">4</span>, <span class="nu">4</span>, <span class="nu">3</span>, <span class="nu">2</span>, <span class="nu">1</span> };   <span class="c">// 54 px</span>
+<span class="k">public static readonly int</span>[] FallTable = { <span class="nu">1</span>, <span class="nu">2</span>, <span class="nu">3</span>, <span class="nu">4</span>, <span class="nu">4</span>, <span class="nu">5</span>, <span class="nu">5</span>, <span class="nu">6</span> };                <span class="c">// y luego 6</span></pre>
+  </div>
+</div>
+</section>
+
+<!-- ============================== GLOSARIO ============================== -->
+<section class="seccion" id="glosario">
+<div class="contenedor">
+  <header class="cabecera revelar">
+    <div class="num">XVIII · GLOSARIO</div>
+    <h2 class="titulo">Glosario</h2>
+  </header>
+  <dl class="glosario revelar">
+    <dt>Tick</dt><dd>Un ciclo de la lógica del juego. El original y el remake van a 30 por segundo.</dd>
+    <dt>Fotograma (frame)</dt><dd>Una imagen dibujada. En el MSX, 60 por segundo; en el remake, 60, 120 o lo que dé la pantalla.</dd>
+    <dt>Interpolación</dt><dd>Dibujar algo entre su posición del tick anterior y la del actual, según la fracción del tick que ha pasado (<code>TickAlpha</code>).</dd>
+    <dt>ROM</dt><dd>El cartucho volcado a un fichero: el código Z80 y los datos del juego, 128 KB en bancos que se paginan.</dd>
+    <dt>openMSX</dt><dd>Emulador de MSX con depurador y Tcl: puntos de parada, lectura y escritura de RAM, capturas y grabación de registros.</dd>
+    <dt>REA / Ghidra</dt><dd>Herramientas de ingeniería inversa usadas para desensamblar y anotar el código Z80.</dd>
+    <dt>PSG</dt><dd>El chip de sonido del MSX, un AY-3-8910 de 3 canales con ruido y envolvente.</dd>
+    <dt>Tile</dt><dd>Casilla de 8 × 8 px. Su número decide si es sólido, escalera, agua, lava o fondo.</dd>
+    <dt>Caja de colisión</dt><dd>Rectángulo con el que se decide si dos cosas se tocan. Se ven con <kbd>F9</kbd>; la rejilla del terreno, con <kbd>F10</kbd>.</dd>
+    <dt>Biblia de diseño</dt><dd><code>docs/design_bible/</code>: qué hace el juego original y qué decide el remake, en 12 capítulos.</dd>
+    <dt>RemakeRules</dt><dd>Los interruptores de cada cambio respecto al original, con su motivo y su prueba.</dd>
+    <dt>LUFS</dt><dd>Unidad de sonoridad percibida; toda la música se normaliza a −14 LUFS.</dd>
+    <dt>URP 2D</dt><dd>El Universal Render Pipeline de Unity con el renderer 2D: luces 2D y posproceso.</dd>
+    <dt>GameCI</dt><dd>Acciones de GitHub para probar y compilar proyectos de Unity en servidores.</dd>
+    <dt>Máscaras, alma, geo</dt><dd>La vida, la energía para curarse y la moneda de Hollow Knight; aquí sustituyen a la vitalidad, la experiencia y las monedas.</dd>
+  </dl>
+</div>
+</section>
+
+</main>
+
+<footer class="pie">
+  <div class="contenedor">
+    <img src="img/logo.png" alt="Galious: The Hollow Kingdom" width="1080" height="390" loading="lazy">
+    <div>
+      <p><strong>Galious: The Hollow Kingdom</strong> es un proyecto personal y educativo de <a href="https://github.com/rldona">rldona</a>: aprender cómo está hecho un juego por dentro y rehacerlo en un motor moderno. No se distribuye ni se vende.</p>
+      <p><em>Knightmare II: The Maze of Galious</em> © Konami 1987. <em>Hollow Knight</em> © Team Cherry 2017: su arte, su música y sus personajes pertenecen a Team Cherry. Las capturas muestran ese arte dentro del remake.</p>
+      <p>Remake, herramientas, documentación y esta wiki: rldona.</p>
+    </div>
+  </div>
+</footer>
+
+<button class="arriba" aria-label="Volver arriba">▲</button>
+
+<div class="visor" role="dialog" aria-modal="true" aria-label="Visor de imágenes">
+  <span class="contador"></span>
+  <button class="cerrar" aria-label="Cerrar">×</button>
+  <button class="ant" aria-label="Anterior">‹</button>
+  <figure><img alt=""><figcaption></figcaption></figure>
+  <button class="sig" aria-label="Siguiente">›</button>
+</div>
+
+<script src="js/wiki.js"></script>
+</body>
+</html>
