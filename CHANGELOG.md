@@ -11,6 +11,9 @@ GitHub. Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES
   para saltar tras salir de un borde) y `JumpBuffer` (saltar pulsado justo antes de aterrizar). Las demos del original
   se reproducen sin ellas.
 
+- CI: las acciones de GitHub, en sus versiones con Node.js 24 (checkout, cache, GameCI, Releases, Pages), y los
+  trabajos fijados en Ubuntu 24.04 (`ubuntu-latest` pasa a Ubuntu 26 el 19 de octubre de 2026).
+
 ### Corregido
 - Wiki: en «la colisión bajo el arte», el castillo va primero y con su colisión; añadido el mundo 10.
 
