@@ -18,19 +18,71 @@ dentro, ingeniería inversa incluida, y rehacerlo en un motor moderno.
 📖 **Wiki de cómo se hizo:** la web de `wiki/` (GitHub Pages): arquitectura, Unity, texturas, ambiente, efectos, música,
 rendimiento, builds, enemigos, jefes y mundos.
 
-> ⚠️ Repositorio **privado**. Contiene la ROM del juego original (propiedad de Konami) y arte y música de Hollow Knight
-> (propiedad de Team Cherry), solo para uso personal y educativo. No se distribuye.
-
 ## Jugar
 
-Las builds salen del CI en la Release **Última build** del repo (Actions → *Builds* → *Run workflow*):
+Las builds salen del CI y se suben a la [Release de cada versión](https://github.com/rldona/Galious/releases) (la última, *Latest*):
 
 | Plataforma | Paquete | Cómo |
 |---|---|---|
 | **Windows** | `Galious-Windows.zip` | Descomprimir y abrir `Galious.exe` (SmartScreen: *Más información* → *Ejecutar de todas formas*). |
-| **Linux / SteamOS** | `Galious-Linux.tar.gz` | `tar -xzf Galious-Linux.tar.gz` y abrir `Galious.x86_64`. En SteamOS (Steam Deck, Legion Go): modo escritorio → Steam → *Añadir un juego que no es de Steam* → `Galious.x86_64`. Las imágenes para la biblioteca están en `steam/` (Propiedades → Personalizar). |
+| **Linux / SteamOS** | `Galious-Linux.tar.gz` | Ver [Linux y Steam](#linux-y-steam), más abajo. |
 | **macOS** | `Galious-macOS.tar.gz` | Descomprimir y abrir `Galious.app` (la primera vez, clic derecho → *Abrir*: no está firmada). |
 | **Web** | `Galious-Web.zip` | Servir la carpeta con un servidor web (`python3 -m http.server`) y abrir `index.html`. |
+
+### Linux y Steam
+
+El juego es nativo de Linux (x86_64): no necesita Proton. Sirve igual para un PC con Linux que para SteamOS (Steam Deck,
+Lenovo Legion Go…).
+
+**1. Instalar**
+
+En SteamOS, pasa al **modo escritorio** (botón Steam → *Apagar* → *Cambiar a escritorio*) y abre una terminal (Konsole).
+Descarga `Galious-Linux.tar.gz` de la Release y descomprímelo en una carpeta tuya:
+
+```bash
+mkdir -p ~/Juegos/Galious && tar -xzf ~/Descargas/Galious-Linux.tar.gz -C ~/Juegos/Galious
+```
+
+Si el ejecutable no tiene permiso de ejecución (por ejemplo, si lo copiaste desde un USB en FAT o exFAT):
+
+```bash
+chmod +x ~/Juegos/Galious/Galious.x86_64
+```
+
+Para probarlo sin Steam: `~/Juegos/Galious/Galious.x86_64`. También queda `Galious.desktop` en la carpeta, con el nombre,
+la descripción y el icono, por si quieres un acceso en el menú de aplicaciones.
+
+**2. Añadirlo a Steam como un juego más**
+
+1. Abre Steam (en SteamOS, el icono del escritorio).
+2. **Juegos → Añadir un juego que no es de Steam a mi biblioteca…** → **Buscar…** → elige
+   `~/Juegos/Galious/Galious.x86_64` → **Añadir programas seleccionados**.
+3. En la biblioteca, clic derecho sobre el juego → **Propiedades…**:
+   - Nombre: `Galious: The Hollow Kingdom`.
+   - Icono: `~/Juegos/Galious/steam/icono_1024.png`.
+   - En **Controlador**, déjalo con Steam Input activado (el mando de la Deck o la Legion Go se presenta como uno de Xbox).
+     Si la vibración no va, prueba a desactivarlo para este juego.
+
+**3. Ponerle sus imágenes en la biblioteca**
+
+La carpeta `steam/` de la build trae el arte para la biblioteca:
+
+| Imagen | Fichero | Dónde se pone |
+|---|---|---|
+| Portada vertical | `portada_600x900.png` | En la cuadrícula de la biblioteca: clic derecho sobre el juego → *Administrar* → *Establecer imagen personalizada* |
+| Cubierta horizontal | `cubierta_920x430.png` | Igual, en la vista de *Recientes* (la portada ancha) |
+| Fondo (héroe) | `heroe_1920x620.png` | En la página del juego: clic derecho sobre el fondo de arriba → *Establecer fondo personalizado* |
+| Logo | `logo.png` | En la página del juego: clic derecho sobre el fondo → *Establecer logotipo personalizado* |
+| Icono | `icono_1024.png` | En *Propiedades* (paso 2) |
+
+El arte solo se puede cambiar desde el modo escritorio; luego se ve igual en el modo juego.
+
+**4. Jugar**
+
+Vuelve al **modo juego** (icono *Volver al modo juego* del escritorio). El juego aparece en la biblioteca, en la pestaña
+**No de Steam**, y se lanza como cualquier otro: a pantalla completa con la resolución de la consola y con el mando.
+
+La partida se guarda en `~/.config/unity3d/rldona/Galious - The Hollow Kingdom/`.
 
 **Controles** (se cambian en *Opciones → Mando / Teclado*):
 
