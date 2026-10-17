@@ -86,7 +86,13 @@ namespace MazeOfKnight.EditorTools
             var report = BuildPipeline.BuildPlayer(options);
             Debug.Log($"[GameBuild] {target} {report.summary.result} {Path.GetFullPath(path)} " +
                       $"({report.summary.totalSize / (1024 * 1024)} MB, {report.summary.totalErrors} errores)");
-            if (report.summary.result == BuildResult.Succeeded) Extras(target, path);
+            if (report.summary.result == BuildResult.Succeeded)
+            {
+                Extras(target, path);
+                // GameCI v6 (CI, .github/workflows/builds.yml) da la build por buena solo si el log lo dice así, como su
+                // método de compilación por defecto.
+                Debug.Log("Build succeeded!");
+            }
             if (Application.isBatchMode && report.summary.result != BuildResult.Succeeded)
                 EditorApplication.Exit(1);
         }
