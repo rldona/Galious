@@ -16,7 +16,8 @@ GitHub. Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES
 
 ### Corregido
 - Wiki: en «la colisión bajo el arte», el castillo va primero y con su colisión; añadidos los mundos 8 y 10.
-- La prueba de las demos fallaba en el CI: escribía su traza en `logs/unity`, que no está en el repo.
+- CI de pruebas: la de las demos escribía su traza en `logs/unity`, que no está en el repo, y el resumen de resultados
+  no tenía permiso para publicarse.
 
 ## [1.0.0] - 2026-10-17
 

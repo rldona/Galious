@@ -9,6 +9,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Para publicar el resumen de resultados (checkName) hace falta crear un check run.
+permissions:
+  contents: read
+  checks: write
+
 concurrency:
   group: pruebas-${{ github.ref }}
   cancel-in-progress: true
