@@ -255,7 +255,7 @@ namespace MazeOfKnight.Game
             LastInput = input;
             // RemakeRules.JumpBuffer: una pulsación de ↑ en el aire se recuerda unos ticks.
             bool airborne = State == MotorState.Jump || State == MotorState.Fall;
-            if (!RemakeRules.JumpBuffer || !airborne && State != MotorState.Ground) jumpBuffer = 0;
+            if (!RemakeRules.JumpBuffer || Replaying || !airborne && State != MotorState.Ground) jumpBuffer = 0;
             else if (airborne && upPressed) jumpBuffer = RemakeRules.JumpBufferTicks;
             else if (airborne && jumpBuffer > 0) jumpBuffer--;
             var liquidBefore = Liquid;
@@ -449,7 +449,7 @@ namespace MazeOfKnight.Game
         {
             StartFall(0, false);
             hoverTicks = P.LedgeHoverTicks;
-            coyoteLeft = RemakeRules.CoyoteJump ? RemakeRules.CoyoteTicks : 0;
+            coyoteLeft = RemakeRules.CoyoteJump && !Replaying ? RemakeRules.CoyoteTicks : 0;
         }
 
         // RemakeRules.CoyoteJump: ticks que quedan para saltar tras salir de un borde; RemakeRules.JumpBuffer: ticks
@@ -575,6 +575,10 @@ namespace MazeOfKnight.Game
                 : FacingLeft ? (X - to, X - from, Y - top, Y - bottom)
                 : (X + from, X + to, Y - top, Y - bottom);
         }
+
+        // Reproduciendo una demo grabada del original: sin RemakeRules.CoyoteJump ni JumpBuffer (la desviarían). Lo pone
+        // PlayerController.
+        public bool Replaying;
 
         // RemakeRules.HollowSlashes: dirección del último espadazo (1 arriba, −1 abajo, 0 delante).
         public int SlashDir { get; private set; }

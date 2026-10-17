@@ -4,6 +4,16 @@ Historial de cambios de **Galious: The Hollow Kingdom**. Cada versión tiene su 
 GitHub. Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versiones con
 [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Cambiado
+- Sensación de Hollow Knight encendida: `HitStop` (el juego se para 0,1 s al acertar un golpe), `CoyoteJump` (2 ticks
+  para saltar tras salir de un borde) y `JumpBuffer` (saltar pulsado justo antes de aterrizar). Las demos del original
+  se reproducen sin ellas.
+
+### Corregido
+- Wiki: en «la colisión bajo el arte», el castillo va primero y con su colisión; añadido el mundo 10.
+
 ## [1.0.0] - 2026-10-17
 
 El proyecto en GitHub, con CI, wiki y versión web.
@@ -148,6 +158,7 @@ Ingeniería inversa de *Knightmare II: The Maze of Galious*.
 - IA de los 53 enemigos y de los 10 jefes, con el ritmo del bucle medido (30 ticks por segundo).
 - Música (driver, 21 canciones, grabación del PSG y conversión a MIDI) y los 48 efectos de sonido.
 
+[Sin publicar]: https://github.com/rldona/Galious/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/rldona/Galious/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/rldona/Galious/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/rldona/Galious/compare/v0.7.0...v0.8.0

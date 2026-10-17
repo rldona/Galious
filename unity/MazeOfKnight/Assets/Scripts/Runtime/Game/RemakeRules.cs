@@ -130,16 +130,16 @@ namespace MazeOfKnight.Game
         //
         // Original: al acertar un golpe el juego sigue sin pararse. Remake: todo el juego se para HitStopTicks ticks
         // (Hollow Knight: ~0,11 s) para que el golpe pese. No cambia lo que pasa, solo cuándo se ve.
-        public static bool HitStop = false;
+        public static bool HitStop = true;            // activado: lo ha pedido el usuario (17 de octubre de 2026)
         public const int HitStopTicks = 3;                  // 0,1 s
         // Original: al salir andando de un borde, 4 ticks quieto en el aire sin poder hacer nada. Remake: en los primeros
         // CoyoteTicks de esos 4, una pulsación de ↑ salta como desde el suelo (Hollow Knight: 0,04 s de "coyote time").
-        public static bool CoyoteJump = false;
+        public static bool CoyoteJump = true;            // activado: lo ha pedido el usuario (17 de octubre de 2026)
         public const int CoyoteTicks = 2;
         // Original: ↑ pulsado en el aire no hace nada al aterrizar (hace falta otra pulsación en el suelo). Remake: una
         // pulsación en los últimos JumpBufferTicks ticks en el aire salta al tocar el suelo si ↑ sigue pulsado
         // (Hollow Knight: búfer de salto de 0,04 s).
-        public static bool JumpBuffer = false;
+        public static bool JumpBuffer = true;            // activado: lo ha pedido el usuario (17 de octubre de 2026)
         public const int JumpBufferTicks = 2;
 
         public static bool HollowFeel

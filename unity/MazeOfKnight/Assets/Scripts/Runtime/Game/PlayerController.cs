@@ -133,7 +133,7 @@ namespace MazeOfKnight.Game
                     if (roomPause > 0) { roomPause--; continue; }   // la demo tampoco avanza mientras se carga la sala
                     var di = Demo.Next();
                     if (Demo.FirePressed) fireLatch = true;
-                    Motor.Tick(delayed);
+                    Motor.Replaying = Demo != null; Motor.Tick(delayed);
                     delayed = di;
                     Ticked?.Invoke();
                     if (Demo == null) break;
@@ -189,7 +189,7 @@ namespace MazeOfKnight.Game
                 Snapshot();
                 if (roomPause > 0) { roomPause--; continue; }
                 if (hitStop > 0) { hitStop--; continue; }   // las pulsaciones se guardan para cuando siga
-                Motor.Tick(delayed);
+                Motor.Replaying = Demo != null; Motor.Tick(delayed);
                 delayed = input;
                 attackLatch = upLatch = downLatch = false;
                 input.Attack = attack.IsPressed();

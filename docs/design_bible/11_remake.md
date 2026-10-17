@@ -200,9 +200,9 @@ En el original, en el agua (como en la lava) el jugador se hunde despacio hasta 
 
 En el original la lava quita 1 de vitalidad cada 4 ticks mientras se está dentro y el jugador se hunde hasta el fondo. El usuario pidió que se comporte como los peligros de Hollow Knight: tocarla es como chocar con un enemigo (`LavaDamage`, 2, con su invulnerabilidad y su parpadeo) y el jugador vuelve al último sitio de suelo firme desde el que cayó (el borde de la plataforma o el punto donde saltó), aunque esté en otra sala. **Activado.** Comprobado con `-capturaSalas` (mundo 8, sala 16); el registro dice adónde vuelve (`[Lava]`).
 
-## Sensación de Hollow Knight: HitStop, CoyoteJump y JumpBuffer (desactivados)
+## Sensación de Hollow Knight: HitStop, CoyoteJump y JumpBuffer (activados)
 
-Tres técnicas de la guía «Hollow Knight por dentro» (en la carpeta de Hollow Knight decodificado), pasadas a los ticks del original (30 por segundo). No cambian la física medida: solo perdonan o marcan el tiempo. **F11** activa o quita las tres a la vez (`RemakeRules.HollowFeel`) para probarlas; por defecto se juega como el original.
+Tres técnicas de la guía «Hollow Knight por dentro» (en la carpeta de Hollow Knight decodificado), pasadas a los ticks del original (30 por segundo). No cambian la física medida: solo perdonan o marcan el tiempo. **F11** (con las teclas de depuración) activa o quita las tres a la vez (`RemakeRules.HollowFeel`). Se dejaron apagadas para jugar como el original por defecto; el 17 de octubre de 2026 el usuario pidió encenderlas. Las demos grabadas del original se reproducen siempre sin ellas (`PlayerMotor.Replaying`), porque las desviarían. **Activadas.**
 
 - **HitStop:** al acertar un golpe (enemigo herido o muerto), todo el juego se para 3 ticks (0,1 s; Hollow Knight, unos 0,11 s), también la animación del jugador. Las pulsaciones de esos ticks se guardan. No se aplica en las demos.
 - **CoyoteJump:** el original deja al jugador 4 ticks quieto en el aire al salir andando de un borde, sin poder hacer nada. Con la regla, una pulsación de ↑ en los 2 primeros salta como desde el suelo (sigue a la misma altura, así que el salto es idéntico). Hollow Knight da 0,04 s.

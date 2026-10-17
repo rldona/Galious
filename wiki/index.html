@@ -665,9 +665,9 @@ importer.spritePixelsPerUnit = PixelsPerUnit;</pre>
   <div class="tabla revelar"><table>
     <thead><tr><th>Regla</th><th>Qué hace</th><th>Por defecto</th></tr></thead>
     <tbody>
-      <tr><td><code>HitStop</code></td><td>Al acertar un golpe todo el juego se para 3 ticks (0,1 s; Hollow Knight, unos 0,11 s). Las pulsaciones de esos ticks se guardan.</td><td class="no">apagada</td></tr>
-      <tr><td><code>CoyoteJump</code></td><td>El original deja 4 ticks quieto en el aire al salir de un borde; en los 2 primeros, ↑ salta como desde el suelo.</td><td class="no">apagada</td></tr>
-      <tr><td><code>JumpBuffer</code></td><td>Una pulsación en los 2 últimos ticks en el aire salta en el primer tick en el suelo.</td><td class="no">apagada</td></tr>
+      <tr><td><code>HitStop</code></td><td>Al acertar un golpe todo el juego se para 3 ticks (0,1 s; Hollow Knight, unos 0,11 s). Las pulsaciones de esos ticks se guardan.</td><td class="si">activada</td></tr>
+      <tr><td><code>CoyoteJump</code></td><td>El original deja 4 ticks quieto en el aire al salir de un borde; en los 2 primeros, ↑ salta como desde el suelo.</td><td class="si">activada</td></tr>
+      <tr><td><code>JumpBuffer</code></td><td>Una pulsación en los 2 últimos ticks en el aire salta en el primer tick en el suelo.</td><td class="si">activada</td></tr>
     </tbody>
   </table></div>
   <p class="revelar">Las tres se activan o quitan a la vez con <kbd>F11</kbd> (teclas de depuración). No cambian la física medida: solo perdonan o marcan el tiempo.</p>
@@ -1325,7 +1325,7 @@ PlayerSettings.SplashScreen.showUnityLogo = <span class="k">false</span>;</pre>
       <tr><td><code>HollowMusic</code></td><td>música de Hollow Knight por zona y jefe</td><td class="si">activada</td></tr>
       <tr><td><code>HollowAmbience</code></td><td>gradación, oscuridad, luz y partículas de cada zona</td><td class="si">activada</td></tr>
       <tr><td><code>HollowMessages</code></td><td>sin mensajes abajo, solo los avisos</td><td class="si">activada</td></tr>
-      <tr><td><code>HitStop · CoyoteJump · JumpBuffer</code></td><td>la sensación de Hollow Knight (F11)</td><td class="no">apagada</td></tr>
+      <tr><td><code>HitStop · CoyoteJump · JumpBuffer</code></td><td>la sensación de Hollow Knight (F11)</td><td class="si">activada</td></tr>
       <tr><td><code>LeaveLadderSideways</code></td><td>soltarse de lado a media escalera</td><td class="no">apagada</td></tr>
       <tr><td><code>BabyAlwaysPresent</code></td><td>el bebé del final siempre en una de las 10 piedras</td><td class="no">apagada</td></tr>
     </tbody>
