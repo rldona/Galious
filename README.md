@@ -91,4 +91,4 @@ Necesitan tres secretos del repo (*Settings → Secrets and variables → Action
 
 - *Knightmare II: The Maze of Galious* © Konami 1987.
 - *Hollow Knight* © Team Cherry 2017: arte, música y personajes.
-- Remake, herramientas y documentación: [rldona](https://github.com/rldona), con Claude.
+- Remake, herramientas y documentación: [rldona](https://github.com/rldona).
