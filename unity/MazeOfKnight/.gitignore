@@ -21,3 +21,6 @@
 
 # Ficheros del Performance Test Runner al ejecutar las pruebas
 /Assets/Resources/PerformanceTestRun*
+
+# Carpeta que deja la build web
+/Data/

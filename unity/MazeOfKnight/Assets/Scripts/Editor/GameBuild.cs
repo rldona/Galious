@@ -44,6 +44,9 @@ namespace MazeOfKnight.EditorTools
         [MenuItem("Maze of Knight/Compilar para la web", false, 43)]
         public static void BuildWeb()
         {
+            // Plantilla propia (Assets/WebGLTemplates/Galious): a pantalla completa, con la portada del juego mientras carga y
+            // sin nada de Unity.
+            PlayerSettings.WebGL.template = "PROJECT:Galious";
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
             PlayerSettings.WebGL.decompressionFallback = true;
             PlayerSettings.WebGL.initialMemorySize = 512;

@@ -215,7 +215,7 @@ namespace MazeOfKnight.Game.Visuals
             items.Add("Nueva partida");
             items.Add("Opciones");
             items.Add("Extras");
-            items.Add("Salir del juego");
+            if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add("Salir del juego");   // en el navegador no se puede cerrar
             sel = Mathf.Clamp(sel, 0, items.Count - 1);
         }
 
