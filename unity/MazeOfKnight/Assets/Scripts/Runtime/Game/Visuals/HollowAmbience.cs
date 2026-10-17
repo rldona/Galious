@@ -30,6 +30,8 @@ namespace MazeOfKnight.Game.Visuals
         public static bool Available => Resources.Load<Sprite>("Hollow/ambiente/luz") != null;
         // -ambienteNeutro: sin gradación (para medir el color de nuestras salas con tools/hollow/medir_ambiente.py).
         static readonly bool Neutral = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-ambienteNeutro") >= 0;
+        // -sinOscuridad: sin la oscuridad de los Canales, el Abismo y el Nido (capturas en las que se tiene que ver la sala entera).
+        static readonly bool NoDarkness = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-sinOscuridad") >= 0;
 
         // Partículas de una zona: textura (Hollow/ambiente), dibujos de su tira, aditiva, ritmo (por segundo), vida (s),
         // tamaño (unidades; la sala mide 16 × 10), velocidad inicial, gravedad, viento (x), giro (grados/s), color y si
@@ -280,7 +282,7 @@ namespace MazeOfKnight.Game.Visuals
             float k = 5.5f / Mathf.Max(0.01f, heroLight.sprite != null ? heroLight.sprite.bounds.size.x : 1);
             heroLight.transform.localScale = new Vector3(k, k, 1);
             var shape = DarknessShape(look.Darkness, game.Inventory.Has(Inventory.Candle));
-            darkness.enabled = shape.alpha > 0;
+            darkness.enabled = shape.alpha > 0 && !NoDarkness;
             if (darkness.enabled)
             {
                 if (shape != shownDark) { shownDark = shape; darkness.sprite = DarknessSprite(shape.inner, shape.outer, shape.alpha); }

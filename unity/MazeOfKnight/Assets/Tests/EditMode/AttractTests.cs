@@ -81,7 +81,10 @@ namespace MazeOfKnight.Tests
                     trace.AppendLine($"{tick++}\t{motor.Room.id}\t{motor.X}\t{motor.Y}\t{motor.State}\t{(input.Up ? "U" : "")}{(input.Down ? "D" : "")}{(input.Left ? "L" : "")}{(input.Right ? "R" : "")}{(input.Attack ? "S" : "")}\t{motor.Lifts.ShaftInRoom(motor.Room.id)?.Y}\t{motor.Lifts.SlideInRoom?.X}");
                     if (motor.Room.id != rooms[rooms.Count - 1]) rooms.Add(motor.Room.id);
                 }
-                System.IO.File.WriteAllText(System.IO.Path.Combine(Application.dataPath, $"../../../logs/unity/demo{demo.index}_remake.tsv"), trace.ToString());
+                // La traza, para compararla con openMSX (logs/ no está en el repo: en el CI se crea).
+                string logs = System.IO.Path.Combine(Application.dataPath, "../../../logs/unity");
+                System.IO.Directory.CreateDirectory(logs);
+                System.IO.File.WriteAllText(System.IO.Path.Combine(logs, $"demo{demo.index}_remake.tsv"), trace.ToString());
                 TestContext.WriteLine($"demo {demo.index}: {string.Join("→", rooms)}");
                 Assert.Greater(rooms.Count, 1, $"demo {demo.index} sale de su sala");
                 // Salas del original (trazas de openMSX: logs/omsx/attract y logs/omsx/lift/demo0).

@@ -15,7 +15,8 @@ GitHub. Formato inspirado en [Keep a Changelog](https://keepachangelog.com/es-ES
   trabajos fijados en Ubuntu 24.04 (`ubuntu-latest` pasa a Ubuntu 26 el 19 de octubre de 2026).
 
 ### Corregido
-- Wiki: en «la colisión bajo el arte», el castillo va primero y con su colisión; añadido el mundo 10.
+- Wiki: en «la colisión bajo el arte», el castillo va primero y con su colisión; añadidos los mundos 8 y 10.
+- La prueba de las demos fallaba en el CI: escribía su traza en `logs/unity`, que no está en el repo.
 
 ## [1.0.0] - 2026-10-17
 
