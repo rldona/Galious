@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc21c78ef52b441e8c60f48b133ff2b, type: 3}
+  m_Name: world09
+  m_EditorClassIdentifier: MazeOfKnight.Runtime::MazeOfKnight.Data.MapData
+  mapName: world09
+  e041: 10
+  bossRoom: 25
+  bossWord: XYWOLEH
+  rooms:
+  - {fileID: 11400000, guid: 6174c5d79f05c44f7be53be1aa52971f, type: 2}
+  - {fileID: 11400000, guid: 5d6e39f87e4aa42ebaf9928936d3c78e, type: 2}
+  - {fileID: 11400000, guid: 95d42e455b4254ebca3ecc9fc0f72776, type: 2}
+  - {fileID: 11400000, guid: 65face0c99ea6464f821ca0faf29d799, type: 2}
+  - {fileID: 11400000, guid: f45ff1bace6b94180a7f1d977e0d3ca0, type: 2}
+  - {fileID: 11400000, guid: bf0797096bd284c64a4f4ca1acee93ed, type: 2}
+  - {fileID: 11400000, guid: d6f19391959c243da8974046cfc4eb24, type: 2}
+  - {fileID: 11400000, guid: 6fc9cd0f0683f460e85bb282dc5928b5, type: 2}
+  - {fileID: 11400000, guid: be1374d07056649db8cf2e15516a17bd, type: 2}
+  - {fileID: 11400000, guid: 081c93134290243c5b1904a9c6c152a7, type: 2}
+  - {fileID: 11400000, guid: fa747ca7513e24033a1a8539d4b5914f, type: 2}
+  - {fileID: 11400000, guid: 000406fedd84243d4b138b56975a83a5, type: 2}
+  - {fileID: 11400000, guid: 62df34d316ca947d18ff01b523dca8ca, type: 2}
+  - {fileID: 11400000, guid: 4f5dc04d066514d52bc3f837287a4e03, type: 2}
+  - {fileID: 11400000, guid: e6e1f2bca2e19453d9376a63de33abfd, type: 2}
+  - {fileID: 11400000, guid: 037d14421fcfa479ebe4e6fc8fb23452, type: 2}
+  - {fileID: 11400000, guid: ffd47133bfe664705b542db9765531f7, type: 2}
+  - {fileID: 11400000, guid: 9e53c32bff1e44217bb419eeccac179b, type: 2}
+  - {fileID: 11400000, guid: 91a6132226bfc4e55a519cb75ff45c55, type: 2}
+  - {fileID: 11400000, guid: e1b11646f5fb14b1bbc2f2f72aa8dc31, type: 2}
+  - {fileID: 11400000, guid: c5db74252c50d442b9cb5c41e8748fe3, type: 2}
+  - {fileID: 11400000, guid: 841ba9663b0cf4c2dbd1448579ec5990, type: 2}
+  - {fileID: 11400000, guid: 43d049c6310bd492c8cb00dec7d7536d, type: 2}
+  - {fileID: 11400000, guid: 453886abe7b1c4481a29c2f418ab851a, type: 2}
+  - {fileID: 11400000, guid: 5bc12a565127b4492a8ca76bdcfadc10, type: 2}
+  - {fileID: 11400000, guid: 62db8d41df7fc4ba7b4bdd7d2e3e17e9, type: 2}
+  - {fileID: 11400000, guid: 02e21b08bea9e4fc29c0a81860341af1, type: 2}

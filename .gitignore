@@ -1,11 +1,6 @@
-# Propiedad de Konami: la ROM, el disco y todo lo derivado de ellos (graficos, mapas,
-# vistas ELF con el codigo, savestates, capturas) no se versiona. Se regenera con tools/.
-rom/
-extracted/
+# La ROM, el disco y lo derivado de ellos (propiedad de Konami) y el arte de Hollow Knight (Team Cherry) SÍ se versionan:
+# el repo es privado (rldona/Galious, decisión del usuario del 17 de octubre de 2026) y el CI compila el juego completo.
 logs/
-*.rom
-*.dsk
-*.oms
 
 # Sistema y Python
 .DS_Store
@@ -16,7 +11,3 @@ __pycache__/
 # Estado local de Claude Code
 .claude/
 
-
-# Arte de Hollow Knight (Team Cherry) importado con tools/hollow/: solo en local, no se versiona ni se reparte.
-unity/MazeOfKnight/Assets/Art/Resources/Hollow/
-unity/MazeOfKnight/Assets/Art/Resources/Hollow.meta

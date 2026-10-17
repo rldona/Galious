@@ -1,0 +1,392 @@
+{
+ "0x01": {
+  "icon_index": null,
+  "rooms": [
+   "castle:121"
+  ],
+  "effect": "arma secundaria: flecha (menu de objetos; E510 = arma elegida) [O*]"
+ },
+ "0x02": {
+  "icon_index": null,
+  "rooms": [
+   "castle:71"
+  ],
+  "effect": "arma secundaria: flecha doble (ceramica) [O*]"
+ },
+ "0x03": {
+  "icon_index": null,
+  "rooms": [
+   "castle:79"
+  ],
+  "effect": "arma secundaria: fuego rodante [O*]"
+ },
+ "0x04": {
+  "icon_index": null,
+  "rooms": [
+   "castle:147"
+  ],
+  "effect": "arma secundaria: fuego [O*]"
+ },
+ "0x07": {
+  "icon_index": 0,
+  "rooms": [
+   "world01:4",
+   "world02:2",
+   "world03:6",
+   "world04:16",
+   "world05:12",
+   "world06:17",
+   "world07:1",
+   "world08:12",
+   "world09:11",
+   "world10:2"
+  ],
+  "effect": "objeto del mundo: activa E061+mundo bit 5; se copia a su flag al entrar en el mundo (b00:463C)"
+ },
+ "0x08": {
+  "icon_index": 1,
+  "rooms": [
+   "world01:14",
+   "world02:14",
+   "world03:4",
+   "world04:3",
+   "world05:15",
+   "world06:4",
+   "world07:16",
+   "world08:10",
+   "world09:24",
+   "world10:1"
+  ],
+  "effect": "objeto del mundo: bit 6"
+ },
+ "0x09": {
+  "icon_index": 2,
+  "rooms": [
+   "world01:10",
+   "world02:11",
+   "world03:10",
+   "world04:6",
+   "world05:6",
+   "world06:6",
+   "world07:5",
+   "world08:15",
+   "world09:13",
+   "world10:3"
+  ],
+  "effect": "objeto del mundo: bit 7"
+ },
+ "0x0a": {
+  "icon_index": 3,
+  "rooms": [
+   "world01:2",
+   "world02:1",
+   "world03:9",
+   "world04:10",
+   "world05:9",
+   "world06:12",
+   "world07:9",
+   "world08:5",
+   "world09:23"
+  ],
+  "effect": "objeto del mundo: bit 4"
+ },
+ "0x0b": {
+  "icon_index": 4,
+  "rooms": [
+   "castle:96"
+  ],
+  "effect": null
+ },
+ "0x0c": {
+  "icon_index": 5,
+  "rooms": [
+   "castle:107",
+   "world01:13",
+   "world02:9",
+   "world03:13",
+   "world04:14",
+   "world05:17",
+   "world06:13",
+   "world07:10",
+   "world08:7",
+   "world09:25"
+  ],
+  "effect": "llave: desbloquea la puerta del mundo siguiente (E062+mundo bit 1); fanfarria (estado 20 en un mundo)"
+ },
+ "0x0d": {
+  "icon_index": 6,
+  "rooms": [],
+  "effect": "Necklace: Popolon (E501=1) lo necesita para la puerta del mundo 7 (b02:9A41)"
+ },
+ "0x0e": {
+  "icon_index": 7,
+  "rooms": [
+   "castle:50"
+  ],
+  "effect": "proteccion: el enemigo 0x2a no hace dano al tocarlo"
+ },
+ "0x0f": {
+  "icon_index": 8,
+  "rooms": [
+   "castle:52"
+  ],
+  "effect": "proteccion: el enemigo 0x28 no hace dano al tocarlo"
+ },
+ "0x10": {
+  "icon_index": 9,
+  "rooms": [],
+  "effect": "mundo 5, salas 12-13: el agua (tile B6) no te hunde (b03:B037) [C]"
+ },
+ "0x11": {
+  "icon_index": 10,
+  "rooms": [
+   "castle:141"
+  ],
+  "effect": "escaleras un 25 % mas rapido (b03:A6B6) [O*]"
+ },
+ "0x12": {
+  "icon_index": 11,
+  "rooms": [
+   "world02:4"
+  ],
+  "effect": "hace aparecer el puente de la sala 11 del mundo 2 (EAC8, b08:9F87) [O*]"
+ },
+ "0x13": {
+  "icon_index": 12,
+  "rooms": [
+   "castle:48"
+  ],
+  "effect": "sin el, en el mundo 8 izquierda y derecha van al reves (b03:A8A6) [O*]"
+ },
+ "0x14": {
+  "icon_index": 13,
+  "rooms": [
+   "castle:131"
+  ],
+  "effect": "en el castillo suena al entrar en ciertas salas, como pista (b00:5D24) [C]"
+ },
+ "0x15": {
+  "icon_index": 14,
+  "rooms": [
+   "castle:105"
+  ],
+  "effect": "en el menu de objetos, Return devuelve al castillo (b02:9AC9) [O*]"
+ },
+ "0x16": {
+  "icon_index": 15,
+  "rooms": [
+   "castle:75"
+  ],
+  "effect": "sin ella, la sala 6 del mundo 5 esta a oscuras (b00:55F7) [O*]"
+ },
+ "0x17": {
+  "icon_index": 16,
+  "rooms": [
+   "castle:17"
+  ],
+  "effect": "proteccion: el enemigo 0x2e no hace dano al tocarlo"
+ },
+ "0x18": {
+  "icon_index": 17,
+  "rooms": [],
+  "effect": "apaga generadores periodicos de enemigos en los mundos 7-10 (b04:6200) [C]"
+ },
+ "0x19": {
+  "icon_index": 18,
+  "rooms": [],
+  "effect": "recibes la mitad de dano (b03:B3BF) [C]"
+ },
+ "0x1a": {
+  "icon_index": 19,
+  "rooms": [
+   "castle:123"
+  ],
+  "effect": "en los mundos coloca un sprite indicador desde una tabla por mundo (b01:668F) [C][I]"
+ },
+ "0x1b": {
+  "icon_index": 20,
+  "rooms": [
+   "castle:40"
+  ],
+  "effect": "duplica la experiencia ganada (b03:B62E) [C]"
+ },
+ "0x1c": {
+  "icon_index": 21,
+  "rooms": [
+   "castle:137"
+  ],
+  "effect": null
+ },
+ "0x1d": {
+  "icon_index": 22,
+  "rooms": [
+   "castle:13"
+  ],
+  "effect": null
+ },
+ "0x1e": {
+  "icon_index": 23,
+  "rooms": [
+   "castle:66"
+  ],
+  "effect": null
+ },
+ "0x1f": {
+  "icon_index": 24,
+  "rooms": [
+   "castle:35"
+  ],
+  "effect": "Aphrodite rompe piedras como Popolon: 5 por golpe en vez de 1 (b03:B841) [O*]"
+ },
+ "0x20": {
+  "icon_index": 25,
+  "rooms": [
+   "castle:11"
+  ],
+  "effect": "CTRL congela a los enemigos ~5 s, hasta 16 veces (b02:9BB6) [O*]"
+ },
+ "0x21": {
+  "icon_index": 26,
+  "rooms": [],
+  "effect": "un golpe de espada rompe todas las piedras de la sala (b01:6398) [O*]"
+ },
+ "0x22": {
+  "icon_index": 27,
+  "rooms": [
+   "castle:140"
+  ],
+  "effect": "proteccion: el enemigo 0x31 no hace dano al tocarlo"
+ },
+ "0x23": {
+  "icon_index": 28,
+  "rooms": [],
+  "effect": "Conch Shell: Aphrodite (E501=0) la necesita para la puerta del mundo 5 (b02:9A33)"
+ },
+ "0x24": {
+  "icon_index": 29,
+  "rooms": [
+   "castle:19"
+  ],
+  "effect": "proteccion: el enemigo 0x08 no hace dano al tocarlo"
+ },
+ "0x25": {
+  "icon_index": 30,
+  "rooms": [
+   "castle:24"
+  ],
+  "effect": "mejora de arma: cada golpe resta 1 de vida extra (b03:B580..B5DB)"
+ },
+ "0x26": {
+  "icon_index": 31,
+  "rooms": [
+   "castle:43"
+  ],
+  "effect": "premio de la secuencia de direcciones del castillo; con el, escribir UMBRELLA activa algo (b02:9BEE) [C]"
+ },
+ "0x27": {
+  "icon_index": 32,
+  "rooms": [
+   "castle:2"
+  ],
+  "effect": "en el menu de objetos, el numero de un mundo abierto te lleva a su puerta (b02:9A99) [O*]"
+ },
+ "0x28": {
+  "icon_index": 33,
+  "rooms": [],
+  "effect": "escudo de nivel 1 (E097) [C]"
+ },
+ "0x29": {
+  "icon_index": 34,
+  "rooms": [
+   "castle:102"
+  ],
+  "effect": "bloquea proyectiles por delante a la altura del jugador (b09:A345) [C][I]"
+ },
+ "0x2a": {
+  "icon_index": 35,
+  "rooms": [
+   "castle:144"
+  ],
+  "effect": "necesario para entrar en la sala de dios de tipo 3 (castillo, sala 87; b02:9A84)"
+ },
+ "0x2b": {
+  "icon_index": 36,
+  "rooms": [],
+  "effect": "escudo de nivel 2 (E097 = 2)"
+ },
+ "0x2c": {
+  "icon_index": 37,
+  "rooms": [],
+  "effect": "escudo de nivel 3 (E097 = 3)"
+ },
+ "0x2d": {
+  "icon_index": null,
+  "rooms": [
+   "castle:3",
+   "castle:12",
+   "castle:16",
+   "castle:51",
+   "castle:64",
+   "castle:69",
+   "castle:70",
+   "castle:80",
+   "castle:93",
+   "castle:100",
+   "castle:103",
+   "castle:130",
+   "castle:145"
+  ],
+  "effect": "recurso: +50 al contador E046 (primera fila del marcador)"
+ },
+ "0x2e": {
+  "icon_index": null,
+  "rooms": [
+   "castle:18",
+   "castle:20",
+   "castle:27",
+   "castle:31",
+   "castle:33",
+   "castle:38",
+   "castle:45",
+   "castle:47",
+   "castle:49",
+   "castle:60",
+   "castle:74",
+   "castle:76",
+   "castle:78",
+   "castle:82",
+   "castle:83",
+   "castle:84",
+   "castle:90",
+   "castle:92",
+   "castle:94",
+   "castle:97",
+   "castle:101",
+   "castle:109",
+   "castle:119",
+   "castle:127",
+   "castle:135"
+  ],
+  "effect": "recurso: +10 al contador E048 (segunda fila)"
+ },
+ "0x2f": {
+  "icon_index": null,
+  "rooms": [
+   "castle:29",
+   "castle:42",
+   "castle:44",
+   "castle:58",
+   "castle:61",
+   "castle:77",
+   "castle:85",
+   "castle:95",
+   "castle:99",
+   "castle:112",
+   "castle:117",
+   "castle:118",
+   "castle:122",
+   "castle:134"
+  ],
+  "effect": "recurso: +2 al contador E04A (tercera fila)"
+ }
+}

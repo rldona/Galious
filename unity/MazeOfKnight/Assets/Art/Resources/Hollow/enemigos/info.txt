@@ -1,0 +1,400 @@
+clip murcielago_quieto 12.0
+clip murcielago_mover 12.0
+clip murcielago_atacar 12.0
+clip murcielago_girar 12.0
+clip murcielago_morir 12.0
+enemigo murcielago 0E centro 1.5 91 103 - contacto
+clip esqueleto_quieto 10.0
+clip esqueleto_mover 10.0
+clip esqueleto_atacar 12.0
+clip esqueleto_girar 12.0
+clip esqueleto_morir 30.0
+enemigo esqueleto 25 pies 1.25 110 102 - contacto
+clip caballero_quieto 12.0
+clip caballero_mover 10.0
+clip caballero_atacar 10.0
+clip caballero_girar 10.0
+clip caballero_morir 30.0
+enemigo caballero 0A pies 1.25 110 139 - contacto
+clip brote_quieto 12.0
+clip brote_mover 12.0
+clip brote_morir 12.0
+enemigo brote 2E pies 1.5 177 298 - contacto
+clip rodador_quieto 12.0
+clip rodador_mover 12.0
+clip rodador_morir 12.0
+enemigo rodador 18 pies 1.3 78 100 - contacto
+clip mosca_quieto 10.0
+clip mosca_mover 10.0
+clip mosca_morir 12.0
+enemigo mosca 19,37 centro 1.4 101 79 - contacto
+clip reptador_quieto 12.0
+clip reptador_mover 12.0
+clip reptador_girar 12.0
+clip reptador_morir 12.0
+enemigo reptador 02,2B pies 1.3 74 105 - contacto
+clip erizo_quieto 10.0
+clip erizo_mover 10.0
+clip erizo_atacar 12.0
+clip erizo_morir 30.0
+enemigo erizo 11 pies 1.3 72 84 - contacto
+clip espiritu_quieto 12.0
+clip espiritu_mover 12.0
+enemigo espiritu 4E centro 2.0 139 133 - contacto
+clip hada_quieto 12.0
+clip hada_mover 12.0
+enemigo hada 4F centro 1.6 55 47 - contacto
+clip fantasma_quieto 12.0
+clip fantasma_mover 12.0
+clip fantasma_girar 12.0
+clip fantasma_morir 12.0
+enemigo fantasma 26 centro 1.5 175 164 - contacto
+clip hechicero_quieto 12.0
+clip hechicero_mover 24.0
+clip hechicero_atacar 12.0
+clip hechicero_girar 12.0
+clip hechicero_morir 12.0
+enemigo hechicero 3C pies 1.5 221 171 - contacto
+clip estatua_quieto 12.0
+clip estatua_mover 12.0
+clip estatua_atacar 15.0
+clip estatua_girar 12.0
+clip estatua_morir 12.0
+enemigo estatua 23 pies 1.4 242 185 - contacto
+clip boca_quieto 12.0
+clip boca_mover 12.0
+clip boca_atacar 12.0
+clip boca_morir 12.0
+enemigo boca 3A,50 centro 1.4 94 102 - contacto
+clip torreta_quieto 12.0
+clip torreta_mover 12.0
+clip torreta_morir 12.0
+enemigo torreta 32,51 centro 1.4 300 335 - contacto
+clip pinchos_quieto 12.0
+clip pinchos_mover 12.0
+enemigo pinchos 31 pies 1.0 128 111 - contacto
+clip bloque_quieto 30.0
+clip bloque_mover 10.0
+enemigo bloque 34 centro 1.1 177 307 - contacto
+clip piston_quieto 20.0
+clip piston_mover 20.0
+enemigo piston 04 centro 1.1 83 247 - contacto
+clip monstruo_agua_quieto 12.0
+clip monstruo_agua_mover 12.0
+clip monstruo_agua_atacar 12.0
+clip monstruo_agua_girar 15.0
+clip monstruo_agua_morir 12.0
+enemigo monstruo_agua 42 centro 1.4 136 192 - contacto
+clip orbitador_quieto 12.0
+clip orbitador_mover 15.0
+clip orbitador_girar 12.0
+clip orbitador_morir 15.0
+enemigo orbitador 15 centro 1.5 130 169 - contacto
+clip acechador_quieto 30.0
+clip acechador_mover 30.0
+clip acechador_atacar 15.0
+clip acechador_morir 12.0
+enemigo acechador 10 pies 1.3 102 102 - contacto
+clip imitador_quieto 12.0
+clip imitador_mover 16.0
+clip imitador_morir 12.0
+enemigo imitador 2F pies 1.3 256 134 - contacto
+clip rebotador_quieto 12.0
+clip rebotador_mover 12.0
+clip rebotador_girar 12.0
+clip rebotador_morir 30.0
+enemigo rebotador 28 centro 1.5 278 253 - contacto
+clip embestidor_quieto 15.0
+clip embestidor_mover 15.0
+clip embestidor_morir 15.0
+enemigo embestidor 20 pies 1.3 368 603 - contacto
+clip soldado_quieto 12.0
+clip soldado_mover 12.0
+clip soldado_atacar 12.0
+clip soldado_girar 12.0
+enemigo soldado 2D pies 1.4 244 198 - contacto
+clip oruga_quieto 12.0
+clip oruga_mover 12.0
+clip oruga_morir 20.0
+enemigo oruga 2C,64 pies 1.3 74 229 - contacto
+clip uh_quieto 12.0
+clip uh_mover 24.0
+clip uh_morir 12.0
+enemigo uh 2A pies 1.4 217 241 - contacto
+clip saltador_quieto 12.0
+clip saltador_mover 12.0
+clip saltador_morir 12.0
+enemigo saltador 24 pies 1.4 112 106 - contacto
+clip babosa_quieto 12.0
+clip babosa_mover 12.0
+clip babosa_girar 12.0
+clip babosa_morir 12.0
+enemigo babosa 03 pies 1.3 103 146 - contacto
+clip mosca_divisible_quieto 12.0
+clip mosca_divisible_mover 12.0
+clip mosca_divisible_girar 12.0
+clip mosca_divisible_morir 12.0
+enemigo mosca_divisible 49,52,53 centro 1.4 322 295 - contacto
+clip emergente_quieto 12.0
+clip emergente_mover 15.0
+enemigo emergente 14 pies 1.4 509 190 - contacto
+clip burbuja_quieto 12.0
+clip burbuja_mover 12.0
+clip burbuja_morir 24.0
+enemigo burbuja 29 centro 1.5 371 127 - contacto
+clip centinela_quieto 12.0
+clip centinela_mover 12.0
+clip centinela_atacar 12.0
+clip centinela_girar 12.0
+enemigo centinela 17 centro 1.5 97 112 - contacto
+clip saltamontes_quieto 12.0
+clip saltamontes_mover 12.0
+clip saltamontes_morir 30.0
+enemigo saltamontes 07 pies 1.4 97 143 - contacto
+clip orbe_quieto 12.0
+clip orbe_mover 12.0
+clip orbe_morir 12.0
+enemigo orbe 36 centro 1.4 142 124 - contacto
+clip errante_quieto 12.0
+clip errante_mover 12.0
+clip errante_atacar 12.0
+clip errante_girar 12.0
+clip errante_morir 15.0
+enemigo errante 4C centro 1.4 283 223 - contacto
+clip bola_quieto 12.0
+clip bola_mover 12.0
+clip bola_morir 12.0
+enemigo bola 0F centro 1.3 371 310 - contacto
+clip armadillo_quieto 12.0
+clip armadillo_mover 18.0
+clip armadillo_morir 12.0
+enemigo armadillo 12 pies 1.3 96 122 - contacto
+clip aparicion_quieto 12.0
+clip aparicion_mover 12.0
+clip aparicion_atacar 20.0
+clip aparicion_girar 12.0
+enemigo aparicion 16 centro 1.5 77 270 - contacto
+clip corredor_quieto 12.0
+clip corredor_mover 12.0
+clip corredor_girar 12.0
+clip corredor_morir 12.0
+enemigo corredor 1F pies 1.3 95 128 - contacto
+clip ave_quieto 12.0
+clip ave_mover 10.0
+clip ave_girar 12.0
+clip ave_morir 12.0
+enemigo ave 27 centro 1.5 282 322 - contacto
+clip escupefuego_quieto 12.0
+clip escupefuego_mover 12.0
+clip escupefuego_atacar 12.0
+clip escupefuego_girar 12.0
+enemigo escupefuego 22 centro 1.5 97 120 - contacto
+clip hombre_llama_quieto 12.0
+clip hombre_llama_mover 12.0
+clip hombre_llama_atacar 12.0
+clip hombre_llama_girar 12.0
+clip hombre_llama_morir 15.0
+enemigo hombre_llama 0C,13 centro 1.5 308 127 - contacto
+clip sombra_quieto 12.0
+clip sombra_mover 12.0
+clip sombra_atacar 12.0
+clip sombra_girar 12.0
+clip sombra_morir 16.0
+enemigo sombra 40 centro 1.4 147 59 - contacto
+clip cabeza_quieto 18.0
+clip cabeza_mover 18.0
+clip cabeza_morir 12.0
+enemigo cabeza 69 centro 1.4 116 115 - contacto
+clip serpiente_quieto 12.0
+clip serpiente_mover 12.0
+clip serpiente_atacar 24.0
+clip serpiente_girar 12.0
+clip serpiente_morir 12.0
+enemigo serpiente 05 pies 1.3 224 236 - contacto
+clip bicho_quieto 12.0
+clip bicho_mover 12.0
+clip bicho_girar 12.0
+enemigo bicho 01 pies 1.3 289 298 - contacto
+clip patrullero_quieto 12.0
+clip patrullero_mover 12.0
+clip patrullero_atacar 12.0
+clip patrullero_girar 12.0
+clip patrullero_morir 12.0
+enemigo patrullero 43 pies 1.3 148 138 - contacto
+clip escarabajo_naranja_quieto 12.0
+clip escarabajo_naranja_mover 12.0
+enemigo escarabajo_naranja 21 pies 1.3 42 47 - contacto
+clip vadeador_quieto 12.0
+clip vadeador_mover 12.0
+clip vadeador_girar 12.0
+clip vadeador_morir 12.0
+enemigo vadeador 30 pies 1.3 252 266 - contacto
+clip trepador_quieto 10.0
+clip trepador_mover 10.0
+clip trepador_morir 30.0
+enemigo trepador 38 pies 1.3 72 84 - contacto
+clip dardo_quieto 12.0
+clip dardo_mover 12.0
+clip dardo_morir 18.0
+enemigo dardo 0B centro 1.4 58 39 - contacto
+clip pelota_quieto 20.0
+clip pelota_mover 20.0
+enemigo pelota 09 centro 1.2 26 84 - contacto
+clip pez_quieto 12.0
+clip pez_mover 12.0
+clip pez_girar 15.0
+clip pez_morir 12.0
+enemigo pez 0D centro 1.4 136 192 - contacto
+clip piedra_rodante_quieto 12.0
+clip piedra_rodante_mover 12.0
+clip piedra_rodante_girar 12.0
+clip piedra_rodante_morir 12.0
+enemigo piedra_rodante 35 pies 1.3 205 206 - contacto
+clip tejedor_quieto 12.0
+clip tejedor_mover 12.0
+clip tejedor_atacar 12.0
+clip tejedor_girar 12.0
+enemigo tejedor 3E pies 1.3 49 51 - contacto
+clip geiser_quieto 15.0
+clip geiser_mover 15.0
+enemigo geiser 08,60 pies 1.2 19 57 - contacto
+clip gota_quieto 20.0
+clip gota_mover 20.0
+enemigo gota 1B centro 1.3 5 45 - contacto
+clip salpicadura_quieto 15.0
+clip salpicadura_mover 15.0
+enemigo salpicadura 6A pies 1.2 13 42 - contacto
+clip escupitajo_quieto 20.0
+clip escupitajo_mover 20.0
+enemigo escupitajo 1A centro 1.4 65 63 - contacto
+clip pua_quieto 12.0
+clip pua_mover 12.0
+enemigo pua 1D,33 centro 1.3 88 16 90 contacto
+clip bolita_gris_quieto 20.0
+clip bolita_gris_mover 20.0
+enemigo bolita_gris 1E centro 1.3 62 49 - contacto
+clip media_luna_quieto 20.0
+clip media_luna_mover 20.0
+enemigo media_luna 3F centro 1.3 146 212 0 contacto
+clip gota_naranja_quieto 20.0
+clip gota_naranja_mover 20.0
+enemigo gota_naranja 3B,48 centro 1.3 62 49 - contacto
+clip orbe_alma_quieto 12.0
+clip orbe_alma_mover 12.0
+enemigo orbe_alma 3D centro 1.4 106 106 - contacto
+clip bola_fuego_quieto 15.0
+clip bola_fuego_mover 15.0
+enemigo bola_fuego 44,56,4A centro 1.4 72 72 - contacto
+clip bola_naranja_quieto 20.0
+clip bola_naranja_mover 20.0
+enemigo bola_naranja 45,46,41 centro 1.3 72 70 - contacto
+clip orbe_rosa_quieto 20.0
+clip orbe_rosa_mover 20.0
+enemigo orbe_rosa 4B centro 1.3 115 118 - contacto
+clip gota_agua_quieto 30.0
+clip gota_agua_mover 30.0
+enemigo gota_agua 61 centro 1.3 17 10 270 contacto
+clip bomba_quieto 20.0
+clip bomba_mover 20.0
+enemigo bomba 47 centro 1.3 65 63 - contacto
+clip espora_quieto 20.0
+clip espora_mover 20.0
+enemigo espora 4D centro 1.4 64 64 - contacto
+clip rayo_quieto 20.0
+clip rayo_mover 20.0
+enemigo rayo 62 centro 1.1 113 41 - contacto
+clip relampago_quieto 12.0
+clip relampago_mover 12.0
+enemigo relampago 06 centro 1.2 182 182 - contacto
+clip sombra_jugador_quieto 12.0
+clip sombra_jugador_mover 12.0
+clip sombra_jugador_atacar 12.0
+clip sombra_jugador_morir 16.0
+clip sombra_jugador_girar 12.0
+enemigo sombra_jugador 1F1 centro 1.4 147 59 - contacto
+clip jefe_bony_dragon_quieto 12.0
+clip jefe_bony_dragon_mover 12.0
+clip jefe_bony_dragon_atacar 12.0
+clip jefe_bony_dragon_girar 12.0
+clip jefe_bony_dragon_morir 12.0
+enemigo jefe_bony_dragon 101 pies 1.3 376 610 - contacto
+clip jefe_elusive_dragon_quieto 12.0
+clip jefe_elusive_dragon_mover 12.0
+clip jefe_elusive_dragon_atacar 12.0
+clip jefe_elusive_dragon_morir 12.0
+enemigo jefe_elusive_dragon 102 centro 1.5 308 344 - arma
+clip jefe_arlyane_quieto 12.0
+clip jefe_arlyane_mover 15.0
+clip jefe_arlyane_atacar 12.0
+clip jefe_arlyane_girar 12.0
+clip jefe_arlyane_morir 12.0
+enemigo jefe_arlyane 103 pies 1.3 266 264 - contacto
+clip jefe_sea_anemone_quieto 12.0
+clip jefe_sea_anemone_mover 12.0
+clip jefe_sea_anemone_atacar 12.0
+enemigo jefe_sea_anemone 104 centro 1.3 523 411 - contacto
+clip jefe_king_dragon_quieto 12.0
+clip jefe_king_dragon_mover 12.0
+clip jefe_king_dragon_atacar 12.0
+enemigo jefe_king_dragon 106 pies 1.3 332 188 - contacto
+clip jefe_big_lip_quieto 12.0
+clip jefe_big_lip_mover 12.0
+clip jefe_big_lip_atacar 12.0
+enemigo jefe_big_lip 107 pies 1.3 143 210 - contacto
+clip jefe_monster_quieto 12.0
+clip jefe_monster_mover 12.0
+clip jefe_monster_atacar 12.0
+clip jefe_monster_morir 12.0
+enemigo jefe_monster 108 pies 1.3 149 205 - contacto
+clip jefe_galious_quieto 12.0
+clip jefe_galious_mover 15.0
+clip jefe_galious_atacar 12.0
+clip jefe_galious_morir 12.0
+enemigo jefe_galious 109 centro 1.3 586 835 - contacto
+clip jefe_donra_quieto 14.0
+clip jefe_donra_mover 14.0
+clip jefe_donra_atacar 12.0
+clip jefe_donra_girar 14.0
+clip jefe_donra_morir 17.0
+enemigo jefe_donra 10A centro 2.2 444 330 - contacto
+clip jefe_jump_slime_quieto 12.0
+clip jefe_jump_slime_mover 12.0
+clip jefe_jump_slime_girar 12.0
+enemigo jefe_jump_slime 10B pies 1.3 329 242 - contacto
+clip hueso_quieto 30.0
+clip hueso_mover 30.0
+enemigo hueso 54,55 centro 1.3 340 85 0 contacto
+clip llamarada_quieto 15.0
+clip llamarada_mover 15.0
+enemigo llamarada 57 centro 1.3 118 142 - contacto
+clip hoz_quieto 15.0
+clip hoz_mover 15.0
+enemigo hoz 58 centro 1.3 65 263 - contacto
+clip medusita_quieto 12.0
+clip medusita_mover 12.0
+enemigo medusita 59 centro 1.4 87 71 - contacto
+clip escupitajo_mawlek_quieto 20.0
+clip escupitajo_mawlek_mover 20.0
+enemigo escupitajo_mawlek 65 centro 1.3 62 49 - contacto
+clip orbe_radiance_quieto 20.0
+clip orbe_radiance_mover 20.0
+enemigo orbe_radiance 67 centro 1.3 115 118 - contacto
+clip globo_quieto 12.0
+clip globo_mover 12.0
+clip globo_morir 15.0
+enemigo globo 68 centro 1.4 98 97 - contacto
+clip chispa_invocacion_quieto 20.0
+clip chispa_invocacion_mover 20.0
+enemigo chispa_invocacion 63 centro 1.5 173 185 - contacto
+clip fantasma_espiral_quieto 12.0
+clip fantasma_espiral_mover 12.0
+clip fantasma_espiral_girar 12.0
+clip fantasma_espiral_morir 20.0
+enemigo fantasma_espiral 39 centro 1.4 312 169 - contacto
+clip piedra_bebe_quieto 30.0
+clip piedra_bebe_mover 30.0
+clip piedra_bebe_morir 30.0
+enemigo piedra_bebe 5C pies 1.1 128 137 - contacto
+clip bebe_quieto 12.0
+clip bebe_mover 12.0
+enemigo bebe 6B pies 1.4 132 93 - contacto

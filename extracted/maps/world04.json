@@ -1,0 +1,224 @@
+{
+ "e041": 5,
+ "table": "0xad07",
+ "table_rooms": 17,
+ "reachable": 17,
+ "unreachable": [],
+ "rooms": {
+  "1": {
+   "pos": [
+    0,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 251,
+    "right": 2
+   }
+  },
+  "2": {
+   "pos": [
+    1,
+    0
+   ],
+   "links": {
+    "up": 3,
+    "down": 255,
+    "left": 1,
+    "right": 6
+   }
+  },
+  "3": {
+   "pos": [
+    1,
+    -1
+   ],
+   "links": {
+    "up": 255,
+    "down": 2,
+    "left": 255,
+    "right": 4
+   }
+  },
+  "4": {
+   "pos": [
+    2,
+    -1
+   ],
+   "links": {
+    "up": 12,
+    "down": 6,
+    "left": 3,
+    "right": 5
+   }
+  },
+  "5": {
+   "pos": [
+    3,
+    -1
+   ],
+   "links": {
+    "up": 7,
+    "down": 255,
+    "left": 4,
+    "right": 16
+   }
+  },
+  "6": {
+   "pos": [
+    2,
+    0
+   ],
+   "links": {
+    "up": 4,
+    "down": 255,
+    "left": 2,
+    "right": 255
+   }
+  },
+  "7": {
+   "pos": [
+    3,
+    -2
+   ],
+   "links": {
+    "up": 8,
+    "down": 5,
+    "left": 12,
+    "right": 15
+   }
+  },
+  "8": {
+   "pos": [
+    3,
+    -3
+   ],
+   "links": {
+    "up": 9,
+    "down": 7,
+    "left": 11,
+    "right": 17
+   }
+  },
+  "9": {
+   "pos": [
+    3,
+    -4
+   ],
+   "links": {
+    "up": 255,
+    "down": 8,
+    "left": 10,
+    "right": 13
+   }
+  },
+  "10": {
+   "pos": [
+    2,
+    -4
+   ],
+   "links": {
+    "up": 255,
+    "down": 11,
+    "left": 255,
+    "right": 9
+   }
+  },
+  "11": {
+   "pos": [
+    2,
+    -3
+   ],
+   "links": {
+    "up": 10,
+    "down": 12,
+    "left": 255,
+    "right": 8
+   }
+  },
+  "12": {
+   "pos": [
+    2,
+    -2
+   ],
+   "links": {
+    "up": 11,
+    "down": 4,
+    "left": 255,
+    "right": 7
+   }
+  },
+  "13": {
+   "pos": [
+    4,
+    -4
+   ],
+   "links": {
+    "up": 255,
+    "down": 17,
+    "left": 9,
+    "right": 255
+   }
+  },
+  "14": {
+   "pos": [
+    4,
+    0
+   ],
+   "links": {
+    "up": 16,
+    "down": 255,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "15": {
+   "pos": [
+    4,
+    -2
+   ],
+   "links": {
+    "up": 17,
+    "down": 16,
+    "left": 7,
+    "right": 255
+   }
+  },
+  "16": {
+   "pos": [
+    4,
+    -1
+   ],
+   "links": {
+    "up": 15,
+    "down": 14,
+    "left": 5,
+    "right": 255
+   }
+  },
+  "17": {
+   "pos": [
+    4,
+    -3
+   ],
+   "links": {
+    "up": 13,
+    "down": 15,
+    "left": 8,
+    "right": 255
+   }
+  }
+ },
+ "exits_to_castle": [
+  [
+   1,
+   "left",
+   "0xfb"
+  ]
+ ],
+ "boss_room": 14,
+ "boss_word": "BARECHET",
+ "after_boss_links": [],
+ "conflicts": []
+}

@@ -1,0 +1,68 @@
+{
+ "1": {
+  "world": 1,
+  "init": "8013",
+  "update": "802E",
+  "hp": 24
+ },
+ "2": {
+  "world": 3,
+  "init": "8279",
+  "update": "8170",
+  "hp": 64
+ },
+ "3": {
+  "world": 6,
+  "init": "8384",
+  "update": "83A7",
+  "hp": 56
+ },
+ "4": {
+  "world": 2,
+  "init": "846E",
+  "update": "847B",
+  "hp": 40
+ },
+ "5": {
+  "world": null,
+  "init": "8002",
+  "update": "8002",
+  "hp": 0
+ },
+ "6": {
+  "world": 9,
+  "init": "895C",
+  "update": "89A0",
+  "hp": 80
+ },
+ "7": {
+  "world": 7,
+  "init": "8627",
+  "update": "864E",
+  "hp": 64
+ },
+ "8": {
+  "world": 8,
+  "init": "8A7A",
+  "update": "8AA4",
+  "hp": 80
+ },
+ "9": {
+  "world": 10,
+  "init": "8CDD",
+  "update": "8D2D",
+  "hp": 248
+ },
+ "10": {
+  "world": 5,
+  "init": "84F0",
+  "update": "8535",
+  "hp": 72
+ },
+ "11": {
+  "world": 4,
+  "init": "87E6",
+  "update": "8815",
+  "hp": 112
+ }
+}

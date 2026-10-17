@@ -1,0 +1,2871 @@
+{
+ "tickFrames": 2,
+ "bosses": [
+  {
+   "id": 1,
+   "world": 1,
+   "name": "Bony Dragon",
+   "word": "YOMAR",
+   "room": 13,
+   "hp": 24,
+   "hpHolyWater": 12,
+   "weaponMask": 33,
+   "weapons": [
+    0,
+    1
+   ],
+   "hitTest": {
+    "kind": "box",
+    "routine": "BBAD",
+    "minSprite": 0,
+    "mineKind": "contactBox",
+    "mineRoutine": "BC69"
+   },
+   "contactTest": "box",
+   "contactDamage": 8,
+   "contactDamageCloak": 4,
+   "init": {
+    "x": 152,
+    "y": 104
+   },
+   "sprites": [
+    {
+     "id": 12,
+     "wTiles": 10,
+     "hTiles": 6,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 12,
+      "dx": 4,
+      "h": 32,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 40,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 80,
+     "h": 48
+    },
+    {
+     "id": 13,
+     "wTiles": 10,
+     "hTiles": 6,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 32,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 40,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 80,
+     "h": 48
+    },
+    {
+     "id": 14,
+     "wTiles": 10,
+     "hTiles": 7,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 32,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 12,
+      "dx": 4,
+      "h": 40,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 80,
+     "h": 56
+    },
+    {
+     "id": 15,
+     "wTiles": 10,
+     "hTiles": 6,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 32,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 40,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 80,
+     "h": 48
+    }
+   ],
+   "childTypes": [
+    84,
+    85
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 2,
+   "world": 3,
+   "name": "Elusive Dragon",
+   "word": "HAHAKLA",
+   "room": 13,
+   "hp": 64,
+   "hpHolyWater": 32,
+   "weaponMask": 9,
+   "weapons": [
+    0,
+    4
+   ],
+   "hitTest": {
+    "kind": "elusiveNeck",
+    "routine": "BB90",
+    "minSprite": 0,
+    "mineKind": "elusiveNeck",
+    "mineRoutine": "BC4B"
+   },
+   "contactTest": "elusiveNeck",
+   "contactDamage": 12,
+   "contactDamageCloak": 6,
+   "init": {
+    "x": 248,
+    "y": 32
+   },
+   "sprites": [
+    {
+     "id": 6,
+     "wTiles": 16,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 128,
+     "h": 24
+    },
+    {
+     "id": 7,
+     "wTiles": 16,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 128,
+     "h": 24
+    },
+    {
+     "id": 8,
+     "wTiles": 16,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 128,
+     "h": 24
+    },
+    {
+     "id": 9,
+     "wTiles": 16,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 128,
+     "h": 24
+    },
+    {
+     "id": 10,
+     "wTiles": 16,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 128,
+     "h": 24
+    },
+    {
+     "id": 11,
+     "wTiles": 16,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 128,
+     "h": 24
+    }
+   ],
+   "childTypes": [
+    87
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 3,
+   "world": 6,
+   "name": "Arlyane",
+   "word": "LEPHA",
+   "room": 13,
+   "hp": 56,
+   "hpHolyWater": 28,
+   "weaponMask": 41,
+   "weapons": [
+    0,
+    1,
+    4
+   ],
+   "hitTest": {
+    "kind": "box",
+    "routine": "BBAD",
+    "minSprite": 0,
+    "mineKind": "contactBox",
+    "mineRoutine": "BC69"
+   },
+   "contactTest": "box",
+   "contactDamage": 20,
+   "contactDamageCloak": 10,
+   "init": {
+    "x": 96,
+    "y": 144
+   },
+   "sprites": [
+    {
+     "id": 58,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 12,
+      "dx": 32,
+      "h": 12,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 32,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 12,
+     "w": 80,
+     "h": 40
+    },
+    {
+     "id": 59,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 12,
+      "dx": 32,
+      "h": 12,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 32,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 20,
+     "w": 80,
+     "h": 40
+    },
+    {
+     "id": 60,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 12,
+      "dx": 32,
+      "h": 12,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 32,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 12,
+     "w": 80,
+     "h": 40
+    }
+   ],
+   "childTypes": [
+    88
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 4,
+   "world": 2,
+   "name": "Sea Anemone",
+   "word": "ELOHIM",
+   "room": 9,
+   "hp": 40,
+   "hpHolyWater": 20,
+   "weaponMask": 33,
+   "weapons": [
+    0,
+    1
+   ],
+   "hitTest": {
+    "kind": "boxMinSprite",
+    "routine": "BB96",
+    "minSprite": 18,
+    "mineKind": "contactBox",
+    "mineRoutine": "BC69"
+   },
+   "contactTest": "box",
+   "contactDamage": 12,
+   "contactDamageCloak": 6,
+   "init": {
+    "x": 104,
+    "y": 72
+   },
+   "sprites": [
+    {
+     "id": 16,
+     "wTiles": 6,
+     "hTiles": 6,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 16,
+      "dx": 8,
+      "h": 32,
+      "w": 32
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 16,
+     "w": 48,
+     "h": 48
+    },
+    {
+     "id": 17,
+     "wTiles": 6,
+     "hTiles": 6,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 8,
+      "dx": 8,
+      "h": 40,
+      "w": 32
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 16,
+     "w": 48,
+     "h": 48
+    },
+    {
+     "id": 18,
+     "wTiles": 6,
+     "hTiles": 6,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 16,
+      "h": 8,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 8,
+      "dx": 8,
+      "h": 40,
+      "w": 32
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 16,
+     "w": 48,
+     "h": 48
+    },
+    {
+     "id": 19,
+     "wTiles": 6,
+     "hTiles": 6,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 16,
+      "h": 8,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 8,
+      "dx": 8,
+      "h": 40,
+      "w": 32
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 16,
+     "w": 48,
+     "h": 48
+    }
+   ],
+   "childTypes": [
+    89
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 6,
+   "world": 9,
+   "name": "King Dragon",
+   "word": "XYWOLEH",
+   "room": 25,
+   "hp": 80,
+   "hpHolyWater": 40,
+   "weaponMask": 17,
+   "weapons": [
+    0,
+    2
+   ],
+   "hitTest": {
+    "kind": "threeBoxes",
+    "routine": "BBBF",
+    "minSprite": 0,
+    "mineKind": "none",
+    "mineRoutine": "0000"
+   },
+   "contactTest": "boxOrHead",
+   "contactDamage": 36,
+   "contactDamageCloak": 18,
+   "init": {
+    "x": 88,
+    "y": 112
+   },
+   "sprites": [
+    {
+     "id": 52,
+     "wTiles": 15,
+     "hTiles": 9,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 16,
+      "dx": 16,
+      "h": 16,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": true,
+      "dy": 0,
+      "dx": 40,
+      "h": 16,
+      "w": 24
+     },
+     "weaponBox3": {
+      "valid": true,
+      "dy": 8,
+      "dx": 64,
+      "h": 16,
+      "w": 24
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 40,
+      "h": 72,
+      "w": 60
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 16,
+      "dx": 16,
+      "h": 16,
+      "w": 24
+     },
+     "knockbackRefDx": 237,
+     "w": 120,
+     "h": 72
+    },
+    {
+     "id": 53,
+     "wTiles": 15,
+     "hTiles": 9,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 16,
+      "dx": 8,
+      "h": 16,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": true,
+      "dy": 32,
+      "dx": 24,
+      "h": 16,
+      "w": 24
+     },
+     "weaponBox3": {
+      "valid": true,
+      "dy": 0,
+      "dx": 64,
+      "h": 16,
+      "w": 24
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 44,
+      "h": 64,
+      "w": 56
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 16,
+      "dx": 8,
+      "h": 24,
+      "w": 36
+     },
+     "knockbackRefDx": 68,
+     "w": 120,
+     "h": 72
+    },
+    {
+     "id": 54,
+     "wTiles": 15,
+     "hTiles": 9,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 48,
+      "dx": 0,
+      "h": 16,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": true,
+      "dy": 8,
+      "dx": 16,
+      "h": 16,
+      "w": 24
+     },
+     "weaponBox3": {
+      "valid": true,
+      "dy": 0,
+      "dx": 56,
+      "h": 16,
+      "w": 24
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 20,
+      "h": 64,
+      "w": 72
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 48,
+      "dx": 0,
+      "h": 16,
+      "w": 120
+     },
+     "knockbackRefDx": 195,
+     "w": 120,
+     "h": 72
+    }
+   ],
+   "childTypes": [
+    87,
+    105
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 7,
+   "world": 7,
+   "name": "Big Lip",
+   "word": "NAWABRA",
+   "room": 10,
+   "hp": 64,
+   "hpHolyWater": 32,
+   "weaponMask": 17,
+   "weapons": [
+    0,
+    2
+   ],
+   "hitTest": {
+    "kind": "boxMinSprite",
+    "routine": "BB9F",
+    "minSprite": 25,
+    "mineKind": "contactBoxOrHead",
+    "mineRoutine": "BC4E"
+   },
+   "contactTest": "box",
+   "contactDamage": 24,
+   "contactDamageCloak": 12,
+   "init": {
+    "x": 104,
+    "y": 64
+   },
+   "sprites": [
+    {
+     "id": 24,
+     "wTiles": 8,
+     "hTiles": 8,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 20,
+      "dx": 12,
+      "h": 24,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 64,
+     "h": 64
+    },
+    {
+     "id": 25,
+     "wTiles": 8,
+     "hTiles": 8,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 24,
+      "h": 16,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 12,
+      "h": 56,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 64,
+     "h": 64
+    },
+    {
+     "id": 26,
+     "wTiles": 8,
+     "hTiles": 8,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 24,
+      "h": 16,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 16,
+      "dx": 12,
+      "h": 36,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 64,
+     "h": 64
+    },
+    {
+     "id": 27,
+     "wTiles": 8,
+     "hTiles": 8,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 24,
+      "h": 24,
+      "w": 16
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 12,
+      "dx": 12,
+      "h": 40,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 64,
+     "h": 64
+    }
+   ],
+   "childTypes": [
+    101
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 8,
+   "world": 8,
+   "name": "Monster",
+   "word": "ASCHER",
+   "room": 7,
+   "hp": 80,
+   "hpHolyWater": 40,
+   "weaponMask": 5,
+   "weapons": [
+    0,
+    3
+   ],
+   "hitTest": {
+    "kind": "box",
+    "routine": "BBAD",
+    "minSprite": 0,
+    "mineKind": "contactBox",
+    "mineRoutine": "BC69"
+   },
+   "contactTest": "box",
+   "contactDamage": 32,
+   "contactDamageCloak": 16,
+   "init": {
+    "x": 104,
+    "y": 32
+   },
+   "sprites": [
+    {
+     "id": 36,
+     "wTiles": 6,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 0,
+     "w": 48,
+     "h": 24
+    },
+    {
+     "id": 37,
+     "wTiles": 6,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 231,
+     "w": 48,
+     "h": 24
+    },
+    {
+     "id": 38,
+     "wTiles": 6,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 79,
+     "w": 48,
+     "h": 24
+    },
+    {
+     "id": 39,
+     "wTiles": 6,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 6,
+     "w": 48,
+     "h": 24
+    },
+    {
+     "id": 40,
+     "wTiles": 6,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 0,
+     "w": 48,
+     "h": 24
+    },
+    {
+     "id": 41,
+     "wTiles": 6,
+     "hTiles": 3,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 20,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 9,
+     "w": 48,
+     "h": 24
+    },
+    {
+     "id": 42,
+     "wTiles": 4,
+     "hTiles": 4,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 28,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 4,
+      "h": 28,
+      "w": 24
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 58,
+     "w": 32,
+     "h": 32
+    }
+   ],
+   "childTypes": [
+    104
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 9,
+   "world": 10,
+   "name": "Galious",
+   "word": "HAMALECH",
+   "room": 5,
+   "hp": 248,
+   "hpHolyWater": 124,
+   "weaponMask": 63,
+   "weapons": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "hitTest": {
+    "kind": "boxNeedsCross",
+    "routine": "BBA8",
+    "minSprite": 0,
+    "mineKind": "contactBox",
+    "mineRoutine": "BC69"
+   },
+   "contactTest": "box",
+   "contactDamage": 40,
+   "contactDamageCloak": 20,
+   "init": {
+    "x": 96,
+    "y": 64
+   },
+   "sprites": [
+    {
+     "id": 55,
+     "wTiles": 7,
+     "hTiles": 7,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 40,
+      "dx": 24,
+      "h": 8,
+      "w": 8
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 8,
+      "h": 56,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 44,
+     "w": 56,
+     "h": 56
+    },
+    {
+     "id": 56,
+     "wTiles": 7,
+     "hTiles": 7,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 40,
+      "dx": 24,
+      "h": 8,
+      "w": 8
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 8,
+      "h": 56,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 97,
+     "w": 56,
+     "h": 56
+    }
+   ],
+   "childTypes": [
+    103
+   ],
+   "defeatMusic": 139,
+   "dropsKey": false
+  },
+  {
+   "id": 10,
+   "world": 5,
+   "name": "Donra",
+   "word": "HEOTYMEO",
+   "room": 17,
+   "hp": 72,
+   "hpHolyWater": 36,
+   "weaponMask": 33,
+   "weapons": [
+    0,
+    1
+   ],
+   "hitTest": {
+    "kind": "headBox",
+    "routine": "BC02",
+    "minSprite": 0,
+    "mineKind": "contactBox",
+    "mineRoutine": "BC69"
+   },
+   "contactTest": "boxOrHead",
+   "contactDamage": 16,
+   "contactDamageCloak": 8,
+   "init": {
+    "x": 112,
+    "y": 96
+   },
+   "sprites": [
+    {
+     "id": 28,
+     "wTiles": 10,
+     "hTiles": 4,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 24,
+      "h": 24,
+      "w": 84
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 80,
+     "h": 32
+    },
+    {
+     "id": 29,
+     "wTiles": 10,
+     "hTiles": 4,
+     "part": "body",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 4,
+      "dx": 24,
+      "h": 24,
+      "w": 84
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 80,
+     "h": 32
+    },
+    {
+     "id": 30,
+     "wTiles": 2,
+     "hTiles": 4,
+     "part": "head",
+     "weaponBox": {
+      "valid": true,
+      "dy": 8,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 8,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 16,
+     "h": 32
+    },
+    {
+     "id": 31,
+     "wTiles": 2,
+     "hTiles": 4,
+     "part": "head",
+     "weaponBox": {
+      "valid": true,
+      "dy": 16,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 16,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 32,
+     "w": 16,
+     "h": 32
+    },
+    {
+     "id": 32,
+     "wTiles": 2,
+     "hTiles": 4,
+     "part": "head",
+     "weaponBox": {
+      "valid": true,
+      "dy": 24,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 24,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 33,
+     "w": 16,
+     "h": 32
+    },
+    {
+     "id": 33,
+     "wTiles": 2,
+     "hTiles": 4,
+     "part": "head",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 0,
+      "h": 8,
+      "w": 24
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 210,
+     "w": 16,
+     "h": 32
+    },
+    {
+     "id": 34,
+     "wTiles": 2,
+     "hTiles": 1,
+     "part": "mouth",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 186,
+     "w": 16,
+     "h": 8
+    },
+    {
+     "id": 35,
+     "wTiles": 2,
+     "hTiles": 1,
+     "part": "mouth",
+     "weaponBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "knockbackRefDx": 58,
+     "w": 16,
+     "h": 8
+    }
+   ],
+   "childTypes": [
+    87
+   ],
+   "defeatMusic": 145,
+   "dropsKey": true
+  },
+  {
+   "id": 11,
+   "world": 4,
+   "name": "Jump Slime",
+   "word": "BARECHET",
+   "room": 14,
+   "hp": 112,
+   "hpHolyWater": 56,
+   "weaponMask": 3,
+   "weapons": [
+    0,
+    5
+   ],
+   "hitTest": {
+    "kind": "box",
+    "routine": "BBAD",
+    "minSprite": 0,
+    "mineKind": "contactBoxOrHead",
+    "mineRoutine": "BC57"
+   },
+   "contactTest": "boxOrExtra",
+   "contactDamage": 16,
+   "contactDamageCloak": 8,
+   "init": {
+    "x": 128,
+    "y": 112
+   },
+   "sprites": [
+    {
+     "id": 43,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 16,
+      "h": 8,
+      "w": 48
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 16,
+      "dx": 8,
+      "h": 8,
+      "w": 64
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 24,
+      "dx": 0,
+      "h": 16,
+      "w": 80
+     },
+     "knockbackRefDx": 119,
+     "w": 80,
+     "h": 40
+    },
+    {
+     "id": 44,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 24,
+      "h": 8,
+      "w": 32
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 12,
+      "dx": 20,
+      "h": 12,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 24,
+      "dx": 8,
+      "h": 16,
+      "w": 64
+     },
+     "knockbackRefDx": 224,
+     "w": 80,
+     "h": 40
+    },
+    {
+     "id": 45,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 24,
+      "h": 8,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 32,
+      "h": 16,
+      "w": 32
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 16,
+      "dx": 12,
+      "h": 24,
+      "w": 48
+     },
+     "knockbackRefDx": 183,
+     "w": 80,
+     "h": 40
+    },
+    {
+     "id": 46,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 32,
+      "dx": 32,
+      "h": 8,
+      "w": 24
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 16,
+      "h": 16,
+      "w": 32
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 16,
+      "dx": 20,
+      "h": 24,
+      "w": 48
+     },
+     "knockbackRefDx": 126,
+     "w": 80,
+     "h": 40
+    },
+    {
+     "id": 47,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 24,
+      "dx": 40,
+      "h": 16,
+      "w": 12
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 40,
+      "h": 24,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 8,
+      "dx": 20,
+      "h": 32,
+      "w": 32
+     },
+     "knockbackRefDx": 40,
+     "w": 80,
+     "h": 40
+    },
+    {
+     "id": 48,
+     "wTiles": 10,
+     "hTiles": 5,
+     "part": "body",
+     "weaponBox": {
+      "valid": true,
+      "dy": 24,
+      "dx": 28,
+      "h": 16,
+      "w": 12
+     },
+     "weaponBox2": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "weaponBox3": {
+      "valid": false,
+      "dy": 0,
+      "dx": 0,
+      "h": 0,
+      "w": 0
+     },
+     "contactBox": {
+      "valid": true,
+      "dy": 0,
+      "dx": 0,
+      "h": 24,
+      "w": 40
+     },
+     "contactBox2": {
+      "valid": true,
+      "dy": 8,
+      "dx": 28,
+      "h": 32,
+      "w": 32
+     },
+     "knockbackRefDx": 3,
+     "w": 80,
+     "h": 40
+    }
+   ],
+   "childTypes": [],
+   "defeatMusic": 145,
+   "dropsKey": true
+  }
+ ],
+ "invocation": {
+  "state": 15,
+  "listenWhen": "en la sala del jefe, jefe no derrotado (E061+E041 bit 2) y E0D2 = 0",
+  "scanRows": 8,
+  "keyMap": "0123456789............ABCDEFGHIJKLMNOPQRSTUVWXYZ................",
+  "bufferLength": 16,
+  "matchTail": true,
+  "caseInsensitive": true,
+  "repeatNeedsRelease": true,
+  "timeoutTicks": 0,
+  "wrongLetterResets": false,
+  "music": 129,
+  "exitsClosed": true,
+  "flashFrames": 60,
+  "flashColors": [
+   1,
+   14
+  ],
+  "flashEveryFrames": 2,
+  "dissolveFrames": 128,
+  "loadFrames": 5,
+  "totalFrames": 193
+ },
+ "summon": {
+  "countdownTicks": 65,
+  "sparkEveryTicks": 8,
+  "sparkType": 99,
+  "sparkPositions": [
+   {
+    "x": 112,
+    "y": 64
+   },
+   {
+    "x": 152,
+    "y": 96
+   },
+   {
+    "x": 144,
+    "y": 128
+   },
+   {
+    "x": 80,
+    "y": 96
+   },
+   {
+    "x": 64,
+    "y": 64
+   },
+   {
+    "x": 176,
+    "y": 64
+   },
+   {
+    "x": 96,
+    "y": 128
+   },
+   {
+    "x": 128,
+    "y": 96
+   }
+  ],
+  "sparkLifeTicks": 80,
+  "maxSparks": 4,
+  "waitAllEnemiesDead": true,
+  "music": 144,
+  "solidTileDuringFight": 240,
+  "typicalTicksToFight": 105
+ },
+ "defeat": {
+  "state": 19,
+  "sound": 132,
+  "dissolveFrames": 128,
+  "keyType": 12,
+  "keyPositions": [
+   {
+    "world": 1,
+    "y": 136,
+    "x": 128
+   },
+   {
+    "world": 2,
+    "y": 104,
+    "x": 128
+   },
+   {
+    "world": 3,
+    "y": 104,
+    "x": 128
+   },
+   {
+    "world": 4,
+    "y": 136,
+    "x": 128
+   },
+   {
+    "world": 5,
+    "y": 136,
+    "x": 112
+   },
+   {
+    "world": 6,
+    "y": 168,
+    "x": 96
+   },
+   {
+    "world": 7,
+    "y": 168,
+    "x": 128
+   },
+   {
+    "world": 8,
+    "y": 104,
+    "x": 128
+   },
+   {
+    "world": 9,
+    "y": 168,
+    "x": 128
+   }
+  ],
+  "keyMusicLoop": 145,
+  "galiousOpensRightExitTo": 6,
+  "exitsStayClosedUntilKey": true,
+  "cannotRefight": true
+ },
+ "keyFanfare": {
+  "state": 20,
+  "pickupSounds": [
+   252,
+   133
+  ],
+  "music": 139,
+  "hops": 9,
+  "hopVy": -10,
+  "hopGravity": 0.5,
+  "hopFrames": 40,
+  "messageFrames": 120,
+  "message": " I HAVE TAKEN WORLD n BACK !",
+  "totalFrames": 480,
+  "unlocksNextWorldDoor": true,
+  "restoresRoomAndExits": true
+ },
+ "deathDuringFight": {
+  "respawnInBossRoom": true,
+  "resummonWithoutWord": true,
+  "hpRestored": true
+ },
+ "damage": {
+  "swordHitsPerSwing": 1,
+  "perHit": 1,
+  "minePerHit": 2,
+  "invalidWeaponSound": 29,
+  "hitSound": 39,
+  "ceramicPierces": true,
+  "ceramicRehitTicks": 16,
+  "mineRehitTicks": 32,
+  "projectileDestroyedOnHit": true,
+  "projectileDestroyedEvenIfImmune": true,
+  "needsVisibleFlag": true
+ },
+ "contact": {
+  "playerBox": {
+   "dy": -14,
+   "dx": -6,
+   "h": 15,
+   "w": 15
+  },
+  "knockbackVx": 4,
+  "knockbackVy": -1.5,
+  "setsInvulnerable": true
+ },
+ "elusive": {
+  "xRight": 248,
+  "xLeft": 0,
+  "vxRight": -2,
+  "yByIndex": [
+   32,
+   64,
+   96,
+   128,
+   160,
+   32,
+   160,
+   64
+  ],
+  "contactDyMax": 40,
+  "weaponDyExtra": 24,
+  "weaponHeadWindow": 64
+ },
+ "children": [
+  {
+   "type": 84,
+   "parent": 1,
+   "name": "bone",
+   "motion": "ballistic",
+   "variants": [
+    {
+     "b": 0,
+     "vx": -2.25,
+     "vy": -4.0,
+     "ay": 0.1875
+    },
+    {
+     "b": 1,
+     "vx": -1.1875,
+     "vy": -3.75,
+     "ay": 0.1875
+    },
+    {
+     "b": 2,
+     "vx": -0.125,
+     "vy": -3.5,
+     "ay": 0.1875
+    }
+   ],
+   "note": "3 a la vez (B = 2, 1, 0) en (x, y) del jefe; al recibir un golpe (espada o arma) se parte en dos 0x55 (B = 0 y 1 = variantes 1 y 2 de 0x54) y desaparece; atraviesa paredes"
+  },
+  {
+   "type": 85,
+   "parent": 1,
+   "name": "bone half",
+   "motion": "ballistic",
+   "invulnerableTicks": 8
+  },
+  {
+   "type": 87,
+   "parent": 2,
+   "name": "flame row",
+   "motion": "tileRow",
+   "growPx": 8,
+   "lifeTicks": [
+    12,
+    12,
+    8
+   ],
+   "grows": [
+    "right",
+    "left",
+    "left"
+   ],
+   "sound": 28,
+   "note": "caja dy 0, alto 8, ancho 8*n (n = 1..12 o 1..8); B = 0 crece a la derecha (x fija), B = 1/2 avanza x -= 8 cada tick con el extremo derecho fijo; invulnerable"
+  },
+  {
+   "type": 88,
+   "parent": 3,
+   "name": "fan shot",
+   "motion": "aimed",
+   "speed": 3.5,
+   "angleUnitsPerTurn": 256,
+   "spreadStep": 8,
+   "spreadIndexOffset": -3,
+   "jitter": [
+    -8,
+    7
+   ],
+   "note": "6 a la vez con B = 5..0: angulo al jugador + (B-3)*8 + rnd(-8..7) (256 = vuelta)"
+  },
+  {
+   "type": 89,
+   "parent": 4,
+   "name": "spore",
+   "motion": "ballistic",
+   "gravity": 0.5,
+   "vyByIndex": [
+    -4.5,
+    -8.0,
+    -7.5,
+    -7.0,
+    -6.5,
+    -6.0,
+    -5.5,
+    -5.0
+   ],
+   "vxByIndex": [
+    3.0,
+    0.0,
+    2.0,
+    3.0,
+    1.0,
+    4.0,
+    3.0,
+    2.0
+   ],
+   "note": "B = rnd 0..15, indice B >> 1, vx negativa si B impar"
+  },
+  {
+   "type": 101,
+   "parent": 7,
+   "name": "lip shot",
+   "motion": "straight",
+   "gridVx": [
+    -1.4141,
+    -2.0,
+    -1.4141,
+    0.0,
+    0.0,
+    0.0,
+    1.4141,
+    2.0,
+    1.4141
+   ],
+   "gridVy": [
+    -1.4141,
+    0.0,
+    1.4141,
+    -2.0,
+    2.0,
+    2.0,
+    -1.4141,
+    0.0,
+    1.4141
+   ],
+   "gridSprite": [
+    176,
+    168,
+    172,
+    160,
+    164,
+    164,
+    188,
+    180,
+    184
+   ],
+   "note": "indice = 3*col + fila; col 0 si x_jug <= x, 1 si x_jug <= x+0x40, si no 2; fila igual con y"
+  },
+  {
+   "type": 103,
+   "parent": 9,
+   "name": "orb",
+   "motion": "orbit",
+   "count": 8,
+   "startAngles": [
+    0,
+    64,
+    128,
+    192,
+    32,
+    96,
+    160,
+    224
+   ],
+   "angleStep": 8,
+   "radiusStart": 50,
+   "radiusMin": 24,
+   "radiusMax": 50,
+   "radiusSpeed": 0.4375,
+   "launchSpeedMul": 8,
+   "launchDirVx": [
+    1.0,
+    0.8633,
+    0.707,
+    0.5,
+    0.0,
+    -0.5,
+    -0.707,
+    -0.8633,
+    -1.0,
+    -0.8633,
+    -0.707,
+    -0.5,
+    0.0,
+    0.5,
+    0.707,
+    0.8633
+   ],
+   "launchDirVy": [
+    0.0,
+    -0.5,
+    -0.707,
+    -0.8633,
+    -1.0,
+    -0.8633,
+    -0.707,
+    -0.5,
+    0.0,
+    0.5,
+    0.707,
+    0.8633,
+    1.0,
+    0.8633,
+    0.707,
+    0.5
+   ],
+   "launchAngleByDir": [
+    192,
+    176,
+    160,
+    144,
+    128,
+    112,
+    96,
+    80,
+    64,
+    48,
+    32,
+    16,
+    0,
+    240,
+    224,
+    208
+   ],
+   "launchOutTicks": 9,
+   "launchBackTicks": 7,
+   "note": "pos = centro + r*sin; x usa angulo + 0x40; bumeran: el centro de su orbita sale 9 ticks a 8 px/tick y vuelve 7, luego salta al centro de Galious"
+  },
+  {
+   "type": 104,
+   "parent": 8,
+   "name": "bouncing ball",
+   "motion": "bounce",
+   "speed": 4,
+   "dirs": [
+    {
+     "vy": -4,
+     "vx": -4
+    },
+    {
+     "vy": -4,
+     "vx": 4
+    },
+    {
+     "vy": 4,
+     "vx": 4
+    },
+    {
+     "vy": 4,
+     "vx": -4
+    }
+   ],
+   "waitTicks": 8,
+   "lifeTicks": 192,
+   "minY": 32
+  },
+  {
+   "type": 99,
+   "parent": 0,
+   "name": "summon spark",
+   "motion": "none",
+   "lifeTicks": 80,
+   "hwSprites": 4
+  }
+ ]
+}

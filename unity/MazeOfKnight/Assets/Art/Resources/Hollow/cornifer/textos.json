@@ -1,0 +1,104 @@
+{
+ "lines": [
+  {
+   "key": "CORNIFER_MEET",
+   "text": "¿Hmm? Ah, hola. ¿Has venido a explorar estas preciosas aunque viejas ruinas? Si es así, ignórame.<page>Me encanta explorar. Perderse y volver a encontrar el camino es un placer como ningún otro. Tú y yo tenemos una suerte increíble.<page>Soy cartógrafo, y ahora mismo estoy dibujando esta zona. ¿Te gustaría comprar lo que llevo hasta ahora?"
+  },
+  {
+   "key": "CORNIFER_PROMPT",
+   "text": "¿Comprar un mapa de la zona?"
+  },
+  {
+   "key": "CORNIFER_NOT_ENOUGH",
+   "text": "¿No tienes geo suficiente? Ah, lo entiendo. Te daría el mapa como regalo, pero no creo que a mi esposa le haga mucha gracia. «Toda nuestra comida es geo», o eso dicen."
+  },
+  {
+   "key": "CORNIFER_REFUSE",
+   "text": "¿Entonces no te interesa? Eso es perfectamente comprensible. Explorar sin mapas, buscando el camino a través de cavernas desconocidas... Muy nutritivo para el alma.<page>Quizás nos volvamos a encontrar en nuestros viajes."
+  },
+  {
+   "key": "CORNIFER_AGAIN",
+   "text": "¿Hmm? ¿Has cambiado de idea sobre comprar un mapa?"
+  },
+  {
+   "key": "CROSSROADS_GREET",
+   "text": "¡Hola otra vez! ¿Todavía recorres estos fantásticos caminos? ¡Imagínate cómo debían de ser durante los mejores tiempos del reino, con mucho tráfico y llenos de vida! Ojalá lo hubiera visto.<page>Ah, y quizás debería preguntar... ¿te interesa comprar una copia de mi mapa de esta zona?"
+  },
+  {
+   "key": "CROSSROADS_BOUGHT",
+   "text": "¿Qué te parece mi mapa? He intentado detallarlo tanto como he podido, pero todo mapa es un trabajo en progreso.<page>Si quieres completar parte del mapa por tu cuenta, puedes comprarle herramientas de cartografía a mi esposa, en Bocasucia. Hemos abierto una tiendecita para llegar a fin de mes."
+  },
+  {
+   "key": "GREENPATH_GREET",
+   "text": "¿No crea esta zona un cierto contraste con los Cruces? Un lugar tan húmedo y lleno de vida. Los caminos tuercen y giran de las formas más maravillosas.<page>Lo hice lo mejor que pude para cartografiar la zona de delante, aunque debo admitir que algunos de los habitantes resultaron bastante molestos."
+  },
+  {
+   "key": "GREENPATH_BOUGHT",
+   "text": "Me crucé con otra viajera mientras bajaba aquí. Intenté llamarla mientras pasaba de largo, pero apenas me miró. No parece que aprecie los mapas como tú o como yo, obviamente."
+  },
+  {
+   "key": "WATERWAYS_GREET",
+   "text": "¡Jo, jo! ¿A que estas vías fluviales son emocionantes? Un laberinto de tuberías y túneles.<page>No podría haber pedido mejor sitio para emplear mis talentos. Es todo tan ordenado, tan calculado, nada parecido a la primitiva irregularidad de esas cavernas. <page>Ayy, pero es tan triste. Mi trompa me dice que estamos acercándonos a esos Páramos Fúngicos y siento que mi aventura llega a su fin. Supongo que daré este mapa por finalizado."
+  },
+  {
+   "key": "WATERWAYS_BOUGHT",
+   "text": "Apuesto a que estas tuberías y cámaras se usaban para transportar los desechos de la ciudad. Debe haber apestado un montón aquí abajo. Por suerte, la lluvia incesante las ha limpiado."
+  },
+  {
+   "key": "FOG_CANYON_GREET",
+   "text": "¡Jo, jo! Por extraño que sea Hallownest, estas cuevas cuentan con un nivel de rareza completamente nuevo.<page>¿Has visto la puerta oscura de abajo? Resulta bastante perturbador estar cerca. Hice lo que pude para evitarla.<page>Por suerte encontré otra ruta para entrar, aunque me chamusqué un poco tras pasar por algo de ácido."
+  },
+  {
+   "key": "FOG_CANYON_BOUGHT",
+   "text": "Hay un edificio enorme justo debajo de aquí, en medio de un lago, y es una maravilla de observar.<page>Intenté entrar, pero se ha convertido en un nido para esas criaturas pringosas y transparentes.<page>Ugh. Son tan... asquerosos, y te dan una desagradable sacudida si los tocas."
+  },
+  {
+   "key": "MINES_GREET",
+   "text": "¿Vienes a escalar la montaña? He oído historias sobre un camino hacia la cumbre. Demasiado lejos para mí y no me gustan las alturas."
+  },
+  {
+   "key": "MINES_BOUGHT",
+   "text": "Antes me pinché con uno de esos cristales de ahí. Están increíblemente afilados y salen por todos lados. Yo que tú tendría cuidado si te diriges hacia arriba."
+  },
+  {
+   "key": "CITY_GREET",
+   "text": "Menudo cambio con esas cavernas retorcidas. La lluvia hace que el lugar parezca triste, pero la arquitectura es simplemente espléndida.<page>Cartografiar un espacio tan diferente es un gran reto, pero uno que he emprendido con entusiasmo.<page>¿Igual te interesaría comprar una copia de lo que tengo hasta ahora?"
+  },
+  {
+   "key": "CITY_BOUGHT",
+   "text": "Ambos hemos caminado mucho para llegar a este gran lugar. Mientras estoy aquí, debo acordarme de conseguir una o dos baratijas para Iselda."
+  },
+  {
+   "key": "FUNGAL_WASTES_GREET",
+   "text": "Ayy mi pequeño amigo, me has pillado en el momento perfecto. Acabo de terminar de cartografiar estas nocivas cavernas.<page>Muchas especies muy territoriales hacen de esta zona su hogar. Te sugiero evitarlas en la medida de lo posible.<page>Unas criaturas extrañas y delgadas me dieron un buen susto algo más abajo. Parecían un grupo inteligente.<page>En mi juventud me hubiera adentrado en sus cavernas, pero me temo que con mi físico envejecido sería incapaz de escapar si resultan ser agresivos."
+  },
+  {
+   "key": "FUNGAL_WASTES_BOUGHT",
+   "text": "En estas cavernas hay un potente hedor que sospecho que es peor para mí que para ti. Mi trompa es bastante sensible, pero parece que tú no posees órgano olfativo de ningún tipo.<page>¿Significa eso que no puedes oler nada?"
+  },
+  {
+   "key": "ABYSS_GREET",
+   "text": "Estas cavernas son bastante antiguas. ¿Puedes sentir la carga del reino que estas soportan? Es algo que pesa mucho.<page>Reconozco que no muchos se adentrarían a esta profundidad. Tú y yo somos pioneros, al menos en la historia reciente."
+  },
+  {
+   "key": "ABYSS_BOUGHT",
+   "text": "Volver de aquí a la tienda es una larga caminata. Descansaré un rato más las piernas por aquí.<page>¡Pero no mucho! No haré que Iselda se preocupe por mí."
+  },
+  {
+   "key": "DEEPNEST_GREET",
+   "text": "Este lu... lugar me da escalofríos. Aparecen malvadas criaturas de to... todos lados y los pasajes son un oscuro laberinto.<page>Si no te has preparado bien, te aconsejo que te vayas. Aunque si te sientes fuerte para bajar, ¿querrías comprar mi mapa?"
+  },
+  {
+   "key": "DEEPNEST_BOUGHT",
+   "text": "Va... vaya madriguera de bestias furiosas más horrible. Va a suponer un gran esfuerzo salir de este oscuro hoyo. Creo que... me voy a esconder aquí un rato más."
+  },
+  {
+   "key": "OUTSKIRTS_GREET",
+   "text": "¿A qué es un hoyo acogedor? Me he estado aventurando en el yermo de al lado y pensé que un momento de descanso es lo que tocaba.<page>Los paisajes de alrededor son más bien serenos en este lado de la ciudad, aunque los habitantes siguen tan feroces como siempre."
+  },
+  {
+   "key": "OUTSKIRTS_BOUGHT",
+   "text": "A juzgar por estas paredes, parece que los habitantes de la ciudad no querían seguir adentrándose en las cavernas. Me pregunto qué les habrá mantenido a raya..."
+  }
+ ]
+}

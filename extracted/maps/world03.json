@@ -1,0 +1,214 @@
+{
+ "e041": 4,
+ "table": "0xacc7",
+ "table_rooms": 16,
+ "reachable": 16,
+ "unreachable": [],
+ "rooms": {
+  "1": {
+   "pos": [
+    0,
+    0
+   ],
+   "links": {
+    "up": 2,
+    "down": 252,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "2": {
+   "pos": [
+    0,
+    -1
+   ],
+   "links": {
+    "up": 7,
+    "down": 1,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "3": {
+   "pos": [
+    -1,
+    -2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 4,
+    "right": 7
+   }
+  },
+  "4": {
+   "pos": [
+    -2,
+    -2
+   ],
+   "links": {
+    "up": 4,
+    "down": 255,
+    "left": 255,
+    "right": 3
+   }
+  },
+  "5": {
+   "pos": [
+    1,
+    -2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 7,
+    "right": 6
+   }
+  },
+  "6": {
+   "pos": [
+    2,
+    -2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 5,
+    "right": 255
+   }
+  },
+  "7": {
+   "pos": [
+    0,
+    -2
+   ],
+   "links": {
+    "up": 8,
+    "down": 2,
+    "left": 3,
+    "right": 5
+   }
+  },
+  "8": {
+   "pos": [
+    0,
+    -3
+   ],
+   "links": {
+    "up": 9,
+    "down": 7,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "9": {
+   "pos": [
+    0,
+    -4
+   ],
+   "links": {
+    "up": 10,
+    "down": 8,
+    "left": 255,
+    "right": 12
+   }
+  },
+  "10": {
+   "pos": [
+    0,
+    -5
+   ],
+   "links": {
+    "up": 11,
+    "down": 9,
+    "left": 255,
+    "right": 16
+   }
+  },
+  "11": {
+   "pos": [
+    0,
+    -6
+   ],
+   "links": {
+    "up": 255,
+    "down": 10,
+    "left": 255,
+    "right": 14
+   }
+  },
+  "12": {
+   "pos": [
+    1,
+    -4
+   ],
+   "links": {
+    "up": 16,
+    "down": 255,
+    "left": 9,
+    "right": 255
+   }
+  },
+  "13": {
+   "pos": [
+    1,
+    -8
+   ],
+   "links": {
+    "up": 255,
+    "down": 15,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "14": {
+   "pos": [
+    1,
+    -6
+   ],
+   "links": {
+    "up": 15,
+    "down": 16,
+    "left": 11,
+    "right": 255
+   }
+  },
+  "15": {
+   "pos": [
+    1,
+    -7
+   ],
+   "links": {
+    "up": 13,
+    "down": 14,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "16": {
+   "pos": [
+    1,
+    -5
+   ],
+   "links": {
+    "up": 14,
+    "down": 12,
+    "left": 10,
+    "right": 255
+   }
+  }
+ },
+ "exits_to_castle": [
+  [
+   1,
+   "down",
+   "0xfc"
+  ]
+ ],
+ "boss_room": 13,
+ "boss_word": "HAHAKLA",
+ "after_boss_links": [],
+ "conflicts": [
+  "4.up -> 4: ya colocada en (-2, -2), aqui seria (-2, -3)"
+ ]
+}

@@ -1,0 +1,275 @@
+{
+ "shafts": [
+  {
+   "id": 6,
+   "rooms": [
+    80,
+    88,
+    101,
+    113,
+    126,
+    135,
+    146
+   ],
+   "startRoom": 80,
+   "startIndex": 0,
+   "y": 120,
+   "x": 112,
+   "speed": 512,
+   "topRoom": 80,
+   "topY": 120,
+   "bottomRoom": 146,
+   "bottomY": 144
+  },
+  {
+   "id": 5,
+   "rooms": [
+    68,
+    82,
+    89,
+    103,
+    116,
+    129,
+    138
+   ],
+   "startRoom": 68,
+   "startIndex": 0,
+   "y": 88,
+   "x": 112,
+   "speed": 512,
+   "topRoom": 68,
+   "topY": 88,
+   "bottomRoom": 138,
+   "bottomY": 120
+  },
+  {
+   "id": 4,
+   "rooms": [
+    17,
+    28,
+    36,
+    49,
+    56
+   ],
+   "startRoom": 17,
+   "startIndex": 0,
+   "y": 56,
+   "x": 112,
+   "speed": 512,
+   "topRoom": 17,
+   "topY": 56,
+   "bottomRoom": 56,
+   "bottomY": 120
+  },
+  {
+   "id": 3,
+   "rooms": [
+    8,
+    16,
+    26,
+    35,
+    46
+   ],
+   "startRoom": 8,
+   "startIndex": 0,
+   "y": 88,
+   "x": 112,
+   "speed": 512,
+   "topRoom": 8,
+   "topY": 88,
+   "bottomRoom": 46,
+   "bottomY": 144
+  },
+  {
+   "id": 2,
+   "rooms": [
+    14,
+    24,
+    34
+   ],
+   "startRoom": 14,
+   "startIndex": 0,
+   "y": 88,
+   "x": 112,
+   "speed": 512,
+   "topRoom": 14,
+   "topY": 88,
+   "bottomRoom": 34,
+   "bottomY": 152
+  },
+  {
+   "id": 1,
+   "rooms": [
+    13,
+    22,
+    33,
+    41,
+    52
+   ],
+   "startRoom": 13,
+   "startIndex": 0,
+   "y": 152,
+   "x": 112,
+   "speed": 512,
+   "topRoom": 13,
+   "topY": 152,
+   "bottomRoom": 52,
+   "bottomY": 120
+  }
+ ],
+ "slides": [
+  {
+   "room": 5,
+   "y": 88,
+   "x": 64,
+   "speed": 512,
+   "minX": 64,
+   "maxX": 160
+  },
+  {
+   "room": 7,
+   "y": 88,
+   "x": 32,
+   "speed": 512,
+   "minX": 32,
+   "maxX": 192
+  },
+  {
+   "room": 8,
+   "y": 56,
+   "x": 32,
+   "speed": 512,
+   "minX": 48,
+   "maxX": 192
+  },
+  {
+   "room": 10,
+   "y": 88,
+   "x": 80,
+   "speed": 512,
+   "minX": 80,
+   "maxX": 144
+  },
+  {
+   "room": 22,
+   "y": 88,
+   "x": 32,
+   "speed": 512,
+   "minX": 32,
+   "maxX": 192
+  },
+  {
+   "room": 24,
+   "y": 88,
+   "x": 48,
+   "speed": 512,
+   "minX": 48,
+   "maxX": 192
+  },
+  {
+   "room": 28,
+   "y": 120,
+   "x": 32,
+   "speed": 512,
+   "minX": 32,
+   "maxX": 192
+  },
+  {
+   "room": 36,
+   "y": 88,
+   "x": 48,
+   "speed": 512,
+   "minX": 48,
+   "maxX": 176
+  },
+  {
+   "room": 37,
+   "y": 120,
+   "x": 32,
+   "speed": 512,
+   "minX": 48,
+   "maxX": 160
+  },
+  {
+   "room": 43,
+   "y": 120,
+   "x": 48,
+   "speed": 512,
+   "minX": 48,
+   "maxX": 176
+  },
+  {
+   "room": 46,
+   "y": 88,
+   "x": 32,
+   "speed": 512,
+   "minX": 32,
+   "maxX": 192
+  },
+  {
+   "room": 102,
+   "y": 88,
+   "x": 64,
+   "speed": 512,
+   "minX": 64,
+   "maxX": 144
+  },
+  {
+   "room": 126,
+   "y": 120,
+   "x": 32,
+   "speed": 512,
+   "minX": 48,
+   "maxX": 176
+  },
+  {
+   "room": 129,
+   "y": 120,
+   "x": 48,
+   "speed": 512,
+   "minX": 48,
+   "maxX": 176
+  },
+  {
+   "room": 140,
+   "y": 88,
+   "x": 32,
+   "speed": 512,
+   "minX": 32,
+   "maxX": 144
+  }
+ ],
+ "demo0": {
+  "id": 6,
+  "room": 146,
+  "up": true,
+  "index": 6,
+  "y": 64,
+  "speed": -512
+ },
+ "box": {
+  "width": 32,
+  "height": 16,
+  "standDxMin": -2,
+  "standDxMax": 34,
+  "standDyMin": 0,
+  "standDyMax": 7,
+  "sideDyMin": 1,
+  "sideDyMax": 31,
+  "pushLeftX": -8,
+  "pushLeftFrom": -8,
+  "pushLeftTo": -5,
+  "pushRightX": 40,
+  "pushRightFrom": 37,
+  "pushRightTo": 40,
+  "headDyMin": 24,
+  "headDyMax": 31,
+  "headPushY": 32,
+  "leaveCooldownTicks": 7,
+  "roomTopY": 40,
+  "roomBottomY": 192,
+  "enterFromBelowY": 185,
+  "enterFromAboveY": 40,
+  "notes": "b03:B0C2, por cada ascensor de la sala, despues de mover al jugador. Sin efecto durante la espera tras bajarse (7 ticks). Con los pies 1..31 px por debajo de la cara de arriba: x - lx en -8..-5 -> x = lx - 8; en 37..40 -> x = lx + 40. Con x - lx en -2..34: pies 0..7 px por debajo -> encima (si ya lo estaba, o si no hay suelo de tiles bajo los pies); 24..31 px por debajo y sin suelo de tiles -> y = ly + 32 (lo empuja por debajo). Al dejar de estar encima empieza la espera."
+ }
+}

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc21c78ef52b441e8c60f48b133ff2b, type: 3}
+  m_Name: world02
+  m_EditorClassIdentifier: MazeOfKnight.Runtime::MazeOfKnight.Data.MapData
+  mapName: world02
+  e041: 3
+  bossRoom: 9
+  bossWord: ELOHIM
+  rooms:
+  - {fileID: 11400000, guid: 4de872fa1f1c84024900d4e0e3dd2497, type: 2}
+  - {fileID: 11400000, guid: 29e4a0eb374ea46b6a3d5b22eebc21e9, type: 2}
+  - {fileID: 11400000, guid: 3dc8af385a5d64068bd62eecc6d9fee2, type: 2}
+  - {fileID: 11400000, guid: 781dcaf71d63a4135aaa3870874396cb, type: 2}
+  - {fileID: 11400000, guid: b5bf345ad05e141858ef285b8e704a7f, type: 2}
+  - {fileID: 11400000, guid: c6230fd03346f49db8bfe1ab10f3f0ef, type: 2}
+  - {fileID: 11400000, guid: 6aa069e13e94b4aecb9bee3448fb00ac, type: 2}
+  - {fileID: 11400000, guid: 5156e97fdef8441589178ca9626e1b03, type: 2}
+  - {fileID: 11400000, guid: add907152ea494341b353e7c2858932b, type: 2}
+  - {fileID: 11400000, guid: 221b47c04994b40199a5aba35e2c9350, type: 2}
+  - {fileID: 11400000, guid: 6e96b30acb0f844eaa6c3dc50222edb0, type: 2}
+  - {fileID: 11400000, guid: 1e537aeddf976447193ae83b3864a8ab, type: 2}
+  - {fileID: 11400000, guid: 9cd84fbefa7c141038157f059e8aa68c, type: 2}
+  - {fileID: 11400000, guid: b895eab57d78e48a685778dca8830285, type: 2}
+  - {fileID: 11400000, guid: 96435ee2acc0649ecaa495712bccb097, type: 2}

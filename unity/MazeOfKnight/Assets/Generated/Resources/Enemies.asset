@@ -1,0 +1,1799 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23268ca0d4ab4b33b8f8be0147dfb8d, type: 3}
+  m_Name: Enemies
+  m_EditorClassIdentifier: MazeOfKnight.Runtime::MazeOfKnight.Data.EnemyCatalog
+  enemies:
+  - type: 1
+    hp: 4
+    invulnerable: 0
+    damage: 8
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 6
+    box: 0
+  - type: 2
+    hp: 1
+    invulnerable: 0
+    damage: 5
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 3
+    box: 117
+  - type: 3
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 5
+  - type: 4
+    hp: 1
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 34
+  - type: 5
+    hp: 3
+    invulnerable: 0
+    damage: 7
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 5
+    box: 42
+  - type: 6
+    hp: 0
+    invulnerable: 1
+    damage: 18
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 3
+    deathExplosions: 1
+    experience: 0
+    box: 16
+  - type: 7
+    hp: 2
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 2
+    box: 38
+  - type: 8
+    hp: 0
+    invulnerable: 1
+    damage: 4
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 77
+  - type: 9
+    hp: 0
+    invulnerable: 1
+    damage: 3
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 19
+  - type: 10
+    hp: 6
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 4
+    box: 78
+  - type: 11
+    hp: 1
+    invulnerable: 0
+    damage: 10
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 3
+    deathExplosions: 1
+    experience: 4
+    box: 62
+  - type: 12
+    hp: 3
+    invulnerable: 0
+    damage: 7
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 4
+    box: 81
+  - type: 13
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 2
+    box: 0
+  - type: 14
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 105
+  - type: 15
+    hp: 6
+    invulnerable: 0
+    damage: 5
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 4
+    box: 50
+  - type: 16
+    hp: 1
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 11
+  - type: 17
+    hp: 2
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 2
+    box: 88
+  - type: 18
+    hp: 5
+    invulnerable: 0
+    damage: 4
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 3
+    box: 19
+  - type: 19
+    hp: 4
+    invulnerable: 0
+    damage: 6
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 3
+    box: 45
+  - type: 20
+    hp: 4
+    invulnerable: 0
+    damage: 6
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 4
+    box: 56
+  - type: 21
+    hp: 40
+    invulnerable: 0
+    damage: 10
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 3
+    deathExplosions: 4
+    experience: 8
+    box: 66
+  - type: 22
+    hp: 24
+    invulnerable: 0
+    damage: 8
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 2
+    deathExplosions: 4
+    experience: 6
+    box: 1
+  - type: 23
+    hp: 5
+    invulnerable: 0
+    damage: 4
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 3
+    box: 19
+  - type: 24
+    hp: 1
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 30
+  - type: 25
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 74
+  - type: 26
+    hp: 1
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 5
+  - type: 27
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 5
+  - type: 28
+    hp: 1
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 34
+  - type: 29
+    hp: 0
+    invulnerable: 1
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 5
+  - type: 30
+    hp: 0
+    invulnerable: 1
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 10
+  - type: 31
+    hp: 3
+    invulnerable: 0
+    damage: 4
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 4
+    box: 0
+  - type: 32
+    hp: 0
+    invulnerable: 1
+    damage: 3
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 25
+  - type: 33
+    hp: 2
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 88
+  - type: 34
+    hp: 24
+    invulnerable: 0
+    damage: 8
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 6
+    box: 9
+  - type: 35
+    hp: 64
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 4
+    box: 108
+  - type: 36
+    hp: 3
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 2
+    box: 0
+  - type: 37
+    hp: 8
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 4
+    box: 78
+  - type: 38
+    hp: 10
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 3
+    box: 18
+  - type: 39
+    hp: 12
+    invulnerable: 0
+    damage: 8
+    immuneItem: 0
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 5
+    box: 17
+  - type: 40
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 15
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 2
+    box: 98
+  - type: 41
+    hp: 0
+    invulnerable: 1
+    damage: 5
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 14
+  - type: 42
+    hp: 3
+    invulnerable: 0
+    damage: 1
+    immuneItem: 14
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 0
+  - type: 43
+    hp: 3
+    invulnerable: 0
+    damage: 10
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 3
+    deathExplosions: 1
+    experience: 4
+    box: 19
+  - type: 44
+    hp: 4
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 2
+    box: 11
+  - type: 45
+    hp: 2
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 2
+    box: 12
+  - type: 46
+    hp: 2
+    invulnerable: 0
+    damage: 2
+    immuneItem: 23
+    lootRule: 0
+    lootKills: 0100000003000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 38
+  - type: 47
+    hp: 5
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 0
+  - type: 48
+    hp: 5
+    invulnerable: 0
+    damage: 5
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 3
+    box: 65
+  - type: 49
+    hp: 0
+    invulnerable: 1
+    damage: 2
+    immuneItem: 34
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 27
+  - type: 50
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 121
+  - type: 51
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 95
+  - type: 52
+    hp: 4
+    invulnerable: 0
+    damage: 6
+    immuneItem: 0
+    lootRule: 1
+    lootKills: 0200000005000000i
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 1
+    box: 34
+  - type: 53
+    hp: 0
+    invulnerable: 1
+    damage: 3
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 19
+  - type: 54
+    hp: 0
+    invulnerable: 1
+    damage: 6
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 0
+    box: 18
+  - type: 55
+    hp: 8
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 61
+  - type: 56
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 2
+    lootKills: 0400000006000000i
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 102
+  - type: 57
+    hp: 40
+    invulnerable: 0
+    damage: 14
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 3
+    deathExplosions: 1
+    experience: 8
+    box: 76
+  - type: 58
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 59
+    hp: 1
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 97
+  - type: 60
+    hp: 7
+    invulnerable: 0
+    damage: 5
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 4
+    box: 19
+  - type: 61
+    hp: 1
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 20
+  - type: 62
+    hp: 2
+    invulnerable: 0
+    damage: 3
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 2
+    box: 15
+  - type: 63
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 5
+  - type: 64
+    hp: 35
+    invulnerable: 0
+    damage: 12
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 3
+    deathExplosions: 4
+    experience: 8
+    box: 57
+  - type: 65
+    hp: 0
+    invulnerable: 1
+    damage: 4
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 66
+    hp: 10
+    invulnerable: 0
+    damage: 20
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 3
+    deathExplosions: 4
+    experience: 4
+    box: 60
+  - type: 67
+    hp: 10
+    invulnerable: 0
+    damage: 10
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 3
+    deathExplosions: 1
+    experience: 8
+    box: 65
+  - type: 68
+    hp: 0
+    invulnerable: 1
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 26
+  - type: 69
+    hp: 0
+    invulnerable: 1
+    damage: 4
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 68
+  - type: 70
+    hp: 0
+    invulnerable: 1
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 68
+  - type: 71
+    hp: 0
+    invulnerable: 1
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 92
+  - type: 72
+    hp: 0
+    invulnerable: 1
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 74
+  - type: 73
+    hp: 5
+    invulnerable: 0
+    damage: 8
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 3
+    box: 106
+  - type: 74
+    hp: 0
+    invulnerable: 1
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 10
+  - type: 75
+    hp: 0
+    invulnerable: 1
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 10
+  - type: 76
+    hp: 20
+    invulnerable: 0
+    damage: 7
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 2
+    deathExplosions: 4
+    experience: 5
+    box: 61
+  - type: 77
+    hp: 0
+    invulnerable: 1
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 84
+  - type: 78
+    hp: 0
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 79
+    hp: 0
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 80
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 81
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 121
+  - type: 82
+    hp: 3
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 2
+    box: 105
+  - type: 83
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 3
+    lootKills: 
+    lootWhenLastAlive: 1
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 1
+    box: 86
+  - type: 84
+    hp: 5
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 85
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 86
+    hp: 1
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 81
+  - type: 87
+    hp: 0
+    invulnerable: 1
+    damage: 6
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 88
+    hp: 1
+    invulnerable: 0
+    damage: 4
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 111
+  - type: 89
+    hp: 1
+    invulnerable: 0
+    damage: 1
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 112
+  - type: 90
+    hp: 1
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 110
+  - type: 91
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 92
+    hp: 5
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 0
+    experience: 0
+    box: 0
+  - type: 93
+    hp: 0
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 94
+    hp: 0
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 95
+    hp: 0
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 96
+    hp: 4
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 2
+    box: 0
+  - type: 97
+    hp: 0
+    invulnerable: 1
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 10
+  - type: 98
+    hp: 4
+    invulnerable: 0
+    damage: 8
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 4
+    box: 0
+  - type: 99
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 100
+    hp: 4
+    invulnerable: 0
+    damage: 2
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 2
+    box: 0
+  - type: 101
+    hp: 1
+    invulnerable: 0
+    damage: 4
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 1
+    deathExplosions: 1
+    experience: 0
+    box: 113
+  - type: 102
+    hp: 0
+    invulnerable: 1
+    damage: 8
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 0
+    box: 111
+  - type: 103
+    hp: 16
+    invulnerable: 0
+    damage: 12
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 3
+    deathExplosions: 1
+    experience: 0
+    box: 85
+  - type: 104
+    hp: 1
+    invulnerable: 0
+    damage: 10
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 3
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  - type: 105
+    hp: 0
+    invulnerable: 1
+    damage: 7
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 2
+    deathExplosions: 1
+    experience: 0
+    box: 14
+  - type: 106
+    hp: 0
+    invulnerable: 1
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 11
+  - type: 107
+    hp: 0
+    invulnerable: 0
+    damage: 0
+    immuneItem: 0
+    lootRule: 4
+    lootKills: 
+    lootWhenLastAlive: 0
+    lootLevel: 0
+    deathExplosions: 1
+    experience: 0
+    box: 0
+  loot:
+    coinBelow: 08000000090000000a0000000a000000i
+    arrowBelow: 0a0000000b0000000d0000000d000000i
+    keyBelow: 0b0000000c0000000f0000000f000000i
+    arrowAmount: 0a000000140000001e00000028000000i
+    coinAmount: 0100000004000000070000000a000000i
+    keyAmount: 01000000010000000200000002000000i
+    arrowObject: 93
+    coinObject: 94
+    keyObject: 95
+    counterCap: 999
+  boxRects:
+  - dy: 0
+    dx: 0
+    h: 16
+    w: 16
+  - dy: -13
+    dx: 0
+    h: 29
+    w: 16
+  - dy: 0
+    dx: 7
+    h: 5
+    w: 9
+  - dy: 0
+    dx: 0
+    h: 10
+    w: 10
+  - dy: 1
+    dx: 1
+    h: 7
+    w: 7
+  - dy: 0
+    dx: 0
+    h: 6
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 8
+    w: 9
+  - dy: 0
+    dx: 0
+    h: 9
+    w: 9
+  - dy: 0
+    dx: 7
+    h: 9
+    w: 9
+  - dy: 0
+    dx: 0
+    h: 14
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 4
+    w: 4
+  - dy: 5
+    dx: 0
+    h: 11
+    w: 16
+  - dy: 2
+    dx: 2
+    h: 14
+    w: 14
+  - dy: 2
+    dx: 0
+    h: 14
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 11
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 9
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 16
+    w: 7
+  - dy: 0
+    dx: 3
+    h: 4
+    w: 10
+  - dy: 0
+    dx: 1
+    h: 16
+    w: 13
+  - dy: 1
+    dx: 0
+    h: 15
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 8
+    w: 8
+  - dy: 0
+    dx: 2
+    h: 16
+    w: 11
+  - dy: 0
+    dx: 1
+    h: 16
+    w: 15
+  - dy: 0
+    dx: 0
+    h: 16
+    w: 11
+  - dy: 0
+    dx: 3
+    h: 16
+    w: 13
+  - dy: 8
+    dx: 0
+    h: 8
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 14
+    w: 15
+  - dy: 9
+    dx: 0
+    h: 7
+    w: 8
+  - dy: 6
+    dx: 0
+    h: 10
+    w: 10
+  - dy: 3
+    dx: 0
+    h: 13
+    w: 13
+  - dy: 12
+    dx: 0
+    h: 4
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 7
+    w: 16
+  - dy: 0
+    dx: 4
+    h: 8
+    w: 12
+  - dy: 0
+    dx: 0
+    h: 8
+    w: 12
+  - dy: 0
+    dx: 0
+    h: 7
+    w: 8
+  - dy: 0
+    dx: 0
+    h: 13
+    w: 13
+  - dy: 0
+    dx: 2
+    h: 12
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 12
+    w: 14
+  - dy: 10
+    dx: 2
+    h: 6
+    w: 11
+  - dy: 8
+    dx: 2
+    h: 8
+    w: 11
+  - dy: 4
+    dx: 2
+    h: 12
+    w: 11
+  - dy: 1
+    dx: 2
+    h: 15
+    w: 11
+  - dy: 0
+    dx: 0
+    h: 16
+    w: 15
+  - dy: 10
+    dx: 0
+    h: 6
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 5
+    w: 6
+  - dy: 0
+    dx: 0
+    h: 9
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 7
+    w: 12
+  - dy: 0
+    dx: 0
+    h: 8
+    w: 15
+  - dy: 0
+    dx: 0
+    h: 6
+    w: 7
+  - dy: 0
+    dx: 2
+    h: 15
+    w: 14
+  - dy: 12
+    dx: 0
+    h: 4
+    w: 4
+  - dy: 12
+    dx: 12
+    h: 4
+    w: 4
+  - dy: 8
+    dx: 0
+    h: 8
+    w: 8
+  - dy: 8
+    dx: 8
+    h: 8
+    w: 8
+  - dy: 4
+    dx: 0
+    h: 12
+    w: 12
+  - dy: 4
+    dx: 4
+    h: 12
+    w: 12
+  - dy: 12
+    dx: 3
+    h: 4
+    w: 10
+  - dy: 0
+    dx: 3
+    h: 31
+    w: 26
+  - dy: 0
+    dx: 0
+    h: 16
+    w: 3
+  - dy: 0
+    dx: 0
+    h: 3
+    w: 16
+  - dy: 1
+    dx: 5
+    h: 15
+    w: 22
+  - dy: 6
+    dx: 6
+    h: 20
+    w: 20
+  - dy: 2
+    dx: 1
+    h: 7
+    w: 15
+  - dy: 2
+    dx: 0
+    h: 7
+    w: 15
+  - dy: 0
+    dx: 2
+    h: 6
+    w: 14
+  - dy: 2
+    dx: 0
+    h: 14
+    w: 32
+  - dy: 6
+    dx: 0
+    h: 25
+    w: 32
+  - dy: 2
+    dx: 0
+    h: 30
+    w: 32
+  - dy: 0
+    dx: 0
+    h: 6
+    w: 6
+  - dy: 5
+    dx: 0
+    h: 22
+    w: 32
+  - dy: 2
+    dx: 0
+    h: 12
+    w: 16
+  - dy: 1
+    dx: 3
+    h: 13
+    w: 10
+  - dy: 1
+    dx: 0
+    h: 7
+    w: 10
+  - dy: 0
+    dx: 1
+    h: 9
+    w: 8
+  - dy: 0
+    dx: 0
+    h: 5
+    w: 5
+  - dy: 0
+    dx: 1
+    h: 5
+    w: 3
+  - dy: 0
+    dx: 0
+    h: 13
+    w: 14
+  - dy: 2
+    dx: 0
+    h: 14
+    w: 16
+  - dy: 1
+    dx: 0
+    h: 15
+    w: 24
+  - dy: 1
+    dx: -8
+    h: 15
+    w: 24
+  - dy: 0
+    dx: 1
+    h: 14
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 8
+    w: 6
+  - dy: 0
+    dx: 2
+    h: 16
+    w: 12
+  - dy: 0
+    dx: 0
+    h: 13
+    w: 9
+  - dy: 0
+    dx: 0
+    h: 10
+    w: 8
+  - dy: 0
+    dx: 1
+    h: 16
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 5
+    w: 9
+  - dy: 0
+    dx: 2
+    h: 7
+    w: 13
+  - dy: 6
+    dx: 0
+    h: 10
+    w: 16
+  - dy: 6
+    dx: 2
+    h: 10
+    w: 14
+  - dy: 6
+    dx: 0
+    h: 10
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 32
+    w: 32
+  - dy: 6
+    dx: 0
+    h: 10
+    w: 8
+  - dy: 8
+    dx: 0
+    h: 8
+    w: 10
+  - dy: 0
+    dx: 0
+    h: 10
+    w: 5
+  - dy: 0
+    dx: 2
+    h: 3
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 3
+    w: 14
+  - dy: 0
+    dx: 0
+    h: 12
+    w: 12
+  - dy: 0
+    dx: 4
+    h: 16
+    w: 8
+  - dy: 4
+    dx: 0
+    h: 8
+    w: 16
+  - dy: 0
+    dx: 0
+    h: 14
+    w: 14
+  - dy: 0
+    dx: 4
+    h: 14
+    w: 14
+  - dy: 0
+    dx: 1
+    h: 6
+    w: 14
+  - dy: 0
+    dx: 3
+    h: 11
+    w: 10
+  - dy: 0
+    dx: 1
+    h: 9
+    w: 14
+  - dy: 1
+    dx: 0
+    h: 9
+    w: 16
+  - dy: 0
+    dx: 2
+    h: 14
+    w: 28
+  - dy: 2
+    dx: 5
+    h: 14
+    w: 22
+  - dy: 0
+    dx: -2
+    h: 24
+    w: 14
+  - dy: 3
+    dx: 2
+    h: 12
+    w: 12
+  - dy: 3
+    dx: 2
+    h: 10
+    w: 10
+  - dy: 4
+    dx: 4
+    h: 8
+    w: 8
+  - dy: 5
+    dx: 5
+    h: 6
+    w: 6
+  - dy: 0
+    dx: 3
+    h: 16
+    w: 10
+  - dy: 9
+    dx: 4
+    h: 7
+    w: 7
+  - dy: 6
+    dx: 3
+    h: 10
+    w: 10
+  - dy: 4
+    dx: 2
+    h: 10
+    w: 12
+  - dy: 2
+    dx: 2
+    h: 12
+    w: 12
+  - dy: 0
+    dx: 4
+    h: 7
+    w: 7
+  - dy: 0
+    dx: 3
+    h: 9
+    w: 10
+  - dy: 6
+    dx: 6
+    h: 5
+    w: 5
+  - dy: 0
+    dx: 0
+    h: 24
+    w: 16

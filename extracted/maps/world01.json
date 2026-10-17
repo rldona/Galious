@@ -1,0 +1,200 @@
+{
+ "e041": 2,
+ "table": "0xac4f",
+ "table_rooms": 15,
+ "reachable": 15,
+ "unreachable": [],
+ "rooms": {
+  "1": {
+   "pos": [
+    0,
+    0
+   ],
+   "links": {
+    "up": 254,
+    "down": 255,
+    "left": 2,
+    "right": 255
+   }
+  },
+  "2": {
+   "pos": [
+    -1,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 3,
+    "left": 255,
+    "right": 1
+   }
+  },
+  "3": {
+   "pos": [
+    -1,
+    1
+   ],
+   "links": {
+    "up": 2,
+    "down": 4,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "4": {
+   "pos": [
+    -1,
+    2
+   ],
+   "links": {
+    "up": 3,
+    "down": 6,
+    "left": 255,
+    "right": 5
+   }
+  },
+  "5": {
+   "pos": [
+    0,
+    2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 4,
+    "right": 255
+   }
+  },
+  "6": {
+   "pos": [
+    -1,
+    3
+   ],
+   "links": {
+    "up": 4,
+    "down": 7,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "7": {
+   "pos": [
+    -1,
+    4
+   ],
+   "links": {
+    "up": 6,
+    "down": 8,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "8": {
+   "pos": [
+    -1,
+    5
+   ],
+   "links": {
+    "up": 7,
+    "down": 255,
+    "left": 9,
+    "right": 10
+   }
+  },
+  "9": {
+   "pos": [
+    -2,
+    5
+   ],
+   "links": {
+    "up": 255,
+    "down": 15,
+    "left": 255,
+    "right": 8
+   }
+  },
+  "10": {
+   "pos": [
+    0,
+    5
+   ],
+   "links": {
+    "up": 255,
+    "down": 11,
+    "left": 8,
+    "right": 255
+   }
+  },
+  "11": {
+   "pos": [
+    0,
+    6
+   ],
+   "links": {
+    "up": 10,
+    "down": 12,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "12": {
+   "pos": [
+    0,
+    7
+   ],
+   "links": {
+    "up": 11,
+    "down": 255,
+    "left": 13,
+    "right": 255
+   }
+  },
+  "13": {
+   "pos": [
+    -1,
+    7
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 14,
+    "right": 12
+   }
+  },
+  "14": {
+   "pos": [
+    -2,
+    7
+   ],
+   "links": {
+    "up": 15,
+    "down": 255,
+    "left": 255,
+    "right": 13
+   }
+  },
+  "15": {
+   "pos": [
+    -2,
+    6
+   ],
+   "links": {
+    "up": 9,
+    "down": 14,
+    "left": 255,
+    "right": 255
+   }
+  }
+ },
+ "exits_to_castle": [
+  [
+   1,
+   "up",
+   "0xfe"
+  ]
+ ],
+ "boss_room": 13,
+ "boss_word": "YOMAR",
+ "after_boss_links": [],
+ "conflicts": []
+}

@@ -1,0 +1,5 @@
+chispas 20.0
+grieta 16.0
+polvo_dash 20.0
+polvo_pared 20.0
+polvo_salto 20.0

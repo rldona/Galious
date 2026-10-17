@@ -1,0 +1,272 @@
+{
+ "e041": 9,
+ "table": "0xae2f",
+ "table_rooms": 21,
+ "reachable": 21,
+ "unreachable": [],
+ "rooms": {
+  "1": {
+   "pos": [
+    0,
+    0
+   ],
+   "links": {
+    "up": 247,
+    "down": 2,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "2": {
+   "pos": [
+    0,
+    1
+   ],
+   "links": {
+    "up": 1,
+    "down": 3,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "3": {
+   "pos": [
+    0,
+    2
+   ],
+   "links": {
+    "up": 2,
+    "down": 9,
+    "left": 4,
+    "right": 10
+   }
+  },
+  "4": {
+   "pos": [
+    -1,
+    2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 5,
+    "right": 3
+   }
+  },
+  "5": {
+   "pos": [
+    -2,
+    2
+   ],
+   "links": {
+    "up": 21,
+    "down": 8,
+    "left": 6,
+    "right": 4
+   }
+  },
+  "6": {
+   "pos": [
+    -3,
+    2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 255,
+    "right": 5
+   }
+  },
+  "7": {
+   "pos": [
+    3,
+    4
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 20,
+    "right": 255
+   }
+  },
+  "8": {
+   "pos": [
+    -2,
+    3
+   ],
+   "links": {
+    "up": 5,
+    "down": 16,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "9": {
+   "pos": [
+    0,
+    3
+   ],
+   "links": {
+    "up": 3,
+    "down": 18,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "10": {
+   "pos": [
+    1,
+    2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 3,
+    "right": 11
+   }
+  },
+  "11": {
+   "pos": [
+    2,
+    2
+   ],
+   "links": {
+    "up": 13,
+    "down": 14,
+    "left": 10,
+    "right": 12
+   }
+  },
+  "12": {
+   "pos": [
+    3,
+    2
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 11,
+    "right": 255
+   }
+  },
+  "13": {
+   "pos": [
+    2,
+    1
+   ],
+   "links": {
+    "up": 255,
+    "down": 11,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "14": {
+   "pos": [
+    2,
+    3
+   ],
+   "links": {
+    "up": 11,
+    "down": 20,
+    "left": 255,
+    "right": 255
+   }
+  },
+  "15": {
+   "pos": [
+    -3,
+    4
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 255,
+    "right": 16
+   }
+  },
+  "16": {
+   "pos": [
+    -2,
+    4
+   ],
+   "links": {
+    "up": 8,
+    "down": 255,
+    "left": 15,
+    "right": 17
+   }
+  },
+  "17": {
+   "pos": [
+    -1,
+    4
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 16,
+    "right": 18
+   }
+  },
+  "18": {
+   "pos": [
+    0,
+    4
+   ],
+   "links": {
+    "up": 9,
+    "down": 255,
+    "left": 17,
+    "right": 19
+   }
+  },
+  "19": {
+   "pos": [
+    1,
+    4
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 18,
+    "right": 20
+   }
+  },
+  "20": {
+   "pos": [
+    2,
+    4
+   ],
+   "links": {
+    "up": 14,
+    "down": 255,
+    "left": 19,
+    "right": 7
+   }
+  },
+  "21": {
+   "pos": [
+    -2,
+    1
+   ],
+   "links": {
+    "up": 255,
+    "down": 5,
+    "left": 255,
+    "right": 255
+   }
+  }
+ },
+ "exits_to_castle": [
+  [
+   1,
+   "up",
+   "0xf7"
+  ]
+ ],
+ "boss_room": 7,
+ "boss_word": "ASCHER",
+ "after_boss_links": [],
+ "conflicts": []
+}

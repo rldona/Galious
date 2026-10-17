@@ -1,0 +1,170 @@
+{
+ "0x81": {
+  "frames_recorded": 319,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 5.32,
+  "notes": 587,
+  "midi": "81.mid"
+ },
+ "0x82": {
+  "frames_recorded": 195,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 3.25,
+  "notes": 143,
+  "midi": "82.mid"
+ },
+ "0x83": {
+  "frames_recorded": 325,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 5.42,
+  "notes": 294,
+  "midi": "83.mid"
+ },
+ "0x84": {
+  "frames_recorded": 255,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 4.25,
+  "notes": 263,
+  "midi": "84.mid"
+ },
+ "0x85": {
+  "frames_recorded": 234,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 3.9,
+  "notes": 55,
+  "midi": "85.mid"
+ },
+ "0x86": {
+  "frames_recorded": 9000,
+  "intro_s": 0.48,
+  "loop_s": 11.2,
+  "length_s": 11.68,
+  "notes": 131,
+  "midi": "86.mid"
+ },
+ "0x87": {
+  "frames_recorded": 25200,
+  "intro_s": 26.83,
+  "loop_s": 83.2,
+  "length_s": 110.03,
+  "notes": 1844,
+  "midi": "87.mid"
+ },
+ "0x88": {
+  "frames_recorded": 25200,
+  "intro_s": 25.23,
+  "loop_s": 83.2,
+  "length_s": 108.43,
+  "notes": 1759,
+  "midi": "88.mid"
+ },
+ "0x89": {
+  "frames_recorded": 25200,
+  "intro_s": 29.03,
+  "loop_s": 83.2,
+  "length_s": 112.23,
+  "notes": 1880,
+  "midi": "89.mid"
+ },
+ "0x8a": {
+  "frames_recorded": 9000,
+  "intro_s": 0.43,
+  "loop_s": 32.0,
+  "length_s": 32.43,
+  "notes": 568,
+  "midi": "8a.mid"
+ },
+ "0x8b": {
+  "frames_recorded": 9000,
+  "intro_s": 6.95,
+  "loop_s": 32.0,
+  "length_s": 38.95,
+  "notes": 695,
+  "midi": "8b.mid"
+ },
+ "0x8c": {
+  "frames_recorded": 9000,
+  "intro_s": 2.6,
+  "loop_s": 5.87,
+  "length_s": 8.47,
+  "notes": 344,
+  "midi": "8c.mid"
+ },
+ "0x8d": {
+  "frames_recorded": 9000,
+  "intro_s": 3.52,
+  "loop_s": 19.2,
+  "length_s": 22.72,
+  "notes": 170,
+  "midi": "8d.mid"
+ },
+ "0x8e": {
+  "frames_recorded": 200,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 3.33,
+  "notes": 85,
+  "midi": "8e.mid"
+ },
+ "0x8f": {
+  "frames_recorded": 9000,
+  "intro_s": 12.72,
+  "loop_s": 25.6,
+  "length_s": 38.32,
+  "notes": 357,
+  "midi": "8f.mid"
+ },
+ "0x90": {
+  "frames_recorded": 9000,
+  "intro_s": 3.92,
+  "loop_s": 19.2,
+  "length_s": 23.12,
+  "notes": 489,
+  "midi": "90.mid"
+ },
+ "0x91": {
+  "frames_recorded": 9000,
+  "intro_s": 1.62,
+  "loop_s": 3.2,
+  "length_s": 4.82,
+  "notes": 72,
+  "midi": "91.mid"
+ },
+ "0x92": {
+  "frames_recorded": 866,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 14.43,
+  "notes": 183,
+  "midi": "92.mid"
+ },
+ "0x93": {
+  "frames_recorded": 25200,
+  "intro_s": 9.35,
+  "loop_s": 102.4,
+  "length_s": 111.75,
+  "notes": 1118,
+  "midi": "93.mid"
+ },
+ "0x94": {
+  "frames_recorded": 218,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 3.63,
+  "notes": 51,
+  "midi": "94.mid"
+ },
+ "0x95": {
+  "frames_recorded": 480,
+  "intro_s": null,
+  "loop_s": null,
+  "length_s": 8.0,
+  "notes": 75,
+  "midi": "95.mid"
+ }
+}

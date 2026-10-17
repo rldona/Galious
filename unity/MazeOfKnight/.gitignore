@@ -14,9 +14,7 @@
 .vs/
 .idea/
 
-# Generado en local desde la ROM del usuario (no se distribuye)
-/Assets/Generated/
-/Assets/Generated.meta
+# Assets/Generated (importado de la ROM) se versiona: el repo es privado (ver el .gitignore de la raíz).
 
 # IDE
 .vscode/

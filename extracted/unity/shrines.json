@@ -1,0 +1,1133 @@
+{
+ "rules": {
+  "musicShrine": 141,
+  "musicAfterCastleShrine": 136,
+  "musicAfterWorldShrine": 138,
+  "soundEnterCastleShrine": 130,
+  "soundCursor": 44,
+  "soundBuy": 45,
+  "soundRefused": 47,
+  "soundResurrection": 48,
+  "quiverArrows": 100,
+  "keyAmount": 1,
+  "counterCap": 999,
+  "pricesBcdTwoDigits": true,
+  "sinkPixels": 16,
+  "sinkFrames": 64,
+  "resurrectionArrows": 100,
+  "resurrectionCoins": 100,
+  "resurrectionKeys": 20,
+  "resurrectionCreditsStart": 1,
+  "resurrectionCreditsCartridgeBonus": 99,
+  "loverDescendPixels": 80,
+  "loverDescendFramesPerPixel": 2,
+  "deathAutoExitFrames": 180,
+  "playerScreenY": 175,
+  "playerScreenX": 128,
+  "languageOffsetEnglish": 32
+ },
+ "layout": {
+  "godNameRow": 1,
+  "portraitRow": 2,
+  "portraitCol": 15,
+  "textBox": {
+   "top": 4,
+   "bottom": 10,
+   "left": 4,
+   "right": 27
+  },
+  "cursorBox": {
+   "top": 11,
+   "bottom": 15,
+   "left": 4,
+   "right": 27
+  },
+  "textRow": 5,
+  "textCol": 6,
+  "textWidth": 20,
+  "itemRow": 7,
+  "itemCols": [
+   9,
+   15,
+   21
+  ],
+  "priceRow": 9,
+  "priceCols": [
+   9,
+   15,
+   21
+  ]
+ },
+ "messages": [
+  {
+   "id": 0,
+   "text": "IF YOUR LOVER IS\nKILLED,COME BACK\nHERE WITH {arrows}x100,\n{coins}x100 AND {keys}x20.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 1,
+   "text": "SEE A FAIRY TO\nRESTORE YOUR\nVITALITY.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 2,
+   "text": "GIVE ME {arrows}x100,\n{coins}x100 AND {keys}x20 IN\nRETURN FOR REVIVING\nYOUR LOVER.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 3,
+   "text": "YOUR LOVER HAS\nREVIVED.GO AND GET\nBACK THE LITTLE BABY\nTOGETHER.GO AHEAD!",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 4,
+   "text": "THEN,YOU MUST FIGHT\nALL BY YOURSELF.\nGO,RIGHT NOW.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 5,
+   "text": "YOU CAN BUY SOME OF\nMY TREASURE.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 6,
+   "text": "TAKE A MINE WITH YOU\nWHEN YOU GO TO\nWORLD 4.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 7,
+   "text": "HIT THE WALL WITH\nYOURE SWORD IF YOU\nWANT TO GO TO THE\nOPPOSITE SHORE.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 8,
+   "text": "APHRODITE.DO NOT BE\nAFRAID OF WATER.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 9,
+   "text": "THE PURE WATER IS\nINSIDE THE WALL.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 10,
+   "text": "HIT THE WALL WHEN\nYOU ARE HALFWAY OF\nTHE STAIRS.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 11,
+   "text": "A GATE WHICH LEARDS\nTO GALIOUS WILL\nAPPEAR SOMEWHERE IN\nTHE CASTLE.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 12,
+   "text": "YOU WANT THE SECRET\nCODE TO WAKEN\nMY MEMORY KEEP THE\nRECORDS ABOUT YOU?",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 13,
+   "text": "YES         NO",
+   "row": 9,
+   "col": 9,
+   "used": true
+  },
+  {
+   "id": 14,
+   "text": "RESCUE THE BABY AS\nQUICKLY AS POSSIBLE.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 15,
+   "text": "DID YOU GET THEM?\n   YES",
+   "row": 8,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 16,
+   "text": "SEE YOU AGAIN.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 17,
+   "text": "YOU SHALL HAVE SOME\nBREAD AND WATER.\nEVERYTIME YOU DEFCAT\nA DEVIL.",
+   "row": 5,
+   "col": 6,
+   "used": false
+  },
+  {
+   "id": 18,
+   "text": "COINS ARE NOT\nENOUGH.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  },
+  {
+   "id": 19,
+   "text": "FIND THE SPELL\nWRITTEN ON A STONE\nMONUMENT UNDER THE\nWATER.",
+   "row": 5,
+   "col": 6,
+   "used": true
+  }
+ ],
+ "shrines": [
+  {
+   "map": "castle",
+   "room": 72,
+   "type": 1,
+   "state": 16,
+   "god": "Demeter",
+   "kind": "password",
+   "entry": {
+    "how": "down",
+    "godX": 112,
+    "godY": 104,
+    "xMin": 118,
+    "xMax": 122,
+    "yMin": 120,
+    "yMax": 121,
+    "needsItem": 0,
+    "rockOnTop": false
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 72,
+    "x": 120,
+    "y": 120
+   },
+   "items": [],
+   "messageIds": [
+    12,
+    13,
+    15,
+    14,
+    16
+   ],
+   "messages": [
+    "YOU WANT THE SECRET\nCODE TO WAKEN\nMY MEMORY KEEP THE\nRECORDS ABOUT YOU?",
+    "YES         NO",
+    "DID YOU GET THEM?\n   YES",
+    "RESCUE THE BABY AS\nQUICKLY AS POSSIBLE.",
+    "SEE YOU AGAIN."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 115,
+   "type": 2,
+   "state": 16,
+   "god": "Hephaestus",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 176,
+    "godY": 104,
+    "xMin": 182,
+    "xMax": 186,
+    "yMin": 120,
+    "yMax": 121,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 115,
+    "x": 184,
+    "y": 120
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 5,
+     "name": "Mine",
+     "price": 30,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 47,
+     "name": "Keys",
+     "price": 5,
+     "amount": 1,
+     "rule": "key",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 2,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 87,
+   "type": 3,
+   "state": 16,
+   "god": "Death",
+   "kind": "resurrection",
+   "entry": {
+    "how": "down",
+    "godX": 40,
+    "godY": 136,
+    "xMin": 46,
+    "xMax": 50,
+    "yMin": 152,
+    "yMax": 153,
+    "needsItem": 42,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 87,
+    "x": 48,
+    "y": 152
+   },
+   "items": [],
+   "messageIds": [
+    0,
+    2,
+    13,
+    3,
+    4
+   ],
+   "messages": [
+    "IF YOUR LOVER IS\nKILLED,COME BACK\nHERE WITH {arrows}x100,\n{coins}x100 AND {keys}x20.",
+    "GIVE ME {arrows}x100,\n{coins}x100 AND {keys}x20 IN\nRETURN FOR REVIVING\nYOUR LOVER.",
+    "YES         NO",
+    "YOUR LOVER HAS\nREVIVED.GO AND GET\nBACK THE LITTLE BABY\nTOGETHER.GO AHEAD!",
+    "THEN,YOU MUST FIGHT\nALL BY YOURSELF.\nGO,RIGHT NOW."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 143,
+   "type": 4,
+   "state": 16,
+   "god": "Ares",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 72,
+    "godY": 72,
+    "xMin": 78,
+    "xMax": 82,
+    "yMin": 88,
+    "yMax": 89,
+    "needsItem": 0,
+    "rockOnTop": false
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 143,
+    "x": 80,
+    "y": 88
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 40,
+     "name": "Copper Shield",
+     "price": 30,
+     "amount": 1,
+     "rule": "shield",
+     "needsShield": 0,
+     "setsShield": 1
+    },
+    {
+     "slot": 2,
+     "type": 6,
+     "name": "Magnifying Glass",
+     "price": 20,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 65,
+   "type": 5,
+   "state": 16,
+   "god": "Ares",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 72,
+    "godY": 40,
+    "xMin": 78,
+    "xMax": 82,
+    "yMin": 56,
+    "yMax": 57,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 65,
+    "x": 80,
+    "y": 56
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 43,
+     "name": "Silver Shield",
+     "price": 40,
+     "amount": 1,
+     "rule": "shield",
+     "needsShield": 1,
+     "setsShield": 2
+    },
+    {
+     "slot": 2,
+     "type": 47,
+     "name": "Keys",
+     "price": 5,
+     "amount": 1,
+     "rule": "key",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 5,
+   "type": 6,
+   "state": 16,
+   "god": "Hephaestus",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 224,
+    "godY": 40,
+    "xMin": 230,
+    "xMax": 234,
+    "yMin": 56,
+    "yMax": 57,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 5,
+    "x": 232,
+    "y": 56
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 33,
+     "name": "Harp",
+     "price": 30,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 2,
+     "type": 47,
+     "name": "Keys",
+     "price": 5,
+     "amount": 1,
+     "rule": "key",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 55,
+   "type": 7,
+   "state": 16,
+   "god": "Hephaestus",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 72,
+    "godY": 168,
+    "xMin": 78,
+    "xMax": 82,
+    "yMin": 184,
+    "yMax": 185,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 55,
+    "x": 80,
+    "y": 184
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 35,
+     "name": "Conch Shell",
+     "price": 25,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 2,
+     "type": 47,
+     "name": "Keys",
+     "price": 5,
+     "amount": 1,
+     "rule": "key",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 54,
+   "type": 8,
+   "state": 16,
+   "god": "Asclepius",
+   "kind": "hint",
+   "entry": {
+    "how": "down",
+    "godX": 208,
+    "godY": 168,
+    "xMin": 214,
+    "xMax": 218,
+    "yMin": 184,
+    "yMax": 185,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 54,
+    "x": 216,
+    "y": 184
+   },
+   "items": [],
+   "messageIds": [
+    1
+   ],
+   "messages": [
+    "SEE A FAIRY TO\nRESTORE YOUR\nVITALITY."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 4,
+   "type": 9,
+   "state": 16,
+   "god": "Ares",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 136,
+    "godY": 104,
+    "xMin": 142,
+    "xMax": 146,
+    "yMin": 120,
+    "yMax": 121,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 4,
+    "x": 144,
+    "y": 120
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 44,
+     "name": "Gold Shield",
+     "price": 50,
+     "amount": 1,
+     "rule": "shield",
+     "needsShield": 2,
+     "setsShield": 3
+    },
+    {
+     "slot": 2,
+     "type": 47,
+     "name": "Keys",
+     "price": 5,
+     "amount": 1,
+     "rule": "key",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 10,
+   "type": 10,
+   "state": 16,
+   "god": "Ares",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 72,
+    "godY": 40,
+    "xMin": 78,
+    "xMax": 82,
+    "yMin": 56,
+    "yMax": 57,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 10,
+    "x": 80,
+    "y": 56
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 25,
+     "name": "Hat Helmet",
+     "price": 50,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 2,
+     "type": 47,
+     "name": "Keys",
+     "price": 5,
+     "amount": 1,
+     "rule": "key",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "castle",
+   "room": 32,
+   "type": 11,
+   "state": 16,
+   "god": "Demeter",
+   "kind": "shop",
+   "entry": {
+    "how": "down",
+    "godX": 112,
+    "godY": 72,
+    "xMin": 118,
+    "xMax": 122,
+    "yMin": 88,
+    "yMax": 89,
+    "needsItem": 0,
+    "rockOnTop": true
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 32,
+    "x": 120,
+    "y": 88
+   },
+   "items": [
+    {
+     "slot": 0,
+     "type": 45,
+     "name": "Quiver",
+     "price": 20,
+     "amount": 100,
+     "rule": "quiver",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 1,
+     "type": 13,
+     "name": "Necklace",
+     "price": 25,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    },
+    {
+     "slot": 2,
+     "type": 47,
+     "name": "Keys",
+     "price": 5,
+     "amount": 1,
+     "rule": "key",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "world01",
+   "room": 15,
+   "type": 14,
+   "state": 14,
+   "god": "Demeter",
+   "kind": "hint",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 14,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": false,
+    "openedBy": ""
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 14,
+    "x": 128,
+    "y": 40
+   },
+   "items": [],
+   "messageIds": [
+    6
+   ],
+   "messages": [
+    "TAKE A MINE WITH YOU\nWHEN YOU GO TO\nWORLD 4."
+   ]
+  },
+  {
+   "map": "world02",
+   "room": 15,
+   "type": 15,
+   "state": 14,
+   "god": "Athena",
+   "kind": "hint",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 7,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": true,
+    "openedBy": "matar a los enemigos marcados de world02:7"
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 7,
+    "x": 128,
+    "y": 40
+   },
+   "items": [],
+   "messageIds": [
+    7
+   ],
+   "messages": [
+    "HIT THE WALL WITH\nYOURE SWORD IF YOU\nWANT TO GO TO THE\nOPPOSITE SHORE."
+   ]
+  },
+  {
+   "map": "world03",
+   "room": 16,
+   "type": 16,
+   "state": 14,
+   "god": "Athena",
+   "kind": "hint",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 12,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": true,
+    "openedBy": "matar a los enemigos marcados de world03:12"
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 12,
+    "x": 128,
+    "y": 40
+   },
+   "items": [],
+   "messageIds": [
+    8
+   ],
+   "messages": [
+    "APHRODITE.DO NOT BE\nAFRAID OF WATER."
+   ]
+  },
+  {
+   "map": "world04",
+   "room": 17,
+   "type": 17,
+   "state": 14,
+   "god": "Demeter",
+   "kind": "hint",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 15,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": true,
+    "openedBy": "matar a los enemigos marcados de world04:8"
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 15,
+    "x": 128,
+    "y": 40
+   },
+   "items": [],
+   "messageIds": [
+    9
+   ],
+   "messages": [
+    "THE PURE WATER IS\nINSIDE THE WALL."
+   ]
+  },
+  {
+   "map": "world05",
+   "room": 18,
+   "type": 12,
+   "state": 14,
+   "god": "Demeter",
+   "kind": "shop",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 16,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": true,
+    "openedBy": "matar a los enemigos marcados de world05:3"
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 16,
+    "x": 128,
+    "y": 40
+   },
+   "items": [
+    {
+     "slot": 1,
+     "type": 16,
+     "name": "Oar",
+     "price": 30,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "world06",
+   "room": 19,
+   "type": 18,
+   "state": 14,
+   "god": "Athena",
+   "kind": "hint",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 11,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": true,
+    "openedBy": "matar a los enemigos marcados de world06:11"
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 11,
+    "x": 128,
+    "y": 40
+   },
+   "items": [],
+   "messageIds": [
+    10
+   ],
+   "messages": [
+    "HIT THE WALL WHEN\nYOU ARE HALFWAY OF\nTHE STAIRS."
+   ]
+  },
+  {
+   "map": "world07",
+   "room": 20,
+   "type": 19,
+   "state": 14,
+   "god": "Demeter",
+   "kind": "hint",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 9,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": false,
+    "openedBy": ""
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 9,
+    "x": 128,
+    "y": 40
+   },
+   "items": [],
+   "messageIds": [
+    19
+   ],
+   "messages": [
+    "FIND THE SPELL\nWRITTEN ON A STONE\nMONUMENT UNDER THE\nWATER."
+   ]
+  },
+  {
+   "map": "world08",
+   "room": 21,
+   "type": 13,
+   "state": 14,
+   "god": "Demeter",
+   "kind": "shop",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 5,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": true,
+    "openedBy": "matar a los enemigos marcados de world08:8"
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 5,
+    "x": 128,
+    "y": 40
+   },
+   "items": [
+    {
+     "slot": 1,
+     "type": 24,
+     "name": "Carpet",
+     "price": 30,
+     "amount": 1,
+     "rule": "flag",
+     "needsShield": 0,
+     "setsShield": 0
+    }
+   ],
+   "messageIds": [
+    5,
+    18
+   ],
+   "messages": [
+    "YOU CAN BUY SOME OF\nMY TREASURE.",
+    "COINS ARE NOT\nENOUGH."
+   ]
+  },
+  {
+   "map": "world09",
+   "room": 27,
+   "type": 20,
+   "state": 14,
+   "god": "Demeter",
+   "kind": "hint",
+   "entry": {
+    "how": "ladderUp",
+    "fromRoom": 18,
+    "ladderCol": 15,
+    "x": 128,
+    "exitBelowY": 40,
+    "hiddenLadder": true,
+    "openedBy": "matar a los enemigos marcados de world09:18"
+   },
+   "exit": {
+    "key": "down",
+    "toRoom": 18,
+    "x": 128,
+    "y": 40
+   },
+   "items": [],
+   "messageIds": [
+    11
+   ],
+   "messages": [
+    "A GATE WHICH LEARDS\nTO GALIOUS WILL\nAPPEAR SOMEWHERE IN\nTHE CASTLE."
+   ]
+  }
+ ]
+}

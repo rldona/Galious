@@ -1,0 +1,624 @@
+{
+ "entries": [
+  {
+   "key": "BUZZER",
+   "name": "Vengamosca",
+   "desc": "Depredador volador que persigue a su presa incansablemente.",
+   "notes": "Este pequeño cazador feroz perseguirá con valentía a criaturas mucho más grandes que él. ¡Admirable! Aunque es débil y he devorado a cientos de ellos con poco esfuerzo o preocupación.",
+   "boss": false,
+   "types": [
+    14
+   ]
+  },
+  {
+   "key": "ZOM_RUNNER",
+   "name": "Cáscara errante",
+   "desc": "Los restos de un insecto, reanimados por una extraña fuerza. Vaga por los caminos en los que solía vivir.",
+   "notes": "Estos insectos «civilizados» de Hallownest eran débiles en vida y ahora son igual de débiles muertos. ¡Devuélvelos a la tierra de la que nacieron!",
+   "boss": false,
+   "types": [
+    37
+   ]
+  },
+  {
+   "key": "ZOM_SHIELD",
+   "name": "Cáscara guerrera",
+   "desc": "Los restos de un insecto, reanimados por una extraña fuerza. Porta un aguijón y una coraza.",
+   "notes": "Estos insectos, ablandados por generaciones de lujo, carecen de garras, coraza propia y veneno. Los que desean protegerse a sí mismos se ven obligados a crear armas con piedras, menas o corazas.",
+   "boss": false,
+   "types": [
+    10
+   ]
+  },
+  {
+   "key": "SNAPPER_TRAP",
+   "name": "Engulletontos",
+   "desc": "Planta carnívora que ataca a cualquier criatura que se le acerque.",
+   "notes": "Tienes que ser un auténtico tonto para dejarte engañar por una planta.",
+   "boss": false,
+   "types": [
+    46
+   ]
+  },
+  {
+   "key": "ROLLER",
+   "name": "Baldur",
+   "desc": "Se hace una bola y se lanza contra los intrusos que se adentran en su territorio. Agresivo incluso siendo recién nacido.",
+   "notes": "A los jóvenes cazadores les encanta capturar a estas criaturas y practicar deporte con ellas. Te animo a que lo pruebes, si te pica el gusanillo.",
+   "boss": false,
+   "types": [
+    24
+   ]
+  },
+  {
+   "key": "BOUNCER",
+   "name": "Gruzzer",
+   "desc": "Criatura simplona que se mueve de un lado a otro anárquicamente, zumbando y golpeándose con cosas.",
+   "notes": "Solo parecen ser ligeramente conscientes de lo que les rodea, por lo que son presa fácil para poner a prueba tu aguijón. ¿Qué será lo que guía su camino? Parece como si buscaran formas de morir.",
+   "boss": false,
+   "types": [
+    25,
+    55
+   ]
+  },
+  {
+   "key": "CRAWLER",
+   "name": "Reptacillo",
+   "desc": "Tímido carroñero que se arrastra por las cavernas buscando comida.",
+   "notes": "Aburrido y patético. Casi no merece la pena matarlo.",
+   "boss": false,
+   "types": [
+    2,
+    43
+   ]
+  },
+  {
+   "key": "CLIMBER",
+   "name": "Tiktik",
+   "desc": "Usa sus pequeñas y afiladas garras para trepar por paredes y techos.",
+   "notes": "Pasa el tiempo repiqueteando una y otra vez por los caminos y las cavernas cercanas a la superficie del reino. Si eres paciente, puedes esperar a que se acerque a ti y cogerlo.",
+   "boss": false,
+   "types": [
+    17,
+    56
+   ]
+  },
+  {
+   "key": "ESPIRITU",
+   "name": "Lumélula",
+   "desc": "Insecto luminoso que vaga por las salas del castillo.",
+   "notes": "Inofensiva a la vista, pero su luz quema al tocarla. No hay gloria en cazarla; sí en no tropezar con ella.",
+   "boss": false,
+   "types": [
+    78
+   ]
+  },
+  {
+   "key": "HEALTH_SCUTTLER",
+   "name": "Germen de vida",
+   "desc": "Pequeño y veloz germen relleno de saviavida, que se puede extraer y consumir para disfrutar de sus propiedades saludables.",
+   "notes": "El líquido brillante del interior de estos pequeñines es delicioso y, si lo bebes, hará que te sientas más fuerte. Me pregunto cómo sabrán mis propias entrañas... ¿sería una cosa horrorosa tratar de beber un poco de ellas?",
+   "boss": false,
+   "types": [
+    79
+   ]
+  },
+  {
+   "key": "MAGE_BALLOON",
+   "name": "Folly",
+   "desc": "Fue una vez un insecto muy inteligente, pero ahora está inflado por usar mal el alma.",
+   "notes": "He oído susurros de que el secreto que buscaban estos insensatos era la inmortalidad. Vivir para siempre... ¡Nunca he escuchado nada más obsceno!",
+   "boss": false,
+   "types": [
+    38
+   ]
+  },
+  {
+   "key": "MAGE",
+   "name": "Tuercealmas",
+   "desc": "Insecto muy inteligente que usa conocimientos arcanos para convertir el alma en despiadados hechizos.",
+   "notes": "He oído a otros hablar sobre el «alma», pero yo no entiendo de qué se trata realmente. Sé que la carne recién matada es la que mejor sabe; ¿será porque el «alma» aún se aferra a ella?",
+   "boss": false,
+   "types": [
+    60
+   ]
+  },
+  {
+   "key": "MOSS_KNIGHT",
+   "name": "Musgocaballero",
+   "desc": "Protector de Sendero Verde, adiestrado en las artes del aguijón y la coraza.",
+   "notes": "Se ocultan como montículos con forma de arbusto y parecen débiles, ¡pero ten cuidado con estos guerreros! Son incansables en combate y protegen con fiereza algo que se oculta en el Sendero Verde.",
+   "boss": false,
+   "types": [
+    35
+   ]
+  },
+  {
+   "key": "PLANT_SHOOTER",
+   "name": "Gulka",
+   "desc": "Un agresivo ser vegetal que se retrae de forma proactiva cuando siente peligro cerca. Escupe bolas duras y espinosas cuando sus enemigos se encuentran a distancia.",
+   "notes": "Sus hojas son secas y sosas. El capullo es desagradablemente agrio, pero ¡oh! El veneno de esas bolas que escupe... ¡Exquisito! Si te sobra tiempo, trata de beber un poco y disfrutar de sus efectos.",
+   "boss": false,
+   "types": [
+    58,
+    80
+   ]
+  },
+  {
+   "key": "MAWLEK_TURRET",
+   "name": "Mawlurk",
+   "desc": "Criatura grande e inmóvil. Escupe veneno de forma salvaje cuando algún intruso pasa a su lado.",
+   "notes": "¡¿Cómo habrán perdido las patas estas insensatas criaturas?! Supongo que es posible perderlo todo si de verdad te esfuerzas.",
+   "boss": false,
+   "types": [
+    50,
+    81
+   ]
+  },
+  {
+   "key": "FLIP_HOPPER",
+   "name": "Pilflip",
+   "desc": "Extraña criatura que se adapta a los cambios de su entorno dándose la vuelta y utilizando las extremidades situadas al otro lado de su cuerpo.",
+   "notes": "La adaptabilidad es una importante habilidad de supervivencia. Si un problema parece insuperable, prueba a afrontarlo desde un ángulo distinto.",
+   "boss": false,
+   "types": [
+    66,
+    13
+   ]
+  },
+  {
+   "key": "SPIDER_FLYER",
+   "name": "Minitejedora",
+   "desc": "Ágil araña que cruza sus dominios usando finos hilos de tela. Espera pacientemente para tender emboscadas.",
+   "notes": "¡Puede aparecer en cualquier momento de entre las sombras! Parece que vuelan por el aire mientras se mueven por hilos invisibles para acechar a sus presas sin hacer ruido.",
+   "boss": false,
+   "types": [
+    21
+   ]
+  },
+  {
+   "key": "MOSS_CHARGER",
+   "name": "Musgoagresor",
+   "desc": "Tímida criatura que asusta a los intrusos cubriéndose con enormes trozos de musgo.",
+   "notes": "Es pequeño, pero saca mucho coraje y fortaleza una vez que se cubre de follaje. Y puedo comprender el deseo de camuflarse...",
+   "boss": false,
+   "types": [
+    16
+   ]
+  },
+  {
+   "key": "GRUB_MIMIC",
+   "name": "Mímico larva",
+   "desc": "Asume la forma de una criatura inofensiva para atraer a su presa.",
+   "notes": "Atraer a un enemigo fingiendo ser una pequeña y débil larva. ¡Muy astuto! Por desgracia para ellos, me como estas larvas en cuanto las veo.",
+   "boss": false,
+   "types": [
+    47
+   ]
+  },
+  {
+   "key": "ACID_FLYER",
+   "name": "Duranda",
+   "desc": "Simple criatura voladora protegida por una coraza espinosa.",
+   "notes": "Cree estar completamente protegido y por ello no se preocupa por quienes pasan a su lado. Ataca su rostro y enséñale que de nada se está nunca a salvo.",
+   "boss": false,
+   "types": [
+    40
+   ]
+  },
+  {
+   "key": "MEGA_MOSS_CHARGER",
+   "name": "Musgoagresor gigante",
+   "desc": "Una familia de criaturas que ha aprendido a fusionarse con musgo y forman un solo ser.",
+   "notes": "Es cierto, la unión hace la fuerza, pero estas criaturas nunca fueron demasiado fuertes de por sí. ¡Haz pedazos su artimaña!",
+   "boss": false,
+   "types": [
+    32
+   ]
+  },
+  {
+   "key": "MANTIS",
+   "name": "Guerrero mantis",
+   "desc": "Miembro de una orgullosa tribu, quien protege ferozmente su territorio. Lanza ataques salvajes con sus afiladas extremidades.",
+   "notes": "Si te adentras demasiado en los bosques fúngicos, estos guerreros se interpondrán en tu camino. ¿Qué es lo que protegen allí en lo más profundo de su territorio?",
+   "boss": false,
+   "types": [
+    45
+   ]
+  },
+  {
+   "key": "BIG_CENTIPEDE",
+   "name": "Garpiés",
+   "desc": "Excavador gigante cubierto de un caparazón hecho de gruesas placas. Viaja de forma incansable por los túneles de Nido Profundo.",
+   "notes": "Son monstruosamente fuertes e inmunes a cualquier ataque sobre sus cuerpos fuertemente blindados. Por suerte, si te limitas a no cruzarte en sus caminos, te dejarán tranquilo.",
+   "boss": false,
+   "types": [
+    44,
+    100
+   ]
+  },
+  {
+   "key": "MAGE_KNIGHT",
+   "name": "Guerrero del alma",
+   "desc": "Insecto erudito que empuña una refinada aguja. Aumenta su destreza en combate con el alma reunida.",
+   "notes": "A estos extraños guerreros les siguen susurros allí donde vayan. No solo son hábiles con el aguijón, sino que también pueden usar un poder extraño para pasar de repente de un lugar a otro. Permanece alerta.",
+   "boss": false,
+   "types": [
+    42
+   ]
+  },
+  {
+   "key": "HOPPER",
+   "name": "Saltamontes",
+   "desc": "Se abalanza sobre su presa y usa su afilada trompa para drenar fluidos vitales.",
+   "notes": "La barriga de este ladrón saltarín está llena de la sangre que ha robado a otras bestias. Si lo pones sobre el fuego, la barriga crecerá y crecerá hasta que explote y de lugar a una lluvia humeante de fluidos.",
+   "boss": false,
+   "types": [
+    36
+   ]
+  },
+  {
+   "key": "ABYSS_CRAWLER",
+   "name": "Trepasombras",
+   "desc": "Solo se encuentra en lugares profundos y oscuros. Nunca se les ha visto comer ni beber nada.",
+   "notes": "Este pequeño bicho es débil y no supone ninguna amenaza, pero tiene algo que me inquieta. La forma en que se mueve y los sonidos que emite son... extraños por algún motivo.",
+   "boss": false,
+   "types": [
+    3
+   ]
+  },
+  {
+   "key": "BIG_FAT_FLYER",
+   "name": "Bubélula",
+   "desc": "Criatura grande y dócil que revolotea pacíficamente por las cavernas del Límite del Reino.",
+   "notes": "Es demasiado lento para huir de ti y demasiado grande para ocultarse. Esta presa no supondrá ningún reto, pero a veces no está mal tomarse las cosas con más tranquilidad.",
+   "boss": false,
+   "types": [
+    73,
+    82,
+    83
+   ]
+  },
+  {
+   "key": "WORM",
+   "name": "Goam",
+   "desc": "Con su gruesa coraza, emerge del suelo para atrapar a su presa entre sus colmillos.",
+   "notes": "Estas bestias parecen ser inmunes a la mayoría de los daños, por lo que puedes afilar tus armas en su grueso pellejo o simplemente golpearlas para tu propia diversión. Apenas parecen notarlo.",
+   "boss": false,
+   "types": [
+    20
+   ]
+  },
+  {
+   "key": "JELLYFISH",
+   "name": "Ooma",
+   "desc": "Su exterior pasivo protege un núcleo agresivo y explosivo.",
+   "notes": "Criatura espeluznante y horrible hecha de un líquido grueso. Puedes ver a través de ella, pero no dónde guarda sus pensamientos. No me fío de ella para nada. Mantente alejado.",
+   "boss": false,
+   "types": [
+    41
+   ]
+  },
+  {
+   "key": "SPITTER",
+   "name": "Cazador aspid",
+   "desc": "Vence a su presa escupiendo líquido corrosivo. Suele cazar en grupo.",
+   "notes": "Depredadores inteligentes que tratarán de atacarte a distancia. No les des espacio, ¡carga contra ellos y córtalos por la mitad! Verás que no son tan inteligentes cuando están muertos.",
+   "boss": false,
+   "types": [
+    23
+   ]
+  },
+  {
+   "key": "GRASS_HOPPER",
+   "name": "Loodle",
+   "desc": "Habita en las tierras salvajes junto a los Jardines de la Reina. Su naturaleza no es agresiva, pero sus continuos rebotes pueden ser peligrosos.",
+   "notes": "¡Parecen tener una energía ilimitada! ¿Alguna vez se detienen a dormir, a comer o a amar?",
+   "boss": false,
+   "types": [
+    7
+   ]
+  },
+  {
+   "key": "BLOBBLE",
+   "name": "Obble de guerra",
+   "desc": "Se crió en el Coliseo. Aunque ha recibido entrenamiento para el combate, sus movimientos y sus ataques son algo torpes.",
+   "notes": "¡Le han hecho una pequeña máscara! Me pregunto si vale para algo...",
+   "boss": false,
+   "types": [
+    54
+   ]
+  },
+  {
+   "key": "FUNGOON_BABY",
+   "name": "Fungicría",
+   "desc": "Globo fúngico pasivo. Sus gases internos hacen que flote.",
+   "notes": "No es más que una cría y se desplaza a la deriva con los ojos cerrados y una mente abierta. Cuando era joven, mis hermanos y hermanas y yo tratábamos de cazarnos los unos a los otros en el nido. Ahora cazo solo.",
+   "boss": false,
+   "types": [
+    76
+   ]
+  },
+  {
+   "key": "BLOB_FLYER",
+   "name": "Obble",
+   "desc": "Insecto gordo, lento y volador. Suele soltar un líquido ácido que guarda en su cuerpo rechoncho.",
+   "notes": "¿Se da cuenta de lo molesto que resulta? ¿Moviéndose de un lado a otro sin rumbo y derramando sus jugos nocivos allí por donde pasa? Si te topas con alguno, asegúrate de matarlo.",
+   "boss": false,
+   "types": [
+    15
+   ]
+  },
+  {
+   "key": "COL_ROLLER",
+   "name": "Baldur espinado",
+   "desc": "Un baldur fortalecido, criado para combatir en el Coliseo de los Insensatos. Es más resistente y agresivo que su antecesor salvaje.",
+   "notes": "Estas criaturas... Nunca he visto a una que haya alcanzado la madurez. Supongo que no se les permite vivir tanto.",
+   "boss": false,
+   "types": [
+    18
+   ]
+  },
+  {
+   "key": "MANTIS_FLYER_CHILD",
+   "name": "Joven mantis",
+   "desc": "Miembro de una orgullosa tribu, quien protege ferozmente su territorio. Lanza ataques punzantes con su abdomen con forma de aguja afilada.",
+   "notes": "Conforme crece, pierde la capacidad de volar. Se suele celebrar el paso a la edad adulta, pero a medida que transcurre el tiempo, nos damos cuenta de lo que hemos perdido.",
+   "boss": false,
+   "types": [
+    22
+   ]
+  },
+  {
+   "key": "MINI_SPIDER",
+   "name": "Necrocría",
+   "desc": "Bebé de Nido Profundo. Se escabulle por la oscuridad, aprendiéndose la distribución de su hogar.",
+   "notes": "Nido Profundo es un lugar peligroso para cazar, pero gratificante. Mantente alerta por si ves criaturas débiles que puedas comerte. Tienes que mantener la fuerza en la oscuridad.",
+   "boss": false,
+   "types": [
+    31
+   ]
+  },
+  {
+   "key": "BIGBUZZER",
+   "name": "Rey vengamosca",
+   "desc": "El patriarca de la colonia de las vengamoscas. Se abalanza en picado sobre los intrusos y llama refuerzos si se ve amenazado.",
+   "notes": "Una asquerosa criatura a la que le gusta masticar cualquier porquería que encuentre tirada en el suelo de la caverna. Cuando se percata de una amenaza, emitirá molestos gritos y chillidos, así que mátalo rápido.",
+   "boss": false,
+   "types": [
+    39
+   ]
+  },
+  {
+   "key": "SUPER_SPITTER",
+   "name": "Aspid primigenio",
+   "desc": "Una forma más salvaje y ancestral del aspid. Se pensaba que se habían extinguido, pero han reaparecido en los límites del mundo.",
+   "notes": "Estos crueles enemigos te emboscarán y atacarán incansablemente con su veneno abrasador. Qué raro que sus descendientes sean tan débiles. Si tengo hijos, espero que sean más fuertes que yo...",
+   "boss": false,
+   "types": [
+    34
+   ]
+  },
+  {
+   "key": "FLAMEBEARER_SMALL",
+   "name": "Grimario Novato",
+   "desc": "Joven y juguetón espíritu de la compañía de Grimm.\n\nComo parte del Ritual, recoge la llama escarlata en su linterna. Renunciará a la llama cuando sea derrotado.",
+   "notes": "“Las sombras sueñan con fuego eterno,\nLlamas devoran ascuas en su descenso,\nUno encenderá la Luz del Horror,\nLlama y sirve en la Tropa del Terror.”\n-«La Compañía de Grimm»",
+   "boss": false,
+   "types": [
+    12,
+    19
+   ]
+  },
+  {
+   "key": "HOLLOW_SHADE",
+   "name": "Sombra",
+   "desc": "Eco de una vida anterior. Derrótala para obtener su poder y estar completo de nuevo.",
+   "notes": "Cada uno de nosotros deja una huella cuando muere. Un mancha en el mundo. No creo que este reino pueda soportar el peso de tantas vidas pasadas durante mucho más tiempo...",
+   "boss": false,
+   "types": [
+    64
+   ]
+  },
+  {
+   "key": "GHOST_NOEYES",
+   "name": "Sin Ojos",
+   "desc": "Sueño persistente de un guerrero caído. Desapareció durante la plaga.",
+   "notes": "Se están acercando...\nLo que tienes en tu interior...\n¡Sácalo!\n- Sin Ojos",
+   "boss": false,
+   "types": [
+    105
+   ]
+  },
+  {
+   "key": "COL_WORM",
+   "name": "Insensato pesado",
+   "desc": "Un guerrero que lucha en el Coliseo de los Insensatos para alcanzar la gloria. Carga lleno de furia contra los enemigos.",
+   "notes": "Grande y corpulento, lucha para conservar la vida. ¡No subestimes a este luchador! Puede moverse rápidamente a pesar de su tamaño. Además, detrás de esa máscara se oculta un rostro sorprendentemente hermoso.",
+   "boss": false,
+   "types": [
+    5
+   ]
+  },
+  {
+   "key": "MUSH_BRAWLER",
+   "name": "Fungiogro",
+   "desc": "Enorme criatura fúngica. Ataca escupiendo veneno corrosivo y embistiendo con su cuerpo a sus enemigos.",
+   "notes": "¿Estas enormes cosas son bestias o son setas? Corté una por la mitad para ver lo que tenía dentro, pero no pude encontrar ninguna respuesta en sus suaves y apestosas entrañas.",
+   "boss": false,
+   "types": [
+    1
+   ]
+  },
+  {
+   "key": "ZOM_BEAM_MINER",
+   "name": "Cáscara cristalizada",
+   "desc": "Los restos de un insecto que murió entre los cristales. Reanimado por una extraña fuerza, ataca lanzando rayos de luz desde sus brazos cristalizados.",
+   "notes": "Los cristales que crecen en las cumbres ocultan algún tipo de poder extraño. Centellean y brillan en la oscuridad, y cada uno tiene un punto brillante que emite un calor abrasador. También cantan, si los escuchas. Muy suavemente...",
+   "boss": false,
+   "types": [
+    67
+   ]
+  },
+  {
+   "key": "ESCARABAJO_NARANJA",
+   "name": "Escarabajo naranja",
+   "desc": "Corretea por el suelo de un lado a otro sin mirar por dónde va.",
+   "notes": "Rápido y sin cerebro. Espéralo quieto con el aguijón listo.",
+   "boss": false,
+   "types": [
+    33
+   ]
+  },
+  {
+   "key": "MINES_CRAWLER",
+   "name": "Fragmentita",
+   "desc": "Se alimenta de polvo de cristal y usa púas cristalizadas para protegerse del peligro.",
+   "notes": "Esta criatura no me parece especialmente resaltable ni interesante. Debería aprender a volar, a respirar fuego o a cantar de forma espeluznante. Cualquier cosa que justificara su existencia.",
+   "boss": false,
+   "types": [
+    48
+   ]
+  },
+  {
+   "key": "HATCHLING",
+   "name": "Cría aspid",
+   "desc": "Recién nacidas, estos jóvenes aspid rodean a los intrusos de forma instintiva.",
+   "notes": "¡Estas crías nacen con un instinto letal! Aunque solo son bebés y puedes destrozarlos con tu aguijón sin pensártelo dos veces. Simplemente, no dejes que te abrumen por sus números.",
+   "boss": false,
+   "types": [
+    11
+   ]
+  },
+  {
+   "key": "PELOTA",
+   "name": "Glóbulo",
+   "desc": "Bola de infección que rebota por las salas.",
+   "notes": "Rebota sin pensar. Aprende su ritmo y golpéala en el aire.",
+   "boss": false,
+   "types": [
+    9
+   ]
+  },
+  {
+   "key": "MUSH_ROLLER",
+   "name": "Fungiguerrero",
+   "desc": "Criatura fúngica que ataca a los intrusos para proteger a sus crías.",
+   "notes": "¡Algo extraño en el aire ha provocado que a estas setas les salgan corazones, mentes e incluso rostros! Eso quiere decir que ahora tienen miedo por su vida, como todas las demás criaturas vivas.",
+   "boss": false,
+   "types": [
+    53
+   ]
+  },
+  {
+   "key": "TEJEDOR",
+   "name": "Tejedorcillo",
+   "desc": "Pequeño tejedor que avanza a saltitos por el suelo.",
+   "notes": "Débil por sí solo; los nidos que guarda son lo peligroso.",
+   "boss": false,
+   "types": [
+    62
+   ]
+  },
+  {
+   "key": "FALSEKNIGHT",
+   "name": "Falso Caballero",
+   "desc": "Un gusano al que una fuerza extraña ha vuelto loco. Vive en una coraza blindada robada.",
+   "notes": "A las criaturas débiles les encanta robar la fuerza de los demás. Sus vidas son efímeras y están llenas de miedo, pero anhelan tener el poder para dominar a quienes los han dominado.",
+   "boss": true,
+   "types": [
+    257
+   ]
+  },
+  {
+   "key": "MANTIS_LORD",
+   "name": "Señores mantis",
+   "desc": "Son los líderes de la tribu mantis, y sus mejores guerreros. Portan finas lanzas aguijón, y atacan con la velocidad del rayo.",
+   "notes": "La tribu mantis y los insectos de Hallownest no se llevaban demasiado bien. Sin embargo, las mantis consiguieron sobrevivir a sus rivales, y su civilización aún perdura.",
+   "boss": true,
+   "types": [
+    258
+   ]
+  },
+  {
+   "key": "TRAITOR_LORD",
+   "name": "Señor desleal",
+   "desc": "Cacique destituido de la tribu mantis. Decidió aceptar la infección y se volvió contra sus hermanas.",
+   "notes": "Yo también he sentido esa tentación. La tentación de dejar que la infección entre en mí. Sería más fuerte, más poderoso... esas ideas siguen emponzoñando mis sueños durante los momentos difíciles. Es una mentira, pero brilla tanto que puede confundir tu mente.",
+   "boss": true,
+   "types": [
+    259
+   ]
+  },
+  {
+   "key": "MEGA_JELLYFISH",
+   "name": "Uumuu",
+   "desc": "Ser inteligente que protege la cámara interior de los Archivos de la Maestra.",
+   "notes": "El desfiladero de abajo, el que está repleto de neblina y chisporrotea con una energía extraña... un cazador puede perder todos sus sentidos allí abajo. Ten cuidado... allí acechan cosas extrañas y antinaturales.",
+   "boss": true,
+   "types": [
+    260
+   ]
+  },
+  {
+   "key": "GRIMM",
+   "name": "Grimm",
+   "desc": "Maestro de la Compañía de Grimm",
+   "notes": "“Por la llamada de la linterna, a través de sueños yo viajo,\n a consumir las llamas de un reino hecho pedazos.”\n- Grimm",
+   "boss": true,
+   "types": [
+    262
+   ]
+  },
+  {
+   "key": "MAWLEK",
+   "name": "Mawlek Incubador",
+   "desc": "Una criatura feroz, aunque extremadamente social. Se vuelve agresiva si no puede relacionarse con los de su propia especie.",
+   "notes": "Escucho a esta bestia gritar a veces mientras merodeo las cavernas, aunque nunca he posado mis ojos en ella. ¿A quién o qué está llamando? Por lo que yo sé, sus bramidos nunca obtienen respuesta.",
+   "boss": true,
+   "types": [
+    263
+   ]
+  },
+  {
+   "key": "INFECTED_KNIGHT",
+   "name": "Receptáculo Roto",
+   "desc": "Cadáver destrozado, reanimado por parásitos infectados.",
+   "notes": "La forma de esta criatura... He visto algo similar antes. Más de una vez, incluso. Se parece un poco a los insectos de Hallownest, pero no es exactamente igual. ¿De dónde han venido estos pequeños errantes vacíos?",
+   "boss": true,
+   "types": [
+    264
+   ]
+  },
+  {
+   "key": "FINAL_BOSS",
+   "name": "Destello",
+   "desc": "La luz, olvidada hace mucho.",
+   "notes": "La plaga, la infección, la locura que reanima los cadáveres de Hallownest... el brillo que surge de los ojos de un reino muerto. ¿De dónde procede? Supongo que es algo que está más allá del entendimiento de mortales como yo.",
+   "boss": true,
+   "types": [
+    265
+   ]
+  },
+  {
+   "key": "MIMIC_SPIDER",
+   "name": "Nosk",
+   "desc": "Adopta la forma de otras criaturas para atraer presas a su guarida.",
+   "notes": "En la oscuridad más profunda hay bestias con rostros robados de tu memoria que tratan de controlarte manipulando tus sentimientos. Conócete a ti mismo y no te dejes engañar.",
+   "boss": true,
+   "types": [
+    266
+   ]
+  },
+  {
+   "key": "DUNG_DEFENDER",
+   "name": "Defensor del Estiércol",
+   "desc": "Un hábil guerrero que vive en el corazón de los Canales. Ataca a los intrusos con esferas compactas de estiércol.",
+   "notes": "Luchar por «honor» o por «lealtad»... es lo mismo que luchar por cenizas. Si quieres matar, hazlo por tu propio bien. Así se comporta un auténtico cazador.",
+   "boss": true,
+   "types": [
+    267
+   ]
+  }
+ ]
+}

@@ -1,0 +1,98 @@
+{
+ "e041": 11,
+ "table": "0xaeef",
+ "table_rooms": 6,
+ "reachable": 6,
+ "unreachable": [],
+ "rooms": {
+  "1": {
+   "pos": [
+    0,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 245,
+    "right": 2
+   }
+  },
+  "2": {
+   "pos": [
+    1,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 1,
+    "right": 3
+   }
+  },
+  "3": {
+   "pos": [
+    2,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 2,
+    "right": 4
+   }
+  },
+  "4": {
+   "pos": [
+    3,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 3,
+    "right": 5
+   }
+  },
+  "5": {
+   "pos": [
+    4,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 4,
+    "right": 255
+   }
+  },
+  "6": {
+   "pos": [
+    5,
+    0
+   ],
+   "links": {
+    "up": 255,
+    "down": 255,
+    "left": 255,
+    "right": 255
+   }
+  }
+ },
+ "exits_to_castle": [
+  [
+   1,
+   "left",
+   "0xf5"
+  ]
+ ],
+ "boss_room": 5,
+ "boss_word": "HAMALECH",
+ "after_boss_links": [
+  {
+   "room": 5,
+   "dir": "right",
+   "to": 6
+  }
+ ],
+ "conflicts": []
+}

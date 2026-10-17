@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b2bbb2dca4745a1a843d9914fcdad2, type: 3}
+  m_Name: room_065
+  m_EditorClassIdentifier: MazeOfHollow.Runtime::MazeOfHollow.Data.RoomData
+  mapName: castle
+  room:
+    id: 65
+    placed: 1
+    shrine: 0
+    gridX: 7
+    gridY: 4
+    up: -1
+    down: 79
+    left: 64
+    right: -1
+    collision:
+    - ................################
+    - .........##.....################
+    - .........##.....################
+    - '####....####....################'
+    - ........####..................##
+    - ........####..................##
+    - ........####..................##
+    - ....############....############
+    - ....############..............##
+    - ....##############............##
+    - ....##############............##
+    - ....################....########
+    - ............####..............##
+    - ............####..............##
+    - ............####..............##
+    - '########....####....####......##'
+    - '##....##............####......##'
+    - '##....##..##........####......##'
+    - '##....##..##........####......##'
+    - '####..##################......##'
+    collisionBoss: []
+    collisionNoLadders: []
+    spawns:
+    - x: 32
+      y: 80
+      type: 25
+    - x: 96
+      y: 80
+      type: 25
+    - x: 160
+      y: 80
+      type: 25
+    - x: 192
+      y: 80
+      type: 25
+    - x: 32
+      y: 144
+      type: 25
+    - x: 96
+      y: 144
+      type: 25
+    - x: 160
+      y: 144
+      type: 25
+    - x: 192
+      y: 144
+      type: 25
+    objects: []
+    hasItem: 0
+    item:
+      x: 0
+      y: 0
+      type: 0
+    rocks:
+    - x: 128
+      y: 104
+    - x: 80
+      y: 168
+    - x: 72
+      y: 40
+    ladders: []
+    periodic: []
+    afterBossRight: -1
+    markedRoom: 0
+    onClear:
+      kind: 
+      room: 0
+    eventLadder:
+      row: 0
+      col: 0
+      height: 0
+      openedBy: 0
+    wallBlock:
+      row: 0
+      col: 0
+      openedBy: 0
+    doorWorld: 0
+    door:
+      x: 0
+      y: 0
+    godType: 5
+    godName: Ares (tienda)
+    god:
+      x: 72
+      y: 40

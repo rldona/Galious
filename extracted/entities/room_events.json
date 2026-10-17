@@ -1,0 +1,656 @@
+{
+ "on_clear": {
+  "castle": [
+   {
+    "world": "castle",
+    "room": 24,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 35,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 48,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 53,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 69,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 75,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 77,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 101,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   },
+   {
+    "world": "castle",
+    "room": 105,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "effect": "E61C = 1 (castillo: hace aparecer un objeto en las salas 48, 75 y 24; b02:9F82)"
+   }
+  ],
+  "world01": [
+   {
+    "world": "world01",
+    "room": 10,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 21,
+     "EC0B": 238
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   },
+   {
+    "world": "world01",
+    "room": 12,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0A2": 1,
+     "EAC0": 0,
+     "E300": 16
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   }
+  ],
+  "world02": [
+   {
+    "world": "world02",
+    "room": 7,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 143,
+     "EC0B": 237
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   },
+   {
+    "world": "world02",
+    "room": 13,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0A3": 1,
+     "EAC0": 0,
+     "E300": 16
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   },
+   {
+    "world": "world02",
+    "room": 14,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 25,
+     "EC0B": 238
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   }
+  ],
+  "world03": [
+   {
+    "world": "world03",
+    "room": 12,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 143,
+     "EC0B": 237
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   },
+   {
+    "world": "world03",
+    "room": 15,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 130,
+     "EC0B": 237
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   }
+  ],
+  "world04": [
+   {
+    "world": "world04",
+    "room": 8,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E41F": 8
+    },
+    "effect": "escalera en la sala 15",
+    "sound": []
+   },
+   {
+    "world": "world04",
+    "room": 11,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0A4": 1
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   }
+  ],
+  "world05": [
+   {
+    "world": "world05",
+    "room": 3,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E431": 8
+    },
+    "effect": "escalera en la sala 16",
+    "sound": []
+   },
+   {
+    "world": "world05",
+    "room": 14,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0A5": 1
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   }
+  ],
+  "world06": [
+   {
+    "world": "world06",
+    "room": 5,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0A6": 1
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   },
+   {
+    "world": "world06",
+    "room": 11,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 143,
+     "EC0B": 237
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   },
+   {
+    "world": "world06",
+    "room": 15,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E43B": 8
+    },
+    "effect": "escalera en la sala 8",
+    "sound": []
+   }
+  ],
+  "world07": [
+   {
+    "world": "world07",
+    "room": 8,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0A8": 1,
+     "EAC0": 0,
+     "E300": 16
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   },
+   {
+    "world": "world07",
+    "room": 15,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0A9": 1
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   },
+   {
+    "world": "world07",
+    "room": 18,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 16,
+     "EC0B": 239
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   }
+  ],
+  "world08": [
+   {
+    "world": "world08",
+    "room": 3,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0AA": 1,
+     "EAC0": 0,
+     "E300": 16
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   },
+   {
+    "world": "world08",
+    "room": 8,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E460": 8
+    },
+    "effect": "escalera en la sala 5",
+    "sound": []
+   },
+   {
+    "world": "world08",
+    "room": 20,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0AB": 1,
+     "EAC0": 0,
+     "E300": 16
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   }
+  ],
+  "world09": [
+   {
+    "world": "world09",
+    "room": 2,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 130,
+     "EC0B": 237
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   },
+   {
+    "world": "world09",
+    "room": 10,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 132,
+     "EC0B": 237
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   },
+   {
+    "world": "world09",
+    "room": 18,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E300": 24,
+     "EC08": 1,
+     "EC09": 3,
+     "EC0A": 143,
+     "EC0B": 237
+    },
+    "effect": "escalera en esta sala",
+    "sound": []
+   },
+   {
+    "world": "world09",
+    "room": 26,
+    "trigger": "matar a los enemigos marcados de la sala",
+    "writes": {
+     "E0AC": 1,
+     "EAC0": 0,
+     "E300": 16
+    },
+    "effect": "abre un bloque de muro",
+    "sound": []
+   }
+  ]
+ },
+ "on_load": [
+  {
+   "world": "world01",
+   "room": 10,
+   "kind": "escalera",
+   "pos": {
+    "row": 4,
+    "col": 21
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world01:10"
+  },
+  {
+   "world": "world01",
+   "room": 12,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 0,
+    "col": 0
+   },
+   "flag": "E0A2",
+   "opened_by": "matar a los enemigos marcados de world01:12"
+  },
+  {
+   "world": "world02",
+   "room": 7,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 15
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world02:7"
+  },
+  {
+   "world": "world02",
+   "room": 11,
+   "kind": "puente (con el objeto 0x12)",
+   "pos": {
+    "row": 7,
+    "col": 8
+   }
+  },
+  {
+   "world": "world02",
+   "room": 13,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 8,
+    "col": 28
+   },
+   "flag": "E0A3",
+   "opened_by": "matar a los enemigos marcados de world02:13"
+  },
+  {
+   "world": "world02",
+   "room": 14,
+   "kind": "escalera",
+   "pos": {
+    "row": 4,
+    "col": 25
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world02:14"
+  },
+  {
+   "world": "world03",
+   "room": 4,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 0,
+    "col": 28
+   },
+   "flag": "E0A1",
+   "opened_by": "subir 5 veces seguidas por el pozo de la sala (b00:479C)"
+  },
+  {
+   "world": "world03",
+   "room": 12,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 15
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world03:12"
+  },
+  {
+   "world": "world03",
+   "room": 15,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 2
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world03:15"
+  },
+  {
+   "world": "world04",
+   "room": 15,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 12,
+    "col": 14
+   },
+   "flag": "E0A4",
+   "opened_by": "matar a los enemigos marcados de world04:11"
+  },
+  {
+   "world": "world04",
+   "room": 15,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 15
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world04:8"
+  },
+  {
+   "world": "world05",
+   "room": 13,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 8,
+    "col": 28
+   },
+   "flag": "E0A5",
+   "opened_by": "matar a los enemigos marcados de world05:14"
+  },
+  {
+   "world": "world05",
+   "room": 16,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 15
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world05:3"
+  },
+  {
+   "world": "world06",
+   "room": 8,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 12,
+    "col": 0
+   },
+   "flag": "E0A6",
+   "opened_by": "matar a los enemigos marcados de world06:5"
+  },
+  {
+   "world": "world06",
+   "room": 8,
+   "kind": "escalera",
+   "pos": {
+    "row": 16,
+    "col": 28
+   },
+   "height": 4,
+   "opened_by": "matar a los enemigos marcados de world06:15"
+  },
+  {
+   "world": "world06",
+   "room": 11,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 15
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world06:11"
+  },
+  {
+   "world": "world07",
+   "room": 8,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 16,
+    "col": 4
+   },
+   "flag": "E0A8",
+   "opened_by": "matar a los enemigos marcados de world07:8"
+  },
+  {
+   "world": "world07",
+   "room": 14,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 0,
+    "col": 8
+   },
+   "flag": "E0A9",
+   "opened_by": "matar a los enemigos marcados de world07:15"
+  },
+  {
+   "world": "world07",
+   "room": 18,
+   "kind": "escalera",
+   "pos": {
+    "row": 12,
+    "col": 16
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world07:18"
+  },
+  {
+   "world": "world08",
+   "room": 3,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 4,
+    "col": 28
+   },
+   "flag": "E0AA",
+   "opened_by": "matar a los enemigos marcados de world08:3"
+  },
+  {
+   "world": "world08",
+   "room": 5,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 15
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world08:8"
+  },
+  {
+   "world": "world08",
+   "room": 20,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 4,
+    "col": 28
+   },
+   "flag": "E0AB",
+   "opened_by": "matar a los enemigos marcados de world08:20"
+  },
+  {
+   "world": "world09",
+   "room": 2,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 2
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world09:2"
+  },
+  {
+   "world": "world09",
+   "room": 10,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 4
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world09:10"
+  },
+  {
+   "world": "world09",
+   "room": 18,
+   "kind": "escalera",
+   "pos": {
+    "row": 0,
+    "col": 15
+   },
+   "height": 3,
+   "opened_by": "matar a los enemigos marcados de world09:18"
+  },
+  {
+   "world": "world09",
+   "room": 26,
+   "kind": "muro 4x3",
+   "pos": {
+    "row": 0,
+    "col": 4
+   },
+   "flag": "E0AC",
+   "opened_by": "matar a los enemigos marcados de world09:26"
+  }
+ ]
+}

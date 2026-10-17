@@ -1,0 +1,3869 @@
+{
+ "source": "ROM + openMSX (docs/attract.md)",
+ "frameRate": 60,
+ "cycle": {
+  "order": [
+   "konamiLogo",
+   "title",
+   "demo0",
+   "konamiLogo",
+   "title",
+   "story",
+   "konamiLogo",
+   "title",
+   "demo1",
+   "konamiLogo",
+   "title",
+   "story"
+  ],
+  "notes": "E025 cuenta las vueltas del estado 2: par = demo jugada (E023 elige la 0 o la 1 y cambia al acabar), impar = historia. Al encender E023 = E025 = 0. Se repite cada 4 vueltas.",
+  "keys": [
+   {
+    "state": 0,
+    "keys": "flechas, espacio, M (o joystick); tecla nueva",
+    "goTo": 1,
+    "notes": "titulo desde el principio (sin pasar por el barrido); no cuenta vuelta"
+   },
+   {
+    "state": 1,
+    "keys": "espacio o M (boton A o B)",
+    "goTo": 3,
+    "notes": "E002 = 0x40 (partida en curso). Las flechas no hacen nada"
+   },
+   {
+    "state": 1,
+    "keys": "L mantenida (SNSMAT fila 4 bit 1, cada frame del titulo)",
+    "goTo": 18,
+    "notes": "pantalla de contraseña; se mira antes que el espacio"
+   },
+   {
+    "state": 2,
+    "keys": "flechas, espacio, M; tecla nueva",
+    "goTo": 1,
+    "notes": "vuelve al titulo (musica 0) y la vuelta cuenta como hecha: E025++ y, si era demo, E023 ^= 1"
+   },
+   {
+    "state": 2,
+    "keys": "F5 (fila 7 bit 1), por flanco, solo en la demo jugada",
+    "goTo": 2,
+    "notes": "E00D ^= 1: apaga la musica de la demo (peticion 0) o la vuelve a pedir si E033 > 0. Los efectos suenan siempre. Tambien vale para la demo siguiente (E00D no se borra)"
+   }
+  ]
+ },
+ "konamiLogo": {
+  "col": 7,
+  "row": 8,
+  "wTiles": 21,
+  "hTiles": 6,
+  "patterns": "RLE b09:BCEF",
+  "color": 15,
+  "backdropColor": 4,
+  "revealLines": 48,
+  "framesPerLine": 2,
+  "notes": "logo de Konami en blanco sobre fondo azul oscuro (VDP R7 = 0xE4). Se colorea de arriba abajo, una linea de pixeles cada 2 frames (las 21 columnas a la vez): 6 filas x 8 lineas = 96 frames. Despues queda quieto 256 frames. Sin musica (peticion 0 = silencio total)."
+ },
+ "title": {
+  "logo": {
+   "tiles": "b14:933F",
+   "col": 9,
+   "row": 1,
+   "wTiles": 14,
+   "hTiles": 12,
+   "notes": "escudo con THE MAZE OF GALIOUS y KNIGHTMARE II (dibujo de tiles); fondo negro (R7 = 0xE0)"
+  },
+  "logoSprites": [
+   {
+    "y": 39,
+    "x": 88,
+    "pattern": 0,
+    "color": 4
+   },
+   {
+    "y": 55,
+    "x": 88,
+    "pattern": 4,
+    "color": 4
+   },
+   {
+    "y": 31,
+    "x": 152,
+    "pattern": 8,
+    "color": 4
+   },
+   {
+    "y": 47,
+    "x": 152,
+    "pattern": 12,
+    "color": 4
+   }
+  ],
+  "glint": {
+   "sprite": {
+    "y": 71,
+    "x": 96,
+    "pattern": 16,
+    "color": 7
+   },
+   "xFrom": 96,
+   "xTo": 152,
+   "pxPerFrame": 2,
+   "patternStepAtX": [
+    110,
+    124,
+    138
+   ],
+   "patternStep": 4,
+   "notes": "destello que recorre la espada: aparece a los 48 frames, avanza 2 px por frame (28 frames) y cambia de patron (+4) en x 0x6E, 0x7C y 0x8A; al llegar a 0x98 se oculta"
+  },
+  "star": {
+   "frames": [
+    [
+     {
+      "y": 63,
+      "x": 160,
+      "pattern": 32,
+      "color": 7
+     },
+     {
+      "y": 224,
+      "x": 0,
+      "pattern": 0,
+      "color": 0
+     }
+    ],
+    [
+     {
+      "y": 63,
+      "x": 164,
+      "pattern": 36,
+      "color": 7
+     },
+     {
+      "y": 71,
+      "x": 156,
+      "pattern": 40,
+      "color": 7
+     }
+    ],
+    [
+     {
+      "y": 63,
+      "x": 164,
+      "pattern": 36,
+      "color": 7
+     },
+     {
+      "y": 71,
+      "x": 156,
+      "pattern": 40,
+      "color": 7
+     }
+    ],
+    [
+     {
+      "y": 63,
+      "x": 160,
+      "pattern": 32,
+      "color": 7
+     },
+     {
+      "y": 224,
+      "x": 0,
+      "pattern": 0,
+      "color": 0
+     }
+    ]
+   ],
+   "framesEach": 16,
+   "notes": "estrella en la punta (x 0xA0, y 0x3F): 4 dibujos de 16 frames, empezando cuando E003 & 15 = 0 (0-15 frames de espera); el 5.o paso la oculta. y = 0xE0 = oculto"
+  },
+  "phasesFrames": [
+   {
+    "id": "still",
+    "frames": 48
+   },
+   {
+    "id": "glint",
+    "frames": 28
+   },
+   {
+    "id": "star",
+    "frames": 67,
+    "notes": "64 + alineacion a E003 & 15 (0-15)"
+   },
+   {
+    "id": "wait",
+    "frames": 120
+   }
+  ]
+ },
+ "screens": [
+  {
+   "id": "konamiLogo",
+   "state": 0,
+   "substates": [
+    0,
+    1,
+    2
+   ],
+   "durationFrames": 366,
+   "measured": true,
+   "music": 0,
+   "texts": [],
+   "notes": "sub 0: 1 frame (init, silencio); sub 1: 96 frames (revelado); sub 2: 256 frames quieto + ~10 de carga del titulo. 353 en codigo, 366 medido"
+  },
+  {
+   "id": "title",
+   "state": 1,
+   "substates": [
+    0
+   ],
+   "durationFrames": 264,
+   "measured": true,
+   "music": 0,
+   "texts": [
+    {
+     "text": "©KONAMI 1987",
+     "x": 10,
+     "y": 15,
+     "blink": false
+    },
+    {
+     "text": "PUSH SPACE KEY",
+     "x": 9,
+     "y": 17,
+     "blink": false
+    }
+   ],
+   "notes": "sin musica; nada parpadea. 48 quieto + 28 destello + 64-79 estrella + 120 quieto: 264-279 frames (medidos 264, 268, 272)"
+  },
+  {
+   "id": "wipe",
+   "state": 2,
+   "substates": [
+    0
+   ],
+   "durationFrames": 55,
+   "measured": true,
+   "music": 0,
+   "texts": [],
+   "notes": "barrido: cada frame borra una columna (filas 4-23) de izquierda a derecha, 32 frames; luego carga la sala de la demo o la historia. 55 frames antes de la demo, 61 antes de la historia"
+  },
+  {
+   "id": "demo",
+   "state": 2,
+   "substates": [
+    1
+   ],
+   "durationFrames": 2440,
+   "measured": true,
+   "music": 136,
+   "texts": [],
+   "notes": "ver demos[]: demo 0 1107 ticks (2440 frames), demo 1 1292 ticks (2743 frames). Marcador normal"
+  },
+  {
+   "id": "story",
+   "state": 2,
+   "substates": [
+    2,
+    3
+   ],
+   "durationFrames": 1710,
+   "measured": true,
+   "music": 134,
+   "texts": [],
+   "notes": "historia que sube (storyLines, story). La orden FB del texto para la musica y el sub 3 acaba en el acto"
+  },
+  {
+   "id": "gameStart",
+   "state": 3,
+   "substates": [
+    0,
+    1,
+    2
+   ],
+   "durationFrames": 49,
+   "measured": true,
+   "music": 135,
+   "texts": [
+    {
+     "text": "©KONAMI 1987",
+     "x": 10,
+     "y": 15,
+     "blink": false
+    },
+    {
+     "text": "PLAY START",
+     "x": 11,
+     "y": 17,
+     "blink": true
+    }
+   ],
+   "notes": "el titulo se queda (sin animar) y PLAY START sustituye a PUSH SPACE KEY en la fila 17. Parpadeo: E004 de 44 a 1, visible si E004 & 4 = 0 (1 frame oculto, luego 4 visibles / 4 ocultos). Sub 0: 1 frame, sub 1: 45, sub 2: 1 + ~3 de borrado. Luego estado 4 (barrido 32 + carga) y estado 5: 104 frames medidos de la tecla al juego"
+  }
+ ],
+ "storyLines": [
+  {
+   "kind": "text",
+   "col": 13,
+   "text": "STORY",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "POPOLON WENT INTO MT.ATOS TO",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "RESCUE APHRODITE KIDNAPPED",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "BY HUDNOS. BUT IT WAS A TRAP",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "MADE BY GALIOUS. HE ATTACKED",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "THE CASTLE DURING POPOLON'S",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "ABSENCE AND ALSO KIDNAPPED",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "AND IMPRISONED A BABY FROM",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "THE HEAVEN WHO WAS SUPPOSED",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "TO BE BORN TO POPOLON AND",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "APHRODITE SEVERAL YEARS",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "text",
+   "col": 2,
+   "text": "LATER...",
+   "rows": 2,
+   "steps": 16
+  },
+  {
+   "kind": "wait",
+   "col": 0,
+   "text": "",
+   "rows": 0,
+   "steps": 255
+  },
+  {
+   "kind": "blank",
+   "col": 0,
+   "text": "",
+   "rows": 10,
+   "steps": 80
+  },
+  {
+   "kind": "musicStop",
+   "col": 0,
+   "text": "",
+   "rows": 0,
+   "steps": 0
+  },
+  {
+   "kind": "blank",
+   "col": 0,
+   "text": "",
+   "rows": 14,
+   "steps": 112
+  },
+  {
+   "kind": "end",
+   "col": 0,
+   "text": "",
+   "rows": 0,
+   "steps": 0
+  }
+ ],
+ "story": {
+  "textPtr": "b15:AE28",
+  "font": "8x16 (la del epilogo)",
+  "screenCols": 32,
+  "music": 134,
+  "scrollPxPerStep": 1,
+  "stepFramesCode": 2,
+  "stepFramesMeasured": 3,
+  "rowSteps": 8,
+  "waitFramesMeasured": 513,
+  "durationFramesMeasured": 1710,
+  "texts": [
+   "STORY",
+   "POPOLON WENT INTO MT.ATOS TO",
+   "RESCUE APHRODITE KIDNAPPED",
+   "BY HUDNOS. BUT IT WAS A TRAP",
+   "MADE BY GALIOUS. HE ATTACKED",
+   "THE CASTLE DURING POPOLON'S",
+   "ABSENCE AND ALSO KIDNAPPED",
+   "AND IMPRISONED A BABY FROM",
+   "THE HEAVEN WHO WAS SUPPOSED",
+   "TO BE BORN TO POPOLON AND",
+   "APHRODITE SEVERAL YEARS",
+   "LATER..."
+  ],
+  "notes": "pantalla negra. El texto entra por abajo y sube 1 px por paso (192 px: STORY queda arriba y LATER... abajo), espera 255 pasos (513 frames), sigue subiendo 10 filas, para la musica (FB) y sube 14 filas mas hasta salir. Medido: 384 pasos de 3 frames + 513 = 1710 frames. Solo hay texto en ingles."
+ },
+ "demo": {
+  "index": 0,
+  "map": "castle",
+  "e041": 1,
+  "room": 146,
+  "x": 128,
+  "y": 56,
+  "spawnByte": 56,
+  "character": "Popolon",
+  "startState": {
+   "character": "Popolon",
+   "e501": 1,
+   "aphrodite": {
+    "vitality": 8,
+    "vitalityMax": 8,
+    "experience": 0,
+    "experienceMax": 48,
+    "lives": 1,
+    "resurrections": 1
+   },
+   "popolon": {
+    "vitality": 8,
+    "vitalityMax": 8,
+    "experience": 0,
+    "experienceMax": 48,
+    "lives": 0,
+    "resurrections": 1
+   },
+   "arrows": 100,
+   "coins": 0,
+   "keys": 0,
+   "subWeapon": 1,
+   "items": [
+    1
+   ],
+   "doorsOpen": false,
+   "world10Door": {
+    "e06eRoll": "R & 3 (registro R del Z80: al azar)",
+    "roomByRoll": [
+     9,
+     30,
+     39,
+     1
+    ]
+   },
+   "notes": "como una partida nueva (b00:4CB0), pero con el Arrow (E070 = 1), elegido (E510 = 1) y 100 flechas (E046 = 0x0100 BCD), b01:7DA1. Al acabar la demo se borran los tres."
+  },
+  "music": 136,
+  "musicStopSteps": 28,
+  "musicStopTickMeasured": 1026,
+  "inputs": [
+   {
+    "frames": 18,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 4,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 88,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 10,
+    "keys": 1,
+    "up": true,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 129,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 1,
+    "up": true,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 9,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 4,
+    "keys": 21,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 21,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 21,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 21,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 4,
+    "keys": 21,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 9,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 8,
+    "keys": 8,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": true,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 6,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 6,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 4,
+    "keys": 20,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 20,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 20,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 20,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 4,
+    "keys": 20,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 8,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 8,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 13,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 17,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 64,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 4,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 20,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 20,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 6,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 200,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 4,
+    "keys": 32,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": true
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 32,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": true
+   },
+   {
+    "frames": 2,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 32,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": true
+   },
+   {
+    "frames": 9,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 49,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 28,
+    "keys": 2,
+    "up": false,
+    "down": true,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 6,
+    "up": false,
+    "down": true,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 99,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 15,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 5,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 13,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 28,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 14,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 14,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 20,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 2,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 3,
+    "keys": 16,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": true,
+    "m": false
+   },
+   {
+    "frames": 9,
+    "keys": 0,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 8,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 12,
+    "keys": 5,
+    "up": true,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 30,
+    "keys": 4,
+    "up": false,
+    "down": false,
+    "left": true,
+    "right": false,
+    "space": false,
+    "m": false
+   },
+   {
+    "frames": 1,
+    "keys": 255,
+    "up": false,
+    "down": false,
+    "left": false,
+    "right": false,
+    "space": false,
+    "m": false
+   }
+  ],
+  "inputCount": 95,
+  "durationTicks": 1107,
+  "durationFrames": 2440,
+  "durationFramesMeasured": 2440,
+  "roomsVisitedMeasured": [
+   146,
+   135,
+   126,
+   113,
+   101,
+   100,
+   99,
+   112,
+   111,
+   110,
+   109
+  ],
+  "notes": "Demo jugada con el motor real: cada tick b01:7E22 mete la combinacion de teclas como si viniera del teclado (E009 mantenidas, E008 flancos). Una entrada dura \"frames\" ticks (contando el tick en que se carga); la ultima (teclas FF) acaba la demo en el tick en que se lee. Marcador normal (CASTLE), sin texto de DEMO. Enemigos, IA y azar son los del juego: el azar (R del Z80 xor E003) no se siembra, asi que en otra maquina la demo podria torcerse."
+ },
+ "demos": [
+  {
+   "index": 0,
+   "map": "castle",
+   "e041": 1,
+   "room": 146,
+   "x": 128,
+   "y": 56,
+   "spawnByte": 56,
+   "character": "Popolon",
+   "startState": {
+    "character": "Popolon",
+    "e501": 1,
+    "aphrodite": {
+     "vitality": 8,
+     "vitalityMax": 8,
+     "experience": 0,
+     "experienceMax": 48,
+     "lives": 1,
+     "resurrections": 1
+    },
+    "popolon": {
+     "vitality": 8,
+     "vitalityMax": 8,
+     "experience": 0,
+     "experienceMax": 48,
+     "lives": 0,
+     "resurrections": 1
+    },
+    "arrows": 100,
+    "coins": 0,
+    "keys": 0,
+    "subWeapon": 1,
+    "items": [
+     1
+    ],
+    "doorsOpen": false,
+    "world10Door": {
+     "e06eRoll": "R & 3 (registro R del Z80: al azar)",
+     "roomByRoll": [
+      9,
+      30,
+      39,
+      1
+     ]
+    },
+    "notes": "como una partida nueva (b00:4CB0), pero con el Arrow (E070 = 1), elegido (E510 = 1) y 100 flechas (E046 = 0x0100 BCD), b01:7DA1. Al acabar la demo se borran los tres."
+   },
+   "music": 136,
+   "musicStopSteps": 28,
+   "musicStopTickMeasured": 1026,
+   "inputs": [
+    {
+     "frames": 18,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 88,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 10,
+     "keys": 1,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 129,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 1,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 9,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 21,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 21,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 21,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 21,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 21,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 9,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 20,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 20,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 20,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 20,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 20,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 13,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 17,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 64,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 20,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 20,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 200,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 32,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 32,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 32,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 9,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 49,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 28,
+     "keys": 2,
+     "up": false,
+     "down": true,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 6,
+     "up": false,
+     "down": true,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 99,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 15,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 13,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 28,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 14,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 14,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 20,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 9,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 12,
+     "keys": 5,
+     "up": true,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 30,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 255,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    }
+   ],
+   "inputCount": 95,
+   "durationTicks": 1107,
+   "durationFrames": 2440,
+   "durationFramesMeasured": 2440,
+   "roomsVisitedMeasured": [
+    146,
+    135,
+    126,
+    113,
+    101,
+    100,
+    99,
+    112,
+    111,
+    110,
+    109
+   ],
+   "notes": "Demo jugada con el motor real: cada tick b01:7E22 mete la combinacion de teclas como si viniera del teclado (E009 mantenidas, E008 flancos). Una entrada dura \"frames\" ticks (contando el tick en que se carga); la ultima (teclas FF) acaba la demo en el tick en que se lee. Marcador normal (CASTLE), sin texto de DEMO. Enemigos, IA y azar son los del juego: el azar (R del Z80 xor E003) no se siembra, asi que en otra maquina la demo podria torcerse."
+  },
+  {
+   "index": 1,
+   "map": "castle",
+   "e041": 1,
+   "room": 1,
+   "x": 192,
+   "y": 120,
+   "spawnByte": 124,
+   "character": "Popolon",
+   "startState": {
+    "character": "Popolon",
+    "e501": 1,
+    "aphrodite": {
+     "vitality": 8,
+     "vitalityMax": 8,
+     "experience": 0,
+     "experienceMax": 48,
+     "lives": 1,
+     "resurrections": 1
+    },
+    "popolon": {
+     "vitality": 8,
+     "vitalityMax": 8,
+     "experience": 0,
+     "experienceMax": 48,
+     "lives": 0,
+     "resurrections": 1
+    },
+    "arrows": 100,
+    "coins": 0,
+    "keys": 0,
+    "subWeapon": 1,
+    "items": [
+     1
+    ],
+    "doorsOpen": false,
+    "world10Door": {
+     "e06eRoll": "R & 3 (registro R del Z80: al azar)",
+     "roomByRoll": [
+      9,
+      30,
+      39,
+      1
+     ]
+    },
+    "notes": "como una partida nueva (b00:4CB0), pero con el Arrow (E070 = 1), elegido (E510 = 1) y 100 flechas (E046 = 0x0100 BCD), b01:7DA1. Al acabar la demo se borran los tres."
+   },
+   "music": 136,
+   "musicStopSteps": 32,
+   "musicStopTickMeasured": 1140,
+   "inputs": [
+    {
+     "frames": 65,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 28,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 10,
+     "keys": 9,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 41,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 2,
+     "keys": 9,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 11,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 12,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 6,
+     "up": false,
+     "down": true,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 28,
+     "keys": 2,
+     "up": false,
+     "down": true,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 26,
+     "keys": 2,
+     "up": false,
+     "down": true,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 10,
+     "up": false,
+     "down": true,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 9,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 62,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 7,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 36,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 4,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 36,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 3,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 36,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 10,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 36,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 48,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 20,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 14,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 7,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 22,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 32,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 32,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 1,
+     "keys": 40,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": true
+    },
+    {
+     "frames": 102,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 9,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 26,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 80,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 16,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 7,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 21,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 2,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 11,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 12,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 18,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 45,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 64,
+     "keys": 2,
+     "up": false,
+     "down": true,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 16,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 18,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 8,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 20,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 21,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 24,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 9,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 11,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 3,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 4,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 16,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": true,
+     "m": false
+    },
+    {
+     "frames": 10,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 9,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 19,
+     "keys": 9,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 5,
+     "keys": 8,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": true,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 6,
+     "keys": 4,
+     "up": false,
+     "down": false,
+     "left": true,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 0,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 39,
+     "keys": 1,
+     "up": true,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    },
+    {
+     "frames": 1,
+     "keys": 255,
+     "up": false,
+     "down": false,
+     "left": false,
+     "right": false,
+     "space": false,
+     "m": false
+    }
+   ],
+   "inputCount": 125,
+   "durationTicks": 1292,
+   "durationFrames": 2743,
+   "durationFramesMeasured": 2743,
+   "roomsVisitedMeasured": [
+    1,
+    107,
+    120,
+    121,
+    132,
+    133,
+    143,
+    133
+   ],
+   "notes": "Demo jugada con el motor real: cada tick b01:7E22 mete la combinacion de teclas como si viniera del teclado (E009 mantenidas, E008 flancos). Una entrada dura \"frames\" ticks (contando el tick en que se carga); la ultima (teclas FF) acaba la demo en el tick en que se lee. Marcador normal (CASTLE), sin texto de DEMO. Enemigos, IA y azar son los del juego: el azar (R del Z80 xor E003) no se siembra, asi que en otra maquina la demo podria torcerse."
+  }
+ ],
+ "gameStart": {
+  "blinkText": {
+   "text": "PLAY START",
+   "x": 11,
+   "y": 17,
+   "blink": true
+  },
+  "blinkFrames": 45,
+  "music": 135,
+  "keyToPlayFramesMeasured": 104,
+  "map": "castle",
+  "e041": 1,
+  "room": 1,
+  "x": 192,
+  "y": 120,
+  "spawnByte": 124,
+  "state": {
+   "character": "Popolon",
+   "e501": 1,
+   "aphrodite": {
+    "vitality": 8,
+    "vitalityMax": 8,
+    "experience": 0,
+    "experienceMax": 48,
+    "lives": 1,
+    "resurrections": 1
+   },
+   "popolon": {
+    "vitality": 8,
+    "vitalityMax": 8,
+    "experience": 0,
+    "experienceMax": 48,
+    "lives": 0,
+    "resurrections": 1
+   },
+   "arrows": 0,
+   "coins": 0,
+   "keys": 0,
+   "subWeapon": 0,
+   "items": [],
+   "doorsOpen": false,
+   "world10Door": {
+    "e06eRoll": "R & 3 (registro R del Z80: al azar)",
+    "roomByRoll": [
+     9,
+     30,
+     39,
+     1
+    ]
+   },
+   "notes": "b00:4CB0 borra E016-E0FE y E200-F03E (objetos, puertas, contadores, flags) y copia E051-E05B de b00:4CE6. Vidas de reserva BCD: E058 = 1 (Aphrodite), E059 = 0 (Popolon): la partida tiene 2 vidas en total (la que se juega + 1). Resurrecciones = credito de la Muerte (E05A/E05B). Con otro cartucho de Konami en el segundo slot (F0F8, b00:4CF1) hay extras: no se reproduce."
+  },
+  "notes": "espacio/M en el titulo -> estado 3 (PLAY START, musica 0x87 del castillo que sigue en el juego) -> estado 4 (barrido y carga de la sala) -> estado 5. Popolon en la sala 1 del castillo, en el suelo, mirando a la derecha (E503 = 0)."
+ }
+}

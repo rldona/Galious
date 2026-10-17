@@ -1,0 +1,1052 @@
+{
+ "tickFrames": 2,
+ "newPressRequired": true,
+ "stopsPlayer": false,
+ "projectileSlots": 3,
+ "mineSlots": 3,
+ "killMinX": 8,
+ "killMaxX": 248,
+ "killMaxY": 184,
+ "solidTile": 186,
+ "solidTileBossFight": 240,
+ "weapons": [
+  {
+   "cost": 1,
+   "damage": 1,
+   "saberBonus": 1,
+   "bossDamage": 1,
+   "rockDamagePopolon": 5,
+   "rockDamageAphrodite": 1,
+   "piercing": false,
+   "rehitPeriodTicks": 0,
+   "deflectable": true,
+   "blockedOnLift": false,
+   "spawnAlignY8": true,
+   "spawnMinY": 32,
+   "firstTickMoves": true,
+   "fallSpeed": 0,
+   "id": 1,
+   "name": "Arrow",
+   "pool": "projectile",
+   "maxPopolon": 2,
+   "maxAphrodite": 3,
+   "maxItem": 29,
+   "maxPopolonWithItem": 3,
+   "air": true,
+   "ladder": false,
+   "ground": true,
+   "spawnDxRight": 0,
+   "spawnDxLeft": -8,
+   "spawnDy": -8,
+   "speedX": 8,
+   "motion": "straight",
+   "bossMaskBit": 5,
+   "hitbox": {
+    "dy": 2,
+    "dx": 2,
+    "h": 3,
+    "w": 12,
+    "alignTo8": true
+   },
+   "sound": 20
+  },
+  {
+   "cost": 1,
+   "damage": 1,
+   "saberBonus": 1,
+   "bossDamage": 1,
+   "rockDamagePopolon": 5,
+   "rockDamageAphrodite": 1,
+   "piercing": true,
+   "rehitPeriodTicks": 16,
+   "deflectable": true,
+   "blockedOnLift": false,
+   "spawnAlignY8": true,
+   "spawnMinY": 32,
+   "firstTickMoves": true,
+   "fallSpeed": 0,
+   "id": 2,
+   "name": "Ceramic Arrow",
+   "pool": "projectile",
+   "maxPopolon": 2,
+   "maxAphrodite": 3,
+   "maxItem": 29,
+   "maxPopolonWithItem": 3,
+   "air": true,
+   "ladder": false,
+   "ground": true,
+   "spawnDxRight": 0,
+   "spawnDxLeft": -8,
+   "spawnDy": -8,
+   "speedX": 4,
+   "motion": "straight",
+   "bossMaskBit": 4,
+   "hitbox": {
+    "dy": 2,
+    "dx": 2,
+    "h": 3,
+    "w": 12,
+    "alignTo8": true
+   },
+   "sound": 21
+  },
+  {
+   "cost": 1,
+   "damage": 1,
+   "saberBonus": 1,
+   "bossDamage": 1,
+   "rockDamagePopolon": 5,
+   "rockDamageAphrodite": 1,
+   "piercing": false,
+   "rehitPeriodTicks": 0,
+   "deflectable": true,
+   "blockedOnLift": true,
+   "spawnAlignY8": false,
+   "spawnMinY": 0,
+   "firstTickMoves": true,
+   "fallSpeed": 4,
+   "id": 3,
+   "name": "Rolling Fire",
+   "pool": "projectile",
+   "maxPopolon": 2,
+   "maxAphrodite": 3,
+   "maxItem": 0,
+   "maxPopolonWithItem": 2,
+   "air": false,
+   "ladder": false,
+   "ground": true,
+   "spawnDxRight": -4,
+   "spawnDxLeft": -4,
+   "spawnDy": -8,
+   "speedX": 4,
+   "motion": "wrapPlatform",
+   "bossMaskBit": 2,
+   "hitbox": {
+    "dy": 0,
+    "dx": 0,
+    "h": 8,
+    "w": 8,
+    "alignTo8": false
+   },
+   "sound": 22
+  },
+  {
+   "cost": 1,
+   "damage": 1,
+   "saberBonus": 1,
+   "bossDamage": 1,
+   "rockDamagePopolon": 5,
+   "rockDamageAphrodite": 1,
+   "piercing": false,
+   "rehitPeriodTicks": 0,
+   "deflectable": true,
+   "blockedOnLift": true,
+   "spawnAlignY8": false,
+   "spawnMinY": 0,
+   "firstTickMoves": false,
+   "fallSpeed": 4,
+   "id": 4,
+   "name": "Fire",
+   "pool": "projectile",
+   "maxPopolon": 2,
+   "maxAphrodite": 3,
+   "maxItem": 0,
+   "maxPopolonWithItem": 2,
+   "air": false,
+   "ladder": false,
+   "ground": true,
+   "spawnDxRight": -8,
+   "spawnDxLeft": -8,
+   "spawnDy": -8,
+   "speedX": 4,
+   "motion": "floorFall",
+   "bossMaskBit": 3,
+   "hitbox": {
+    "dy": 0,
+    "dx": 0,
+    "h": 4,
+    "w": 8,
+    "alignTo8": false
+   },
+   "sound": 22
+  },
+  {
+   "cost": 1,
+   "damage": 2,
+   "saberBonus": 2,
+   "bossDamage": 2,
+   "rockDamagePopolon": 0,
+   "rockDamageAphrodite": 0,
+   "piercing": false,
+   "rehitPeriodTicks": 32,
+   "deflectable": false,
+   "blockedOnLift": true,
+   "spawnAlignY8": false,
+   "spawnMinY": 0,
+   "firstTickMoves": true,
+   "fallSpeed": 0,
+   "id": 5,
+   "name": "Mine",
+   "pool": "mine",
+   "maxPopolon": 2,
+   "maxAphrodite": 3,
+   "maxItem": 30,
+   "maxPopolonWithItem": 3,
+   "air": false,
+   "ladder": false,
+   "ground": true,
+   "spawnDxRight": -8,
+   "spawnDxLeft": -8,
+   "spawnDy": -4,
+   "speedX": 0,
+   "motion": "mine",
+   "bossMaskBit": 1,
+   "hitbox": {
+    "dy": 0,
+    "dx": 2,
+    "h": 4,
+    "w": 12,
+    "alignTo8": false
+   },
+   "sound": 22
+  },
+  {
+   "cost": 0,
+   "damage": 0,
+   "saberBonus": 0,
+   "bossDamage": 0,
+   "rockDamagePopolon": 0,
+   "rockDamageAphrodite": 0,
+   "piercing": false,
+   "rehitPeriodTicks": 0,
+   "deflectable": false,
+   "blockedOnLift": false,
+   "spawnAlignY8": false,
+   "spawnMinY": 0,
+   "firstTickMoves": true,
+   "fallSpeed": 0,
+   "id": 6,
+   "name": "Magnifying Glass",
+   "pool": "none",
+   "maxPopolon": 0,
+   "maxAphrodite": 0,
+   "maxItem": 0,
+   "maxPopolonWithItem": 0,
+   "air": true,
+   "ladder": true,
+   "ground": true,
+   "spawnDxRight": 0,
+   "spawnDxLeft": 0,
+   "spawnDy": 0,
+   "speedX": 0,
+   "motion": "none",
+   "bossMaskBit": -1,
+   "hitbox": {
+    "dy": 0,
+    "dx": 0,
+    "h": 0,
+    "w": 0,
+    "alignTo8": false
+   },
+   "sound": 0
+  }
+ ],
+ "mine": {
+  "armDy": 21,
+  "armDxMin": -8,
+  "armDxMax": 25,
+  "needsFloorAt": [
+   2,
+   15
+  ],
+  "fuseTicks": 0,
+  "explosionTicks": 70,
+  "explosionShiftY": -12,
+  "explosionShiftX": -8,
+  "explosionHitbox": {
+   "dy": -16,
+   "dx": 0,
+   "h": 32,
+   "w": 32,
+   "alignTo8": false
+  },
+  "blinkColours": [
+   15,
+   7,
+   5,
+   4,
+   5,
+   7
+  ],
+  "blinkEveryTicks": 4,
+  "playerDamage": 2,
+  "playerBox": {
+   "dy": -16,
+   "dx": -8,
+   "h": 16,
+   "w": 16
+  },
+  "ignoresInvulnerablePlayer": true,
+  "sound": 38
+ },
+ "rollingFire": {
+  "floorProbeDy": 8,
+  "ceilingProbeDy": -1,
+  "wallProbeDxRight": 8,
+  "wallProbeDxLeft": -1,
+  "wallProbeDy": 2,
+  "laps": 1,
+  "animEveryTicks": 8
+ },
+ "fire": {
+  "floorProbeDy": 4,
+  "restOffsetFromFloor": -4
+ },
+ "deflect": {
+  "vy": -8,
+  "reverseX": true,
+  "sound": 29
+ },
+ "sounds": {
+  "enemyHit": 30,
+  "enemyKilled": 32,
+  "bossHit": 39,
+  "immune": 29,
+  "rockBroken": 32
+ },
+ "magicRod": {
+  "item": 9,
+  "flag": 57464,
+  "freeInBossFight": true
+ },
+ "magnifier": {
+  "dyMin": -16,
+  "dyMax": 16,
+  "playerDy": -16,
+  "dxMin": -16,
+  "dxMax": 16,
+  "playerDx": -8,
+  "tombstones": [
+   {
+    "world": 1,
+    "e041": 2,
+    "room": 3,
+    "kind": 0,
+    "x": 40,
+    "y": 40
+   },
+   {
+    "world": 1,
+    "e041": 2,
+    "room": 5,
+    "kind": 0,
+    "x": 136,
+    "y": 136
+   },
+   {
+    "world": 1,
+    "e041": 2,
+    "room": 10,
+    "kind": 0,
+    "x": 104,
+    "y": 72
+   },
+   {
+    "world": 1,
+    "e041": 2,
+    "room": 12,
+    "kind": 1,
+    "x": 136,
+    "y": 168
+   },
+   {
+    "world": 1,
+    "e041": 2,
+    "room": 14,
+    "kind": 0,
+    "x": 200,
+    "y": 40
+   },
+   {
+    "world": 2,
+    "e041": 3,
+    "room": 4,
+    "kind": 0,
+    "x": 40,
+    "y": 40
+   },
+   {
+    "world": 2,
+    "e041": 3,
+    "room": 5,
+    "kind": 0,
+    "x": 40,
+    "y": 72
+   },
+   {
+    "world": 2,
+    "e041": 3,
+    "room": 7,
+    "kind": 0,
+    "x": 136,
+    "y": 168
+   },
+   {
+    "world": 2,
+    "e041": 3,
+    "room": 8,
+    "kind": 0,
+    "x": 200,
+    "y": 40
+   },
+   {
+    "world": 2,
+    "e041": 3,
+    "room": 10,
+    "kind": 2,
+    "x": 136,
+    "y": 40
+   },
+   {
+    "world": 2,
+    "e041": 3,
+    "room": 12,
+    "kind": 0,
+    "x": 136,
+    "y": 40
+   },
+   {
+    "world": 2,
+    "e041": 3,
+    "room": 13,
+    "kind": 0,
+    "x": 136,
+    "y": 168
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 2,
+    "kind": 0,
+    "x": 136,
+    "y": 40
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 3,
+    "kind": 0,
+    "x": 168,
+    "y": 40
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 6,
+    "kind": 0,
+    "x": 168,
+    "y": 168
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 7,
+    "kind": 0,
+    "x": 168,
+    "y": 136
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 9,
+    "kind": 3,
+    "x": 72,
+    "y": 104
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 11,
+    "kind": 0,
+    "x": 40,
+    "y": 104
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 12,
+    "kind": 0,
+    "x": 168,
+    "y": 104
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 14,
+    "kind": 0,
+    "x": 72,
+    "y": 104
+   },
+   {
+    "world": 3,
+    "e041": 4,
+    "room": 15,
+    "kind": 0,
+    "x": 104,
+    "y": 40
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 2,
+    "kind": 0,
+    "x": 200,
+    "y": 168
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 4,
+    "kind": 0,
+    "x": 168,
+    "y": 168
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 5,
+    "kind": 0,
+    "x": 200,
+    "y": 40
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 7,
+    "kind": 0,
+    "x": 40,
+    "y": 104
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 8,
+    "kind": 0,
+    "x": 40,
+    "y": 72
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 9,
+    "kind": 0,
+    "x": 168,
+    "y": 40
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 12,
+    "kind": 0,
+    "x": 40,
+    "y": 40
+   },
+   {
+    "world": 4,
+    "e041": 5,
+    "room": 13,
+    "kind": 4,
+    "x": 104,
+    "y": 168
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 2,
+    "kind": 0,
+    "x": 200,
+    "y": 104
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 3,
+    "kind": 0,
+    "x": 40,
+    "y": 136
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 4,
+    "kind": 0,
+    "x": 40,
+    "y": 136
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 5,
+    "kind": 5,
+    "x": 104,
+    "y": 136
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 8,
+    "kind": 0,
+    "x": 104,
+    "y": 104
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 10,
+    "kind": 0,
+    "x": 104,
+    "y": 104
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 13,
+    "kind": 0,
+    "x": 104,
+    "y": 40
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 14,
+    "kind": 0,
+    "x": 72,
+    "y": 72
+   },
+   {
+    "world": 5,
+    "e041": 6,
+    "room": 16,
+    "kind": 0,
+    "x": 168,
+    "y": 168
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 1,
+    "kind": 0,
+    "x": 136,
+    "y": 136
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 3,
+    "kind": 0,
+    "x": 104,
+    "y": 136
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 5,
+    "kind": 0,
+    "x": 168,
+    "y": 168
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 7,
+    "kind": 0,
+    "x": 168,
+    "y": 104
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 8,
+    "kind": 0,
+    "x": 72,
+    "y": 136
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 9,
+    "kind": 0,
+    "x": 168,
+    "y": 72
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 10,
+    "kind": 0,
+    "x": 136,
+    "y": 72
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 14,
+    "kind": 0,
+    "x": 72,
+    "y": 40
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 15,
+    "kind": 0,
+    "x": 200,
+    "y": 136
+   },
+   {
+    "world": 6,
+    "e041": 7,
+    "room": 18,
+    "kind": 6,
+    "x": 136,
+    "y": 104
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 2,
+    "kind": 0,
+    "x": 200,
+    "y": 168
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 3,
+    "kind": 0,
+    "x": 72,
+    "y": 40
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 4,
+    "kind": 0,
+    "x": 200,
+    "y": 72
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 6,
+    "kind": 0,
+    "x": 168,
+    "y": 104
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 7,
+    "kind": 0,
+    "x": 72,
+    "y": 72
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 8,
+    "kind": 0,
+    "x": 72,
+    "y": 40
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 11,
+    "kind": 0,
+    "x": 136,
+    "y": 104
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 12,
+    "kind": 0,
+    "x": 40,
+    "y": 40
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 13,
+    "kind": 0,
+    "x": 72,
+    "y": 104
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 14,
+    "kind": 0,
+    "x": 200,
+    "y": 40
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 15,
+    "kind": 0,
+    "x": 72,
+    "y": 168
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 17,
+    "kind": 0,
+    "x": 136,
+    "y": 168
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 18,
+    "kind": 0,
+    "x": 200,
+    "y": 136
+   },
+   {
+    "world": 7,
+    "e041": 8,
+    "room": 19,
+    "kind": 7,
+    "x": 72,
+    "y": 168
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 2,
+    "kind": 0,
+    "x": 72,
+    "y": 168
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 3,
+    "kind": 0,
+    "x": 40,
+    "y": 136
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 4,
+    "kind": 0,
+    "x": 168,
+    "y": 104
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 6,
+    "kind": 0,
+    "x": 168,
+    "y": 72
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 9,
+    "kind": 8,
+    "x": 72,
+    "y": 72
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 11,
+    "kind": 0,
+    "x": 104,
+    "y": 72
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 16,
+    "kind": 0,
+    "x": 104,
+    "y": 72
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 18,
+    "kind": 0,
+    "x": 168,
+    "y": 72
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 19,
+    "kind": 0,
+    "x": 168,
+    "y": 72
+   },
+   {
+    "world": 8,
+    "e041": 9,
+    "room": 20,
+    "kind": 0,
+    "x": 136,
+    "y": 72
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 1,
+    "kind": 0,
+    "x": 168,
+    "y": 168
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 5,
+    "kind": 0,
+    "x": 72,
+    "y": 40
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 6,
+    "kind": 0,
+    "x": 40,
+    "y": 104
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 7,
+    "kind": 0,
+    "x": 168,
+    "y": 72
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 9,
+    "kind": 0,
+    "x": 72,
+    "y": 136
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 10,
+    "kind": 0,
+    "x": 40,
+    "y": 168
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 11,
+    "kind": 0,
+    "x": 104,
+    "y": 40
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 12,
+    "kind": 0,
+    "x": 72,
+    "y": 168
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 13,
+    "kind": 0,
+    "x": 40,
+    "y": 40
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 14,
+    "kind": 0,
+    "x": 200,
+    "y": 104
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 15,
+    "kind": 0,
+    "x": 104,
+    "y": 104
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 16,
+    "kind": 0,
+    "x": 40,
+    "y": 40
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 17,
+    "kind": 0,
+    "x": 168,
+    "y": 72
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 18,
+    "kind": 0,
+    "x": 200,
+    "y": 40
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 19,
+    "kind": 0,
+    "x": 104,
+    "y": 40
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 21,
+    "kind": 0,
+    "x": 136,
+    "y": 136
+   },
+   {
+    "world": 9,
+    "e041": 10,
+    "room": 26,
+    "kind": 9,
+    "x": 8,
+    "y": 40
+   },
+   {
+    "world": 10,
+    "e041": 11,
+    "room": 4,
+    "kind": 10,
+    "x": 200,
+    "y": 104
+   }
+  ]
+ }
+}

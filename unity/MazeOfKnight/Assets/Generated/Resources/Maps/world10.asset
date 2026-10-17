@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc21c78ef52b441e8c60f48b133ff2b, type: 3}
+  m_Name: world10
+  m_EditorClassIdentifier: MazeOfKnight.Runtime::MazeOfKnight.Data.MapData
+  mapName: world10
+  e041: 11
+  bossRoom: 5
+  bossWord: HAMALECH
+  rooms:
+  - {fileID: 11400000, guid: 0307b5ceb230c423eacb9bbb3b0c5002, type: 2}
+  - {fileID: 11400000, guid: bc166905aac3040e29682c99b533fdf4, type: 2}
+  - {fileID: 11400000, guid: 6a85675b6a26b44f78839c180fb74cea, type: 2}
+  - {fileID: 11400000, guid: f2b16f8f6dfff4fa68f4967553482272, type: 2}
+  - {fileID: 11400000, guid: e75a078b0f45444bd8f33bfffa0261df, type: 2}
+  - {fileID: 11400000, guid: ae275ccc1405745058d0a0203764dc6f, type: 2}

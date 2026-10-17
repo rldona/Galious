@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b2bbb2dca4745a1a843d9914fcdad2, type: 3}
+  m_Name: room_043
+  m_EditorClassIdentifier: MazeOfHollow.Runtime::MazeOfHollow.Data.RoomData
+  mapName: castle
+  room:
+    id: 43
+    placed: 1
+    shrine: 0
+    gridX: 0
+    gridY: 6
+    up: -1
+    down: 53
+    left: 42
+    right: 44
+    collision:
+    - ................................
+    - ............##..................
+    - ............##..................
+    - ............########............
+    - ................HH..............
+    - ................HH..............
+    - ................HH..............
+    - ..............####..............
+    - ................................
+    - ................................
+    - ................................
+    - '####........................####'
+    - ..............................##
+    - ..............................##
+    - ..............................##
+    - ..............................##
+    - ..............................##
+    - ..............................##
+    - ..............................##
+    - '####....##....................##'
+    collisionBoss: []
+    collisionNoLadders: []
+    spawns:
+    - x: 192
+      y: 32
+      type: 14
+    - x: 144
+      y: 64
+      type: 14
+    - x: 64
+      y: 80
+      type: 14
+    - x: 128
+      y: 96
+      type: 14
+    - x: 224
+      y: 128
+      type: 14
+    - x: 128
+      y: 144
+      type: 14
+    - x: 96
+      y: 128
+      type: 14
+    - x: 128
+      y: 128
+      type: 14
+    objects: []
+    hasItem: 1
+    item:
+      x: 0
+      y: 0
+      type: 38
+    rocks:
+    - x: 96
+      y: 40
+    ladders: []
+    periodic: []
+    afterBossRight: -1
+    markedRoom: 0
+    onClear:
+      kind: 
+      room: 0
+    eventLadder:
+      row: 0
+      col: 0
+      height: 0
+      openedBy: 0
+    wallBlock:
+      row: 0
+      col: 0
+      openedBy: 0
+    doorWorld: 0
+    door:
+      x: 0
+      y: 0
+    godType: 0
+    godName: 
+    god:
+      x: 0
+      y: 0

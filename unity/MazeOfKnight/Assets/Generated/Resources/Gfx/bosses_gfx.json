@@ -1,0 +1,84 @@
+{
+ "bosses": [
+  {
+   "world": 1,
+   "file": "boss_w1",
+   "dx": 0,
+   "dy": 0,
+   "w": 80,
+   "h": 48
+  },
+  {
+   "world": 2,
+   "file": "boss_w2",
+   "dx": 0,
+   "dy": 16,
+   "w": 48,
+   "h": 32
+  },
+  {
+   "world": 3,
+   "file": "boss_w3",
+   "dx": 0,
+   "dy": 0,
+   "w": 16,
+   "h": 24
+  },
+  {
+   "world": 4,
+   "file": "boss_w4",
+   "dx": 0,
+   "dy": 8,
+   "w": 80,
+   "h": 24
+  },
+  {
+   "world": 5,
+   "file": "boss_w5",
+   "dx": 0,
+   "dy": 0,
+   "w": 80,
+   "h": 32
+  },
+  {
+   "world": 6,
+   "file": "boss_w6",
+   "dx": 0,
+   "dy": 0,
+   "w": 80,
+   "h": 40
+  },
+  {
+   "world": 7,
+   "file": "boss_w7",
+   "dx": 8,
+   "dy": 0,
+   "w": 48,
+   "h": 64
+  },
+  {
+   "world": 8,
+   "file": "boss_w8",
+   "dx": 0,
+   "dy": 0,
+   "w": 48,
+   "h": 24
+  },
+  {
+   "world": 9,
+   "file": "boss_w9",
+   "dx": 0,
+   "dy": 0,
+   "w": 120,
+   "h": 72
+  },
+  {
+   "world": 10,
+   "file": "boss_w10",
+   "dx": 0,
+   "dy": 0,
+   "w": 56,
+   "h": 56
+  }
+ ]
+}

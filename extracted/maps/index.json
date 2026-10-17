@@ -1,0 +1,176 @@
+{
+ "castle": {
+  "e041": 1,
+  "table_rooms": 147,
+  "reachable": 146,
+  "unreachable": [
+   94
+  ],
+  "boss_room": null,
+  "boss_word": null,
+  "exits_to_castle": [],
+  "conflicts": []
+ },
+ "world01": {
+  "e041": 2,
+  "table_rooms": 15,
+  "reachable": 15,
+  "unreachable": [],
+  "boss_room": 13,
+  "boss_word": "YOMAR",
+  "exits_to_castle": [
+   [
+    1,
+    "up",
+    "0xfe"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world02": {
+  "e041": 3,
+  "table_rooms": 15,
+  "reachable": 15,
+  "unreachable": [],
+  "boss_room": 9,
+  "boss_word": "ELOHIM",
+  "exits_to_castle": [
+   [
+    1,
+    "down",
+    "0xfd"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world03": {
+  "e041": 4,
+  "table_rooms": 16,
+  "reachable": 16,
+  "unreachable": [],
+  "boss_room": 13,
+  "boss_word": "HAHAKLA",
+  "exits_to_castle": [
+   [
+    1,
+    "down",
+    "0xfc"
+   ]
+  ],
+  "conflicts": [
+   "4.up -> 4: ya colocada en (-2, -2), aqui seria (-2, -3)"
+  ]
+ },
+ "world04": {
+  "e041": 5,
+  "table_rooms": 17,
+  "reachable": 17,
+  "unreachable": [],
+  "boss_room": 14,
+  "boss_word": "BARECHET",
+  "exits_to_castle": [
+   [
+    1,
+    "left",
+    "0xfb"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world05": {
+  "e041": 6,
+  "table_rooms": 18,
+  "reachable": 18,
+  "unreachable": [],
+  "boss_room": 17,
+  "boss_word": "HEOTYMEO",
+  "exits_to_castle": [
+   [
+    1,
+    "right",
+    "0xfa"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world06": {
+  "e041": 7,
+  "table_rooms": 19,
+  "reachable": 19,
+  "unreachable": [],
+  "boss_room": 13,
+  "boss_word": "LEPHA",
+  "exits_to_castle": [
+   [
+    1,
+    "up",
+    "0xf9"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world07": {
+  "e041": 8,
+  "table_rooms": 20,
+  "reachable": 20,
+  "unreachable": [],
+  "boss_room": 10,
+  "boss_word": "NAWABRA",
+  "exits_to_castle": [
+   [
+    1,
+    "up",
+    "0xf8"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world08": {
+  "e041": 9,
+  "table_rooms": 21,
+  "reachable": 21,
+  "unreachable": [],
+  "boss_room": 7,
+  "boss_word": "ASCHER",
+  "exits_to_castle": [
+   [
+    1,
+    "up",
+    "0xf7"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world09": {
+  "e041": 10,
+  "table_rooms": 27,
+  "reachable": 27,
+  "unreachable": [],
+  "boss_room": 25,
+  "boss_word": "XYWOLEH",
+  "exits_to_castle": [
+   [
+    1,
+    "left",
+    "0xf6"
+   ]
+  ],
+  "conflicts": []
+ },
+ "world10": {
+  "e041": 11,
+  "table_rooms": 6,
+  "reachable": 6,
+  "unreachable": [],
+  "boss_room": 5,
+  "boss_word": "HAMALECH",
+  "exits_to_castle": [
+   [
+    1,
+    "left",
+    "0xf5"
+   ]
+  ],
+  "conflicts": []
+ }
+}

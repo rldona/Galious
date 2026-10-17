@@ -1,0 +1,781 @@
+{
+ "source": "ROM + openMSX (docs/ending.md)",
+ "frameRate": 60,
+ "bossRoomAfterDefeat": {
+  "map": "world10",
+  "room": 5,
+  "state19Frames": 129,
+  "dropsKey": false,
+  "finalBlowSound": 132,
+  "queuedMusic": 139,
+  "queuedMusicDelayFramesMeasured": 156,
+  "exitsAfterDefeat": {
+   "up": -1,
+   "down": -1,
+   "left": -1,
+   "right": 6
+  },
+  "notes": "Estado 19 igual que en los otros mundos (el jefe se deshace en puntos 128 frames), pero sin Great Key ni estado 20: E64B = 6 (b00:4BA2) y vuelta al estado 5. La sala sigue negra (sin decoracion) y con las demas salidas cerradas; la izquierda, que llevaba a la sala 4, queda cerrada. Se sale por la derecha del pasillo de abajo (filas 16-18) a la sala 6. La musica 0x8B (la del golpe final, b03:BD48, en espera por E01D/E01E) sigue sonando."
+ },
+ "rockRoom": {
+  "map": "world10",
+  "e041": 11,
+  "room": 6,
+  "enteredFrom": 5,
+  "links": {
+   "up": -1,
+   "down": -1,
+   "left": -1,
+   "right": -1
+  },
+  "spriteTypes": [
+   57
+  ],
+  "rocks": [
+   {
+    "index": 0,
+    "x": 32,
+    "y": 40
+   },
+   {
+    "index": 1,
+    "x": 176,
+    "y": 40
+   },
+   {
+    "index": 2,
+    "x": 64,
+    "y": 72
+   },
+   {
+    "index": 3,
+    "x": 144,
+    "y": 72
+   },
+   {
+    "index": 4,
+    "x": 32,
+    "y": 104
+   },
+   {
+    "index": 5,
+    "x": 144,
+    "y": 104
+   },
+   {
+    "index": 6,
+    "x": 208,
+    "y": 104
+   },
+   {
+    "index": 7,
+    "x": 96,
+    "y": 136
+   },
+   {
+    "index": 8,
+    "x": 176,
+    "y": 136
+   },
+   {
+    "index": 9,
+    "x": 144,
+    "y": 168
+   }
+  ],
+  "rock": {
+   "type": 92,
+   "hp": 5,
+   "damage": 0,
+   "experience": 0,
+   "sprite": 57,
+   "hitSound": 30,
+   "breakSound": 32,
+   "swingsToBreak": 5,
+   "notes": "enemigo 0x5C (no es una piedra del castillo): sprite, caja fija 16x16 (caja 0), no hace dano ni se mueve. Cada golpe de espada o arma resta 1 (2 con el objeto que suma dano, E094). Al morir no da experiencia ni botin ni explosion: crea el bebe o un fantasma en su sitio."
+  },
+  "babyRule": {
+   "rollWhen": "al iniciar la primera piedra, al cargar la sala (cada vez que se entra o se reaparece)",
+   "roll": "F033 = (rnd & 3) + (rnd & 7); rnd = (R >> 3 rotado) XOR E003 (b05:81F1)",
+   "rangeMin": 0,
+   "rangeMax": 10,
+   "babyRockIndexIs": "F033 (indice en rocks[], orden de la lista de la ROM)",
+   "noBabyWhen": 10,
+   "noBabyProbability": "1/32 con dados independientes y uniformes",
+   "remakeSuggestion": "elegir 0-9 uniforme; o reproducir la suma (0-3)+(0-7) con su sesgo hacia 3-7",
+   "notes": "Con F033 = 10 ninguna piedra tiene al bebe [F]: la sala no tiene salidas y solo se sale perdiendo una vida, que reaparece en la sala 6 con las 10 piedras y una tirada nueva [O]. Distribucion de la suma (sobre 32): 0:1 1:2 2:3 3:4 4:4 5:4 6:4 7:4 8:3 9:2 10:1."
+  },
+  "baby": {
+   "type": 107,
+   "hp": 0,
+   "damage": 0,
+   "experience": 0,
+   "sprite": 23,
+   "touchNeedsNotBlinking": true,
+   "anyCharacter": true,
+   "tilesOnTouch": [
+    122,
+    123,
+    124,
+    125
+   ],
+   "notes": "sprite quieto (actualizacion RET), no golpeable ni hace dano. Lo coge quien lo toque (Popolon o Aphrodite; no se mira E501 ni el otro personaje) si no esta parpadeando (E518 = 0). Al tocarlo: tiles 7A 7B / 7C 7D en su sitio, E024 = 1 -> estado 17."
+  },
+  "otherRocksRelease": {
+   "type": 57,
+   "hp": 40,
+   "damage": 14,
+   "experience": 8,
+   "sprite": 196,
+   "lootRule": 3,
+   "lootWhenLastAlive": true,
+   "centerXOffset": 10,
+   "centerYOffset": 0,
+   "angleStepPerTick": 8,
+   "radiusGrowthPerTick256": 128,
+   "startRadius": 0,
+   "startAngle": 0,
+   "despawnWhenOffscreen": true,
+   "notes": "espiral que se abre: y = cy + r*sin(a), x = cx + r*cos(a) (tabla b06:B374); desaparece al salir de la zona visible (visto en y > 184). Mata: experiencia y botin de regla 3, nivel 3 (enemies.json). No es el 0x28 (ectoplasma de la guia): el Helmet no protege."
+  }
+ },
+ "castleScene": {
+  "picture": {
+   "tiles": "b15:B989",
+   "wTiles": 20,
+   "hTiles": 14
+  },
+  "phases": [
+   {
+    "phase": 0,
+    "frames": 191,
+    "notes": "castillo con la bandera roja de Galious en el mastil; un destello (sprite) parpadea junto a la bandera cada 16 frames (dos patrones)"
+   },
+   {
+    "phase": 1,
+    "frames": 137,
+    "notes": "la bandera roja baja 1 px cada 4 frames (y 0x2E -> 0x3F, 65 frames) y se cambia por la bandera azul con la cruz, que sube igual hasta y 0x2E (72 frames)"
+   },
+   {
+    "phase": 2,
+    "frames": 52,
+    "notes": "el bebe (2 sprites, amarillo y blanco) sube 12 px entre Popolon y Aphrodite, 1 px cada 4 frames (y 0x6B -> 0x5F)"
+   },
+   {
+    "phase": 3,
+    "frames": 386,
+    "notes": "Popolon y Aphrodite se mueven (dos tiles alternan cada 16 frames); tras 64 frames, cada 64 frames sale al azar un bocadillo: \"NICE!\" a la izquierda o \"GREAT!\" a la derecha (uno a la vez). Acaba 510 frames despues del cambio de bandera (F02B = 255, un paso cada 2 frames)"
+   }
+  ],
+  "balloons": [
+   "NICE!",
+   "GREAT!"
+  ]
+ },
+ "epilogue": {
+  "textPtr": "b15:A84A",
+  "font": "8x16 (dos filas de tiles por linea)",
+  "screenCols": 32,
+  "scrollPxPerStep": 1,
+  "stepFramesCode": 2,
+  "stepFramesMeasured": 3,
+  "rowSteps": 8,
+  "waitStepFramesMeasured": 2,
+  "lines": [
+   {
+    "kind": "text",
+    "col": 12,
+    "text": "EPILOGUE",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "THANKS TO YOU,THE BABY WAS",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "RESCUED SAFELY.THE KINGDOM",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "TOOK BACK PEACE AND VIGOR.",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "POPOLON WAS AWARDED THE",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "CROWN FOR HIS ACHIEVEMENT.IT",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "WAS DECIDED THAT HE PROTECT",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "THE KINGDOM WITH APHRODITE",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "AS HIS WIFE FOR THE REST OF",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "THEIR LIVES.THIS LEGEND WILL",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "BE TOLD AGAIN WHEN THEY ARE",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 2,
+    "text": "APT TO LOSE BELIEF IN LOVE.",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "wait",
+    "col": 0,
+    "text": "",
+    "rows": 0,
+    "steps": 255
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 15,
+    "steps": 120
+   },
+   {
+    "kind": "text",
+    "col": 13,
+    "text": "STAFF",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 9,
+    "text": "MAIN PROGRAMMER",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 12,
+    "text": "Y.HARUKI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 9,
+    "text": "SUB  PROGRAMMER",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 13,
+    "text": "I.AKADA",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 13,
+    "text": "M.OZAWA",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 14,
+    "text": "T.OKA",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 11,
+    "text": "Y.HIRONAKA",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 13,
+    "text": "K.OZAWA",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 11,
+    "text": "S.YOSHIKAWA",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 8,
+    "text": "GRAPHIC DESIGNER",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 12,
+    "text": "R.SHOGAKI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 11,
+    "text": "C.TANIGAKI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 12,
+    "text": "T.MIYOSHI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 11,
+    "text": "K.SHIRAGAKI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 9,
+    "text": "SOUND  CREATOR",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 12,
+    "text": "K.UEHARA",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 6,
+    "steps": 48
+   },
+   {
+    "kind": "text",
+    "col": 6,
+    "text": "PLANNER AND DIRECTOR",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 12,
+    "text": "R.SHOGAKI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 12,
+    "steps": 96
+   },
+   {
+    "kind": "text",
+    "col": 5,
+    "text": "WE PROMISE TO CONTINUE",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 5,
+    "text": "SENDING ROMANTIC GAME",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 5,
+    "text": "MESSAGES.",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 5,
+    "text": "THANK YOU VERY MUCH",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 5,
+    "text": "FOR YOUR JOINING IN",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 5,
+    "text": "THIS STORY.",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 5,
+    "steps": 40
+   },
+   {
+    "kind": "wait",
+    "col": 0,
+    "text": "",
+    "rows": 0,
+    "steps": 255
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 8,
+    "steps": 64
+   },
+   {
+    "kind": "text",
+    "col": 6,
+    "text": "PRESENTED BY KONAMI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "text",
+    "col": 9,
+    "text": "© 1987  KONAMI",
+    "rows": 2,
+    "steps": 16
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 11,
+    "steps": 88
+   },
+   {
+    "kind": "wait",
+    "col": 0,
+    "text": "",
+    "rows": 0,
+    "steps": 255
+   },
+   {
+    "kind": "musicStop",
+    "col": 0,
+    "text": "",
+    "rows": 0,
+    "steps": 0
+   },
+   {
+    "kind": "blank",
+    "col": 0,
+    "text": "",
+    "rows": 13,
+    "steps": 104
+   },
+   {
+    "kind": "end",
+    "col": 0,
+    "text": "",
+    "rows": 0,
+    "steps": 0
+   }
+  ],
+  "texts": [
+   "EPILOGUE",
+   "THANKS TO YOU,THE BABY WAS",
+   "RESCUED SAFELY.THE KINGDOM",
+   "TOOK BACK PEACE AND VIGOR.",
+   "POPOLON WAS AWARDED THE",
+   "CROWN FOR HIS ACHIEVEMENT.IT",
+   "WAS DECIDED THAT HE PROTECT",
+   "THE KINGDOM WITH APHRODITE",
+   "AS HIS WIFE FOR THE REST OF",
+   "THEIR LIVES.THIS LEGEND WILL",
+   "BE TOLD AGAIN WHEN THEY ARE",
+   "APT TO LOSE BELIEF IN LOVE.",
+   "STAFF",
+   "MAIN PROGRAMMER",
+   "Y.HARUKI",
+   "SUB  PROGRAMMER",
+   "I.AKADA",
+   "M.OZAWA",
+   "T.OKA",
+   "Y.HIRONAKA",
+   "K.OZAWA",
+   "S.YOSHIKAWA",
+   "GRAPHIC DESIGNER",
+   "R.SHOGAKI",
+   "C.TANIGAKI",
+   "T.MIYOSHI",
+   "K.SHIRAGAKI",
+   "SOUND  CREATOR",
+   "K.UEHARA",
+   "PLANNER AND DIRECTOR",
+   "R.SHOGAKI",
+   "WE PROMISE TO CONTINUE",
+   "SENDING ROMANTIC GAME",
+   "MESSAGES.",
+   "THANK YOU VERY MUCH",
+   "FOR YOUR JOINING IN",
+   "THIS STORY.",
+   "PRESENTED BY KONAMI",
+   "© 1987  KONAMI"
+  ],
+  "notes": "El texto entra por abajo y sube. Las esperas (wait, 255 pasos = 510 frames) dejan quieta la pantalla: con el epilogo completo, con el final del staff y con PRESENTED BY KONAMI. musicStop para la musica (orden 0xFF) 13 filas antes del final."
+ },
+ "screens": [
+  {
+   "id": "touchBaby",
+   "state": 17,
+   "substates": [
+    0,
+    1
+   ],
+   "durationFrames": 40,
+   "measured": true,
+   "music": 255,
+   "sounds": [],
+   "texts": [],
+   "notes": "orden 0xFF: calla musica y efectos. La sala se congela; piedras y fantasmas dejan de verse, el jugador y el bebe (ya en tiles) se quedan. El marcador sigue."
+  },
+  {
+   "id": "roomCollapse",
+   "state": 17,
+   "substates": [
+    2
+   ],
+   "durationFrames": 101,
+   "measured": true,
+   "music": 0,
+   "sounds": [],
+   "texts": [],
+   "notes": "174 anillos de la sala de 32x20 tiles, uno cada 10 frames, de fuera adentro (rectangulo 32x20, 30x18 ... 14x2), se ponen a tile 0 (negro). Los 2x2 tiles del bebe no se borran."
+  },
+  {
+   "id": "blackPause",
+   "state": 17,
+   "substates": [
+    3
+   ],
+   "durationFrames": 120,
+   "measured": true,
+   "music": 0,
+   "sounds": [],
+   "texts": [],
+   "notes": "zona de juego negra con el jugador y el bebe; marcador visible"
+  },
+  {
+   "id": "castleLoad",
+   "state": 17,
+   "substates": [
+    4
+   ],
+   "durationFrames": 19,
+   "measured": true,
+   "music": 146,
+   "sounds": [],
+   "texts": [],
+   "notes": "borra la pantalla (sin marcador), dibuja el castillo con marco de hojas y empieza la musica 0x92"
+  },
+  {
+   "id": "castle",
+   "state": 17,
+   "substates": [
+    5
+   ],
+   "durationFrames": 766,
+   "measured": true,
+   "music": 146,
+   "sounds": [],
+   "texts": [
+    "NICE!",
+    "GREAT!"
+   ],
+   "notes": "ver castleScene. Los bocadillos son dibujos de tiles (b15:BAA1, BAC1), no texto"
+  },
+  {
+   "id": "epilogueLoad",
+   "state": 17,
+   "substates": [
+    6
+   ],
+   "durationFrames": 28,
+   "measured": true,
+   "music": 147,
+   "sounds": [],
+   "texts": [],
+   "notes": "pantalla negra, carga la fuente grande; empieza la musica 0x93 (60,3 s, vuelve a 9,1 s)"
+  },
+  {
+   "id": "epilogue",
+   "state": 17,
+   "substates": [
+    7
+   ],
+   "durationFrames": 5417,
+   "measured": true,
+   "music": 147,
+   "sounds": [],
+   "texts": [
+    "EPILOGUE",
+    "THANKS TO YOU,THE BABY WAS",
+    "RESCUED SAFELY.THE KINGDOM",
+    "TOOK BACK PEACE AND VIGOR.",
+    "POPOLON WAS AWARDED THE",
+    "CROWN FOR HIS ACHIEVEMENT.IT",
+    "WAS DECIDED THAT HE PROTECT",
+    "THE KINGDOM WITH APHRODITE",
+    "AS HIS WIFE FOR THE REST OF",
+    "THEIR LIVES.THIS LEGEND WILL",
+    "BE TOLD AGAIN WHEN THEY ARE",
+    "APT TO LOSE BELIEF IN LOVE.",
+    "STAFF",
+    "MAIN PROGRAMMER",
+    "Y.HARUKI",
+    "SUB  PROGRAMMER",
+    "I.AKADA",
+    "M.OZAWA",
+    "T.OKA",
+    "Y.HIRONAKA",
+    "K.OZAWA",
+    "S.YOSHIKAWA",
+    "GRAPHIC DESIGNER",
+    "R.SHOGAKI",
+    "C.TANIGAKI",
+    "T.MIYOSHI",
+    "K.SHIRAGAKI",
+    "SOUND  CREATOR",
+    "K.UEHARA",
+    "PLANNER AND DIRECTOR",
+    "R.SHOGAKI",
+    "WE PROMISE TO CONTINUE",
+    "SENDING ROMANTIC GAME",
+    "MESSAGES.",
+    "THANK YOU VERY MUCH",
+    "FOR YOUR JOINING IN",
+    "THIS STORY.",
+    "PRESENTED BY KONAMI",
+    "© 1987  KONAMI"
+   ],
+   "notes": "epilogo y creditos que suben (ver epilogue). La musica se corta 312 frames antes del final"
+  },
+  {
+   "id": "end",
+   "state": 17,
+   "substates": [
+    8
+   ],
+   "durationFrames": 1,
+   "measured": true,
+   "music": 0,
+   "sounds": [],
+   "texts": [],
+   "notes": "espera a que no suene musica y salta al estado 0 (logo de Konami), borrando E002 bit 6"
+  }
+ ],
+ "after": {
+  "nextState": 0,
+  "titleAfterFramesMeasured": 367,
+  "gameInProgressFlagCleared": true,
+  "secondLoop": false,
+  "password": false,
+  "variations": false,
+  "notes": "Vuelve a la intro (logo de Konami, estado 0) y al titulo (estado 1); la demo sigue como siempre. No hay segunda vuelta, ni contraseña final, ni puntuacion: una partida nueva empieza desde cero (castillo, sala 1, puertas cerradas) [O]. El final no depende del tiempo, la experiencia, las vidas ni del personaje activo: el estado 17 no lee nada de eso y el dibujo del castillo trae siempre a Popolon y Aphrodite [C]."
+ },
+ "totalFramesMeasured": 6492
+}

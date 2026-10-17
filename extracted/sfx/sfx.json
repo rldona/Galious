@@ -1,0 +1,670 @@
+{
+ "0x00": {
+  "ptr": "FF28",
+  "frames": 0,
+  "seconds": 0.0,
+  "noise": false,
+  "tone_start": null,
+  "tone_end": null,
+  "tone_min": null,
+  "tone_max": null,
+  "callers": []
+ },
+ "0x01": {
+  "ptr": "74CA",
+  "frames": 11,
+  "seconds": 0.18,
+  "noise": true,
+  "tone_start": "A8",
+  "tone_end": "A7",
+  "tone_min": "D#5",
+  "tone_max": "A8",
+  "callers": [
+   "b03:A2A1"
+  ]
+ },
+ "0x02": {
+  "ptr": "74E9",
+  "frames": 6,
+  "seconds": 0.1,
+  "noise": true,
+  "tone_start": "A6",
+  "tone_end": "A8",
+  "tone_min": "A6",
+  "tone_max": "A8",
+  "callers": [
+   "b03:A3CC",
+   "b03:A52E"
+  ]
+ },
+ "0x03": {
+  "ptr": "74FC",
+  "frames": 9,
+  "seconds": 0.15,
+  "noise": false,
+  "tone_start": "D#5",
+  "tone_end": "F6",
+  "tone_min": "D#5",
+  "tone_max": "F6",
+  "callers": [
+   "b05:9280"
+  ]
+ },
+ "0x04": {
+  "ptr": "7511",
+  "frames": 7,
+  "seconds": 0.12,
+  "noise": false,
+  "tone_start": "C#7",
+  "tone_end": "A#7",
+  "tone_min": "C#7",
+  "tone_max": "A#7",
+  "callers": [
+   "b09:A5E6"
+  ]
+ },
+ "0x05": {
+  "ptr": "7522",
+  "frames": 25,
+  "seconds": 0.42,
+  "noise": true,
+  "tone_start": "D7",
+  "tone_end": "D7",
+  "tone_min": "D7",
+  "tone_max": "D7",
+  "callers": [
+   "b05:97E0"
+  ]
+ },
+ "0x06": {
+  "ptr": "7547",
+  "frames": 26,
+  "seconds": 0.43,
+  "noise": false,
+  "tone_start": "E5",
+  "tone_end": "C5",
+  "tone_min": "C5",
+  "tone_max": "F5",
+  "callers": [
+   "b05:8949"
+  ]
+ },
+ "0x07": {
+  "ptr": "757E",
+  "frames": 26,
+  "seconds": 0.43,
+  "noise": true,
+  "tone_start": "A7",
+  "tone_end": "D7",
+  "tone_min": "D7",
+  "tone_max": "A7",
+  "callers": [
+   "b04:76C8"
+  ]
+ },
+ "0x08": {
+  "ptr": "75D7",
+  "frames": 40,
+  "seconds": 0.67,
+  "noise": false,
+  "tone_start": "G2",
+  "tone_end": "F4",
+  "tone_min": "G2",
+  "tone_max": "F4",
+  "callers": [
+   "b04:727F",
+   "b04:7321"
+  ]
+ },
+ "0x09": {
+  "ptr": "762A",
+  "frames": 21,
+  "seconds": 0.35,
+  "noise": false,
+  "tone_start": "B2",
+  "tone_end": "C3",
+  "tone_min": "A2",
+  "tone_max": "A3",
+  "callers": [
+   "b04:7028",
+   "b06:ABC9"
+  ]
+ },
+ "0x0a": {
+  "ptr": "7657",
+  "frames": 26,
+  "seconds": 0.43,
+  "noise": true,
+  "tone_start": "D3",
+  "tone_end": "D3",
+  "tone_min": "D2",
+  "tone_max": "D3",
+  "callers": [
+   "b02:815C",
+   "b06:A166"
+  ]
+ },
+ "0x0b": {
+  "ptr": "7693",
+  "frames": 16,
+  "seconds": 0.27,
+  "noise": false,
+  "tone_start": "A8",
+  "tone_end": "A5",
+  "tone_min": "D3",
+  "tone_max": "A8",
+  "callers": [
+   "b05:8704",
+   "b06:A829",
+   "b06:AC93"
+  ]
+ },
+ "0x0c": {
+  "ptr": "76B6",
+  "frames": 28,
+  "seconds": 0.47,
+  "noise": false,
+  "tone_start": "C8",
+  "tone_end": "C8",
+  "tone_min": "C8",
+  "tone_max": "C8",
+  "callers": [
+   "b05:8AE5"
+  ]
+ },
+ "0x0d": {
+  "ptr": "76D9",
+  "frames": 39,
+  "seconds": 0.65,
+  "noise": true,
+  "tone_start": null,
+  "tone_end": null,
+  "tone_min": null,
+  "tone_max": null,
+  "callers": [
+   "b04:78C8"
+  ]
+ },
+ "0x0e": {
+  "ptr": "771E",
+  "frames": 24,
+  "seconds": 0.4,
+  "noise": true,
+  "tone_start": "F3",
+  "tone_end": "D3",
+  "tone_min": "C#2",
+  "tone_max": "D4",
+  "callers": [
+   "b05:8FC5",
+   "b05:9F32"
+  ]
+ },
+ "0x0f": {
+  "ptr": "7759",
+  "frames": 18,
+  "seconds": 0.3,
+  "noise": false,
+  "tone_start": "C#5",
+  "tone_end": "C7",
+  "tone_min": "C#5",
+  "tone_max": "C7",
+  "callers": [
+   "b05:80D8",
+   "b05:84D0",
+   "b05:8CEF",
+   "b06:A553"
+  ]
+ },
+ "0x10": {
+  "ptr": "7780",
+  "frames": 16,
+  "seconds": 0.27,
+  "noise": false,
+  "tone_start": "A4",
+  "tone_end": "C3",
+  "tone_min": "A2",
+  "tone_max": "F#6",
+  "callers": [
+   "b05:9154"
+  ]
+ },
+ "0x11": {
+  "ptr": "77A3",
+  "frames": 26,
+  "seconds": 0.43,
+  "noise": false,
+  "tone_start": "B6",
+  "tone_end": "D#2",
+  "tone_min": "D#2",
+  "tone_max": "B6",
+  "callers": [
+   "b02:80F1",
+   "b02:874D"
+  ]
+ },
+ "0x12": {
+  "ptr": "77DA",
+  "frames": 26,
+  "seconds": 0.43,
+  "noise": true,
+  "tone_start": "A3",
+  "tone_end": "F3",
+  "tone_min": "D2",
+  "tone_max": "F5",
+  "callers": [
+   "b02:841F",
+   "b02:84CD",
+   "b05:91F9"
+  ]
+ },
+ "0x13": {
+  "ptr": "7812",
+  "frames": 9,
+  "seconds": 0.15,
+  "noise": true,
+  "tone_start": "A8",
+  "tone_end": "A7",
+  "tone_min": "A7",
+  "tone_max": "A8",
+  "callers": [
+   "b03:A76A"
+  ]
+ },
+ "0x14": {
+  "ptr": "782F",
+  "frames": 13,
+  "seconds": 0.22,
+  "noise": true,
+  "tone_start": "D7",
+  "tone_end": "A7",
+  "tone_min": "D7",
+  "tone_max": "B7",
+  "callers": [
+   "b03:AA89"
+  ]
+ },
+ "0x15": {
+  "ptr": "784A",
+  "frames": 19,
+  "seconds": 0.32,
+  "noise": true,
+  "tone_start": "F#8",
+  "tone_end": "D7",
+  "tone_min": "A6",
+  "tone_max": "F#8",
+  "callers": []
+ },
+ "0x16": {
+  "ptr": "786D",
+  "frames": 5,
+  "seconds": 0.08,
+  "noise": true,
+  "tone_start": "G#6",
+  "tone_end": "D7",
+  "tone_min": "G#6",
+  "tone_max": "D7",
+  "callers": [
+   "b03:ACD6"
+  ]
+ },
+ "0x17": {
+  "ptr": "7880",
+  "frames": 48,
+  "seconds": 0.8,
+  "noise": false,
+  "tone_start": "B3",
+  "tone_end": "B4",
+  "tone_min": "B3",
+  "tone_max": "B4",
+  "callers": [
+   "b05:8468",
+   "b05:858E"
+  ]
+ },
+ "0x18": {
+  "ptr": "78AF",
+  "frames": 41,
+  "seconds": 0.68,
+  "noise": false,
+  "tone_start": "D6",
+  "tone_end": "D2",
+  "tone_min": "C#2",
+  "tone_max": "C8",
+  "callers": [
+   "b05:962B"
+  ]
+ },
+ "0x19": {
+  "ptr": "7904",
+  "frames": 18,
+  "seconds": 0.3,
+  "noise": false,
+  "tone_start": "B7",
+  "tone_end": "D9",
+  "tone_min": "B7",
+  "tone_max": "D9",
+  "callers": [
+   "b05:8DC0"
+  ]
+ },
+ "0x1a": {
+  "ptr": "791B",
+  "frames": 40,
+  "seconds": 0.67,
+  "noise": false,
+  "tone_start": "B2",
+  "tone_end": "C#3",
+  "tone_min": "G#2",
+  "tone_max": "D#3",
+  "callers": [
+   "b02:8909"
+  ]
+ },
+ "0x1b": {
+  "ptr": "77A3",
+  "frames": 26,
+  "seconds": 0.43,
+  "noise": false,
+  "tone_start": "B6",
+  "tone_end": "D#2",
+  "tone_min": "D#2",
+  "tone_max": "B6",
+  "callers": [
+   "b02:8C1A"
+  ]
+ },
+ "0x1c": {
+  "ptr": "796E",
+  "frames": 45,
+  "seconds": 0.75,
+  "noise": true,
+  "tone_start": "D3",
+  "tone_end": "D3",
+  "tone_min": "D3",
+  "tone_max": "D4",
+  "callers": [
+   "b04:775F",
+   "b06:AD77"
+  ]
+ },
+ "0x1d": {
+  "ptr": "79A4",
+  "frames": 42,
+  "seconds": 0.7,
+  "noise": true,
+  "tone_start": "A8",
+  "tone_end": "D7",
+  "tone_min": "D7",
+  "tone_max": "A8",
+  "callers": [
+   "b03:AE88",
+   "b03:B405",
+   "b03:BCF4"
+  ]
+ },
+ "0x1e": {
+  "ptr": "79C6",
+  "frames": 23,
+  "seconds": 0.38,
+  "noise": false,
+  "tone_start": "G#4",
+  "tone_end": "D#3",
+  "tone_min": "C#2",
+  "tone_max": "C6",
+  "callers": [
+   "b03:B57B",
+   "b03:B5E5",
+   "b03:B83C",
+   "b09:A69E"
+  ]
+ },
+ "0x1f": {
+  "ptr": "79F7",
+  "frames": 26,
+  "seconds": 0.43,
+  "noise": true,
+  "tone_start": "A8",
+  "tone_end": "A8",
+  "tone_min": "A7",
+  "tone_max": "A8",
+  "callers": [
+   "b05:99E7"
+  ]
+ },
+ "0x20": {
+  "ptr": "7A21",
+  "frames": 32,
+  "seconds": 0.53,
+  "noise": false,
+  "tone_start": "F4",
+  "tone_end": "B3",
+  "tone_min": "D2",
+  "tone_max": "D6",
+  "callers": [
+   "b03:B604",
+   "b03:B857"
+  ]
+ },
+ "0x21": {
+  "ptr": "7A64",
+  "frames": 51,
+  "seconds": 0.85,
+  "noise": false,
+  "tone_start": "G2",
+  "tone_end": "F2",
+  "tone_min": "E2",
+  "tone_max": "G#3",
+  "callers": [
+   "b02:80AA",
+   "b04:7A35",
+   "b09:A0F2",
+   "b09:A19B"
+  ]
+ },
+ "0x22": {
+  "ptr": "7ACD",
+  "frames": 40,
+  "seconds": 0.67,
+  "noise": true,
+  "tone_start": "A8",
+  "tone_end": "D8",
+  "tone_min": "F7",
+  "tone_max": "A8",
+  "callers": [
+   "b02:9A20",
+   "b09:A0A0"
+  ]
+ },
+ "0x23": {
+  "ptr": "7B21",
+  "frames": 60,
+  "seconds": 1.0,
+  "noise": false,
+  "tone_start": "D3",
+  "tone_end": "D#4",
+  "tone_min": "C3",
+  "tone_max": "A8",
+  "callers": [
+   "b09:A278",
+   "b09:A3B8"
+  ]
+ },
+ "0x24": {
+  "ptr": "7B82",
+  "frames": 45,
+  "seconds": 0.75,
+  "noise": true,
+  "tone_start": "A3",
+  "tone_end": "F3",
+  "tone_min": "F3",
+  "tone_max": "A3",
+  "callers": [
+   "b03:B063"
+  ]
+ },
+ "0x25": {
+  "ptr": "7BB2",
+  "frames": 6,
+  "seconds": 0.1,
+  "noise": false,
+  "tone_start": "A2",
+  "tone_end": "A7",
+  "tone_min": "A2",
+  "tone_max": "A7",
+  "callers": [
+   "b03:B08E",
+   "b03:B28C"
+  ]
+ },
+ "0x26": {
+  "ptr": "7BC1",
+  "frames": 43,
+  "seconds": 0.72,
+  "noise": false,
+  "tone_start": "F5",
+  "tone_end": "A#2",
+  "tone_min": "F#2",
+  "tone_max": "F5",
+  "callers": [
+   "b03:AE63"
+  ]
+ },
+ "0x27": {
+  "ptr": "7C0C",
+  "frames": 49,
+  "seconds": 0.82,
+  "noise": true,
+  "tone_start": "B3",
+  "tone_end": "F#2",
+  "tone_min": "F#2",
+  "tone_max": "F#6",
+  "callers": [
+   "b03:BC94",
+   "b03:BD50"
+  ]
+ },
+ "0x28": {
+  "ptr": "7C8A",
+  "frames": 95,
+  "seconds": 1.58,
+  "noise": false,
+  "tone_start": "A7",
+  "tone_end": "A7",
+  "tone_min": "A7",
+  "tone_max": "D8",
+  "callers": [
+   "b00:5D63"
+  ]
+ },
+ "0x29": {
+  "ptr": "7CB9",
+  "frames": 30,
+  "seconds": 0.5,
+  "noise": false,
+  "tone_start": "C#5",
+  "tone_end": "F#6",
+  "tone_min": "C#5",
+  "tone_max": "F#6",
+  "callers": [
+   "b01:6153"
+  ]
+ },
+ "0x2a": {
+  "ptr": "7CF8",
+  "frames": 32,
+  "seconds": 0.53,
+  "noise": false,
+  "tone_start": "D7",
+  "tone_end": "D6",
+  "tone_min": "D6",
+  "tone_max": "D7",
+  "callers": [
+   "b03:B3DC"
+  ]
+ },
+ "0x2b": {
+  "ptr": "7D03",
+  "frames": 32,
+  "seconds": 0.53,
+  "noise": false,
+  "tone_start": "E5",
+  "tone_end": "C7",
+  "tone_min": "E5",
+  "tone_max": "C7",
+  "callers": [
+   "b00:44DD"
+  ]
+ },
+ "0x2c": {
+  "ptr": "7D1A",
+  "frames": 36,
+  "seconds": 0.6,
+  "noise": false,
+  "tone_start": "A6",
+  "tone_end": "F#7",
+  "tone_min": "A6",
+  "tone_max": "F#7",
+  "callers": [
+   "b01:686A",
+   "b02:934A"
+  ]
+ },
+ "0x2d": {
+  "ptr": "7D31",
+  "frames": 36,
+  "seconds": 0.6,
+  "noise": false,
+  "tone_start": "D5",
+  "tone_end": "A#7",
+  "tone_min": "D5",
+  "tone_max": "A#7",
+  "callers": [
+   "b02:91CF",
+   "b03:B2CF",
+   "b03:B764"
+  ]
+ },
+ "0x2e": {
+  "ptr": "7D7C",
+  "frames": 67,
+  "seconds": 1.12,
+  "noise": false,
+  "tone_start": "C7",
+  "tone_end": "E7",
+  "tone_min": "C7",
+  "tone_max": "B7",
+  "callers": [
+   "b00:47CA",
+   "b03:A051",
+   "b03:A630",
+   "b08:9D9D",
+   "b09:A6B0"
+  ]
+ },
+ "0x2f": {
+  "ptr": "7D9F",
+  "frames": 21,
+  "seconds": 0.35,
+  "noise": false,
+  "tone_start": "B5",
+  "tone_end": "B5",
+  "tone_min": "B5",
+  "tone_max": "B5",
+  "callers": [
+   "b02:9220"
+  ]
+ },
+ "0x30": {
+  "ptr": "7DB0",
+  "frames": 84,
+  "seconds": 1.4,
+  "noise": false,
+  "tone_start": "F#5",
+  "tone_end": "F#7",
+  "tone_min": "F#5",
+  "tone_max": "F#7",
+  "callers": [
+   "b02:90AB"
+  ]
+ }
+}

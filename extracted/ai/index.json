@@ -1,0 +1,537 @@
+{
+ "0x01": {
+  "init": "7950",
+  "update": "7978",
+  "in_rooms": true
+ },
+ "0x02": {
+  "init": "6CDB",
+  "update": "6CF4",
+  "in_rooms": true
+ },
+ "0x03": {
+  "init": "ABFE",
+  "update": "AC28",
+  "in_rooms": true
+ },
+ "0x04": {
+  "init": "6F5D",
+  "update": "6F80",
+  "in_rooms": true
+ },
+ "0x05": {
+  "init": "6AE8",
+  "update": "6B06",
+  "in_rooms": true
+ },
+ "0x06": {
+  "init": "7679",
+  "update": "76CD",
+  "in_rooms": false
+ },
+ "0x07": {
+  "init": "A830",
+  "update": "A848",
+  "in_rooms": true
+ },
+ "0x08": {
+  "init": "6DFE",
+  "update": "6E32",
+  "in_rooms": false
+ },
+ "0x09": {
+  "init": "700D",
+  "update": "7020",
+  "in_rooms": false
+ },
+ "0x0a": {
+  "init": "7B0D",
+  "update": "7B4F",
+  "in_rooms": true
+ },
+ "0x0b": {
+  "init": "7A93",
+  "update": "7AC1",
+  "in_rooms": true
+ },
+ "0x0c": {
+  "init": "9D97",
+  "update": "9DBE",
+  "in_rooms": true
+ },
+ "0x0d": {
+  "init": "784B",
+  "update": "78CD",
+  "in_rooms": false
+ },
+ "0x0e": {
+  "init": "7D18",
+  "update": "7D3A",
+  "in_rooms": true
+ },
+ "0x0f": {
+  "init": "7347",
+  "update": "7376",
+  "in_rooms": true
+ },
+ "0x10": {
+  "init": "71C9",
+  "update": "71D3",
+  "in_rooms": true
+ },
+ "0x11": {
+  "init": "73BA",
+  "update": "73DC",
+  "in_rooms": true
+ },
+ "0x12": {
+  "init": "7097",
+  "update": "70A8",
+  "in_rooms": true
+ },
+ "0x13": {
+  "init": "A3E2",
+  "update": "A401",
+  "in_rooms": true
+ },
+ "0x14": {
+  "init": "7249",
+  "update": "7255",
+  "in_rooms": true
+ },
+ "0x15": {
+  "init": "8E05",
+  "update": "8E3D",
+  "in_rooms": true
+ },
+ "0x16": {
+  "init": "8C1F",
+  "update": "8C36",
+  "in_rooms": true
+ },
+ "0x17": {
+  "init": "951C",
+  "update": "9540",
+  "in_rooms": true
+ },
+ "0x18": {
+  "init": "6C50",
+  "update": "6C5D",
+  "in_rooms": true
+ },
+ "0x19": {
+  "init": "863D",
+  "update": "868F",
+  "in_rooms": true
+ },
+ "0x1a": {
+  "init": "6C32",
+  "update": "6C47",
+  "in_rooms": false
+ },
+ "0x1b": {
+  "init": "6EC2",
+  "update": "6E7D",
+  "in_rooms": false
+ },
+ "0x1c": {
+  "init": "6F55",
+  "update": "6F80",
+  "in_rooms": false
+ },
+ "0x1d": {
+  "init": "6C42",
+  "update": "98A7",
+  "in_rooms": false
+ },
+ "0x1e": {
+  "init": "8CEC",
+  "update": "98A7",
+  "in_rooms": false
+ },
+ "0x1f": {
+  "init": "942F",
+  "update": "9455",
+  "in_rooms": true
+ },
+ "0x20": {
+  "init": "93D4",
+  "update": "93E2",
+  "in_rooms": true
+ },
+ "0x21": {
+  "init": "7E89",
+  "update": "7EB5",
+  "in_rooms": false
+ },
+ "0x22": {
+  "init": "80C0",
+  "update": "80C9",
+  "in_rooms": true
+ },
+ "0x23": {
+  "init": "A198",
+  "update": "A1B8",
+  "in_rooms": true
+ },
+ "0x24": {
+  "init": "9B30",
+  "update": "9B54",
+  "in_rooms": true
+ },
+ "0x25": {
+  "init": "98C0",
+  "update": "9908",
+  "in_rooms": true
+ },
+ "0x26": {
+  "init": "A42A",
+  "update": "A458",
+  "in_rooms": true
+ },
+ "0x27": {
+  "init": "8935",
+  "update": "8942",
+  "in_rooms": true
+ },
+ "0x28": {
+  "init": "9357",
+  "update": "9345",
+  "in_rooms": true
+ },
+ "0x29": {
+  "init": "92BA",
+  "update": "92E3",
+  "in_rooms": true
+ },
+ "0x2a": {
+  "init": "969A",
+  "update": "9696",
+  "in_rooms": true
+ },
+ "0x2b": {
+  "init": "87DA",
+  "update": "87FB",
+  "in_rooms": true
+ },
+ "0x2c": {
+  "init": "A974",
+  "update": "A9B3",
+  "in_rooms": true
+ },
+ "0x2d": {
+  "init": "9725",
+  "update": "9754",
+  "in_rooms": true
+ },
+ "0x2e": {
+  "init": "A070",
+  "update": "A081",
+  "in_rooms": true
+ },
+ "0x2f": {
+  "init": "91FE",
+  "update": "9219",
+  "in_rooms": true
+ },
+ "0x30": {
+  "init": "7F2E",
+  "update": "7F72",
+  "in_rooms": false
+ },
+ "0x31": {
+  "init": "8B32",
+  "update": "8B3F",
+  "in_rooms": true
+ },
+ "0x32": {
+  "init": "9078",
+  "update": "9084",
+  "in_rooms": true
+ },
+ "0x33": {
+  "init": "9143",
+  "update": "98A7",
+  "in_rooms": false
+ },
+ "0x34": {
+  "init": "AAF4",
+  "update": "AAFA",
+  "in_rooms": true
+ },
+ "0x35": {
+  "init": "AB88",
+  "update": "ABA7",
+  "in_rooms": false
+ },
+ "0x36": {
+  "init": "8A39",
+  "update": "8A7A",
+  "in_rooms": true
+ },
+ "0x37": {
+  "init": "8681",
+  "update": "868F",
+  "in_rooms": false
+ },
+ "0x38": {
+  "init": "A7A8",
+  "update": "A7C3",
+  "in_rooms": false
+ },
+ "0x39": {
+  "init": "A8DF",
+  "update": "A90D",
+  "in_rooms": false
+ },
+ "0x3a": {
+  "init": "9159",
+  "update": "9160",
+  "in_rooms": true
+ },
+ "0x3b": {
+  "init": "91E0",
+  "update": "91DF",
+  "in_rooms": false
+ },
+ "0x3c": {
+  "init": "AE4C",
+  "update": "AE59",
+  "in_rooms": true
+ },
+ "0x3d": {
+  "init": "AEC4",
+  "update": "AE58",
+  "in_rooms": false
+ },
+ "0x3e": {
+  "init": "A283",
+  "update": "A2A4",
+  "in_rooms": false
+ },
+ "0x3f": {
+  "init": "9890",
+  "update": "98A7",
+  "in_rooms": false
+ },
+ "0x40": {
+  "init": "8D04",
+  "update": "8D0D",
+  "in_rooms": true
+ },
+ "0x41": {
+  "init": "8D7F",
+  "update": "8D28",
+  "in_rooms": false
+ },
+ "0x42": {
+  "init": "838D",
+  "update": "83C2",
+  "in_rooms": true
+ },
+ "0x43": {
+  "init": "84D5",
+  "update": "84E8",
+  "in_rooms": true
+ },
+ "0x44": {
+  "init": "9F1E",
+  "update": "9DBD",
+  "in_rooms": false
+ },
+ "0x45": {
+  "init": "8FBA",
+  "update": "8FB9",
+  "in_rooms": false
+ },
+ "0x46": {
+  "init": "8CE6",
+  "update": "8D03",
+  "in_rooms": false
+ },
+ "0x47": {
+  "init": "95AC",
+  "update": "95C7",
+  "in_rooms": false
+ },
+ "0x48": {
+  "init": "6C42",
+  "update": "87BA",
+  "in_rooms": false
+ },
+ "0x49": {
+  "init": "A0E3",
+  "update": "A109",
+  "in_rooms": true
+ },
+ "0x4a": {
+  "init": "80FB",
+  "update": "8131",
+  "in_rooms": false
+ },
+ "0x4b": {
+  "init": "A548",
+  "update": "A526",
+  "in_rooms": false
+ },
+ "0x4c": {
+  "init": "8FCA",
+  "update": "8FD3",
+  "in_rooms": true
+ },
+ "0x4d": {
+  "init": "8FF7",
+  "update": "900B",
+  "in_rooms": false
+ },
+ "0x4e": {
+  "init": "822A",
+  "update": "8247",
+  "in_rooms": true
+ },
+ "0x4f": {
+  "init": "82F9",
+  "update": "8314",
+  "in_rooms": false
+ },
+ "0x50": {
+  "init": "9159",
+  "update": "9160",
+  "in_rooms": true
+ },
+ "0x51": {
+  "init": "9078",
+  "update": "9084",
+  "in_rooms": true
+ },
+ "0x52": {
+  "init": "A0F1",
+  "update": "A109",
+  "in_rooms": false
+ },
+ "0x53": {
+  "init": "A0F1",
+  "update": "A109",
+  "in_rooms": false
+ },
+ "0x54": {
+  "init": "6EED",
+  "update": "ACE8",
+  "in_rooms": false
+ },
+ "0x55": {
+  "init": "AD05",
+  "update": "AD13",
+  "in_rooms": false
+ },
+ "0x56": {
+  "init": "9F1E",
+  "update": "9DBD",
+  "in_rooms": false
+ },
+ "0x57": {
+  "init": "AD51",
+  "update": "AD8C",
+  "in_rooms": false
+ },
+ "0x58": {
+  "init": "ADB2",
+  "update": "ADF4",
+  "in_rooms": false
+ },
+ "0x59": {
+  "init": "AE03",
+  "update": "AE29",
+  "in_rooms": false
+ },
+ "0x5a": {
+  "init": "74BA",
+  "update": "74BA",
+  "in_rooms": false
+ },
+ "0x5b": {
+  "init": "6A05",
+  "update": "6A18",
+  "in_rooms": false
+ },
+ "0x5c": {
+  "init": "AABE",
+  "update": "AAF3",
+  "in_rooms": false
+ },
+ "0x5d": {
+  "init": "6AAA",
+  "update": "6AC3",
+  "in_rooms": false
+ },
+ "0x5e": {
+  "init": "6AAA",
+  "update": "6AC3",
+  "in_rooms": false
+ },
+ "0x5f": {
+  "init": "6AAA",
+  "update": "6AC3",
+  "in_rooms": false
+ },
+ "0x60": {
+  "init": "8458",
+  "update": "8476",
+  "in_rooms": false
+ },
+ "0x61": {
+  "init": "84C5",
+  "update": "84C4",
+  "in_rooms": false
+ },
+ "0x62": {
+  "init": "8544",
+  "update": "8581",
+  "in_rooms": false
+ },
+ "0x63": {
+  "init": "6AC4",
+  "update": "6ACB",
+  "in_rooms": false
+ },
+ "0x64": {
+  "init": "AAA3",
+  "update": "A99D",
+  "in_rooms": true
+ },
+ "0x65": {
+  "init": "A560",
+  "update": "74BA",
+  "in_rooms": false
+ },
+ "0x66": {
+  "init": "678A",
+  "update": "B45D",
+  "in_rooms": false
+ },
+ "0x67": {
+  "init": "A5E0",
+  "update": "A5F3",
+  "in_rooms": false
+ },
+ "0x68": {
+  "init": "9F3F",
+  "update": "9F6B",
+  "in_rooms": false
+ },
+ "0x69": {
+  "init": "74BB",
+  "update": "7511",
+  "in_rooms": true
+ },
+ "0x6a": {
+  "init": "7937",
+  "update": "6C47",
+  "in_rooms": false
+ },
+ "0x6b": {
+  "init": "AAB5",
+  "update": "AABD",
+  "in_rooms": false
+ }
+}

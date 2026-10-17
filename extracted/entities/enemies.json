@@ -1,0 +1,1852 @@
+{
+ "0x01": {
+  "descriptor": "a2 a0 08 04 00",
+  "hp": 4,
+  "invulnerable": false,
+  "hitbox": 0,
+  "loot_rule": 0,
+  "damage": 8,
+  "sprite_sheet": "sprites_01.png",
+  "immune_with_item": null,
+  "spawns": 7,
+  "worlds": [
+   "world09"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.5,
+   "speed_x": 0.75,
+   "speed_y": 0.0,
+   "step_x": 1.51,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.92,
+   "toward_player": 0.55,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world09:11"
+ },
+ "0x02": {
+  "descriptor": "81 a0 0f 01 75",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 117,
+  "loot_rule": 0,
+  "damage": 5,
+  "sprite_sheet": "sprites_02.png",
+  "immune_with_item": null,
+  "spawns": 5,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.5,
+   "speed_x": 0.37,
+   "speed_y": 0.13,
+   "step_x": 0.73,
+   "y_range": 24,
+   "frames_with_dy": 0.13,
+   "turns_per_s": 0.33,
+   "toward_player": 0.58,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "castle:7"
+ },
+ "0x03": {
+  "descriptor": "81 c4 08 01 05",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 5,
+  "loot_rule": 0,
+  "damage": 1,
+  "sprite_sheet": "sprites_03.png",
+  "immune_with_item": null,
+  "spawns": 10,
+  "worlds": [
+   "world03"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.19,
+   "speed_x": 0.19,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.13,
+   "toward_player": 0.27,
+   "pattern": "camina"
+  },
+  "observed_near_player": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.19,
+   "speed_x": 0.19,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.13,
+   "toward_player": 0.32,
+   "pattern": "camina"
+  },
+  "children": {},
+  "trace_room": "world03:3"
+ },
+ "0x04": {
+  "descriptor": "40 00 00 01 22",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 34,
+  "loot_rule": 2,
+  "damage": 2,
+  "sprite_sheet": null,
+  "immune_with_item": null,
+  "spawns": 7,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.02,
+   "speed_x": 0.0,
+   "speed_y": 0.13,
+   "step_x": 0.0,
+   "y_range": 16,
+   "frames_with_dy": 0.02,
+   "turns_per_s": 0.0,
+   "toward_player": 0.42,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.02,
+   "speed_x": 0.0,
+   "speed_y": 0.16,
+   "step_x": 0.0,
+   "y_range": 16,
+   "frames_with_dy": 0.02,
+   "turns_per_s": 0.0,
+   "toward_player": 0.46,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "castle:117"
+ },
+ "0x05": {
+  "descriptor": "81 a0 07 03 2a",
+  "hp": 3,
+  "invulnerable": false,
+  "hitbox": 42,
+  "loot_rule": 0,
+  "damage": 7,
+  "sprite_sheet": "sprites_05.png",
+  "immune_with_item": null,
+  "spawns": 11,
+  "worlds": [
+   "world09"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.47,
+   "speed_x": 0.47,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.61,
+   "toward_player": 0.51,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x1a": 3
+  },
+  "trace_room": "world09:14"
+ },
+ "0x07": {
+  "descriptor": "81 a0 09 02 26",
+  "hp": 2,
+  "invulnerable": false,
+  "hitbox": 38,
+  "loot_rule": 0,
+  "damage": 3,
+  "sprite_sheet": "sprites_07.png",
+  "immune_with_item": null,
+  "spawns": 21,
+  "worlds": [
+   "world05"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.28,
+   "speed_x": 0.3,
+   "speed_y": 0.07,
+   "step_x": 1.08,
+   "y_range": 21,
+   "frames_with_dy": 0.05,
+   "turns_per_s": 0.11,
+   "toward_player": 0.22,
+   "pattern": "camina (cae entre plataformas)"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world05:2"
+ },
+ "0x0a": {
+  "descriptor": "8a b0 07 06 4e",
+  "hp": 6,
+  "invulnerable": false,
+  "hitbox": 78,
+  "loot_rule": 1,
+  "damage": 3,
+  "sprite_sheet": "sprites_0a.png",
+  "immune_with_item": null,
+  "spawns": 54,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 5,
+   "frames": 1795,
+   "moving": 0.23,
+   "speed_x": 0.22,
+   "speed_y": 0.03,
+   "step_x": 0.95,
+   "y_range": 32,
+   "frames_with_dy": 0.02,
+   "turns_per_s": 0.3,
+   "toward_player": 0.41,
+   "pattern": "camina (cae entre plataformas)"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "castle:20"
+ },
+ "0x0b": {
+  "descriptor": "81 a0 07 01 3e",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 62,
+  "loot_rule": 1,
+  "damage": 10,
+  "sprite_sheet": "sprites_0b.png",
+  "immune_with_item": null,
+  "spawns": 5,
+  "worlds": [
+   "world05"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.43,
+   "speed_x": 1.74,
+   "speed_y": 0.0,
+   "step_x": 4.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.5,
+   "toward_player": 0.53,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world05:12"
+ },
+ "0x0c": {
+  "descriptor": "81 b0 08 03 51",
+  "hp": 3,
+  "invulnerable": false,
+  "hitbox": 81,
+  "loot_rule": 0,
+  "damage": 7,
+  "sprite_sheet": "sprites_0c.png",
+  "immune_with_item": null,
+  "spawns": 20,
+  "worlds": [
+   "world08"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.37,
+   "speed_x": 0.37,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.33,
+   "toward_player": 0.44,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x56": 2
+  },
+  "trace_room": "world08:6"
+ },
+ "0x0e": {
+  "descriptor": "81 ac 01 01 69",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 105,
+  "loot_rule": 0,
+  "damage": 1,
+  "sprite_sheet": "sprites_0e.png",
+  "immune_with_item": null,
+  "spawns": 294,
+  "worlds": [
+   "castle",
+   "world01",
+   "world03",
+   "world04",
+   "world06",
+   "world07",
+   "world09",
+   "world10"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.29,
+   "speed_x": 0.21,
+   "speed_y": 0.37,
+   "step_x": 0.73,
+   "y_range": 118,
+   "frames_with_dy": 0.29,
+   "turns_per_s": 0.13,
+   "toward_player": 0.51,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "castle:13"
+ },
+ "0x0f": {
+  "descriptor": "81 a0 0a 06 32",
+  "hp": 6,
+  "invulnerable": false,
+  "hitbox": 50,
+  "loot_rule": 1,
+  "damage": 5,
+  "sprite_sheet": "sprites_0f.png",
+  "immune_with_item": null,
+  "spawns": 24,
+  "worlds": [
+   "world06"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.5,
+   "speed_x": 0.5,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.96,
+   "toward_player": 0.39,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world06:9"
+ },
+ "0x10": {
+  "descriptor": "81 a0 07 01 0b",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 11,
+  "loot_rule": 1,
+  "damage": 2,
+  "sprite_sheet": "sprites_10.png",
+  "immune_with_item": null,
+  "spawns": 23,
+  "worlds": [
+   "world01"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.12,
+   "speed_x": 0.16,
+   "speed_y": 0.0,
+   "step_x": 1.39,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.13,
+   "toward_player": 0.47,
+   "pattern": "camina"
+  },
+  "children": {},
+  "trace_room": "world01:4"
+ },
+ "0x11": {
+  "descriptor": "81 a4 0b 02 58",
+  "hp": 2,
+  "invulnerable": false,
+  "hitbox": 88,
+  "loot_rule": 1,
+  "damage": 2,
+  "sprite_sheet": "sprites_11.png",
+  "immune_with_item": null,
+  "spawns": 25,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.33,
+   "speed_x": 0.67,
+   "speed_y": 0.0,
+   "step_x": 2.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.95,
+   "toward_player": 0.48,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x1d": 2
+  },
+  "trace_room": "castle:5"
+ },
+ "0x12": {
+  "descriptor": "81 ac 0e 05 13",
+  "hp": 5,
+  "invulnerable": false,
+  "hitbox": 19,
+  "loot_rule": 1,
+  "damage": 4,
+  "sprite_sheet": "sprites_12.png",
+  "immune_with_item": null,
+  "spawns": 9,
+  "worlds": [
+   "world06"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "world06:5"
+ },
+ "0x13": {
+  "descriptor": "81 a0 0f 04 2d",
+  "hp": 4,
+  "invulnerable": false,
+  "hitbox": 45,
+  "loot_rule": 0,
+  "damage": 6,
+  "sprite_sheet": "sprites_13.png",
+  "immune_with_item": null,
+  "spawns": 12,
+  "worlds": [
+   "world08"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.4,
+   "speed_x": 0.4,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.5,
+   "toward_player": 0.47,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x44": 4
+  },
+  "trace_room": "world08:3"
+ },
+ "0x14": {
+  "descriptor": "81 a0 0e 04 38",
+  "hp": 4,
+  "invulnerable": false,
+  "hitbox": 56,
+  "loot_rule": 1,
+  "damage": 6,
+  "sprite_sheet": "sprites_14.png",
+  "immune_with_item": null,
+  "spawns": 15,
+  "worlds": [
+   "world04"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.03,
+   "speed_x": 0.03,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.17,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.03,
+   "speed_x": 0.03,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "world04:3"
+ },
+ "0x15": {
+  "descriptor": "c4 08 05 28 42",
+  "hp": 40,
+  "invulnerable": false,
+  "hitbox": 66,
+  "loot_rule": 3,
+  "damage": 10,
+  "sprite_sheet": "sprites_15.png",
+  "immune_with_item": null,
+  "spawns": 1,
+  "worlds": [
+   "world09"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.47,
+   "speed_x": 0.52,
+   "speed_y": 0.5,
+   "step_x": 1.11,
+   "y_range": 62,
+   "frames_with_dy": 0.35,
+   "turns_per_s": 0.33,
+   "toward_player": 0.61,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x45": 2
+  },
+  "trace_room": "world09:26"
+ },
+ "0x16": {
+  "descriptor": "c4 00 02 18 01",
+  "hp": 24,
+  "invulnerable": false,
+  "hitbox": 1,
+  "loot_rule": 3,
+  "damage": 8,
+  "sprite_sheet": "sprites_16.png",
+  "immune_with_item": null,
+  "spawns": 1,
+  "worlds": [
+   "world06"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 358,
+   "moving": 0.2,
+   "speed_x": 0.32,
+   "speed_y": 0.24,
+   "step_x": 1.59,
+   "y_range": 85,
+   "frames_with_dy": 0.2,
+   "turns_per_s": 0.0,
+   "toward_player": 0.96,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x46": 2
+  },
+  "trace_room": "world06:11"
+ },
+ "0x17": {
+  "descriptor": "81 c8 0a 05 13",
+  "hp": 5,
+  "invulnerable": false,
+  "hitbox": 19,
+  "loot_rule": 2,
+  "damage": 4,
+  "sprite_sheet": "sprites_17.png",
+  "immune_with_item": null,
+  "spawns": 10,
+  "worlds": [
+   "world04"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 516,
+   "moving": 0.25,
+   "speed_x": 0.5,
+   "speed_y": 0.0,
+   "step_x": 2.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.12,
+   "toward_player": 0.53,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x47": 1
+  },
+  "trace_room": "world04:2"
+ },
+ "0x18": {
+  "descriptor": "81 a0 09 01 1e",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 30,
+  "loot_rule": 0,
+  "damage": 2,
+  "sprite_sheet": "sprites_18.png",
+  "immune_with_item": null,
+  "spawns": 41,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.22,
+   "speed_x": 0.22,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.21,
+   "toward_player": 0.62,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "castle:3"
+ },
+ "0x19": {
+  "descriptor": "81 d0 0b 01 4a",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 74,
+  "loot_rule": 3,
+  "damage": 1,
+  "sprite_sheet": "sprites_19.png",
+  "immune_with_item": null,
+  "spawns": 40,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 9,
+   "frames": 2473,
+   "moving": 0.44,
+   "speed_x": 0.35,
+   "speed_y": 0.36,
+   "step_x": 0.8,
+   "y_range": 83,
+   "frames_with_dy": 0.32,
+   "turns_per_s": 0.73,
+   "toward_player": 0.55,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "castle:18"
+ },
+ "0x1f": {
+  "descriptor": "81 a0 02 03 00",
+  "hp": 3,
+  "invulnerable": false,
+  "hitbox": 0,
+  "loot_rule": 1,
+  "damage": 4,
+  "sprite_sheet": "sprites_1f.png",
+  "immune_with_item": null,
+  "spawns": 12,
+  "worlds": [
+   "world07"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.5,
+   "speed_x": 1.81,
+   "speed_y": 0.0,
+   "step_x": 3.64,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 1.06,
+   "toward_player": 0.48,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world07:7"
+ },
+ "0x20": {
+  "descriptor": "81 a0 01 fe 19",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 25,
+  "loot_rule": 1,
+  "damage": 3,
+  "sprite_sheet": "sprites_20.png",
+  "immune_with_item": null,
+  "spawns": 12,
+  "worlds": [
+   "world02"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.13,
+   "speed_x": 0.13,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.06,
+   "toward_player": 0.1,
+   "pattern": "camina"
+  },
+  "observed_near_player": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.13,
+   "speed_x": 0.13,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.06,
+   "toward_player": 0.1,
+   "pattern": "camina"
+  },
+  "children": {},
+  "trace_room": "world02:2"
+ },
+ "0x22": {
+  "descriptor": "81 c8 03 18 09",
+  "hp": 24,
+  "invulnerable": false,
+  "hitbox": 9,
+  "loot_rule": 3,
+  "damage": 8,
+  "sprite_sheet": "sprites_22.png",
+  "immune_with_item": null,
+  "spawns": 2,
+  "worlds": [
+   "world07"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 145,
+   "moving": 0.41,
+   "speed_x": 0.37,
+   "speed_y": 0.32,
+   "step_x": 0.88,
+   "y_range": 41,
+   "frames_with_dy": 0.32,
+   "turns_per_s": 0.83,
+   "toward_player": 0.58,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x4a": 14
+  },
+  "trace_room": "world07:16"
+ },
+ "0x23": {
+  "descriptor": "9a a0 0e 40 6c",
+  "hp": 64,
+  "invulnerable": false,
+  "hitbox": 108,
+  "loot_rule": 4,
+  "damage": 0,
+  "sprite_sheet": "sprites_23.png",
+  "immune_with_item": null,
+  "spawns": 7,
+  "worlds": [
+   "castle",
+   "world03"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "castle:2"
+ },
+ "0x24": {
+  "descriptor": "81 a0 09 03 00",
+  "hp": 3,
+  "invulnerable": false,
+  "hitbox": 0,
+  "loot_rule": 2,
+  "damage": 3,
+  "sprite_sheet": "sprites_24.png",
+  "immune_with_item": null,
+  "spawns": 13,
+  "worlds": [
+   "world03"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.5,
+   "speed_x": 1.0,
+   "speed_y": 0.0,
+   "step_x": 2.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.33,
+   "toward_player": 0.45,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world03:6"
+ },
+ "0x25": {
+  "descriptor": "82 ac 0f 08 4e",
+  "hp": 8,
+  "invulnerable": false,
+  "hitbox": 78,
+  "loot_rule": 2,
+  "damage": 3,
+  "sprite_sheet": "sprites_25.png",
+  "immune_with_item": null,
+  "spawns": 62,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.42,
+   "speed_x": 0.48,
+   "speed_y": 0.03,
+   "step_x": 1.16,
+   "y_range": 41,
+   "frames_with_dy": 0.01,
+   "turns_per_s": 0.21,
+   "toward_player": 0.54,
+   "pattern": "camina (cae entre plataformas)"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x3d": 1
+  },
+  "trace_room": "castle:6"
+ },
+ "0x26": {
+  "descriptor": "81 c4 0a 0a 12",
+  "hp": 10,
+  "invulnerable": false,
+  "hitbox": 18,
+  "loot_rule": 3,
+  "damage": 3,
+  "sprite_sheet": "sprites_26.png",
+  "immune_with_item": null,
+  "spawns": 3,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.3,
+   "speed_x": 0.22,
+   "speed_y": 0.21,
+   "step_x": 0.72,
+   "y_range": 19,
+   "frames_with_dy": 0.19,
+   "turns_per_s": 1.17,
+   "toward_player": 0.5,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x4b": 3
+  },
+  "trace_room": "castle:4"
+ },
+ "0x27": {
+  "descriptor": "81 c4 07 0c 11",
+  "hp": 12,
+  "invulnerable": false,
+  "hitbox": 17,
+  "loot_rule": 0,
+  "damage": 8,
+  "sprite_sheet": "sprites_27.png",
+  "immune_with_item": null,
+  "spawns": 4,
+  "worlds": [
+   "world07"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.46,
+   "speed_x": 0.35,
+   "speed_y": 0.33,
+   "step_x": 0.76,
+   "y_range": 51,
+   "frames_with_dy": 0.33,
+   "turns_per_s": 0.84,
+   "toward_player": 0.35,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world07:4"
+ },
+ "0x28": {
+  "descriptor": "81 c4 0f 01 62",
+  "hp": 1,
+  "invulnerable": false,
+  "hitbox": 98,
+  "loot_rule": 0,
+  "damage": 1,
+  "sprite_sheet": "sprites_28.png",
+  "immune_with_item": "0x0f",
+  "spawns": 27,
+  "worlds": [
+   "world01",
+   "world07"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.5,
+   "speed_x": 1.02,
+   "speed_y": 0.89,
+   "step_x": 2.04,
+   "y_range": 138,
+   "frames_with_dy": 0.39,
+   "turns_per_s": 0.71,
+   "toward_player": 0.6,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world01:6"
+ },
+ "0x29": {
+  "descriptor": "81 c4 0f ff 0e",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 14,
+  "loot_rule": 4,
+  "damage": 5,
+  "sprite_sheet": "sprites_29.png",
+  "immune_with_item": null,
+  "spawns": 14,
+  "worlds": [
+   "world04"
+  ],
+  "observed": {
+   "instances": 5,
+   "frames": 1300,
+   "moving": 0.47,
+   "speed_x": 0.21,
+   "speed_y": 0.43,
+   "step_x": 0.46,
+   "y_range": 87,
+   "frames_with_dy": 0.43,
+   "turns_per_s": 0.05,
+   "toward_player": 0.4,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world04:5"
+ },
+ "0x2a": {
+  "descriptor": "81 c4 0f 03 00",
+  "hp": 3,
+  "invulnerable": false,
+  "hitbox": 0,
+  "loot_rule": 3,
+  "damage": 1,
+  "sprite_sheet": "sprites_2a.png",
+  "immune_with_item": "0x0e",
+  "spawns": 5,
+  "worlds": [
+   "world02"
+  ],
+  "observed": {
+   "instances": 5,
+   "frames": 355,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 4,
+   "frames": 356,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "world02:4"
+ },
+ "0x2b": {
+  "descriptor": "81 c4 05 03 13",
+  "hp": 3,
+  "invulnerable": false,
+  "hitbox": 19,
+  "loot_rule": 3,
+  "damage": 10,
+  "sprite_sheet": "sprites_2b.png",
+  "immune_with_item": null,
+  "spawns": 9,
+  "worlds": [
+   "world08"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.5,
+   "speed_x": 0.35,
+   "speed_y": 0.16,
+   "step_x": 0.69,
+   "y_range": 56,
+   "frames_with_dy": 0.16,
+   "turns_per_s": 0.17,
+   "toward_player": 0.27,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world08:4"
+ },
+ "0x2c": {
+  "descriptor": "81 a0 0e 04 0b",
+  "hp": 4,
+  "invulnerable": false,
+  "hitbox": 11,
+  "loot_rule": 4,
+  "damage": 2,
+  "sprite_sheet": "sprites_2c.png",
+  "immune_with_item": null,
+  "spawns": 7,
+  "worlds": [
+   "world02"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.21,
+   "speed_x": 0.21,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.08,
+   "toward_player": 0.07,
+   "pattern": "camina"
+  },
+  "observed_near_player": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.21,
+   "speed_x": 0.21,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.08,
+   "toward_player": 0.07,
+   "pattern": "camina"
+  },
+  "children": {},
+  "trace_room": "world02:10"
+ },
+ "0x2d": {
+  "descriptor": "81 a0 0f 02 0c",
+  "hp": 2,
+  "invulnerable": false,
+  "hitbox": 12,
+  "loot_rule": 1,
+  "damage": 3,
+  "sprite_sheet": "sprites_2d.png",
+  "immune_with_item": null,
+  "spawns": 12,
+  "worlds": [
+   "world02"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.34,
+   "speed_x": 0.51,
+   "speed_y": 0.0,
+   "step_x": 1.51,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.33,
+   "toward_player": 0.62,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x3f": 2
+  },
+  "trace_room": "world02:5"
+ },
+ "0x2e": {
+  "descriptor": "81 c4 03 02 26",
+  "hp": 2,
+  "invulnerable": false,
+  "hitbox": 38,
+  "loot_rule": 0,
+  "damage": 2,
+  "sprite_sheet": "sprites_2e.png",
+  "immune_with_item": "0x17",
+  "spawns": 58,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 4,
+   "frames": 1436,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {
+   "0x1d": 1
+  },
+  "trace_room": "castle:5"
+ },
+ "0x2f": {
+  "descriptor": "81 c4 02 05 00",
+  "hp": 5,
+  "invulnerable": false,
+  "hitbox": 0,
+  "loot_rule": 2,
+  "damage": 1,
+  "sprite_sheet": "sprites_2f.png",
+  "immune_with_item": null,
+  "spawns": 26,
+  "worlds": [
+   "world01",
+   "world03"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "world01:2"
+ },
+ "0x31": {
+  "descriptor": "81 c4 0f ff 1b",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 27,
+  "loot_rule": 4,
+  "damage": 2,
+  "sprite_sheet": "sprites_31.png",
+  "immune_with_item": "0x22",
+  "spawns": 45,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "castle:49"
+ },
+ "0x32": {
+  "descriptor": "00 04 00 fe 79",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 121,
+  "loot_rule": 4,
+  "damage": 0,
+  "sprite_sheet": "sprites_32.png",
+  "immune_with_item": null,
+  "spawns": 8,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "castle:9"
+ },
+ "0x34": {
+  "descriptor": "81 c4 0a 04 22",
+  "hp": 4,
+  "invulnerable": false,
+  "hitbox": 34,
+  "loot_rule": 1,
+  "damage": 6,
+  "sprite_sheet": "sprites_34.png",
+  "immune_with_item": null,
+  "spawns": 38,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.5,
+   "speed_x": 0.0,
+   "speed_y": 1.88,
+   "step_x": 0.0,
+   "y_range": 21,
+   "frames_with_dy": 0.5,
+   "turns_per_s": 0.0,
+   "toward_player": 0.5,
+   "pattern": "vertical"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "castle:17"
+ },
+ "0x36": {
+  "descriptor": "81 c4 08 fe 12",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 18,
+  "loot_rule": 4,
+  "damage": 6,
+  "sprite_sheet": "sprites_36.png",
+  "immune_with_item": null,
+  "spawns": 16,
+  "worlds": [
+   "world05"
+  ],
+  "observed": {
+   "instances": 9,
+   "frames": 2871,
+   "moving": 0.38,
+   "speed_x": 0.23,
+   "speed_y": 0.81,
+   "step_x": 0.61,
+   "y_range": 136,
+   "frames_with_dy": 0.38,
+   "turns_per_s": 0.29,
+   "toward_player": 0.49,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world05:5"
+ },
+ "0x3a": {
+  "descriptor": "00 00 00 fe 00",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 0,
+  "loot_rule": 4,
+  "damage": 0,
+  "sprite_sheet": "sprites_3a.png",
+  "immune_with_item": null,
+  "spawns": 3,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 2,
+   "frames": 574,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "castle:3"
+ },
+ "0x3c": {
+  "descriptor": "81 c8 0f 07 13",
+  "hp": 7,
+  "invulnerable": false,
+  "hitbox": 19,
+  "loot_rule": 3,
+  "damage": 5,
+  "sprite_sheet": "sprites_3c.png",
+  "immune_with_item": null,
+  "spawns": 2,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 357,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 3,
+   "frames": 357,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {
+   "0x3d": 5
+  },
+  "trace_room": "castle:6"
+ },
+ "0x40": {
+  "descriptor": "c5 04 03 23 39",
+  "hp": 35,
+  "invulnerable": false,
+  "hitbox": 57,
+  "loot_rule": 3,
+  "damage": 12,
+  "sprite_sheet": "sprites_40.png",
+  "immune_with_item": null,
+  "spawns": 1,
+  "worlds": [
+   "world08"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.21,
+   "speed_x": 0.21,
+   "speed_y": 0.03,
+   "step_x": 0.96,
+   "y_range": 10,
+   "frames_with_dy": 0.03,
+   "turns_per_s": 0.0,
+   "toward_player": 1.0,
+   "pattern": "camina (cae entre plataformas)"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x41": 1
+  },
+  "trace_room": "world08:20"
+ },
+ "0x42": {
+  "descriptor": "c4 c4 0b 0a 3c",
+  "hp": 10,
+  "invulnerable": false,
+  "hitbox": 60,
+  "loot_rule": 3,
+  "damage": 20,
+  "sprite_sheet": "sprites_42.png",
+  "immune_with_item": null,
+  "spawns": 3,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 358,
+   "moving": 0.1,
+   "speed_x": 0.0,
+   "speed_y": 0.1,
+   "step_x": 0.0,
+   "y_range": 12,
+   "frames_with_dy": 0.1,
+   "turns_per_s": 0.0,
+   "toward_player": 0.67,
+   "pattern": "vertical"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x61": 3
+  },
+  "trace_room": "castle:141"
+ },
+ "0x43": {
+  "descriptor": "8a d0 02 0a 41",
+  "hp": 10,
+  "invulnerable": false,
+  "hitbox": 65,
+  "loot_rule": 3,
+  "damage": 10,
+  "sprite_sheet": "sprites_43.png",
+  "immune_with_item": null,
+  "spawns": 4,
+  "worlds": [
+   "world09"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.5,
+   "speed_x": 1.0,
+   "speed_y": 0.0,
+   "step_x": 2.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.67,
+   "toward_player": 0.5,
+   "pattern": "camina"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world09:6"
+ },
+ "0x49": {
+  "descriptor": "8a b4 01 05 6a",
+  "hp": 5,
+  "invulnerable": false,
+  "hitbox": 106,
+  "loot_rule": 4,
+  "damage": 8,
+  "sprite_sheet": "sprites_49.png",
+  "immune_with_item": null,
+  "spawns": 1,
+  "worlds": [
+   "world03"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.5,
+   "speed_x": 0.71,
+   "speed_y": 0.54,
+   "step_x": 1.41,
+   "y_range": 120,
+   "frames_with_dy": 0.42,
+   "turns_per_s": 1.0,
+   "toward_player": 0.47,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "world03:14"
+ },
+ "0x4c": {
+  "descriptor": "c4 06 04 14 3d",
+  "hp": 20,
+  "invulnerable": false,
+  "hitbox": 61,
+  "loot_rule": 3,
+  "damage": 7,
+  "sprite_sheet": "sprites_4c.png",
+  "immune_with_item": null,
+  "spawns": 2,
+  "worlds": [
+   "world05"
+  ],
+  "observed": {
+   "instances": 1,
+   "frames": 359,
+   "moving": 0.46,
+   "speed_x": 0.34,
+   "speed_y": 0.34,
+   "step_x": 0.73,
+   "y_range": 64,
+   "frames_with_dy": 0.34,
+   "turns_per_s": 0.84,
+   "toward_player": 0.43,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x4d": 11
+  },
+  "trace_room": "world05:6"
+ },
+ "0x4e": {
+  "descriptor": "81 a0 0f 00 00",
+  "hp": 0,
+  "invulnerable": false,
+  "hitbox": 0,
+  "loot_rule": 4,
+  "damage": 0,
+  "sprite_sheet": "sprites_4e.png",
+  "immune_with_item": null,
+  "spawns": 36,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 12,
+   "frames": 4308,
+   "moving": 0.47,
+   "speed_x": 0.33,
+   "speed_y": 0.33,
+   "step_x": 0.7,
+   "y_range": 140,
+   "frames_with_dy": 0.33,
+   "turns_per_s": 0.5,
+   "toward_player": 0.46,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {},
+  "trace_room": "castle:25"
+ },
+ "0x50": {
+  "descriptor": "00 02 00 fe 00",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 0,
+  "loot_rule": 4,
+  "damage": 0,
+  "sprite_sheet": null,
+  "immune_with_item": null,
+  "spawns": 4,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "castle:3"
+ },
+ "0x51": {
+  "descriptor": "00 05 00 fe 79",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 121,
+  "loot_rule": 4,
+  "damage": 0,
+  "sprite_sheet": null,
+  "immune_with_item": null,
+  "spawns": 5,
+  "worlds": [
+   "castle"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "observed_near_player": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.0,
+   "speed_x": 0.0,
+   "speed_y": 0.0,
+   "step_x": 0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.0,
+   "toward_player": 0.0,
+   "pattern": "quieto"
+  },
+  "children": {},
+  "trace_room": "castle:9"
+ },
+ "0x64": {
+  "descriptor": "81 a0 0e 04 00",
+  "hp": 4,
+  "invulnerable": false,
+  "hitbox": 0,
+  "loot_rule": 4,
+  "damage": 2,
+  "sprite_sheet": null,
+  "immune_with_item": null,
+  "spawns": 7,
+  "worlds": [
+   "world02"
+  ],
+  "observed": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.16,
+   "speed_x": 0.16,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.08,
+   "toward_player": 0.11,
+   "pattern": "camina"
+  },
+  "observed_near_player": {
+   "instances": 2,
+   "frames": 718,
+   "moving": 0.16,
+   "speed_x": 0.16,
+   "speed_y": 0.0,
+   "step_x": 1.0,
+   "y_range": 0,
+   "frames_with_dy": 0.0,
+   "turns_per_s": 0.08,
+   "toward_player": 0.11,
+   "pattern": "camina"
+  },
+  "children": {},
+  "trace_room": "world02:10"
+ },
+ "0x69": {
+  "descriptor": "81 bc 0f ff 0e",
+  "hp": null,
+  "invulnerable": true,
+  "hitbox": 14,
+  "loot_rule": 4,
+  "damage": 7,
+  "sprite_sheet": null,
+  "immune_with_item": null,
+  "spawns": 21,
+  "worlds": [
+   "world09"
+  ],
+  "observed": {
+   "instances": 3,
+   "frames": 1077,
+   "moving": 0.22,
+   "speed_x": 0.06,
+   "speed_y": 0.16,
+   "step_x": 0.29,
+   "y_range": 7,
+   "frames_with_dy": 0.16,
+   "turns_per_s": 0.0,
+   "toward_player": 0.44,
+   "pattern": "vuela"
+  },
+  "observed_near_player": null,
+  "children": {
+   "0x06": 4
+  },
+  "trace_room": "world09:7"
+ }
+}

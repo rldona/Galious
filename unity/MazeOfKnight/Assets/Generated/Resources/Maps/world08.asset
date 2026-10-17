@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc21c78ef52b441e8c60f48b133ff2b, type: 3}
+  m_Name: world08
+  m_EditorClassIdentifier: MazeOfKnight.Runtime::MazeOfKnight.Data.MapData
+  mapName: world08
+  e041: 9
+  bossRoom: 7
+  bossWord: ASCHER
+  rooms:
+  - {fileID: 11400000, guid: fdd41e24ecf50480c8fd6e6cd65451da, type: 2}
+  - {fileID: 11400000, guid: 94d153f42011d43edb28a4e461f95d4d, type: 2}
+  - {fileID: 11400000, guid: fa922bdc799f14cf79678e3ac35fb874, type: 2}
+  - {fileID: 11400000, guid: 28cc6efd3beb548cab62806ab3ab3d7b, type: 2}
+  - {fileID: 11400000, guid: ba2478ab9bf2644aeb00303bd79df0e6, type: 2}
+  - {fileID: 11400000, guid: adaf60aa301b64957af2bcbe11fdf626, type: 2}
+  - {fileID: 11400000, guid: fec7ba9abb3c941d4a0387e50b8ba637, type: 2}
+  - {fileID: 11400000, guid: 98d0dadcdd3074767bc32cb050b37f3d, type: 2}
+  - {fileID: 11400000, guid: 33213490617e4438d9ff3cd0e4f01f5a, type: 2}
+  - {fileID: 11400000, guid: a7ada137e7e85405aa19fc3be1a60c24, type: 2}
+  - {fileID: 11400000, guid: 9688648f7c7d34b4fb91d2636d9dd88b, type: 2}
+  - {fileID: 11400000, guid: 929095177db2a451fa6d3f7e1fa260a4, type: 2}
+  - {fileID: 11400000, guid: 803160d413c2c4cfda30e3b065fe1fcb, type: 2}
+  - {fileID: 11400000, guid: 35ddd5b59c61b466d97855935f3fd39d, type: 2}
+  - {fileID: 11400000, guid: 34aa737964a4944499702e40b6ca0c70, type: 2}
+  - {fileID: 11400000, guid: d6ff11dadcf76438e967ea30b1392edc, type: 2}
+  - {fileID: 11400000, guid: c5ba3674f8b844323a2b695e041ec403, type: 2}
+  - {fileID: 11400000, guid: 6251e5c319e52440e8fae0eec43e3627, type: 2}
+  - {fileID: 11400000, guid: 201493f687cfc43e8a94e7ca40a9abb6, type: 2}
+  - {fileID: 11400000, guid: 3cce783a278e7410096d900e266d5a49, type: 2}
+  - {fileID: 11400000, guid: a0c04a15605794ce8b5c7c234a8b2cab, type: 2}

@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9b2bbb2dca4745a1a843d9914fcdad2, type: 3}
+  m_Name: room_080
+  m_EditorClassIdentifier: MazeOfHollow.Runtime::MazeOfHollow.Data.RoomData
+  mapName: castle
+  room:
+    id: 80
+    placed: 1
+    shrine: 0
+    gridX: 8
+    gridY: 3
+    up: -1
+    down: 88
+    left: 79
+    right: 81
+    collision:
+    - '################................'
+    - '################................'
+    - '################................'
+    - '################................'
+    - ................................
+    - ........................##......
+    - ........................##......
+    - '####..................##########'
+    - '####............................'
+    - '####............................'
+    - '####............................'
+    - '######......................####'
+    - '####............................'
+    - '####............................'
+    - '####............................'
+    - '############..........##########'
+    - ......######..........##########
+    - ......######..........##########
+    - ......######..........##########
+    - '##..########..........##########'
+    collisionBoss: []
+    collisionNoLadders: []
+    spawns: []
+    objects: []
+    hasItem: 1
+    item:
+      x: 192
+      y: 72
+      type: 45
+    rocks:
+    - x: 192
+      y: 72
+    ladders: []
+    periodic:
+    - gen: E65C
+      type: 33
+      firstDelay: 145
+      period: 145
+      periodRandom: 
+      batch: 0
+      batchGap: 0
+      maxTotal: 0
+      x: -1
+      y: 0
+      xSequence: 
+      randomX: 100000002f000000500000006f00000090000000af000000d0000000ef000000i
+      xRule: random
+      xClamp: 
+      param: 0
+      pauseInLiquid: 0
+      disabledByItem: 0
+    afterBossRight: -1
+    markedRoom: 0
+    onClear:
+      kind: 
+      room: 0
+    eventLadder:
+      row: 0
+      col: 0
+      height: 0
+      openedBy: 0
+    wallBlock:
+      row: 0
+      col: 0
+      openedBy: 0
+    doorWorld: 0
+    door:
+      x: 0
+      y: 0
+    godType: 0
+    godName: 
+    god:
+      x: 0
+      y: 0
