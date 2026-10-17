@@ -272,7 +272,7 @@ namespace MazeOfKnight.Game
             int damage = w.damage + (items.Contains(ItemSaber) ? w.saberBonus : 0);
             foreach (var e in enemies.Overlapping(x0, y0, x1, y1))
             {
-                if (e is Boss boss)
+                if ((e as Boss ?? Boss.PartOf(e)) is Boss boss)   // la maza del False Knight, como él (RemakeRules.HollowBosses)
                 {
                     // Jefes: solo las armas de su máscara (b03:BD0A) y si su prueba de choque lo deja; 1 por golpe y
                     // el Saber no suma. La flecha y los fuegos desaparecen aunque no valga el arma (sonido 0x1D).

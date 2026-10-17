@@ -1,0 +1,75 @@
+# Compila el juego para Windows, Linux (y SteamOS), macOS y la web con GameCI, todo en servidores Linux (la de macOS va
+# con Mono: no gasta minutos de macOS, que cuentan x10), y lo sube a una Release del repo (privada, como el repo; los
+# artefactos de Actions no caben: en el plan gratis hay 500 MB y cada build comprimida pesa unos 220 MB).
+# Se lanza a mano (Actions → Builds → Run workflow) o al subir una etiqueta v*.
+# Secretos: UNITY_LICENSE, UNITY_EMAIL y UNITY_PASSWORD (ver tests.yml).
+name: Builds
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Windows, target: StandaloneWindows64, method: BuildWindows, out: Galious.exe }
+          - { name: Linux, target: StandaloneLinux64, method: BuildLinux, out: Galious.x86_64 }
+          - { name: macOS, target: StandaloneOSX, method: BuildMac, out: Galious.app }
+          - { name: Web, target: WebGL, method: BuildWeb, out: Web }
+    steps:
+      - name: Espacio en disco
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+
+      - uses: actions/checkout@v4
+
+      - name: Caché de Library
+        uses: actions/cache@v4
+        with:
+          path: unity/MazeOfKnight/Library
+          key: library-${{ matrix.target }}-${{ hashFiles('unity/MazeOfKnight/Packages/packages-lock.json', 'unity/MazeOfKnight/ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: library-${{ matrix.target }}-
+
+      - name: Compilar
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity/MazeOfKnight
+          targetPlatform: ${{ matrix.target }}
+          buildMethod: MazeOfKnight.EditorTools.GameBuild.${{ matrix.method }}
+          customParameters: -salida build/${{ matrix.target }}/${{ matrix.out }}
+          versioning: None
+
+      - name: Empaquetar
+        run: |
+          cd unity/MazeOfKnight/build/${{ matrix.target }}
+          sudo chown -R "$USER" .
+          rm -rf *_BackUpThisFolder_ButDontShipItWithYourGame *_BurstDebugInformation_DoNotShip
+          if [ "${{ matrix.target }}" = "StandaloneLinux64" ] || [ "${{ matrix.target }}" = "StandaloneOSX" ]; then
+            tar -czf "$GITHUB_WORKSPACE/Galious-${{ matrix.name }}.tar.gz" .
+          else
+            zip -qr -9 "$GITHUB_WORKSPACE/Galious-${{ matrix.name }}.zip" .
+          fi
+          ls -lh "$GITHUB_WORKSPACE"/Galious-*
+
+      - name: Subir a la Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'ultima' }}
+          name: ${{ github.ref_type == 'tag' && github.ref_name || 'Última build' }}
+          prerelease: ${{ github.ref_type != 'tag' }}
+          files: Galious-${{ matrix.name }}.*

@@ -134,6 +134,29 @@ namespace MazeOfKnight.Tests
             finally { RemakeRules.HollowBosses = before; }
         }
 
+        // Remake (RemakeRules.HollowBosses): un espadazo a la maza del False Knight, cuando golpea el suelo, le quita vida.
+        [Test]
+        public void HittingTheFalseKnightsMaceHurtsHim()
+        {
+            var (fight, sys, world, room, motor) = Setup(1);
+            var boss = Summon(fight, sys);
+            MaceHead mace = null;
+            for (int t = 0; t < 400 && mace == null; t++) { sys.Tick(); mace = sys.Enemies.OfType<MaceHead>().FirstOrDefault(m => m.Alive); }
+            Assert.IsNotNull(mace, "da con la maza");
+            Assert.AreSame(boss, Boss.PartOf(mace));
+            float bodyX0 = boss.ContactRects().Min(r => r.x0);
+            Assert.LessOrEqual(mace.X + mace.Width, bodyX0, "la bola, a la izquierda del cuerpo, fuera de él");
+            // El Caballero, a la izquierda de la bola y mirando hacia ella: el tajo alcanza la bola y no el cuerpo.
+            motor.Place(world, room, (int)mace.X - 6, (int)(mace.Y + mace.Height));
+            motor.Tick(new MotorInput { Attack = true });
+            Assert.IsFalse(motor.FacingLeft);
+            var (sx0, sx1, _, _) = motor.SwordRect();
+            Assert.Less(sx1, bodyX0, "el tajo no llega al cuerpo");
+            int hp = boss.Hp;
+            sys.Strike(motor, new List<int>());
+            Assert.AreEqual(hp - 1, boss.Hp, "golpe a la maza");
+        }
+
         // Remake (RemakeRules.FalseKnightMace): el False Knight da con la maza en vez de lanzar huesos; la bola hace daño
         // solo cuando golpea el suelo, delante de él. Sin la regla, los huesos del original.
         [Test]

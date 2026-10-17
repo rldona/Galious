@@ -45,6 +45,28 @@ namespace MazeOfKnight.Game
         public static string Path => System.IO.Path.Combine(Application.persistentDataPath, Testing ? "partida_pruebas.json" : "partida.json");
         public static bool Exists => File.Exists(Path) || File.Exists(Path + ".new");
 
+        // El juego se llamaba "Maze of Knight" (de DefaultCompany) y ahora "Galious - The Hollow Kingdom" (de rldona), y Unity
+        // guarda en una carpeta con esos nombres: la primera vez, se trae la partida de la carpeta de antes.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void BringOldSave()
+        {
+            try
+            {
+                string now = Application.persistentDataPath;
+                var root = Directory.GetParent(now)?.Parent;
+                if (root == null) return;
+                string old = System.IO.Path.Combine(root.FullName, "DefaultCompany", "Maze of Knight");
+                if (old == now || !Directory.Exists(old)) return;
+                Directory.CreateDirectory(now);
+                foreach (var f in Directory.GetFiles(old, "*.json"))
+                {
+                    string to = System.IO.Path.Combine(now, System.IO.Path.GetFileName(f));
+                    if (!File.Exists(to)) File.Copy(f, to);
+                }
+            }
+            catch (System.Exception e) { Debug.LogWarning($"[SaveGame] no se pudo traer la partida de antes: {e.Message}"); }
+        }
+
         public void Write() => WriteAtomic(Path, JsonUtility.ToJson(this, true));
 
         // Escribe primero <fichero>.new y luego lo pone en su sitio de una vez (como el user1.dat.new de Hollow Knight):

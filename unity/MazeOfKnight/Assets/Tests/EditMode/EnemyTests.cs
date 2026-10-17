@@ -164,15 +164,22 @@ namespace MazeOfKnight.Tests
         [Test]
         public void SwordReachesEighteenPixels()
         {
-            foreach (var (dx, expected) in new[] { (18, true), (20, false) })
+            // Original: 18 px. Con RemakeRules.SlashBoxFromArt (el tajo dibujado), 22.
+            bool before = RemakeRules.SlashBoxFromArt;
+            try
             {
-                var (sys, motor, _) = Setup(Room(-1, new EntityJson { type = 0x0E, x = 120, y = 104 }), 120 - dx, 120);
-                var bat = sys.Enemies[0];
-                bat.X = 120; bat.Y = 104;
-                motor.Tick(new MotorInput { Attack = true });
-                sys.Strike(motor, new List<int>());
-                Assert.AreEqual(!expected, bat.Alive, $"a {dx} px");
+                foreach (var (art, dx, expected) in new[] { (false, 18, true), (false, 20, false), (true, 22, true), (true, 24, false) })
+                {
+                    RemakeRules.SlashBoxFromArt = art;
+                    var (sys, motor, _) = Setup(Room(-1, new EntityJson { type = 0x0E, x = 120, y = 104 }), 120 - dx, 120);
+                    var bat = sys.Enemies[0];
+                    bat.X = 120; bat.Y = 104;
+                    motor.Tick(new MotorInput { Attack = true });
+                    sys.Strike(motor, new List<int>());
+                    Assert.AreEqual(!expected, bat.Alive, $"a {dx} px ({(art ? "tajo dibujado" : "original")})");
+                }
             }
+            finally { RemakeRules.SlashBoxFromArt = before; }
         }
 
         [Test]

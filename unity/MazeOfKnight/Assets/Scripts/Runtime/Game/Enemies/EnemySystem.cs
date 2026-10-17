@@ -348,16 +348,17 @@ namespace MazeOfKnight.Game.Enemies
         {
             var (sx0, sx1, sy0, sy1) = m.SwordRect();
             int damage = collected.Contains(ItemSaber) ? 2 : 1;
+            Boss struck = null;                    // un espadazo, un golpe al jefe aunque alcance también su maza
             foreach (var e in enemies.ToList())
             {
                 if (!e.Alive || !e.Visible)
                     continue;
                 if (!e.WeaponRects().Any(r => !(sx1 < r.x0 || sx0 >= r.x1 || sy1 < r.y0 || sy0 >= r.y1)))
                     continue;
-                if (e is Boss boss)
+                if ((e as Boss ?? Boss.PartOf(e)) is Boss boss)
                 {
                     // Jefes: la espada vale con todos (bit 0), si su prueba de choque lo deja; el Saber no suma.
-                    if (boss.CanBeHitNow && boss.Vulnerable(0)) HitBoss(boss, 1);
+                    if (boss != struck && boss.CanBeHitNow && boss.Vulnerable(0)) { struck = boss; HitBoss(boss, 1); }
                     continue;
                 }
                 if (e.Hittable && e.Deflects(m.FacingLeft))

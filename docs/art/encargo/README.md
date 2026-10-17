@@ -9,7 +9,7 @@ el documento compartido (artefacto «Encargo de arte de Maze of Knight»); la gu
 | Cajas de colisión de los 53 enemigos de sala, 10 generados, 44 hijos y 10 jefes | [cajas_colision.md](cajas_colision.md) | `python3 tools/extract/art_boxes.py` |
 | Hojas del arte provisional (personajes, enemigos, objetos) | [personajes.png](personajes.png), [enemigos.png](enemigos.png), [objetos.png](objetos.png) | menú **Maze of Knight → Lote del encargo de arte** |
 | Capturas de salas con la rejilla de colisión encima (7 del castillo, 1 por mundo) | `logs/unity/encargo/sala_*.png` (no se versionan: llevan la disposición de las salas del original; se entregan aparte) | el mismo menú, o en batch `Unity -batchmode -projectPath unity/MazeOfKnight -executeMethod MazeOfKnight.EditorTools.VisualPreview.ArtPackBatch` |
-| El juego compilado para probar | `unity/MazeOfKnight/Builds/MazeOfKnight.app` | menú **Maze of Knight → Compilar para macOS** |
+| El juego compilado para probar | `unity/MazeOfKnight/Builds/Galious.app` | menú **Maze of Knight → Compilar para macOS** |
 
 > El compilado lleva dentro las salas, la música y algún gráfico sacados de la ROM de Konami. Antes de dárselo a alguien
 > de fuera hay que decidir qué se entrega: capturas y vídeo, o un compilado sin esos datos (ver la revisión del encargo).

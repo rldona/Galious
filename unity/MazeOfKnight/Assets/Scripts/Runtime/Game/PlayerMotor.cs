@@ -563,12 +563,18 @@ namespace MazeOfKnight.Game
             Room.doorWorld > 0 && Y == Room.door.y + 0x18 && X >= Room.door.x + 14 && X <= Room.door.x + 18;
 
         // Zona de la espada en píxeles de la sala (incluidos los extremos).
-        public (int x0, int x1, int y0, int y1) SwordRect() =>
-            SlashDir > 0 ? (X - RemakeRules.SlashHalf, X + RemakeRules.SlashHalf, Y - P.HeadHeight - RemakeRules.SlashReach, Y - P.HeadHeight + 2)
-            : SlashDir < 0 ? (X - RemakeRules.SlashHalf, X + RemakeRules.SlashHalf, Y - 2, Y + RemakeRules.SlashReach)
-            : FacingLeft
-                ? (X - P.SwordReach, X - P.SwordFrom, Y - P.SwordTop, Y - P.SwordBottom)
-                : (X + P.SwordFrom, X + P.SwordReach, Y - P.SwordTop, Y - P.SwordBottom);
+        public (int x0, int x1, int y0, int y1) SwordRect()
+        {
+            // RemakeRules.SlashBoxFromArt: del tamaño del tajo dibujado.
+            bool art = RemakeRules.SlashBoxFromArt;
+            int reach = art ? RemakeRules.ArtSlashVertical : RemakeRules.SlashReach;
+            int from = art ? RemakeRules.ArtSlashFrom : P.SwordFrom, to = art ? RemakeRules.ArtSlashReach : P.SwordReach;
+            int top = art ? RemakeRules.ArtSlashTop : P.SwordTop, bottom = art ? RemakeRules.ArtSlashBottom : P.SwordBottom;
+            return SlashDir > 0 ? (X - RemakeRules.SlashHalf, X + RemakeRules.SlashHalf, Y - P.HeadHeight - reach, Y - P.HeadHeight + 2)
+                : SlashDir < 0 ? (X - RemakeRules.SlashHalf, X + RemakeRules.SlashHalf, Y - 2, Y + reach)
+                : FacingLeft ? (X - to, X - from, Y - top, Y - bottom)
+                : (X + from, X + to, Y - top, Y - bottom);
+        }
 
         // RemakeRules.HollowSlashes: dirección del último espadazo (1 arriba, −1 abajo, 0 delante).
         public int SlashDir { get; private set; }

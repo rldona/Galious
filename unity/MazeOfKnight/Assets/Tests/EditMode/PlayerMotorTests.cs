@@ -440,14 +440,24 @@ namespace MazeOfKnight.Tests
         [Test]
         public void SwordDoesNotReachTwentyPixels()
         {
-            var room = FlatRoom();
-            room.rocks = new[] { new PointJson { x = 64 + 20, y = 104 } };
-            var world = new RoomWorld(new[] { room });
-            var rocks = new Rocks("test", world, new HashSet<(string, int, int, int)>());
-            var motor = new PlayerMotor(world, room, 64, 120);
-            motor.Tick(new MotorInput { Attack = true });
-            rocks.Strike(motor, world);
-            Assert.AreEqual(OriginalPhysics.RockHp, rocks.All.First().hp);
+            // Original: la espada llega a x + 18; con RemakeRules.SlashBoxFromArt, a x + 22 (el tajo dibujado).
+            bool before = RemakeRules.SlashBoxFromArt;
+            try
+            {
+                foreach (bool art in new[] { false, true })
+                {
+                    RemakeRules.SlashBoxFromArt = art;
+                    var room = FlatRoom();
+                    room.rocks = new[] { new PointJson { x = 64 + (art ? 24 : 20), y = 104 } };
+                    var world = new RoomWorld(new[] { room });
+                    var rocks = new Rocks("test", world, new HashSet<(string, int, int, int)>());
+                    var motor = new PlayerMotor(world, room, 64, 120);
+                    motor.Tick(new MotorInput { Attack = true });
+                    rocks.Strike(motor, world);
+                    Assert.AreEqual(OriginalPhysics.RockHp, rocks.All.First().hp, art ? "tajo dibujado" : "original");
+                }
+            }
+            finally { RemakeRules.SlashBoxFromArt = before; }
         }
 
         // ---------- puertas y salidas ----------

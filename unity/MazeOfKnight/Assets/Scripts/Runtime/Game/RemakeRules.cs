@@ -117,6 +117,13 @@ namespace MazeOfKnight.Game
         // linterna) y las partículas de la zona.
         public static bool HollowAmbience = true;         // activado: lo ha pedido el usuario
         public const int SlashHalf = 10, SlashReach = 16;
+
+        // Original: la espada golpea una franja de 4 px de alto (y − 7 … y − 4) de x + 8 a x + 18, y los tajos de arriba y
+        // abajo, SlashReach de alto: mucho menos que el tajo de Hollow Knight que se ve (16 × 22 px delante, unos 20 × 22
+        // arriba y abajo). Remake (el usuario, 17 de octubre de 2026: era frustrante dar a piedras, enemigos y jefes): la
+        // caja del golpe es la del tajo dibujado (medido en sus texturas, Hollow/personajes/popolon_estela y Hollow/tajos).
+        public static bool SlashBoxFromArt = true;        // activado: lo ha pedido el usuario
+        public const int ArtSlashFrom = 2, ArtSlashReach = 22, ArtSlashTop = 19, ArtSlashBottom = 4, ArtSlashVertical = 22;
         public const int BounceRise = 5;                  // entrada de OriginalPhysics.RiseTable desde la que rebota
 
         // Sensación de Hollow Knight (guía "Hollow Knight por dentro", Knight y Combate). F11 activa o quita las tres a la vez.

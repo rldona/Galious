@@ -50,13 +50,21 @@ namespace MazeOfKnight.Game.Enemies
             if (s.contactBox2.valid) yield return Rect(X, Y, s.contactBox2);
         }
 
+        // Donde recibe golpes: las cajas de golpe de su fotograma y, con RemakeRules.HollowBosses, también las de contacto
+        // (todo el cuerpo dibujado; en el original, a veces solo la cabeza). Si se le puede dar ahora lo sigue diciendo
+        // CanBeHitNow, y con qué arma, Vulnerable.
         public override IEnumerable<(float x0, float y0, float x1, float y1)> WeaponRects()
         {
             var s = CurrentSprite;
             if (s == null) yield break;
             foreach (var b in new[] { s.weaponBox, s.weaponBox2, s.weaponBox3 })
                 if (b.valid) yield return Rect(X, Y, b);
+            if (RemakeRules.HollowBosses)
+                foreach (var r in ContactRects()) yield return r;
         }
+
+        // Una parte del jefe que recibe golpes por él (la maza del False Knight), o null.
+        public static Boss PartOf(Enemy e) => RemakeRules.HollowBosses && e is MaceHead m && m.Parent is Boss b && b.Alive ? b : null;
 
         public override (float x0, float y0, float x1, float y1) DrawRect()
         {
@@ -83,10 +91,6 @@ namespace MazeOfKnight.Game.Enemies
         const float Floor = 0x68;
 
         public bool Swinging => swing > 0;
-
-        // Con RemakeRules.HollowBosses, todo el cuerpo recibe golpes (en el original, solo la cabeza).
-        public override IEnumerable<(float x0, float y0, float x1, float y1)> WeaponRects() =>
-            RemakeRules.HollowBosses ? ContactRects() : base.WeaponRects();
 
         // Da con la maza hacia el jugador (si no está ya en ello): la bola hace daño donde cae (MaceHead).
         void Swing(EnemyContext ctx)
